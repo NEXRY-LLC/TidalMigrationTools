@@ -1,0 +1,24 @@
+APPL ELD817B WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/*********************************************************************/
+/* 12/20/2016 -JFC- NEW APPL SET UP PER DANNY MCLEOD                 */
+/*   -EVENT IS TRIGGERED BY CREATION OF DATASET                      */
+/*     -DISABLED DSTRIG IN APPL                                      */
+/*********************************************************************/
+
+NOTIFY FAILURE ABEND ALERT(REMD)
+
+DSTRIG DSM.POCINTRA
+   /*CREATED BY JOB POD027*/
+/*RUN DAILY
+  DSNAME 'PON.P.F1696.DSM.POCINTRA.G-'
+  RELEASE ADD(ELD817B)
+ENDJOB
+
+JOB ELD817B
+  CCCHK RC(1:4095) FAIL CONTINUE
+  RUN DAILY
+ENDJOB
+

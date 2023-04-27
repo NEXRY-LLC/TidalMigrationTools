@@ -1,0 +1,32 @@
+APPL QAOEFIT1 WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/**********************************************************************/
+/*DESCRIPTION: An on CMD job for QA/SE to upload the Quarterly OE
+/*             Fitment Xref file.
+/*Frequency: On Demand
+/**********************************************************************/
+/*10/22/2019-JFC-NEW APPL CREATED PER INC000002065884                 */
+/**********************************************************************/
+
+NOTIFY FAILURE ABEND ALERT(REMD)
+TAG PPIW
+
+JOB LIS.!ESPAPPL LINK PROCESS
+   RUN TODAY
+   RELEASE ADD(OE_FITMENT_XREF_ADDS)
+ENDJOB
+
+NT_JOB OE_FITMENT_XREF_ADDS
+   AGENT CYBA_PPIWPROD
+   CMDNAME X:\cmd_scripts\OE_FITMENT_XREF_ADDS.CMD
+   USER maestro
+   RUN TODAY
+   RELEASE ADD(LIE.!ESPAPPL)
+ENDJOB
+
+JOB LIE.!ESPAPPL LINK PROCESS
+   RUN TODAY
+ENDJOB
+

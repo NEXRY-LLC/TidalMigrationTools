@@ -1,0 +1,15 @@
+APPL RESUBJOB WAIT
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/**********************************************************************/
+/* CREATED ON 06/10/21 - BS09611 - Auto resubmit of failed job        */
+/**********************************************************************/
+
+JOB RESTART.!MNJOB LINK PROCESS
+ RUN TODAY
+ DELAYSUB NOW PLUS 5 MINUTES
+ IF !MNSUB# LT 2 THEN DO
+ ESP AJ !MNFULLNAME RESUB APPL(!MNAPPL..!MNAPPLGEN)
+ ENDDO
+ENDJOB
+

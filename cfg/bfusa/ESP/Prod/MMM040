@@ -1,0 +1,252 @@
+APPL MMM040
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/*********************************************************************/
+/*03/27/2019 -JFC- changes made per INC000001858289                  */
+/*********************************************************************/
+
+NOTIFY FAILURE ABEND ALERT(REMD)
+
+JOB LIS.!ESPAPPL LINK PROCESS
+   RUN FIRST WORKDAY
+   EARLYSUB 01.00
+   RELEASE ADD(ZMMIMRO1_MONTHLY_PURCHACTIVITY)
+ENDJOB
+
+DATA_OBJECT PARMSET.!ESPAPPL
+   /*Create a timestamp in hhmmMMDDYY format*/
+   SETVAR TMSTMP='!ESPSHH.:!ESPSMN.,!ESPSMM./!ESPSDD./!ESPSYY'
+   SETVAR PID=''
+   SETVAR STMPTM='!ESPSMM./!ESPSDD./!ESPSYY.,!ESPSHH.:!ESPSMN'
+ENDJOB
+
+JOB SETPID.!ESPAPPL LINK PROCESS
+   /*get the next PID number from the ConnectDirect*/
+   /*Process ID table (CDPROD).  Save the value into*/
+   /*the applications DataObject for use by the C:D*/
+   /*job and the CDSTAT job (if needed).*/
+   VINCR (PID) TABLE(CDPROD) CLANG
+   VGET  (PID) TABLE(CDPROD) CLANG
+   ESP MGRMSG * . . . PARMSET.!ESPAPPL/!ESPAPPL..!ESPAPGEN/MAIN +
+ACTION SET PID(!PID)
+   RUN FIRST WORKDAY
+   RELEASE ADD(SAPTOMROSS_ACTIVITYCD)
+ENDJOB
+
+SAP_JOB ZMMIMRO1_MONTHLY_PURCHACTIVITY
+   /*@@ "/  -job ZMMIMRO1_MONTHLY_PURCHACTIVITY -user SAPBATCH -i 1  +
+       3453201 -c C"*/
+   SAPUSER SAPADM
+   AGENT CYBB_BFP030
+   SAPJOBNAME ZMMIMRO1_MONTHLY_PURCHACTIVITY
+   SAPJOBCLASS C
+   ABAPNAME ZMMIMRO1
+   VARIANT SS-ROB-DF-003
+   LANGUAGE E
+   PRINTDEST CC16
+   EXPIRATION 8
+   COLUMNS 132
+   BANNER D
+   RECIPIENT SAPADM
+   ARCMODE PRINT
+   PRINTCOPIES 001
+   RUN FIRST WORKDAY
+   RELEASE ADD(SAPTOMROSS_ACTIVITYCD)
+ENDJOB
+
+UNIX_JOB SAPTOMROSS_ACTIVITYCD
+   AGENT CYBA_ISBFP3
+   EARLYSUB REALNOW PLUS 20 SECONDS
+   PID= WOBDATA('PARMSET.!ESPAPPL','PID')
+   TMSTMP= WOBDATA('PARMSET.!ESPAPPL','TMSTMP')
+   /*@@ "/apps/condir/bfsbin/submit.sh saptomross_activity.cd 5"*/
+   SCRIPTNAME /apps/condir/bfsbin/submitcd.sh
+   ARGS saptomross_activity.cd 5  !PID !TMSTMP
+   RUN FIRST WORKDAY
+   RESOURCE ADD(1,ISBFP3CD)
+   USER cdprod
+   RELEASE ADD(CDSTAT.SAPMRS00(A))
+   RELEASE ADD(RM_ZMMIMRO1_PURCHACTIVITY_TXT)
+ENDJOB
+
+AIX_JOB CDSTAT.SAPMRS00 CONDITIONAL
+   AGENT CYBA_ISBFP3
+   /*This job only runs if the C:D job does not end with*/
+   /*a EXITCODE of 0.  It can be rerun as often as*/
+   /*required to check the status of the C:D process.*/
+   /*When the C:D process finishes, complete the job*/
+   /*to release the successors.*/
+   RUN FIRST WORKDAY
+   USER cduser
+   STMPTM= WOBDATA('PARMSET.!ESPAPPL','STMPTM')
+   PID= WOBDATA('PARMSET.!ESPAPPL','PID')
+   CMDNAME /apps/condir/bfsbin/cdstat.sh
+   ARGS !STMPTM  j!PID
+ENDJOB
+
+UNIX_JOB RM_ZMMIMRO1_PURCHACTIVITY_TXT
+   AGENT CYBA_ISBFP3
+   /*@@ "rm /data/BFP/interfaces/output/dataout/zmmimro1_purchactiv  +
+       ity.txt"*/
+   CMDNAME /bin/rm
+   ARGS /data/BFP/interfaces/output/dataout/zmmimro1_purchactivity.txt
+   RUN FIRST WORKDAY
+   USER cdprod
+   RELEASE ADD(ZMMIMRO1_MONTHLY_ITEMTEXT_EXT)
+ENDJOB
+
+SAP_JOB ZMMIMRO1_MONTHLY_ITEMTEXT_EXT
+   /*@@ "/  -job ZMMIMRO1_MONTHLY_ITEMTEXT_EXT -user SAPBATCH -i 13  +
+       475201 -c C"*/
+   SAPUSER SAPADM
+   AGENT CYBB_BFP030
+   SAPJOBNAME ZMMIMRO1_MONTHLY_ITEMTEXT_EXT
+   SAPJOBCLASS C
+   ABAPNAME ZMMIMRO1
+   VARIANT SS-ROB-DF-004
+   LANGUAGE E
+   PRINTDEST CC16
+   EXPIRATION 8
+   COLUMNS 132
+   BANNER D
+   RECIPIENT SAPADM
+   ARCMODE PRINT
+   PRINTCOPIES 001
+   RUN FIRST WORKDAY
+   RELEASE ADD(SAPTOMROSS_ITEMTEXTCD)
+ENDJOB
+
+JOB SETPID1.!ESPAPPL LINK PROCESS
+   RUN FIRST WORKDAY
+   /*get the next PID number from the ConnectDirect*/
+   /*Process ID table (CDPROD).  Save the value into*/
+   /*the applications DataObject for use by the C:D*/
+   /*job and the CDSTAT job (if needed).*/
+   VINCR (PID) TABLE(CDPROD) CLANG
+   VGET  (PID) TABLE(CDPROD) CLANG
+   ESP MGRMSG * . . . PARMSET.!ESPAPPL/!ESPAPPL..!ESPAPGEN/MAIN +
+ACTION SET PID(!PID)
+   RELEASE (SAPTOMROSS_ITEMTEXTCD)
+ENDJOB
+
+UNIX_JOB SAPTOMROSS_ITEMTEXTCD
+   AGENT CYBA_ISBFP3
+   EARLYSUB REALNOW PLUS 20 SECONDS
+   PID= WOBDATA('PARMSET.!ESPAPPL','PID')
+   TMSTMP= WOBDATA('PARMSET.!ESPAPPL','TMSTMP')
+   /*@@ "/apps/condir/bfsbin/submit.sh saptomross_itemtext.cd 5"*/
+   SCRIPTNAME /apps/condir/bfsbin/submitcd.sh
+   ARGS saptomross_itemtext.cd 5 !PID !TMSTMP
+   RUN FIRST WORKDAY
+   RESOURCE ADD(1,ISBFP3CD)
+   USER cdprod
+   RELEASE ADD(CDSTAT.SAPMRS04(A))
+   RELEASE ADD(RM_ZMMIMRO1_ITEMTEXT_TXT)
+ENDJOB
+
+AIX_JOB CDSTAT.SAPMRS04 CONDITIONAL
+   AGENT CYBA_ISBFP3
+   /*This job only runs if the C:D job does not end with*/
+   /*a EXITCODE of 0.  It can be rerun as often as*/
+   /*required to check the status of the C:D process.*/
+   /*When the C:D process finishes, complete the job*/
+   /*to release the successors.*/
+   RUN FIRST WORKDAY
+   USER cduser
+   STMPTM= WOBDATA('PARMSET.!ESPAPPL','STMPTM')
+   PID= WOBDATA('PARMSET.!ESPAPPL','PID')
+   CMDNAME /apps/condir/bfsbin/cdstat.sh
+   ARGS !STMPTM  j!PID
+ENDJOB
+
+UNIX_JOB RM_ZMMIMRO1_ITEMTEXT_TXT
+   AGENT CYBA_ISBFP3
+   /*@@ "rm /data/BFP/interfaces/output/dataout/zmmimro1_itemtext.t  +
+       xt"*/
+   CMDNAME /bin/rm
+   ARGS /data/BFP/interfaces/output/dataout/zmmimro1_itemtext.txt
+   RUN FIRST WORKDAY
+   USER cdprod
+   RELEASE ADD(ZMMIMRO1_MONTHLY_PULOSS_ACTIVITY)
+ENDJOB
+
+SAP_JOB ZMMIMRO1_MONTHLY_PULOSS_ACTIVITY
+   /*@@ "/  -job ZMMIMRO1_MONTHLY_PULOSS_ACTIVITY -user SAPBATCH -i  +
+        14565601 -c C -flag ENABLE_JOBLOG"*/
+   SAPUSER SAPADM
+   AGENT CYBB_BFP030
+   SAPJOBNAME ZMMIMRO1_MONTHLY_PULOSS_ACTIVITY
+   SAPJOBCLASS C
+   ABAPNAME ZMMIMRO1
+   VARIANT 'RUTH ANN'
+   LANGUAGE E
+   PRINTDEST CP21
+   EXPIRATION 8
+   COLUMNS 132
+   BANNER D
+   RECIPIENT SYLVESTTOM
+   ARCMODE PRINT
+   PRINTCOPIES 001
+   RUN FIRST WORKDAY
+   RELEASE ADD(SAPTOMROSS_LOSSCD)
+ENDJOB
+
+JOB SETPID2.!ESPAPPL LINK PROCESS
+   RUN FIRST WORKDAY
+   /*get the next PID number from the ConnectDirect*/
+   /*Process ID table (CDPROD).  Save the value into*/
+   /*the applications DataObject for use by the C:D*/
+   /*job and the CDSTAT job (if needed).*/
+   VINCR (PID) TABLE(CDPROD) CLANG
+   VGET  (PID) TABLE(CDPROD) CLANG
+   ESP MGRMSG * . . . PARMSET.!ESPAPPL/!ESPAPPL..!ESPAPGEN/MAIN +
+ACTION SET PID(!PID)
+   RELEASE ADD(SAPTOMROSS_LOSSCD)
+ENDJOB
+
+UNIX_JOB SAPTOMROSS_LOSSCD
+   AGENT CYBA_ISBFP3
+   AFTER ADD(SETPID2.!ESPAPPL)
+   EARLYSUB REALNOW PLUS 20 SECONDS
+   PID= WOBDATA('PARMSET.!ESPAPPL','PID')
+   TMSTMP= WOBDATA('PARMSET.!ESPAPPL','TMSTMP')
+   /*@@ "/apps/condir/bfsbin/submit.sh saptomross_loss.cd 5"*/
+   SCRIPTNAME /apps/condir/bfsbin/submitcd.sh
+   ARGS saptomross_loss.cd 5 !PID !TMSTMP
+   RUN FIRST WORKDAY
+   RESOURCE ADD(1,ISBFP3CD)
+   USER cdprod
+   RELEASE ADD(CDSTAT.SAPMRS06(A))
+   RELEASE ADD(RM_ZMMIMRO1_LOSS_TXT)
+ENDJOB
+
+AIX_JOB CDSTAT.SAPMRS06 CONDITIONAL
+   AGENT CYBA_ISBFP3
+   /*This job only runs if the C:D job does not end with*/
+   /*a EXITCODE of 0.  It can be rerun as often as*/
+   /*required to check the status of the C:D process.*/
+   /*When the C:D process finishes, complete the job*/
+   /*to release the successors.*/
+   RUN FIRST WORKDAY
+   USER cduser
+   STMPTM= WOBDATA('PARMSET.!ESPAPPL','STMPTM')
+   PID= WOBDATA('PARMSET.!ESPAPPL','PID')
+   CMDNAME /apps/condir/bfsbin/cdstat.sh
+   ARGS !STMPTM  j!PID
+ENDJOB
+
+UNIX_JOB RM_ZMMIMRO1_LOSS_TXT
+   AGENT CYBA_ISBFP3
+   /*@@ "rm /data/BFP/interfaces/output/dataout/zmmimro1_loss.txt"*/
+   CMDNAME /bin/rm
+   ARGS /data/BFP/interfaces/output/dataout/zmmimro1_loss.txt
+   RUN FIRST WORKDAY
+   USER cdprod
+   RELEASE ADD(LIE.!ESPAPPL)
+ENDJOB
+
+JOB LIE.!ESPAPPL LINK PROCESS
+   RUN FIRST WORKDAY
+ENDJOB
+

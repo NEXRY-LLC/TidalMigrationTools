@@ -1,0 +1,21 @@
+APPL DSDAROUT WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/**********************************************************************/
+/* 10/21/21 - CREATED PER MANASI DILIP BERDE -SCTASK0083297
+/**********************************************************************/
+
+NOTIFY ABEND FAILURE ALERT(REMD)
+
+
+NT_JOB JOB_MDG_ADDR_OUTPUT_FILES_MOVING
+  AGENT DSSAPP01PAKR
+  USER svc_sap_ds_q
+  CMDNAME "\\dssapp01pakr\bods\Job_Scripts\+
+          JOB_MDG_ADDR_OUTPUT_FILES_MOVING.bat"
+  EARLYSUB 23.00
+  RUN WEEKDAYS
+ENDJOB
+
+

@@ -1,0 +1,29 @@
+APPL LNARART9 WAIT
+
+/*********************************************************************/
+/*02/28/2019 -JFC- MOVED TO OBSOLETE & DELETED EVENT                 */
+/*********************************************************************/
+
+NOTIFY FAILURE ABEND ALERT(REMD)
+
+
+SCHD1 = 'YESTERDAY'
+
+IF !USER2 = 1 OR !USER2 = '' THEN SCHD1 = 'TODAY'
+
+JCLLIB 'FTRF.PRDJOBS'
+COPYJCL 'SWS.ESP.COPYLIB'
+TEMPLIB 'SWS.ESP.TEMPLIB'
+DOCLIB 'SWS.ESP.DOCLIB'
+
+IF !ESPAPSUB# > 1 THEN JCLLIB 'SWS.ESP.COPYLIB'
+
+OPTIONS RESTARTSTEP
+
+JOB LNARART9
+  /*@@ SYSTEM=LAWSON
+  CCCHK RC(1:4095) FAIL CONTINUE
+    /*@@ SCHID=001
+  RUN !SCHD1
+ENDJOB
+

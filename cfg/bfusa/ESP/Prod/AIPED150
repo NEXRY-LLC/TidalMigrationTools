@@ -1,0 +1,584 @@
+APPL AIPED150 WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/*********************************************************************/
+/*05/05/2016 -JFC- UPDATED PROC NOTES SECTION                        */
+/*06/24/2019 -JFC- CHANGED SCOPE FROM -04                            */
+/*********************************************************************/
+/*THE MIMI CD JOBS IN THIS APPL COMMUNICATE WITH APPM-NA-CHQ         */
+/*INT-012 Material extract for MIMI and SFDC validation              */
+/*F181MMAT (YMIMMMAT_MIMI MATERIAL EXT F181)                         */
+/*         Material extract from SAP to use for SFDC and MIMI        */
+/**AIMMFTCD (MIMIMMFT.CD)                                            */
+/*         Move the material master data from SAP to APPM-NA-BSP     */
+/**INT-125 BOM Version Extract                                       */
+/**F181PRVR (YMIMPRVR_MIMI PROD VER EXT F181)                        */
+/*         BOM version extract from SAP to use for SFDC and MIMI     */
+/**AIPVFTCD (MIMIPVFT_F181.CD) Move the data from SAP to APPM-NA-BSP */
+/*  INT-124 Routing Extract for MIMI                                 */
+/**F181ROUT (YMIMROUT_MIMI ROUTINGS EXT F181)                        */
+/*          Create Routings file for use in mimi                     */
+/**AIRTFTCD (MIMIRTFT_F181.CD) Move the data from SAP to APPM-AG-PLT */
+/*  INT-126 Work Center Extract for MIMI                             */
+/**F181WKCN (YMIMWKCN_MIMI WORK CEN EXT F181)                        */
+/*          Create Work Center data                                  */
+/**AIWCFTCD (MIMIWCFT_F181.CD) Move the data from SAP to APPM-NA-BSP */
+/*  INT-123 BOM Extract for MIMI                                     */
+/**F181BOM (YMIMBOM_MIMI BOM EXT F181)                               */
+/*         Create Bill of Material extract data for use in MIMI      */
+/**AIBMFTCD (MIMIBMFT_F181.CD) Move the data from SAP to APPM-NA-BSP */
+/* REQ0128096 - stopping MIMI CD jobs temporarily
+/*********************************************************************/
+
+NOTIFY FAILURE ABEND ALERT(REMD)
+
+DATA_OBJECT PARMSET.!ESPAPPL
+    /*Create a timestamp in hhmmMMDDYY format*/
+    SETVAR TMSTMP='!ESPSHH.:!ESPSMN.,!ESPSMM./!ESPSDD./!ESPSYY'
+    SETVAR PID=''
+    SETVAR STMPTM='!ESPSMM./!ESPSDD./!ESPSYY.,!ESPSHH.:!ESPSMN'
+ENDJOB
+
+AIX_JOB LIE.AIPPD020 EXTERNAL APPLID(AIPPD020) SCOPE(-01)
+    RUN DAILY
+    IF TODAY('DEC 17 2020') AND ESPSHH GT '18' THEN NORUN TODAY
+    INVOKE 'SWS.ESP.APPL.PROCLIB(#AIFREEZ)'
+    RELEASE ADD(LIS.!ESPAPPL)
+ENDJOB
+
+JOB LIS.!ESPAPPL LINK PROCESS
+    RUN DAILY
+    IF ESPSHH = '11' THEN DELAYSUB 13.40
+    IF ESPSHH = '19' THEN DELAYSUB 21.30
+    RELEASE ADD(YMIMMMAT_MIMI_MATERIAL_EXT_F181)
+ENDJOB
+
+SAP_JOB YMIMMMAT_MIMI_MATERIAL_EXT_F181
+    SAPUSER SAPADM
+    AGENT CYBB_BFP030
+    SAPJOBNAME 'YMIMMMAT_MIMI MATERIAL EXT F181'
+    SAPJOBCLASS C
+    ABAPNAME YMIMMMAT
+    VARIANT YMIMMMAT_F181
+    LANGUAGE E
+    PRINTDEST CP40
+    PRINTCOPIES 001
+    EXPIRATION 8
+    LINES 65
+    COLUMNS 80
+    BANNER D
+    RECIPIENT DUETTAD
+    ARCMODE PRINT
+    RUN DAILY
+    RELEASE ADD(YMIMPRVR_MIMI_PROD_VER_EXT_F181)
+ENDJOB
+
+SAP_JOB YMIMPRVR_MIMI_PROD_VER_EXT_F181
+    SAPUSER SAPADM
+    AGENT CYBB_BFP030
+    SAPJOBNAME 'YMIMPRVR_MIMI PROD VER EXT F181'
+    SAPJOBCLASS C
+    ABAPNAME YMIMPRVR
+    VARIANT YMIMPRVR_F181
+    LANGUAGE E
+    PRINTDEST CP40
+    PRINTCOPIES 001
+    EXPIRATION 8
+    LINES 65
+    COLUMNS 80
+    BANNER D
+    RECIPIENT DUETTAD
+    ARCMODE PRINT
+    RUN DAILY
+    RELEASE ADD(ZMROUT_MIMI_ROUTINGS_EXT_F181)
+ENDJOB
+
+SAP_JOB ZMROUT_MIMI_ROUTINGS_EXT_F181
+    SAPUSER SAPADM
+    AGENT CYBB_BFP030
+    SAPJOBNAME 'ZMROUT_MIMI ROUTINGS EXT F181'
+    SAPJOBCLASS C
+    ABAPNAME ZMROUT
+    VARIANT ZMROUT_F181
+    LANGUAGE E
+    PRINTDEST CP40
+    PRINTCOPIES 001
+    EXPIRATION 8
+    LINES 65
+    COLUMNS 80
+    BANNER D
+    RECIPIENT DUETTAD
+    ARCMODE PRINT
+    RUN DAILY
+    RELEASE ADD(YMIMWKCN_MIMI_WORK_CEN_EXT_F181)
+ENDJOB
+
+SAP_JOB YMIMWKCN_MIMI_WORK_CEN_EXT_F181
+    SAPUSER SAPADM
+    AGENT CYBB_BFP030
+    SAPJOBNAME 'YMIMWKCN_MIMI WORK CEN EXT F181'
+    SAPJOBCLASS C
+    ABAPNAME YMIMWKCN
+    VARIANT YMIMWKCN_F181
+    LANGUAGE E
+    PRINTDEST CP40
+    PRINTCOPIES 001
+    EXPIRATION 8
+    LINES 65
+    COLUMNS 80
+    BANNER D
+    RECIPIENT DUETTAD
+    ARCMODE PRINT
+    RUN DAILY
+    RELEASE ADD(YMIMBOM_MIMI_BOM_EXTRACT_F181)
+ENDJOB
+
+SAP_JOB YMIMBOM_MIMI_BOM_EXTRACT_F181
+    SAPUSER SAPADM
+    AGENT CYBB_BFP030
+    SAPJOBNAME 'YMIMBOM_MIMI BOM EXTRACT F181'
+    SAPJOBCLASS C
+    ABAPNAME YMIMBOM
+    VARIANT YMIMBOM_F181
+    LANGUAGE E
+    PRINTDEST CP40
+    PRINTCOPIES 001
+    EXPIRATION 8
+    LINES 65
+    COLUMNS 80
+    BANNER D
+    RECIPIENT DUETTAD
+    ARCMODE PRINT
+    RUN DAILY
+    RELEASE ADD(MIMIMMFT_F181CD)
+ENDJOB
+
+JOB SETPID.!ESPAPPL LINK PROCESS
+    /*get the next PID number from the ConnectDirect*/
+    /*Process ID table (CDPROD).  Save the value into*/
+    /*the applications DataObject for use by the C:D*/
+    /*job and the CDSTAT job (if needed).*/
+    VINCR (PID) TABLE(CDPROD) CLANG
+    VGET  (PID) TABLE(CDPROD) CLANG
+    ESP MGRMSG * . . . PARMSET.!ESPAPPL/!ESPAPPL..!ESPAPGEN/MAIN +
+    ACTION SET PID(!PID)
+    RUN DAILY
+    RELEASE ADD(MIMIMMFT_F181CD)
+ENDJOB
+
+JOB SETPID1.!ESPAPPL LINK PROCESS
+    /*get the next PID number from the ConnectDirect*/
+    /*Process ID table (CDPROD).  Save the value into*/
+    /*the applications DataObject for use by the C:D*/
+    /*job and the CDSTAT job (if needed).*/
+    VINCR (PID) TABLE(CDPROD) CLANG
+    VGET  (PID) TABLE(CDPROD) CLANG
+    ESP MGRMSG * . . . PARMSET.!ESPAPPL/!ESPAPPL..!ESPAPGEN/MAIN +
+    ACTION SET PID(!PID)
+    RUN DAILY
+    RELEASE ADD(BOSSMMFT_F181CD)
+ENDJOB
+
+UNIX_JOB MIMIMMFT_F181CD
+    AGENT CYBA_ISBFP3
+    EARLYSUB REALNOW PLUS 20 SECONDS
+    PID= WOBDATA('PARMSET.!ESPAPPL','PID')
+    TMSTMP= WOBDATA('PARMSET.!ESPAPPL','TMSTMP')
+    SCRIPTNAME /apps/condir/bfsbin/submitcd.sh
+    ARGS MIMIMMFT_F181.CD 5 !PID !TMSTMP
+    RESOURCE ADD(1,ISBFP3CD)
+    USER cdprod
+  RUN DAILY
+    RELEASE ADD(CDSTAT.MIMIMMFT_F181CD(A))
+    RELEASE ADD(BOSSMMFT_F181CD)
+ENDJOB
+
+AIX_JOB CDSTAT.MIMIMMFT_F181CD CONDITIONAL
+    AGENT CYBA_ISBFP3
+    /*This job only runs if the C:D job does not end with*/
+    /*a EXITCODE of 0.  It can be rerun as often as*/
+    /*required to check the status of the C:D process.*/
+    /*When the C:D process finishes, complete the job*/
+    /*to release the successors.*/
+    USER cduser
+    STMPTM= WOBDATA('PARMSET.!ESPAPPL','STMPTM')
+    PID= WOBDATA('PARMSET.!ESPAPPL','PID')
+    CMDNAME /apps/condir/bfsbin/cdstat.sh
+    ARGS !STMPTM  j!PID
+    RUN DAILY
+ENDJOB
+
+UNIX_JOB BOSSMMFT_F181CD
+    AGENT CYBA_ISBFP3
+    EARLYSUB REALNOW PLUS 20 SECONDS
+    PID= WOBDATA('PARMSET.!ESPAPPL','PID')
+    TMSTMP= WOBDATA('PARMSET.!ESPAPPL','TMSTMP')
+    SCRIPTNAME /apps/condir/bfsbin/submitcd.sh
+    ARGS BOSSMMFT_F181.CD 5 !PID !TMSTMP
+    RESOURCE ADD(1,ISBFP3CD)
+    USER cdprod
+    RUN DAILY
+    RELEASE ADD(CDSTAT.BOSSMMFT_F181CD(A))
+    RELEASE ADD(MIMIPVFT_F181CD)
+ENDJOB
+
+AIX_JOB CDSTAT.BOSSMMFT_F181CD CONDITIONAL
+    AGENT CYBA_ISBFP3
+    /*This job only runs if the C:D job does not end with*/
+    /*a EXITCODE of 0.  It can be rerun as often as*/
+    /*required to check the status of the C:D process.*/
+    /*When the C:D process finishes, complete the job*/
+    /*to release the successors.*/
+    USER cduser
+    STMPTM= WOBDATA('PARMSET.!ESPAPPL','STMPTM')
+    PID= WOBDATA('PARMSET.!ESPAPPL','PID')
+    CMDNAME /apps/condir/bfsbin/cdstat.sh
+    ARGS !STMPTM  j!PID
+    RUN DAILY
+ENDJOB
+
+JOB SETPID2.!ESPAPPL LINK PROCESS
+    /*get the next PID number from the ConnectDirect*/
+    /*Process ID table (CDPROD).  Save the value into*/
+    /*the applications DataObject for use by the C:D*/
+    /*job and the CDSTAT job (if needed).*/
+    VINCR (PID) TABLE(CDPROD) CLANG
+    VGET  (PID) TABLE(CDPROD) CLANG
+    ESP MGRMSG * . . . PARMSET.!ESPAPPL/!ESPAPPL..!ESPAPGEN/MAIN +
+    ACTION SET PID(!PID)
+    RUN DAILY
+    RELEASE ADD(MIMIPVFT_F181CD)
+ENDJOB
+
+UNIX_JOB MIMIPVFT_F181CD
+    AGENT CYBA_ISBFP3
+    EARLYSUB REALNOW PLUS 20 SECONDS
+    PID= WOBDATA('PARMSET.!ESPAPPL','PID')
+    TMSTMP= WOBDATA('PARMSET.!ESPAPPL','TMSTMP')
+    SCRIPTNAME /apps/condir/bfsbin/submitcd.sh
+    ARGS MIMIPVFT_F181.CD 5 !PID !TMSTMP
+    RESOURCE ADD(1,ISBFP3CD)
+    USER cdprod
+    RUN DAILY
+    RELEASE ADD(CDSTAT.MIMIPVFT_F181CD(A))
+    RELEASE ADD(BOSSPVFT_F181CD)
+ENDJOB
+
+AIX_JOB CDSTAT.MIMIPVFT_F181CD CONDITIONAL
+    AGENT CYBA_ISBFP3
+    /*This job only runs if the C:D job does not end with*/
+    /*a EXITCODE of 0.  It can be rerun as often as*/
+    /*required to check the status of the C:D process.*/
+    /*When the C:D process finishes, complete the job*/
+    /*to release the successors.*/
+    USER cduser
+    STMPTM= WOBDATA('PARMSET.!ESPAPPL','STMPTM')
+    PID= WOBDATA('PARMSET.!ESPAPPL','PID')
+    CMDNAME /apps/condir/bfsbin/cdstat.sh
+    ARGS !STMPTM  j!PID
+    RUN DAILY
+ENDJOB
+
+JOB SETPID3.!ESPAPPL LINK PROCESS
+    /*get the next PID number from the ConnectDirect*/
+    /*Process ID table (CDPROD).  Save the value into*/
+    /*the applications DataObject for use by the C:D*/
+    /*job and the CDSTAT job (if needed).*/
+    VINCR (PID) TABLE(CDPROD) CLANG
+    VGET  (PID) TABLE(CDPROD) CLANG
+    ESP MGRMSG * . . . PARMSET.!ESPAPPL/!ESPAPPL..!ESPAPGEN/MAIN +
+    ACTION SET PID(!PID)
+    RUN DAILY
+    RELEASE ADD(BOSSPVFT_F181CD)
+ENDJOB
+
+UNIX_JOB BOSSPVFT_F181CD
+    AGENT CYBA_ISBFP3
+    EARLYSUB REALNOW PLUS 20 SECONDS
+    PID= WOBDATA('PARMSET.!ESPAPPL','PID')
+    TMSTMP= WOBDATA('PARMSET.!ESPAPPL','TMSTMP')
+    SCRIPTNAME /apps/condir/bfsbin/submitcd.sh
+    ARGS BOSSPVFT_F181.CD 5 !PID !TMSTMP
+    RESOURCE ADD(1,ISBFP3CD)
+    USER cdprod
+    RUN DAILY
+    RELEASE ADD(CDSTAT.BOSSPVFT_F181CD(A))
+    RELEASE ADD(MIMIRTFT_F181CD)
+ENDJOB
+
+AIX_JOB CDSTAT.BOSSPVFT_F181CD CONDITIONAL
+    AGENT CYBA_ISBFP3
+    /*This job only runs if the C:D job does not end with*/
+    /*a EXITCODE of 0.  It can be rerun as often as*/
+    /*required to check the status of the C:D process.*/
+    /*When the C:D process finishes, complete the job*/
+    /*to release the successors.*/
+    USER cduser
+    STMPTM= WOBDATA('PARMSET.!ESPAPPL','STMPTM')
+    PID= WOBDATA('PARMSET.!ESPAPPL','PID')
+    CMDNAME /apps/condir/bfsbin/cdstat.sh
+    ARGS !STMPTM  j!PID
+    RUN DAILY
+ENDJOB
+
+JOB SETPID4.!ESPAPPL LINK PROCESS
+    /*get the next PID number from the ConnectDirect*/
+    /*Process ID table (CDPROD).  Save the value into*/
+    /*the applications DataObject for use by the C:D*/
+    /*job and the CDSTAT job (if needed).*/
+    VINCR (PID) TABLE(CDPROD) CLANG
+    VGET  (PID) TABLE(CDPROD) CLANG
+    ESP MGRMSG * . . . PARMSET.!ESPAPPL/!ESPAPPL..!ESPAPGEN/MAIN +
+    ACTION SET PID(!PID)
+    RUN DAILY
+    RELEASE ADD(MIMIRTFT_F181CD)
+ENDJOB
+
+UNIX_JOB MIMIRTFT_F181CD
+    AGENT CYBA_ISBFP3
+    EARLYSUB REALNOW PLUS 20 SECONDS
+    PID= WOBDATA('PARMSET.!ESPAPPL','PID')
+    TMSTMP= WOBDATA('PARMSET.!ESPAPPL','TMSTMP')
+    SCRIPTNAME /apps/condir/bfsbin/submitcd.sh
+    ARGS MIMIRTFT_F181.CD 5 !PID !TMSTMP
+    RESOURCE ADD(1,ISBFP3CD)
+    USER cdprod
+    RUN DAILY
+    RELEASE ADD(CDSTAT.MIMIRTFT_F181CD(A))
+    RELEASE ADD(BOSSRTFT_F181CD)
+ENDJOB
+
+AIX_JOB CDSTAT.MIMIRTFT_F181CD CONDITIONAL
+    AGENT CYBA_ISBFP3
+    /*This job only runs if the C:D job does not end with*/
+    /*a EXITCODE of 0.  It can be rerun as often as*/
+    /*required to check the status of the C:D process.*/
+    /*When the C:D process finishes, complete the job*/
+    /*to release the successors.*/
+    USER cduser
+    STMPTM= WOBDATA('PARMSET.!ESPAPPL','STMPTM')
+    PID= WOBDATA('PARMSET.!ESPAPPL','PID')
+    CMDNAME /apps/condir/bfsbin/cdstat.sh
+    ARGS !STMPTM  j!PID
+    RUN DAILY
+ENDJOB
+
+JOB SETPID5.!ESPAPPL LINK PROCESS
+    /*get the next PID number from the ConnectDirect*/
+    /*Process ID table (CDPROD).  Save the value into*/
+    /*the applications DataObject for use by the C:D*/
+    /*job and the CDSTAT job (if needed).*/
+    VINCR (PID) TABLE(CDPROD) CLANG
+    VGET  (PID) TABLE(CDPROD) CLANG
+    ESP MGRMSG * . . . PARMSET.!ESPAPPL/!ESPAPPL..!ESPAPGEN/MAIN +
+    ACTION SET PID(!PID)
+    RUN DAILY
+    RELEASE ADD(BOSSRTFT_F181CD)
+ENDJOB
+
+UNIX_JOB BOSSRTFT_F181CD
+    AGENT CYBA_ISBFP3
+    EARLYSUB REALNOW PLUS 20 SECONDS
+    PID= WOBDATA('PARMSET.!ESPAPPL','PID')
+    TMSTMP= WOBDATA('PARMSET.!ESPAPPL','TMSTMP')
+    SCRIPTNAME /apps/condir/bfsbin/submitcd.sh
+    ARGS BOSSRTFT_F181.CD 5 !PID !TMSTMP
+    RESOURCE ADD(1,ISBFP3CD)
+    USER cdprod
+    RUN DAILY
+    RELEASE ADD(CDSTAT.BOSSRTFT_F181CD(A))
+    RELEASE ADD(MIMIWCFT_F181CD)
+ENDJOB
+
+AIX_JOB CDSTAT.BOSSRTFT_F181CD CONDITIONAL
+    AGENT CYBA_ISBFP3
+    /*This job only runs if the C:D job does not end with*/
+    /*a EXITCODE of 0.  It can be rerun as often as*/
+    /*required to check the status of the C:D process.*/
+    /*When the C:D process finishes, complete the job*/
+    /*to release the successors.*/
+    USER cduser
+    STMPTM= WOBDATA('PARMSET.!ESPAPPL','STMPTM')
+    PID= WOBDATA('PARMSET.!ESPAPPL','PID')
+    CMDNAME /apps/condir/bfsbin/cdstat.sh
+    ARGS !STMPTM  j!PID
+    RUN DAILY
+ENDJOB
+
+JOB SETPID6.!ESPAPPL LINK PROCESS
+    /*get the next PID number from the ConnectDirect*/
+    /*Process ID table (CDPROD).  Save the value into*/
+    /*the applications DataObject for use by the C:D*/
+    /*job and the CDSTAT job (if needed).*/
+    VINCR (PID) TABLE(CDPROD) CLANG
+    VGET  (PID) TABLE(CDPROD) CLANG
+    ESP MGRMSG * . . . PARMSET.!ESPAPPL/!ESPAPPL..!ESPAPGEN/MAIN +
+    ACTION SET PID(!PID)
+    RUN DAILY
+    RELEASE ADD(MIMIWCFT_F181CD)
+ENDJOB
+
+UNIX_JOB MIMIWCFT_F181CD
+    AGENT CYBA_ISBFP3
+    EARLYSUB REALNOW PLUS 20 SECONDS
+    PID= WOBDATA('PARMSET.!ESPAPPL','PID')
+    TMSTMP= WOBDATA('PARMSET.!ESPAPPL','TMSTMP')
+    SCRIPTNAME /apps/condir/bfsbin/submitcd.sh
+    ARGS MIMIWCFT_F181.CD 5 !PID !TMSTMP
+    RESOURCE ADD(1,ISBFP3CD)
+    USER cdprod
+    RUN DAILY
+    RELEASE ADD(CDSTAT.MIMIWCFT_F181CD(A))
+    RELEASE ADD(BOSSWCFT_F181CD)
+ENDJOB
+
+AIX_JOB CDSTAT.MIMIWCFT_F181CD CONDITIONAL
+    AGENT CYBA_ISBFP3
+    /*This job only runs if the C:D job does not end with*/
+    /*a EXITCODE of 0.  It can be rerun as often as*/
+    /*required to check the status of the C:D process.*/
+    /*When the C:D process finishes, complete the job*/
+    /*to release the successors.*/
+    USER cduser
+    STMPTM= WOBDATA('PARMSET.!ESPAPPL','STMPTM')
+    PID= WOBDATA('PARMSET.!ESPAPPL','PID')
+    CMDNAME /apps/condir/bfsbin/cdstat.sh
+    ARGS !STMPTM  j!PID
+    RUN DAILY
+ENDJOB
+
+JOB SETPID7.!ESPAPPL LINK PROCESS
+    /*get the next PID number from the ConnectDirect*/
+    /*Process ID table (CDPROD).  Save the value into*/
+    /*the applications DataObject for use by the C:D*/
+    /*job and the CDSTAT job (if needed).*/
+    VINCR (PID) TABLE(CDPROD) CLANG
+    VGET  (PID) TABLE(CDPROD) CLANG
+    ESP MGRMSG * . . . PARMSET.!ESPAPPL/!ESPAPPL..!ESPAPGEN/MAIN +
+    ACTION SET PID(!PID)
+    RUN DAILY
+    RELEASE ADD(BOSSWCFT_F181CD)
+ENDJOB
+
+UNIX_JOB BOSSWCFT_F181CD
+    AGENT CYBA_ISBFP3
+    EARLYSUB REALNOW PLUS 20 SECONDS
+    PID= WOBDATA('PARMSET.!ESPAPPL','PID')
+    TMSTMP= WOBDATA('PARMSET.!ESPAPPL','TMSTMP')
+    SCRIPTNAME /apps/condir/bfsbin/submitcd.sh
+    ARGS BOSSWCFT_F181.CD 5 !PID !TMSTMP
+    RESOURCE ADD(1,ISBFP3CD)
+    USER cdprod
+    RUN DAILY
+    RELEASE ADD(CDSTAT.BOSSWCFT_F181CD(A))
+    RELEASE ADD(MIMIBMFT_F181CD)
+ENDJOB
+
+AIX_JOB CDSTAT.BOSSWCFT_F181CD CONDITIONAL
+    AGENT CYBA_ISBFP3
+    /*This job only runs if the C:D job does not end with*/
+    /*a EXITCODE of 0.  It can be rerun as often as*/
+    /*required to check the status of the C:D process.*/
+    /*When the C:D process finishes, complete the job*/
+    /*to release the successors.*/
+    USER cduser
+    STMPTM= WOBDATA('PARMSET.!ESPAPPL','STMPTM')
+    PID= WOBDATA('PARMSET.!ESPAPPL','PID')
+    CMDNAME /apps/condir/bfsbin/cdstat.sh
+    ARGS !STMPTM  j!PID
+    RUN DAILY
+ENDJOB
+
+JOB SETPID8.!ESPAPPL LINK PROCESS
+    /*get the next PID number from the ConnectDirect*/
+    /*Process ID table (CDPROD).  Save the value into*/
+    /*the applications DataObject for use by the C:D*/
+    /*job and the CDSTAT job (if needed).*/
+    VINCR (PID) TABLE(CDPROD) CLANG
+    VGET  (PID) TABLE(CDPROD) CLANG
+    ESP MGRMSG * . . . PARMSET.!ESPAPPL/!ESPAPPL..!ESPAPGEN/MAIN +
+    ACTION SET PID(!PID)
+    RUN DAILY
+    RELEASE ADD(MIMIBMFT_F181CD)
+ENDJOB
+
+UNIX_JOB MIMIBMFT_F181CD
+    AGENT CYBA_ISBFP3
+    EARLYSUB REALNOW PLUS 20 SECONDS
+    PID= WOBDATA('PARMSET.!ESPAPPL','PID')
+    TMSTMP= WOBDATA('PARMSET.!ESPAPPL','TMSTMP')
+    SCRIPTNAME /apps/condir/bfsbin/submitcd.sh
+    ARGS MIMIBMFT_F181.CD 5 !PID !TMSTMP
+    RESOURCE ADD(1,ISBFP3CD)
+    USER cdprod
+    RUN DAILY
+    RELEASE ADD(CDSTAT.MIMIBMFT_F181CD(A))
+    RELEASE ADD(BOSSBMFT_F181CD)
+ENDJOB
+
+AIX_JOB CDSTAT.MIMIBMFT_F181CD CONDITIONAL
+    AGENT CYBA_ISBFP3
+    /*This job only runs if the C:D job does not end with*/
+    /*a EXITCODE of 0.  It can be rerun as often as*/
+    /*required to check the status of the C:D process.*/
+    /*When the C:D process finishes, complete the job*/
+    /*to release the successors.*/
+    USER cduser
+    STMPTM= WOBDATA('PARMSET.!ESPAPPL','STMPTM')
+    PID= WOBDATA('PARMSET.!ESPAPPL','PID')
+    CMDNAME /apps/condir/bfsbin/cdstat.sh
+    ARGS !STMPTM  j!PID
+    RUN DAILY
+ENDJOB
+
+JOB SETPID9.!ESPAPPL LINK PROCESS
+    /*get the next PID number from the ConnectDirect*/
+    /*Process ID table (CDPROD).  Save the value into*/
+    /*the applications DataObject for use by the C:D*/
+    /*job and the CDSTAT job (if needed).*/
+    VINCR (PID) TABLE(CDPROD) CLANG
+    VGET  (PID) TABLE(CDPROD) CLANG
+    ESP MGRMSG * . . . PARMSET.!ESPAPPL/!ESPAPPL..!ESPAPGEN/MAIN +
+    ACTION SET PID(!PID)
+    RUN DAILY
+    RELEASE ADD(BOSSBMFT_F181CD)
+ENDJOB
+
+UNIX_JOB BOSSBMFT_F181CD
+    AGENT CYBA_ISBFP3
+    EARLYSUB REALNOW PLUS 20 SECONDS
+    PID= WOBDATA('PARMSET.!ESPAPPL','PID')
+    TMSTMP= WOBDATA('PARMSET.!ESPAPPL','TMSTMP')
+    SCRIPTNAME /apps/condir/bfsbin/submitcd.sh
+    ARGS BOSSBMFT_F181.CD 5 !PID !TMSTMP
+    RESOURCE ADD(1,ISBFP3CD)
+    USER cdprod
+    RUN DAILY
+    RELEASE ADD(CDSTAT.BOSSBMFT_F181CD(A))
+    RELEASE ADD(LIE.!ESPAPPL)
+ENDJOB
+
+AIX_JOB CDSTAT.BOSSBMFT_F181CD CONDITIONAL
+    AGENT CYBA_ISBFP3
+    /*This job only runs if the C:D job does not end with*/
+    /*a EXITCODE of 0.  It can be rerun as often as*/
+    /*required to check the status of the C:D process.*/
+    /*When the C:D process finishes, complete the job*/
+    /*to release the successors.*/
+    USER cduser
+    STMPTM= WOBDATA('PARMSET.!ESPAPPL','STMPTM')
+    PID= WOBDATA('PARMSET.!ESPAPPL','PID')
+    CMDNAME /apps/condir/bfsbin/cdstat.sh
+    ARGS !STMPTM  j!PID
+    RUN DAILY
+ENDJOB
+
+AIX_JOB LIE.!ESPAPPL
+    AGENT CYBA_ISBFP3
+    COMMAND /bin/sleep
+    ARGS 3
+    USER bfpadm
+    RUN DAILY
+ENDJOB
+

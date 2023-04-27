@@ -1,0 +1,43 @@
+APPL TESTLNXJ
+
+/**********  SET PARAMETER 1 VARIABLE  ********************************/
+/* USE PARAMETER 1 TO SET WHAT AGENT THE JOB SHOULD RUN ON            */
+
+IF USER1 = '' THEN !USER1 = 'CYBA_ISBFT'
+IF USER2 = '' THEN !USER2 = 'root'
+
+/**********************************************************************/
+/*QUITE A FEW OPTIONS HERE FOR TESTING LINUX, UNIX AND AIX JOBS  *****/
+/*AGENT NAME AND USERID CAN BE ENTERED AND CHANGED USING THE PARAMTERS*/
+/*SOME SCRIPTS MAY NEED THE /USR/ OTHERS DO NOT                    ***/
+/*UNIX, AIX AND LNX ARE PRETTY MUCH INTERCHANGABLE IN ESP  ***********/
+/**********************************************************************/
+
+TAG 'SWTEST'
+
+JOB LIS.!ESPAPPL LINK PROCESS
+   RUN DAILY
+   RELEASE ADD(!USER1._TEST_DATE_SH)
+   RELEASE ADD(!USER1._TEST_DF_SH)
+ENDJOB
+
+UNIX_JOB !USER1._TEST_DATE_SH
+   AGENT !user1
+   SCRIPTNAME /usr/bin/date.sh
+   USER !user2
+/* RUN NOW
+   RELEASE ADD(LIE.!ESPAPPL)
+ENDJOB
+
+AIX_JOB !USER1._TEST_DF_SH
+   AGENT !user1
+   SCRIPTNAME /local/bin/df.sh
+   USER !user2
+   RUN NOW
+   RELEASE ADD(LIE.!ESPAPPL)
+ENDJOB
+
+JOB LIE.!ESPAPPL LINK PROCESS
+   RUN DAILY
+ENDJOB
+

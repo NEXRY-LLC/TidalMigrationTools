@@ -1,0 +1,27 @@
+APPL ED385J  WAIT                                                       00010001
+                                                                        00010103
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'                                 00011003
+                                                                        00020001
+NOTIFY FAILURE ABEND ALERT(REMD)                                        00030001
+                                                                        00040001
+JOB ED385J                                                              00140001
+  /*@@ SYSTEM=EDI                                                       00150001
+  CCCHK RC(7:4095) FAIL CONTINUE                                        00160001
+  RUN TODAY                                                             00170001
+  RELEASE ADD(ED385L)                                                   00180001
+ENDJOB                                                                  00200001
+                                                                        00210001
+JOB ED385L                                                              00280001
+  /*@@ SYSTEM=EDI                                                       00290001
+  CCCHK RC(7:4095) FAIL CONTINUE                                        00300001
+    /*@@ SCHID=001/001                                                  00310001
+  RUN TODAY                                                             00320001
+  RELEASE ADD(ED385N)                                                   00330003
+ENDJOB                                                                  00350001
+                                                                        00360001
+JOB ED385N                                                              00960001
+  /*@@ SYSTEM=EDI                                                       00970001
+  CCCHK RC(7:4095) FAIL CONTINUE                                        00980001
+  RUN TODAY                                                             00990001
+  RELEASE ADD(ED605DT)                                                  01000001
+ENDJOB                                                                  01010001

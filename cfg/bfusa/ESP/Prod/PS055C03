@@ -1,0 +1,18 @@
+APPL PS055C03 WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+NOTIFY FAILURE ABEND ALERT(REMD)
+
+/*********************************************************************/
+/*03/16/2017-JFC-NEW APPL CREATED PER MARTY MAATZ-CRQ#52230          */
+/*********************************************************************/
+/*APPLY WEEK-TO-DATE INDUCTIONS TO PRODUCTION SCHEDULE FOR JDA       */
+/*********************************************************************/
+
+JOB PS055C03
+  /*@@ SYSTEM=MPS
+  CCCHK RC(1:4095) FAIL CONTINUE
+  RUN DAILY
+  DELAYSUB 06:00
+ENDJOB
+

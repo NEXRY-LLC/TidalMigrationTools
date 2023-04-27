@@ -1,0 +1,50 @@
+package com.bluehouseinc.dataconverter.api.importer.transformers;
+
+import com.bluehouseinc.dataconverter.api.importer.TidalAPI;
+import com.bluehouseinc.dataconverter.model.impl.CsvFileWatcherJob;
+import com.bluehouseinc.tidal.api.model.TrueFalse;
+import com.bluehouseinc.tidal.api.model.job.JobType;
+import com.bluehouseinc.tidal.api.model.job.filewatcher.FileWatcherJob;
+import com.bluehouseinc.tidal.api.model.job.filewatcher.TimeUnit;
+import com.bluehouseinc.transform.ITransformer;
+import com.bluehouseinc.transform.TransformationException;
+
+public class FileWatcherJobTransformer implements ITransformer<CsvFileWatcherJob, FileWatcherJob> {
+
+	FileWatcherJob base;
+	TidalAPI tidal;
+
+	public FileWatcherJobTransformer(FileWatcherJob base, TidalAPI tidal) {
+		this.base = base;
+		this.tidal = tidal;
+	}
+
+	@Override
+	public FileWatcherJob transform(CsvFileWatcherJob in) throws TransformationException {
+
+		this.base.setType(JobType.FILEWATCHER);
+
+		if(in.getFileExist() == TrueFalse.YES) {
+			this.base.doSetFileExist(in.getDirectory(), in.getFilemask());
+		}else {
+			this.base.doSetFileNotExist(in.getDirectory(), in.getFilemask());
+		}
+
+		if (in.getFileActivity() != null) {
+			this.base.doSetFileWatcher(in.getFileActivity(), in.getFileActivityInterval(), in.getFileActivityTimeUnit(), null, null);
+		}
+
+		if (in.getPollInterval() != null) {
+			this.base.setPollinterval(in.getPollInterval());
+			this.base.setPollintervalunit(TimeUnit.SECOND);
+		}
+
+		if (in.getPollMaxDuration() != null) {
+			this.base.setPolllifetime(in.getPollMaxDuration());
+			this.base.setPolllifetimeunit(TimeUnit.SECOND);
+		}
+
+		return this.base;
+	}
+
+}

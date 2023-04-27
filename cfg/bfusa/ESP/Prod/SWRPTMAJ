@@ -1,0 +1,15 @@
+APPL SWRPTMAJ JOB_ANCESTOR_WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/*********************************************************************/
+/* CREATE REPORT OF JOBS FROM MAJOR APPS                             */
+/* IF THIS JOB FAILS - JUST MARK IT COMPLETE                         */
+/* 02/22/2016-JFC- CREATED                                           */
+/*********************************************************************/
+
+JOB SWRPTMAJ
+  RUN ANY
+  DELAYSUB 7AM
+ENDJOB
+

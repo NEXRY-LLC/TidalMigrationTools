@@ -1,0 +1,29 @@
+APPL NTTESTJO
+
+/**********  SET PARAMETER 1 VARIABLE  ********************************/
+/* USE PARAMETER 1 TO SET WHAT AGENT THE JOB SHOULD RUN ON            */
+
+!USER1 = 'appcyb02ppd'
+
+/**********************************************************************/
+/**********  SET PARAMETER 2 VARIABLE  ********************************/
+/* USE PARAMETER 2 TO SET WHAT USER ID THE JOB SHOULD USE             */
+/* THIS NEEDS TO BE A VALID USER ID ALREADY DEFINED IN ESP            */
+/* THIS OPTION IS REQUIRED IF IT IS A WINDOWS SERVER                  */
+
+IF !USER1 = 'appcyb02ppd' THEN !USER2 = 'svc_siftcalc'
+
+/**********************************************************************/
+/**********************************************************************/
+
+TAG 'SWTEST'
+NOTIFY ABEND FAILURE ALERT(REMX)
+
+NT_JOB TEST_JOB_!USER1.
+   AGENT !user1
+   CMDNAME c:\windows\system2\ipconfig
+   USER !user2
+   RUN NOW
+ENDJOB
+
+

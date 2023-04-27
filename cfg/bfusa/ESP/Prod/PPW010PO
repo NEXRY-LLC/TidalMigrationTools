@@ -1,0 +1,548 @@
+APPL PPW010PO WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/**********************************************************************/
+/*06/29/2018-JFC-INCORPORATED EVENT PPW010SP INTO THIS EVENT          */
+/*06/29/2018-JFC-SET EVENT TO RUN WEEKDAYS SAT PER INC000001660927    */
+/*02/14/2019 -JFC- REMOVED ALERT JO03 PER INC000001852710             */
+/**********************************************************************/
+/*THIS APPL HAS EXTERNALS IN WGPPD040 AND WGPPM040                    */
+/*THIS APPL HAS EXTERNALS IN BLPPD040 AND BLPPM040                    */
+/*THE CD JOBS IN THIS APPL COMMUNICATE WITH APPM-NA-CHQ               */
+/**********************************************************************/
+/*INT-005 MRP Planned Orders for SAP                                  */
+/*B2W001  Transfer file from MPS MVS to MIMI server APPM-NA-BSP       */
+/*SUNCOMMERCIAL - Create planned orders for WARREN = 161              */
+/*SUNOR - Create planned orders for BLOOMINGTON OTR = 111             */
+/*SUNOR_F191 - Create planned orders for AIKEN OFFROAD = 191          */
+/*SUNAG - Create planned orders for DES MOINES = 131                  */
+/*SUNCONSUMER - Create planned orders for PLANTS                      */
+/*            - 171, 201, 141, 181 AND 2000                           */
+/**********************************************************************/
+/* CONNECT:DIRECT JOBS FOR MOVING PLANNED ORDERS FROM PLANT TO SAP    */
+/**********************************************************************/
+/*(planned_orders_for_f131.cd)       - DES MOINES  = 131              */
+/*(planned_orders_for_f191.cd)       - AIKEN OFFROAD  = 191           */
+/*(planned_orders_for_consumer_1.cd) - OK CITY(NA)                    */
+/*(planned_orders_for_consumer_2.cd) - WILSON PLANT = 171             */
+/*(planned_orders_for_consumer_3.cd) - DECATUR PLANT(NA)              */
+/*(planned_orders_for_consumer_4.cd) - JOLIETTE = 201                 */
+/*(planned_orders_for_consumer_5.cd) - LAVERGNE = 141                 */
+/*(planned_orders_for_consumer_6.cd) - AIKEN = 181                    */
+/*(planned_orders_for_consumer_7.cd) - MONTERREY = 2000               */
+/*(planned_orders_for_commercial.cd) - WARREN = 161                   */
+/*(planned_orders_for_otr.cd)        - BLOOMINGTON OTR = 111          */
+/**********************************************************************/
+/**********************************************************************/
+/* WHEN YOU NEED TO RUN THE CD JOBS FOR A SPECIFIC PLANT              */
+/*   1) TRIGGER APPL WITH TODAY'S DATE - NOT A SATURDAY DATE          */
+/*   2) TRIGGER APPL WITH THE PLANT ID AS PARAMETER 2                 */
+/**********************************************************************/
+/**********************************************************************/
+
+NOTIFY ABEND FAILURE ALERT(REMD)
+NOTIFY OVERDUE ABEND MAILBOX(PPW010PO)
+
+DATA_OBJECT PARMSET.!ESPAPPL
+   /*Create a timestamp in hhmmMMDDYY format*/
+   SETVAR TMSTMP='!ESPSHH.:!ESPSMN.,!ESPSMM./!ESPSDD./!ESPSYY'
+   SETVAR PID=''
+   SETVAR STMPTM='!ESPSMM./!ESPSDD./!ESPSYY.,!ESPSHH.:!ESPSMN'
+ENDJOB
+
+JOB LIS.!ESPAPPL LINK PROCESS
+   RUN WEEKDAYS SAT
+   IF TODAY('MAY 03 2014') THEN JOBATTR HOLD
+   IF !USER2 = 111 THEN RUN TODAY
+   IF !USER2 = 131 THEN RUN TODAY
+   IF !USER2 = 141 THEN RUN TODAY
+   IF !USER2 = 161 THEN RUN TODAY
+   IF !USER2 = 171 THEN RUN TODAY
+   IF !USER2 = 181 THEN RUN TODAY
+   IF !USER2 = 191 THEN RUN TODAY
+   IF !USER2 = 201 THEN RUN TODAY
+   EARLYSUB 22.30
+   TAG MAJORAPPS
+   RELEASE ADD(B2W001)
+ENDJOB
+
+JOB B2W001 REQUEST
+   CCCHK RC(1:4095) FAIL CONTINUE
+   RUN WEEKDAYS SAT
+   RELEASE ADD(SUNCONSUMER)
+   RELEASE ADD(COPYMPSFILE)
+ENDJOB
+
+NT_JOB SUNCONSUMER REQUEST
+   AGENT CYBA_APPMNACHQ
+   CMDNAME e:\Apps\aspentech\aspenMIMI\Batch\sunconsumer.bat
+   ARGS
+   USER maestro
+   RUN TUE SAT
+   RELEASE ADD(SUNCOMMERCIAL)
+   RELEASE ADD(PLANNED_ORDERS_FOR_CONSUMER_2)
+ENDJOB
+
+NT_JOB SUNCOMMERCIAL REQUEST
+   AGENT CYBA_APPMNACHQ
+   CMDNAME e:\Apps\aspentech\aspenMIMI\Batch\suncommercial.bat
+   ARGS
+   USER maestro
+   RUN TUE SAT
+   RELEASE ADD(SUNOR)
+   RELEASE ADD(PLANNED_ORDERS_FOR_COMMERCIAL)
+ENDJOB
+
+NT_JOB SUNOR REQUEST
+   AGENT CYBA_APPMNACHQ
+   CMDNAME e:\Apps\aspentech\aspenMIMI\Batch\SUNOR.bat
+   ARGS
+   USER maestro
+   RUN TUE SAT
+   RELEASE ADD(SUNOR_F191)
+   RELEASE ADD(PLANNED_ORDERS_FOR_OTR)
+ENDJOB
+
+NT_JOB SUNOR_F191 REQUEST
+   AGENT CYBA_APPMNACHQ
+   CMDNAME e:\Apps\aspentech\aspenMIMI\Batch\SUNOR_F191.bat
+   ARGS
+   USER maestro
+   RUN TUE SAT
+   RELDELAY 1
+   RELEASE ADD(SUNAG)
+   RELEASE ADD(PLANNED_ORDERS_FOR_F191CD)
+ENDJOB
+
+NT_JOB SUNAG REQUEST
+   AGENT CYBA_APPMNACHQ
+   CMDNAME e:\Apps\aspentech\aspenMIMI\Batch\SUNAG.bat
+   ARGS
+   USER maestro
+   RUN TUE SAT
+   DUEOUT EXEC 23.00
+   RELEASE ADD(PLANNED_ORDERS_FOR_F131CD)
+ENDJOB
+
+JOB SETPID3.!ESPAPPL LINK PROCESS
+   /*get the next PID number from the ConnectDirect*/
+   /*Process ID table (CDPROD).  Save the value into*/
+   /*the applications DataObject for use by the C:D*/
+   /*job and the CDSTAT job (if needed).*/
+   VINCR (PID) TABLE(CDPROD) CLANG
+   VGET  (PID) TABLE(CDPROD) CLANG
+   ESP MGRMSG * . . . PARMSET.!ESPAPPL/!ESPAPPL..!ESPAPGEN/MAIN +
+ACTION SET PID(!PID)
+   RUN SAT
+   IF !USER2 = 131 THEN RUN TODAY
+   RELEASE ADD(PLANNED_ORDERS_FOR_F131CD)
+ENDJOB
+
+UNIX_JOB PLANNED_ORDERS_FOR_F131CD REQUEST
+   AGENT CYBA_ISBFP3
+   EARLYSUB REALNOW PLUS 20 SECONDS
+   PID= WOBDATA('PARMSET.!ESPAPPL','PID')
+   TMSTMP= WOBDATA('PARMSET.!ESPAPPL','TMSTMP')
+   SCRIPTNAME /apps/condir/bfsbin/submitcd.sh
+   ARGS planned_orders_for_f131.cd 10 !PID !TMSTMP
+   RESOURCE ADD(1,ISBFP3CD)
+   USER cdprod
+   RUN SAT
+   IF !USER2 = 131 THEN RUN TODAY
+   RELEASE ADD(CDSTAT.F131CD(A))
+   RELEASE ADD(LIE.!ESPAPPL)
+ENDJOB
+
+AIX_JOB CDSTAT.F131CD CONDITIONAL
+   AGENT CYBA_ISBFP3
+   /*This job only runs if the C:D job does not end with*/
+   /*a EXITCODE of 0.  It can be rerun as often as*/
+   /*required to check the status of the C:D process.*/
+   /*When the C:D process finishes, complete the job*/
+   /*to release the successors.*/
+   USER cduser
+   STMPTM= WOBDATA('PARMSET.!ESPAPPL','STMPTM')
+   PID= WOBDATA('PARMSET.!ESPAPPL','PID')
+   CMDNAME /apps/condir/bfsbin/cdstat.sh
+   ARGS !STMPTM  j!PID
+   RUN SAT
+   IF !USER2 = 131 THEN RUN TODAY
+ENDJOB
+
+JOB SETPID10.!ESPAPPL LINK PROCESS
+   /*get the next PID number from the ConnectDirect*/
+   /*Process ID table (CDPROD).  Save the value into*/
+   /*the applications DataObject for use by the C:D*/
+   /*job and the CDSTAT job (if needed).*/
+   VINCR (PID) TABLE(CDPROD) CLANG
+   VGET  (PID) TABLE(CDPROD) CLANG
+   ESP MGRMSG * . . . PARMSET.!ESPAPPL/!ESPAPPL..!ESPAPGEN/MAIN +
+ACTION SET PID(!PID)
+   RUN SAT
+   IF !USER2 = 191 THEN RUN TODAY
+   RELEASE ADD(PLANNED_ORDERS_FOR_F191CD)
+ENDJOB
+
+UNIX_JOB PLANNED_ORDERS_FOR_F191CD REQUEST
+   AGENT CYBA_ISBFP3
+   EARLYSUB REALNOW PLUS 20 SECONDS
+   PID= WOBDATA('PARMSET.!ESPAPPL','PID')
+   TMSTMP= WOBDATA('PARMSET.!ESPAPPL','TMSTMP')
+   SCRIPTNAME /apps/condir/bfsbin/submitcd.sh
+   ARGS planned_orders_for_f191.cd 5 !PID !TMSTMP
+   RESOURCE ADD(1,ISBFP3CD)
+   USER cdprod
+   RUN SAT
+   IF !USER2 = 191 THEN RUN TODAY
+   RELEASE ADD(CDSTAT.F191CD(A))
+   RELEASE ADD(LIE.!ESPAPPL)
+ENDJOB
+
+AIX_JOB CDSTAT.F191CD CONDITIONAL
+   AGENT CYBA_ISBFP3
+   /*This job only runs if the C:D job does not end with*/
+   /*a EXITCODE of 0.  It can be rerun as often as*/
+   /*required to check the status of the C:D process.*/
+   /*When the C:D process finishes, complete the job*/
+   /*to release the successors.*/
+   USER cduser
+   STMPTM= WOBDATA('PARMSET.!ESPAPPL','STMPTM')
+   PID= WOBDATA('PARMSET.!ESPAPPL','PID')
+   CMDNAME /apps/condir/bfsbin/cdstat.sh
+   ARGS !STMPTM  j!PID
+   RUN SAT
+   IF !USER2 = 191 THEN RUN TODAY
+ENDJOB
+
+JOB SETPID4.!ESPAPPL LINK PROCESS
+   /*get the next PID number from the ConnectDirect*/
+   /*Process ID table (CDPROD).  Save the value into*/
+   /*the applications DataObject for use by the C:D*/
+   /*job and the CDSTAT job (if needed).*/
+   VINCR (PID) TABLE(CDPROD) CLANG
+   VGET  (PID) TABLE(CDPROD) CLANG
+   ESP MGRMSG * . . . PARMSET.!ESPAPPL/!ESPAPPL..!ESPAPGEN/MAIN +
+ACTION SET PID(!PID)
+   RUN SAT
+   IF !USER2 = 171 THEN RUN TODAY
+   RELEASE ADD(PLANNED_ORDERS_FOR_CONSUMER_2)
+ENDJOB
+
+UNIX_JOB PLANNED_ORDERS_FOR_CONSUMER_2 REQUEST
+   AGENT CYBA_ISBFP3
+   EARLYSUB REALNOW PLUS 20 SECONDS
+   PID= WOBDATA('PARMSET.!ESPAPPL','PID')
+   TMSTMP= WOBDATA('PARMSET.!ESPAPPL','TMSTMP')
+   SCRIPTNAME /apps/condir/bfsbin/submitcd.sh
+   ARGS planned_orders_for_consumer_2.cd 10 !PID !TMSTMP
+   RESOURCE ADD(1,ISBFP3CD)
+   USER cdprod
+   RUN SAT
+   IF !USER2 = 171 THEN RUN TODAY
+   RELEASE ADD(CDSTAT.CONS2CD(A))
+   RELEASE ADD(PLANNED_ORDERS_FOR_CONSUMER_4)
+ENDJOB
+
+AIX_JOB CDSTAT.CONS2CD CONDITIONAL
+   AGENT CYBA_ISBFP3
+   /*This job only runs if the C:D job does not end with*/
+   /*a EXITCODE of 0.  It can be rerun as often as*/
+   /*required to check the status of the C:D process.*/
+   /*When the C:D process finishes, complete the job*/
+   /*to release the successors.*/
+   USER cduser
+   STMPTM= WOBDATA('PARMSET.!ESPAPPL','STMPTM')
+   PID= WOBDATA('PARMSET.!ESPAPPL','PID')
+   CMDNAME /apps/condir/bfsbin/cdstat.sh
+   ARGS !STMPTM  j!PID
+   RUN SAT
+   IF !USER2 = 171 THEN RUN TODAY
+ENDJOB
+
+JOB SETPID5.!ESPAPPL LINK PROCESS
+   /*get the next PID number from the ConnectDirect*/
+   /*Process ID table (CDPROD).  Save the value into*/
+   /*the applications DataObject for use by the C:D*/
+   /*job and the CDSTAT job (if needed).*/
+   VINCR (PID) TABLE(CDPROD) CLANG
+   VGET  (PID) TABLE(CDPROD) CLANG
+   ESP MGRMSG * . . . PARMSET.!ESPAPPL/!ESPAPPL..!ESPAPGEN/MAIN +
+ACTION SET PID(!PID)
+   RUN SAT
+   IF !USER2 = 201 THEN RUN TODAY
+   RELEASE ADD(PLANNED_ORDERS_FOR_CONSUMER_4)
+ENDJOB
+
+UNIX_JOB PLANNED_ORDERS_FOR_CONSUMER_4 REQUEST
+   AGENT CYBA_ISBFP3
+   EARLYSUB REALNOW PLUS 20 SECONDS
+   PID= WOBDATA('PARMSET.!ESPAPPL','PID')
+   TMSTMP= WOBDATA('PARMSET.!ESPAPPL','TMSTMP')
+   SCRIPTNAME /apps/condir/bfsbin/submitcd.sh
+   ARGS planned_orders_for_consumer_4.cd 10 !PID !TMSTMP
+   RESOURCE ADD(1,ISBFP3CD)
+   USER cdprod
+   RUN SAT
+   IF !USER2 = 201 THEN RUN TODAY
+   RELEASE ADD(CDSTAT.CONS4CD(A))
+   RELEASE ADD(PLANNED_ORDERS_FOR_CONSUMER_5)
+ENDJOB
+
+AIX_JOB CDSTAT.CONS4CD CONDITIONAL
+   AGENT CYBA_ISBFP3
+   /*This job only runs if the C:D job does not end with*/
+   /*a EXITCODE of 0.  It can be rerun as often as*/
+   /*required to check the status of the C:D process.*/
+   /*When the C:D process finishes, complete the job*/
+   /*to release the successors.*/
+   USER cduser
+   STMPTM= WOBDATA('PARMSET.!ESPAPPL','STMPTM')
+   PID= WOBDATA('PARMSET.!ESPAPPL','PID')
+   CMDNAME /apps/condir/bfsbin/cdstat.sh
+   ARGS !STMPTM  j!PID
+   RUN SAT
+   IF !USER2 = 201 THEN RUN TODAY
+ENDJOB
+
+JOB SETPID6.!ESPAPPL LINK PROCESS
+   /*get the next PID number from the ConnectDirect*/
+   /*Process ID table (CDPROD).  Save the value into*/
+   /*the applications DataObject for use by the C:D*/
+   /*job and the CDSTAT job (if needed).*/
+   VINCR (PID) TABLE(CDPROD) CLANG
+   VGET  (PID) TABLE(CDPROD) CLANG
+   ESP MGRMSG * . . . PARMSET.!ESPAPPL/!ESPAPPL..!ESPAPGEN/MAIN +
+ACTION SET PID(!PID)
+   RUN SAT
+   IF !USER2 = 141 THEN RUN TODAY
+   RELEASE ADD(PLANNED_ORDERS_FOR_CONSUMER_5)
+ENDJOB
+
+UNIX_JOB PLANNED_ORDERS_FOR_CONSUMER_5 REQUEST
+   AGENT CYBA_ISBFP3
+   EARLYSUB REALNOW PLUS 20 SECONDS
+   PID= WOBDATA('PARMSET.!ESPAPPL','PID')
+   TMSTMP= WOBDATA('PARMSET.!ESPAPPL','TMSTMP')
+   SCRIPTNAME /apps/condir/bfsbin/submitcd.sh
+   ARGS planned_orders_for_consumer_5.cd 10 !PID !TMSTMP
+   RESOURCE ADD(1,ISBFP3CD)
+   USER cdprod
+   RUN SAT
+   IF !USER2 = 141 THEN RUN TODAY
+   RELEASE ADD(CDSTAT.CONS5CD(A))
+   RELEASE ADD(PLANNED_ORDERS_FOR_CONSUMER_6)
+ENDJOB
+
+AIX_JOB CDSTAT.CONS5CD CONDITIONAL
+   AGENT CYBA_ISBFP3
+   /*This job only runs if the C:D job does not end with*/
+   /*a EXITCODE of 0.  It can be rerun as often as*/
+   /*required to check the status of the C:D process.*/
+   /*When the C:D process finishes, complete the job*/
+   /*to release the successors.*/
+   USER cduser
+   STMPTM= WOBDATA('PARMSET.!ESPAPPL','STMPTM')
+   PID= WOBDATA('PARMSET.!ESPAPPL','PID')
+   CMDNAME /apps/condir/bfsbin/cdstat.sh
+   ARGS !STMPTM  j!PID
+   RUN SAT
+   IF !USER2 = 141 THEN RUN TODAY
+ENDJOB
+
+JOB SETPID7.!ESPAPPL LINK PROCESS
+   /*get the next PID number from the ConnectDirect*/
+   /*Process ID table (CDPROD).  Save the value into*/
+   /*the applications DataObject for use by the C:D*/
+   /*job and the CDSTAT job (if needed).*/
+   VINCR (PID) TABLE(CDPROD) CLANG
+   VGET  (PID) TABLE(CDPROD) CLANG
+   ESP MGRMSG * . . . PARMSET.!ESPAPPL/!ESPAPPL..!ESPAPGEN/MAIN +
+ACTION SET PID(!PID)
+   RUN SAT
+   IF !USER2 = 181 THEN RUN TODAY
+   RELEASE ADD(PLANNED_ORDERS_FOR_CONSUMER_6)
+ENDJOB
+
+UNIX_JOB PLANNED_ORDERS_FOR_CONSUMER_6 REQUEST
+   AGENT CYBA_ISBFP3
+   EARLYSUB REALNOW PLUS 20 SECONDS
+   PID= WOBDATA('PARMSET.!ESPAPPL','PID')
+   TMSTMP= WOBDATA('PARMSET.!ESPAPPL','TMSTMP')
+   SCRIPTNAME /apps/condir/bfsbin/submitcd.sh
+   ARGS planned_orders_for_consumer_6.cd 10 !PID !TMSTMP
+   RESOURCE ADD(1,ISBFP3CD)
+   USER cdprod
+   RUN SAT
+   IF !USER2 = 181 THEN RUN TODAY
+   RELEASE ADD(CDSTAT.CONS6CD(A))
+   RELEASE ADD(PLANNED_ORDERS_FOR_CONSUMER_7)
+ENDJOB
+
+AIX_JOB CDSTAT.CONS6CD CONDITIONAL
+   AGENT CYBA_ISBFP3
+   /*This job only runs if the C:D job does not end with*/
+   /*a EXITCODE of 0.  It can be rerun as often as*/
+   /*required to check the status of the C:D process.*/
+   /*When the C:D process finishes, complete the job*/
+   /*to release the successors.*/
+   USER cduser
+   STMPTM= WOBDATA('PARMSET.!ESPAPPL','STMPTM')
+   PID= WOBDATA('PARMSET.!ESPAPPL','PID')
+   CMDNAME /apps/condir/bfsbin/cdstat.sh
+   ARGS !STMPTM  j!PID
+   RUN SAT
+   IF !USER2 = 181 THEN RUN TODAY
+ENDJOB
+
+JOB SETPID9.!ESPAPPL LINK PROCESS
+   /*get the next PID number from the ConnectDirect*/
+   /*Process ID table (CDPROD).  Save the value into*/
+   /*the applications DataObject for use by the C:D*/
+   /*job and the CDSTAT job (if needed).*/
+   VINCR (PID) TABLE(CDPROD) CLANG
+   VGET  (PID) TABLE(CDPROD) CLANG
+   ESP MGRMSG * . . . PARMSET.!ESPAPPL/!ESPAPPL..!ESPAPGEN/MAIN +
+ACTION SET PID(!PID)
+   RUN SAT
+   RELEASE ADD(PLANNED_ORDERS_FOR_CONSUMER_7)
+ENDJOB
+
+UNIX_JOB PLANNED_ORDERS_FOR_CONSUMER_7 REQUEST
+   AGENT CYBA_ISBFP3
+   EARLYSUB REALNOW PLUS 20 SECONDS
+   PID= WOBDATA('PARMSET.!ESPAPPL','PID')
+   TMSTMP= WOBDATA('PARMSET.!ESPAPPL','TMSTMP')
+   SCRIPTNAME /apps/condir/bfsbin/submitcd.sh
+   ARGS planned_orders_for_consumer_7.cd 10 !PID !TMSTMP
+   RESOURCE ADD(1,ISBFP3CD)
+   USER cdprod
+   RUN SAT
+   RELEASE ADD(CDSTAT.CONS7CD(A))
+   RELEASE ADD(LIE.!ESPAPPL)
+ENDJOB
+
+AIX_JOB CDSTAT.CONS7CD CONDITIONAL
+   AGENT CYBA_ISBFP3
+   /*This job only runs if the C:D job does not end with*/
+   /*a EXITCODE of 0.  It can be rerun as often as*/
+   /*required to check the status of the C:D process.*/
+   /*When the C:D process finishes, complete the job*/
+   /*to release the successors.*/
+   USER cduser
+   STMPTM= WOBDATA('PARMSET.!ESPAPPL','STMPTM')
+   PID= WOBDATA('PARMSET.!ESPAPPL','PID')
+   CMDNAME /apps/condir/bfsbin/cdstat.sh
+   ARGS !STMPTM  j!PID
+   RUN SAT
+ENDJOB
+
+JOB SETPID8.!ESPAPPL LINK PROCESS
+   /*get the next PID number from the ConnectDirect*/
+   /*Process ID table (CDPROD).  Save the value into*/
+   /*the applications DataObject for use by the C:D*/
+   /*job and the CDSTAT job (if needed).*/
+   VINCR (PID) TABLE(CDPROD) CLANG
+   VGET  (PID) TABLE(CDPROD) CLANG
+   ESP MGRMSG * . . . PARMSET.!ESPAPPL/!ESPAPPL..!ESPAPGEN/MAIN +
+ACTION SET PID(!PID)
+   RUN SAT
+   IF !USER2 = 161 THEN RUN TODAY
+   RELEASE ADD(PLANNED_ORDERS_FOR_COMMERCIAL)
+ENDJOB
+
+UNIX_JOB PLANNED_ORDERS_FOR_COMMERCIAL REQUEST
+   AGENT CYBA_ISBFP3
+   EARLYSUB REALNOW PLUS 20 SECONDS
+   PID= WOBDATA('PARMSET.!ESPAPPL','PID')
+   TMSTMP= WOBDATA('PARMSET.!ESPAPPL','TMSTMP')
+   SCRIPTNAME /apps/condir/bfsbin/submitcd.sh
+   ARGS planned_orders_for_commercial.cd 10 !PID !TMSTMP
+   RESOURCE ADD(1,ISBFP3CD)
+   USER cdprod
+   RUN SAT
+   IF !USER2 = 161 THEN RUN TODAY
+   RELEASE ADD(CDSTAT.COMMERCD(A))
+   RELEASE ADD(LIE.!ESPAPPL)
+ENDJOB
+
+AIX_JOB CDSTAT.COMMERCD CONDITIONAL
+   AGENT CYBA_ISBFP3
+   /*This job only runs if the C:D job does not end with*/
+   /*a EXITCODE of 0.  It can be rerun as often as*/
+   /*required to check the status of the C:D process.*/
+   /*When the C:D process finishes, complete the job*/
+   /*to release the successors.*/
+   USER cduser
+   STMPTM= WOBDATA('PARMSET.!ESPAPPL','STMPTM')
+   PID= WOBDATA('PARMSET.!ESPAPPL','PID')
+   CMDNAME /apps/condir/bfsbin/cdstat.sh
+   ARGS !STMPTM  j!PID
+   RUN SAT
+   IF !USER2 = 161 THEN RUN TODAY
+ENDJOB
+
+JOB SETPID1.!ESPAPPL LINK PROCESS
+   /*get the next PID number from the ConnectDirect*/
+   /*Process ID table (CDPROD).  Save the value into*/
+   /*the applications DataObject for use by the C:D*/
+   /*job and the CDSTAT job (if needed).*/
+   VINCR (PID) TABLE(CDPROD) CLANG
+   VGET  (PID) TABLE(CDPROD) CLANG
+   ESP MGRMSG * . . . PARMSET.!ESPAPPL/!ESPAPPL..!ESPAPGEN/MAIN +
+ACTION SET PID(!PID)
+   RELDELAY 1
+   RUN SAT
+   IF !USER2 = 111 THEN RUN TODAY
+   RELEASE ADD(PLANNED_ORDERS_FOR_OTR)
+ENDJOB
+
+UNIX_JOB PLANNED_ORDERS_FOR_OTR REQUEST
+   AGENT CYBA_ISBFP3
+   EARLYSUB REALNOW PLUS 20 SECONDS
+   PID= WOBDATA('PARMSET.!ESPAPPL','PID')
+   TMSTMP= WOBDATA('PARMSET.!ESPAPPL','TMSTMP')
+   SCRIPTNAME /apps/condir/bfsbin/submitcd.sh
+   ARGS planned_orders_for_otr.cd 10 !PID !TMSTMP
+   RESOURCE ADD(1,ISBFP3CD)
+   USER cdprod
+   RUN SAT
+   IF !USER2 = 111 THEN RUN TODAY
+   RELEASE ADD(CDSTAT.OTRCD(A))
+   RELEASE ADD(LIE.!ESPAPPL)
+ENDJOB
+
+AIX_JOB CDSTAT.OTRCD CONDITIONAL
+   AGENT CYBA_ISBFP3
+   /*This job only runs if the C:D job does not end with*/
+   /*a EXITCODE of 0.  It can be rerun as often as*/
+   /*required to check the status of the C:D process.*/
+   /*When the C:D process finishes, complete the job*/
+   /*to release the successors.*/
+   USER cduser
+   STMPTM= WOBDATA('PARMSET.!ESPAPPL','STMPTM')
+   PID= WOBDATA('PARMSET.!ESPAPPL','PID')
+   CMDNAME /apps/condir/bfsbin/cdstat.sh
+   ARGS !STMPTM  j!PID
+   RUN SAT
+   IF !USER2 = 111 THEN RUN TODAY
+ENDJOB
+
+NT_JOB COPYMPSFILE REQUEST
+   AGENT CYBA_APPMNACHQ
+   CMDNAME e:\Apps\aspentech\aspenMIMI\Batch\CopyMPSFile.bat
+   ARGS
+   USER maestro
+   RUN SAT
+   RELEASE ADD(LIE.!ESPAPPL)
+ENDJOB
+
+AIX_JOB LIE.!ESPAPPL
+  AGENT CYBA_ISBFP3
+  COMMAND /bin/sleep
+  ARGS 3
+  USER bfpadm
+  RUN WEEKDAYS SAT
+  DUEOUT EXEC 23.00
+ENDJOB
+

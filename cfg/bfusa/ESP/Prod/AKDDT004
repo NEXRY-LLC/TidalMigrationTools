@@ -1,0 +1,29 @@
+APPL AKDDT004 WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/*********************************************************************/
+/*07/08/2018 -JFC- CLEANED UP PROC - ADDED LIE - NO OTHER CHANGES
+/*03/31/2022 -VV - added domain to user maestro                      */
+/*********************************************************************/
+
+NOTIFY FAILURE ABEND ALERT(REMD)
+
+JOB LIS.!ESPAPPL LINK PROCESS
+  RUN DAILY
+  RELEASE ADD(DATATRANSMITBAT)
+ENDJOB
+
+NT_JOB DATATRANSMITBAT
+  AGENT CYBA_CDC1AKFIS
+  CMDNAME D:\PLTD_TESS\DataTransmit.bat
+  ARGS
+  RUN DAILY
+  USER bfusa\maestro
+  RELEASE ADD(LIE.!ESPAPPL)
+ENDJOB
+
+JOB LIE.!ESPAPPL LINK PROCESS
+   RUN DAILY
+ENDJOB
+

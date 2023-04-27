@@ -1,0 +1,18 @@
+APPL DIDUMMY WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+JCLLIB 'FTRF.PRDJOBS.DI'
+
+/*********************************************************************/
+/* 08DEC2016 - RKP - TEST FOR ROY                                    */
+/*********************************************************************/
+
+NOTIFY FAILURE ABEND ALERT(REMD)
+
+JOB DITEST
+  /*@@ SYSTEM=DRP
+  CCCHK RC(1:4095) FAIL CONTINUE
+  RUN NOW
+ENDJOB
+

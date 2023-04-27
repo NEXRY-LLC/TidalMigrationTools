@@ -1,0 +1,25 @@
+APPL USMULTIV WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/*********************************************************************/
+/*03/05/2019 -JFC-  UPDATED PROC - ADDED LIS AND LIE                */
+/*********************************************************************/
+
+NOTIFY FAILURE ABEND ALERT(REMD)
+
+JOB LIS.!ESPAPPL LINK PROCESS
+  RUN DAILY
+  DELAYSUB 06:00
+  RELEASE ADD(USMULTIV)
+ENDJOB
+
+JOB USMULTIV
+  RUN WORKDAYS
+  RELEASE ADD(LIE.!ESPAPPL)
+ENDJOB
+
+JOB LIE.!ESPAPPL LINK PROCESS
+  RUN DAILY
+ENDJOB
+

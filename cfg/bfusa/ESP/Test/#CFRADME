@@ -1,0 +1,30 @@
+/**********************************************************************/
+/*08/12/2016 -JFC- CREATED                                            */
+/**********************************************************************/
+/*THESE ARE NOT "RUN" DATES                                           */
+/* THESE ARE DATES NEEDED TO PASS ALONG TO THE LINUX JOBS AS -        */
+/*        "RUN-AS-DATES" - FOR POSTING TRANSACTIONS AND BALANCE AGE   */
+/**********************************************************************/
+/*DO NOT CHANGE ANY OF THE 'IF', 'AND', 'OR' STATEMENTS - JUST DATES  */
+/**********************************************************************/
+/*THESE DATES ARE FOR EOM RUN-AS-DATES - THESE ARE NOT "RUN" DATES    */
+/*THESE DATES ARE PASSED ALONG TO THE LINUX JOBS AS VARIABLES ON EOM  */
+/*EOM RUN DAYS AND RUN-AS-DATES COULD BE 4 OR 5 DAYS APART - THE NORM */
+/*PROCESSING IN CFMCYC30 WILL SET THE RAD AS 'TODAY'.                 */
+/*THESE DATES SHOULD BE ANYTHING OTHER THAN MATCHING DATES            */
+/*ANY DATES OTHER THAN THE FIRST OF THE MONTH (FOR EOM) SHOULD BE HERE*/
+/*ENTER RUN DATE THEN PROCESSING DATE (USUALLY LAST DAT OF PREV MONTH */
+/**********************************************************************/
+
+IF TODAY('JAN 05 2016') AND USER4 = '' THEN !USER4 = '2016-12-31'
+IF TODAY('MAY 02 2016') AND USER4 = '' THEN !USER4 = '2016-04-30'
+IF TODAY('OCT 03 2016') AND USER4 = '' THEN !USER4 = '2016-09-30'
+
+IF TODAY('JAN 02 2017') AND USER4 = '' THEN !USER4 = '2016-12-31'
+IF TODAY('APR 03 2017') AND USER4 = '' THEN !USER4 = '2017-05-31'
+IF TODAY('JUL 03 2017') AND USER4 = '' THEN !USER4 = '2017-06-30'
+IF TODAY('OCT 02 2017') AND USER4 = '' THEN !USER4 = '2017-09-30'
+
+
+
+

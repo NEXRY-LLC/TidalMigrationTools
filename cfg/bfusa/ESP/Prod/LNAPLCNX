@@ -1,0 +1,24 @@
+APPL LNAPLCNX WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/*********************************************************************/
+/*04/29/2019 -JFC- CLEANED UP PROC - ADDED LIE - NO OTHER CHANGES
+/*********************************************************************/
+
+JOB LIS.!ESPAPPL LINK PROCESS
+   RUN DAILY
+   RELEASE ADD(LNAPLCNX)
+ENDJOB
+
+JOB LNAPLCNX
+  /*@@ SYSTEM=LAWSON
+  CCCHK RC(1:4095) FAIL CONTINUE
+  RUN TODAY
+  RELEASE ADD(LIE.!ESPAPPL)
+ENDJOB
+
+JOB LIE.!ESPAPPL LINK PROCESS
+  RUN DAILY
+ENDJOB
+

@@ -1,0 +1,23 @@
+APPL ED400C  WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/*********************************************************************/
+/*05/17/2018 -VMD- REMOVED JOBS ED617DT and ED400ZPER DANNY McLEOD  */
+/*********************************************************************/
+
+NOTIFY ABEND FAILURE ALERT(REMD)
+
+JOB ED400C
+  /*@@ SYSTEM=EDI
+  CCCHK RC(7:4095) FAIL CONTINUE
+encparm predict dsnotfound(no)
+  RUN TODAY
+  NOTWITH (ED366S.-)
+  NOTWITH (ED372A01.-)
+  NOTWITH (ED372V01.-)
+  NOTWITH (ED400N.-)
+  NOTWITH (ED400Q.-)
+  NOTWITH (ED400S.-)
+ENDJOB
+

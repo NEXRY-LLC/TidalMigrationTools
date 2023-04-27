@@ -1,0 +1,52 @@
+APPL TE25CONA WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/********************************************************************/
+/*  This APPL is for the processing of BFCA information from Concur */
+/*  for BFUSA Canada. It runs weekly on Tuesday mornings.           */
+/********************************************************************/
+/* Replaced sfgint01pnsh.bfusa.com with BSA-securetranfers.bfusa.com
+/* in SEND job per Allen Garrett - 09/22/17 MFM
+/*11/20/2018 - SUSPENDED PER INC000001783503
+/********************************************************************/
+
+NOTIFY ABEND FAILURE ALERT(REMD)
+
+FILE_TRIGGER RECEIVE_CONCUR_FOR_BFCA
+   AGENT CYBA_PGP2AKFIS
+   FILENAME '/home/ceadmin/Concur_extract_BFCA_?????????????????.+
+txt.pgp' CREATE
+   RUN TUESDAY
+   RELEASE ADD(DECRYPT_CONCUR_BFCA)
+ENDJOB
+
+LINUX_JOB DECRYPT_CONCUR_BFCA
+    AGENT CYBA_PGP2AKFIS
+    SCRIPTNAME /usr/local/scripts/pgpdecrypt.sh
+    USER ceadmin
+    ARGS Concur_extract_BFCA_?????????????????.txt.pgp
+    RUN TUESDAY
+    RELEASE (RENAME_CONCUR_BFCA)
+ ENDJOB
+
+LINUX_JOB RENAME_CONCUR_BFCA
+    AGENT CYBA_PGP2AKFIS
+    CMDNAME /bin/mv
+    ARGS /home/ceadmin/Concur_extract_BFCA_*.txt +
+/home/ceadmin/ZFIAPI14CONCUREXPCA.dat
+    USER ceadmin
+    RUN TUESDAY
+    RELEASE ADD(SEND_BFCA_2FILEGTWY)
+ENDJOB
+
+LINUX_JOB SEND_BFCA_2FILEGTWY
+  AGENT CYBA_PGP2AKFIS
+  USER root
+  SCRIPTNAME /usr/local/scripts/scpsend.sh
+/*ARGS -u CONCURCA -p 'Wr51ure2ucaf' -h Bsa-securetransfers.bfusa.com
+  ARGS -u CONCURCA -p 'Wr51ure2ucaf' -h sfgint01pnsh.bfusa.com +
+-f /home/ceadmin/ZFIAPI14CONCUREXPCA.dat
+  RUN TUESDAY
+ENDJOB
+

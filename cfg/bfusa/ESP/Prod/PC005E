@@ -1,0 +1,26 @@
+APPL PC005E WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/*********************************************************************/
+/*03/11/2019 -JFC-  UPDATED PROC PER  INC000001874299                */
+/*********************************************************************/
+
+NOTIFY FAILURE ABEND ALERT(REMD)
+
+JOB LIS.!ESPAPPL LINK PROCESS
+  RUN TUESDAY
+  DELAYSUB 15:00
+  RELEASE ADD(PC005E)
+ENDJOB
+
+JOB PC005E
+  CCCHK RC(8:4095) FAIL CONTINUE
+  RUN TUESDAY
+  RELEASE ADD(LIE.!ESPAPPL)
+ENDJOB
+
+JOB LIE.!ESPAPPL LINK PROCESS
+  RUN TUESDAY
+ENDJOB
+

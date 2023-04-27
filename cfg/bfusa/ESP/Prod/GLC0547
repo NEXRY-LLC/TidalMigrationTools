@@ -1,0 +1,19 @@
+APPL GLC0547 WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/*********************************************************************/
+/*01/22/2019 -JFC- CLEANED UP PROC -  NO OTHER CHANGES
+/*********************************************************************/
+
+NOTIFY FAILURE ABEND ALERT(REMD)
+
+
+JOB GLC0547
+  TAG MAJORAPPS
+  CCCHK RC(1:4095) FAIL CONTINUE
+  RUN WEEKDAYS SAT
+  NORUN 1ST DAY OF JAN
+  DELAYSUB 21:30
+ENDJOB
+

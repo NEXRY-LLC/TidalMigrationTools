@@ -1,0 +1,19 @@
+APPL EBSAPINV WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/*********************************************************************/
+/*11/13/2019 -VMD- CHANGED AGENT - PER   INC000002085604
+/*********************************************************************/
+
+NOTIFY FAILURE ABEND ALERT(REMP)
+
+NT_JOB EBSAPINV_TORN
+   AGENT APPPLS02PAKR
+   USER bsprintuser
+   CMDNAME D:\APPS\SAP\START\SAP_INV_TORNS.BAT
+   ENVAR STDOUT=D:\APPS\SAP\REPORTFILES\+
+   SAP_INV_TORNS.TXT
+   RUN TODAY
+ENDJOB
+

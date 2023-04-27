@@ -1,0 +1,37 @@
+APPL SCBFPCYL WAIT HOLD
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/*********************************************************************/
+/*12/18/2018 -JFC- appl set up to recycle the agent on ISBFP3        */
+/*********************************************************************/
+/* **THIS APPL SHOULD BE RUN ONLY IN CASE OF EMERGENCY -             */
+/*********************************************************************/
+
+JOB LIS.!ESPAPPL LINK PROCESS hold
+   RUN DAILY
+   RELEASE ADD(STOP_SCHEDULING_AGENT)
+ENDJOB
+
+AIX_JOB STOP_SCHEDULING_AGENT hold
+   AGENT CYBA_ISBFP3
+   USER root
+   SCRIPTNAME /local/bin/stop_at_cybr.sh
+   RUN DAILY
+   RELEASE ADD(START_SCHEDULING_AGENT)
+ENDJOB
+
+AIX_JOB START_SCHEDULING_AGENT HOLD
+   AGENT CYBA_BKPNBU05
+   USER root
+   SCRIPTNAME /local/bin/start_remote_cyb_process.sh
+   ARGS isbfp3
+   RUN DAILY
+   RELEASE ADD(LIE.!ESPAPPL)
+ENDJOB
+
+JOB LIE.!ESPAPPL LINK PROCESS
+   RUN DAILY
+ENDJOB
+
+

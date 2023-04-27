@@ -1,0 +1,42 @@
+APPL REMX WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/*******************************************************************/
+/*CAN USE THIS PROC TO REPLACE THE OLD REMD ALERT PROC             */
+/*1 - RENAME THE CURRENT REMD MEMBER TO REMDOLD1                   */
+/*2 - BACK ALL THE WAY OUT OF PROCLIB                              */
+/*3 - RENAME THIS PROC MEMBER TO REMD                              */
+/*******************************************************************/
+
+
+
+
+JOB LIS.!ESPAPPL LINK PROCESS
+   RUN NOW
+   RELEASE ADD(SWESPEMO.!MNAPPL)
+ENDJOB
+
+JOB SWESPEMO.!MNAPPL
+   IF !MNSUB# GT '1' THEN DO
+   NORUN TODAY
+   ENDDO
+   ELSE DO
+     RUN TODAY
+   ENDDO
+     ESP_BG_COLOR    = '#FF8800'
+     ESP_RECIPIENT_1 = 'RCPT TO:<velmuruganvimalaraja@bfusa.com>'
+     ESP_HEADER      = 'JOB !MNAPPL #!MNFULLNAME FAILED CC !MNCMPC'
+     ESP_MESSAGE_1   = 'JOBNAME = !MNFULLNAME'
+     ESP_MESSAGE_2   = 'APPLICATION = !MNAPPL !MNAPPLGEN'
+     ESP_MESSAGE_3   = 'JOB TYPE = !MNJOBTYPE on system !MNSYS'
+     ESP_MESSAGE_4   = 'START TIME = !MNJSTART'
+     ESP_MESSAGE_5   = 'STATUS = !MNSTATUS'
+  RELEASE ADD(LIE.!ESPAPPL)
+ENDJOB
+
+JOB LIE.!ESPAPPL LINK PROCESS
+   RUN DAILY
+ENDJOB
+
+/*=====

@@ -1,0 +1,36 @@
+APPL SSIS6006 WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/*********************************************************************/
+/** BAOE - AGG                                                       */
+/*04/09/2019 -JFC- CLEANED UP PROC - ADDED LIE - NO OTHER CHANGES    */
+/*07/10/2019 -JFC- ADDED DUEOUT STATEMENT PER INC                    */
+/*********************************************************************/
+
+NOTIFY FAILURE ABEND ALERT(REMD)
+
+JOB LIS.!ESPAPPL LINK PROCESS
+   RUN DAILY
+   RELEASE ADD(INTERFACE_6006)
+ENDJOB
+
+NT_JOB INTERFACE_6001 EXTERNAL APPLID(SSIS6001) SCOPE(-01)
+   RUN DAILY
+   RELEASE ADD(INTERFACE_6006)
+ENDJOB
+
+NT_JOB INTERFACE_6006
+  AGENT CYBA_BIRDmAKFIS
+  USER sapcyber
+  CMDNAME "K:\OTC SSIS Production\BatchFiles\+
+  BAOE\DTEXEC_Interface_6006.bat"
+  RUN DAILY
+  DUEOUT EXEC 6AM
+  RELEASE ADD(LIE.!ESPAPPL)
+ENDJOB
+
+JOB LIE.!ESPAPPL LINK PROCESS
+  RUN DAILY
+ENDJOB
+

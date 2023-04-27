@@ -1,0 +1,10 @@
+APPL TE02 WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/*********************************************************************/
+/* PROC FOR ALERT TE02 - USE THIS FOR TE** EVENTS AND APPLICATIONS   */
+/*********************************************************************/
+
+TAG 'ALERT'
+

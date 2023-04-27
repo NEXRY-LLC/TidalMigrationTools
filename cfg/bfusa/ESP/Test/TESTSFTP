@@ -1,0 +1,41 @@
+//TESTSFTP  JOB (XXXXXX,SQS8),CLASS=R,MSGCLASS=J
+//*                                                                 ***
+//* SFTP TEST FILE TO 10.42.122.132
+//*                                                                 ***
+//*                                                                 ***
+//* Control cards for SFTP                                          ***
+//*                                                                 ***
+//STP0104  EXEC  PGM=IEBGENER
+//SYSPRINT DD  SYSOUT=*
+//SYSIN    DD  DUMMY
+//SYSUT1   DD  *
+ascii
+cd IN
+put 'BS09611.HISTORY.OLD1' HISTORY.YYYYMMDDHHMMSS.TXT
+quit
+/*
+//SYSUT2   DD  DSN=SW.TSORT99.SFTP03,DISP=(,CATLG,DELETE),
+//  UNIT=SYSDA,SPACE=(TRK,1)
+//*                                                                 ***
+//* COPY FILE FROM MVS TO USS                                       ***
+//*                                                                 ***
+//STP0204 EXEC PGM=IKJEFT1B,DYNAMNBR=20
+//SYSPROC  DD  DISP=SHR,DSN=TSO5.CMDPROC
+//SYSTSPRT DD  SYSOUT=*
+//SYSPRINT DD  SYSOUT=*
+//SYSUDUMP DD  SYSOUT=*
+//SYSTSIN  DD  *
+ OPUT 'SW.TSORT99.SFTP03' 'u/tmp'
+/*
+//*                                                                 ***
+//* SFTP                                                            ***
+//*                                                                 ***
+//STP0304  EXEC  PGM=BPXBATCH
+//STDOUT   DD SYSOUT=*
+//STDERR   DD SYSOUT=*
+//STDPARM  DD *
+sh
+//*p -v splunk@10.42.122.132
+sftp -v svc_esprpt@accspk07pakr
+/*
+//*                                                                 ***

@@ -1,0 +1,32 @@
+APPL TETX600R WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/*********************************************************************/
+/*04/01/2019 -JFC- CLEANED UP PROC - ADDED LIE - NO OTHER CHANGES
+/*********************************************************************/
+
+NOTIFY FAILURE ABEND ALERT(REMD)
+
+SCHD1 = 'YESTERDAY'
+IF !USER2 = 1 OR !USER2 = '' THEN SCHD1 = 'TODAY'
+
+JOB LIS.!ESPAPPL LINK PROCESS
+  RUN !SCHD1
+  RELEASE ADD(TETX600R)
+ENDJOB
+
+JOB TETX600R
+  /*@@ SYSTEM=TETXPAY
+  CCCHK RC(4:4095) FAIL CONTINUE
+  RUN !SCHD1
+  NOTWITH (PA006C.-)
+  NOTWITH (PA006D12.-)
+  NOTWITH (TE800R.-)                                                    00010001
+  RELEASE ADD(LIE.!ESPAPPL)
+ENDJOB
+
+JOB LIE.!ESPAPPL LINK PROCESS
+  RUN !SCHD1
+ENDJOB
+

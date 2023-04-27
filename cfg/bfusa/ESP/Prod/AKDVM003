@@ -1,0 +1,31 @@
+APPL AKDVM003 WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/*********************************************************************/
+/*01/31/2019 -JFC- CLEANED UP PROC - ADDED LIE - NO OTHER CHANGES
+/*03/31/2022 -VV - added domain to user maestro
+/*********************************************************************/
+
+NOTIFY FAILURE ABEND ALERT(REMD)
+
+JOB LIS.!ESPAPPL LINK PROCESS
+  RUN DAILY
+  DELAYSUB 20.30
+  RELEASE ADD(VMSDOT)
+ENDJOB
+
+NT_JOB VMSDOT
+  AGENT CYBA_CDC1AKFIS
+  CMDNAME D:\PLTD_TESS\VMSDOT.bat
+  ARGS
+  USER bfusa\maestro
+  RUN DAILY
+  RELEASE ADD(LIE.!ESPAPPL)
+ENDJOB
+
+JOB LIE.!ESPAPPL LINK PROCESS
+  RUN DAILY
+  DUEOUT EXEC 9pm
+ENDJOB
+

@@ -1,0 +1,151 @@
+APPL TE25CONC WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'                                 00010000
+
+/********************************************************************/
+/*  This APPL is for the processing of the AMEX, FSDP, and Standard */
+/*  (STAN) files from Concur.                                       */
+/*  The application runs every Monday.                              */
+/* Replaced sfgint01pnsh.bfusa.com with BSA-securetranfers.bfusa.com
+/* in SEND job per Allen Garrett - 09/22/17 MFM
+/********************************************************************/
+
+NOTIFY ABEND FAILURE ALERT(REMD)
+
+JOB LIS.!ESPAPPL LINK PROCESS
+   RUN MONDAY
+   EARLYSUB 09.00
+   RELEASE ADD(RECEIVE_CONCUR_FOR_AMEX)
+   RELEASE ADD(RECEIVE_CONCUR_FOR_FSDP)
+   RELEASE ADD(RECEIVE_CONCUR_FOR_STAN)
+ENDJOB
+
+FILE_TRIGGER RECEIVE_CONCUR_FOR_AMEX
+   AGENT CYBA_PGP2AKFIS
+   FILENAME '/home/ceadmin/Concur_extract_amex_?????????????????.+
+    txt.pgp' CREATE
+   RUN MONDAY
+   RELEASE ADD(DECRYPT_CONCUR_AMEX)
+ENDJOB
+
+LINUX_JOB DECRYPT_CONCUR_AMEX
+   AGENT CYBA_PGP2AKFIS
+   SCRIPTNAME /usr/local/scripts/pgpdecrypt.sh
+   USER ceadmin
+   ARGS Concur_extract_amex_?????????????????.txt.pgp
+   RUN MONDAY
+   RELEASE ADD(RENAME_CONCUR_AMEX)
+ENDJOB
+
+LINUX_JOB RENAME_CONCUR_AMEX
+    AGENT CYBA_PGP2AKFIS
+    RUN MONDAY
+    CMDNAME /bin/mv
+    ARGS /home/ceadmin/Concur_extract_amex_*.txt +
+     /home/ceadmin/BFS-AMEX-REMIT.txt
+    USER ceadmin
+    RELEASE ADD(REENCRYPT_CONCUR_AMEX)
+ENDJOB
+
+ LINUX_JOB REENCRYPT_CONCUR_AMEX
+    AGENT CYBA_PGP2AKFIS
+    SCRIPTNAME /usr/local/scripts/pgpencrypt.sh
+    USER ceadmin
+    ARGS BFS-AMEX-REMIT.txt +
+     "SFT generated key"
+    RUN MONDAY
+   RELEASE ADD(SEND_TO_AMEX)
+ ENDJOB
+
+LINUX_JOB SEND_TO_AMEX
+  AGENT CYBA_PGP2AKFIS
+  SCRIPTNAME /usr/local/scripts/scpsend.sh
+  USER root
+   /*ARGS -u EXAMEX -p 2#rmXAAIJa42 -h Bsa-securetransfers.bfusa.com
+  ARGS -u EXAMEX -p 2#rmXAAIJa42 -h sfgint01pnsh.bfusa.com +
+   -f /home/ceadmin/BFS-AMEX-REMIT.txt.pgp
+  RUN MONDAY
+  RELEASE ADD(LIE.!ESPAPPL)
+ENDJOB
+
+FILE_TRIGGER RECEIVE_CONCUR_FOR_FSDP
+   AGENT CYBA_PGP2AKFIS
+   FILENAME '/home/ceadmin/Concur_extract_FSDP_?????????????????.+
+    txt.pgp' CREATE
+   RUN MONDAY
+   RELEASE ADD(DECRYPT_CONCUR_FSDP)
+ENDJOB
+
+LINUX_JOB DECRYPT_CONCUR_FSDP
+   AGENT CYBA_PGP2AKFIS
+   SCRIPTNAME /usr/local/scripts/pgpdecrypt.sh
+   USER ceadmin
+   ARGS Concur_extract_FSDP_?????????????????.txt.pgp
+   RUN MONDAY
+   RELEASE ADD(RENAME_CONCUR_FSDP)
+ENDJOB
+
+LINUX_JOB RENAME_CONCUR_FSDP
+    AGENT CYBA_PGP2AKFIS
+    RUN MONDAY
+    CMDNAME /bin/mv
+    ARGS /home/ceadmin/Concur_extract_FSDP_*.txt +
+     /home/ceadmin/Concur_extract_FSDP.txt
+    USER ceadmin
+    RELEASE ADD(SEND_FSDP_2STERPROD)
+ENDJOB
+
+LINUX_JOB SEND_FSDP_2STERPROD
+  AGENT CYBA_PGP2AKFIS
+  USER root
+  SCRIPTNAME /usr/local/scripts/scpsend.sh
+ /*ARGS -u BFDPPROD -p 'sw5bre#6fRu5' -h Bsa-securetransfers.bfusa.com
+  ARGS -u BFDPPROD -p 'sw5bre#6fRu5' -h sfgint01pnsh.bfusa.com +
+   -f /home/ceadmin/Concur_extract_FSDP.txt
+  RUN MONDAY
+  RELEASE ADD(LIE.!ESPAPPL)
+ENDJOB
+
+FILE_TRIGGER RECEIVE_CONCUR_FOR_STAN
+   AGENT CYBA_PGP2AKFIS
+   FILENAME '/home/ceadmin/Concur_extract_Stan_?????????????????.+
+txt.pgp' CREATE
+   RUN MONDAY
+   RELEASE ADD(DECRYPT_CONCUR_STAN)
+ENDJOB
+
+LINUX_JOB DECRYPT_CONCUR_STAN
+   AGENT CYBA_PGP2AKFIS
+   SCRIPTNAME /usr/local/scripts/pgpdecrypt.sh
+   USER ceadmin
+   ARGS Concur_extract_Stan_?????????????????.txt.pgp
+   RUN MONDAY
+   RELEASE ADD(RENAME_CONCUR_STAN)
+ENDJOB
+
+LINUX_JOB RENAME_CONCUR_STAN
+    AGENT CYBA_PGP2AKFIS
+    RUN MONDAY
+    CMDNAME /bin/mv
+    ARGS /home/ceadmin/Concur_extract_Stan_*.txt +
+/home/ceadmin/ZFIAPI14CONCUREXP.dat
+    USER ceadmin
+    RELEASE ADD(SEND_TO_STAN)
+ENDJOB
+
+LINUX_JOB SEND_TO_STAN
+  AGENT CYBA_PGP2AKFIS
+  USER root
+  SCRIPTNAME /usr/local/scripts/scpsend.sh
+ /*ARGS -u BSSAPFIN -p 'm#c4Evast4tH' -h Bsa-securetransfers.bfusa.com
+  ARGS -u BSSAPFIN -p 'm#c4Evast4tH' -h sfgint01pnsh.bfusa.com +
+-f /home/ceadmin/ZFIAPI14CONCUREXP.dat
+  RUN MONDAY
+  RELEASE ADD(LIE.!ESPAPPL)
+ENDJOB
+
+JOB LIE.!ESPAPPL LINK PROCESS
+   RUN DAILY
+   DUEOUT EXEC NOW PLUS 4 HOURS
+ENDJOB
+

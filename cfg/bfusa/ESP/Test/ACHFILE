@@ -1,0 +1,9 @@
+APPL ACHFILE
+LINUX_JOB SEND_ACHFLE_TEST
+    AGENT CYBA_ISBFT
+    SCRIPTNAME /home/ceadmin/scp2_bft2sterling.sh
+    USER root
+    ARGS /data/BFT/interfaces/output/dataout/ px01
+    RUN DAILY
+ ENDJOB
+

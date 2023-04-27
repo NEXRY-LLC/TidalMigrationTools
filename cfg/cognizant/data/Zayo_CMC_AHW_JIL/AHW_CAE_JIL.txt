@@ -1,0 +1,1490 @@
+/* ----------------- AHW_CAE_0180__Post_Processing ----------------- */ 
+
+insert_job: AHW_CAE_0180__Post_Processing   job_type: BOX 
+owner: caebatchprod.service@b61
+permission: 
+date_conditions: 1
+run_calendar: CTS.Sun_thru_Fri
+start_times: "22:00"
+alarm_if_fail: 1
+alarm_if_terminated: 1
+group: AHW_CAE
+application: BOX.CAE-NOTCOUNTED.H
+send_notification: 1
+notification_template: "PROD1_ZAYO"
+notification_emailaddress_on_failure: BusServCustomerLeadsAHW@cognizant.com
+notification_emailaddress_on_failure: CISTZAppCAEOperations@cognizant.com
+
+
+ /* ----------------- AHW_CAE_0180_010.Post-Backup_OLTP ----------------- */ 
+
+ insert_job: AHW_CAE_0180_010.Post-Backup_OLTP   job_type: CMD 
+ box_name: AHW_CAE_0180__Post_Processing
+ command: $${CAEParmS} HBA_CAE_PostBatch_OLTP.xml $${AHW_CAEParmE}$${CAEParmE2}
+ machine: AHW_CAE.B61PRODBAT0002
+ owner: caebatchprod.service@b61
+ permission: 
+ date_conditions: 1
+ run_calendar: CTS.Mon_thru_Sat
+ start_times: "01:00"
+ condition: s(AHW_CAE_0130_060.DailyRunnersLogRPT)
+ description: "Scheduling Notes:   CTS : M - F##*##Operator Notes:##Title:  Post-Backup OLTP##Purpose:##Special Instructions:##Escalations: Sql Dba##Server: CSN-AHW-SQL-13"
+ std_out_file: "$${AHW_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.out"
+ std_err_file: "$${AHW_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.err"
+ alarm_if_fail: 1
+ job_load: 2
+ priority: 50
+ alarm_if_terminated: 1
+ group: AHW_CAE
+ application: BACKUP.CAE-COUNTED.H
+ send_notification: 1
+ notification_template: "PROD1_ZAYO"
+ resources: (AHW_CAE.RC_BatchControl,QUANTITY=10,FREE=A)
+ notification_emailaddress_on_failure: BusServCustomerLeadsAHW@cognizant.com
+ notification_emailaddress_on_failure: CISTZAppCAEOperations@cognizant.com
+
+
+/* ----------------- AHW_CAE_0140__DI_Reports ----------------- */ 
+
+insert_job: AHW_CAE_0140__DI_Reports   job_type: BOX 
+owner: caebatchprod.service@b61
+permission: 
+date_conditions: 1
+run_calendar: CTS.Daily_except_Maint_Wknd_Sa
+start_times: "19:55"
+alarm_if_fail: 1
+alarm_if_terminated: 1
+group: AHW_CAE
+application: BOX.CAE-NOTCOUNTED.H
+send_notification: 1
+notification_template: "PROD1_ZAYO"
+notification_emailaddress_on_failure: BusServCustomerLeadsAHW@cognizant.com
+notification_emailaddress_on_failure: CISTZAppCAEOperations@cognizant.com
+
+
+ /* ----------------- AHW_CAE_0140_010.DI_ErrorUpdateRptControl ----------------- */ 
+
+ insert_job: AHW_CAE_0140_010.DI_ErrorUpdateRptControl   job_type: CMD 
+ box_name: AHW_CAE_0140__DI_Reports
+ command: $${CAEParmS} HBA_CAE_DI_ErrorUpdateRptControl.xml $${AHW_CAEParmE}$${CAEParmE2}
+ machine: AHW_CAE.B61PRODBAT0002
+ owner: caebatchprod.service@b61
+ permission: 
+ date_conditions: 1
+ run_calendar: CTS.Daily_except_Maint_Wknd_Sa
+ start_times: "22:00"
+ condition: s(AHW_CAE_0130_060.DailyRunnersLogRPT)
+ description: "If job fails , re run again , if fails a second time , set to CN and send email. CAE will resolve next day."
+ std_out_file: "$${AHW_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.out"
+ std_err_file: "$${AHW_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.err"
+ alarm_if_fail: 1
+ job_load: 2
+ priority: 50
+ alarm_if_terminated: 1
+ group: AHW_CAE
+ application: CAE-NOTCOUNTED.H
+ send_notification: 1
+ notification_template: "PROD1_ZAYO"
+ resources: (AHW_CAE.RC_BatchControl,QUANTITY=10,FREE=A)
+ notification_emailaddress_on_failure: BusServCustomerLeadsAHW@cognizant.com
+ notification_emailaddress_on_failure: CISTZAppCAEOperations@cognizant.com
+
+
+ /* ----------------- AHW_CAE_0140_020.DI_Error_Pull ----------------- */ 
+
+ insert_job: AHW_CAE_0140_020.DI_Error_Pull   job_type: CMD 
+ box_name: AHW_CAE_0140__DI_Reports
+ command: $${CAEParmS} HBA_CAE_DI_ErrorPull.xml $${AHW_CAEParmE}$${CAEParmE2}
+ machine: AHW_CAE.B61PRODBAT0002
+ owner: caebatchprod.service@b61
+ permission: 
+ date_conditions: 0
+ condition: s(AHW_CAE_0140_010.DI_ErrorUpdateRptControl)
+ description: "If job fails , re run again , if fails a second time , set to CN and send email. CAE will resolve next day.\"\"Scheduling Notes:   CTS : M - F##*##Operator Notes:##Title:  DI_Error_Pull##Purpose:##Special Instructions:###Escalations:"
+ std_out_file: "$${AHW_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.out"
+ std_err_file: "$${AHW_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.err"
+ alarm_if_fail: 1
+ job_load: 2
+ priority: 50
+ alarm_if_terminated: 1
+ group: AHW_CAE
+ application: CAE-NOTCOUNTED.H
+ send_notification: 1
+ notification_template: "PROD1_ZAYO"
+ resources: (AHW_CAE.RC_BatchControl,QUANTITY=10,FREE=A)
+ notification_emailaddress_on_failure: BusServCustomerLeadsAHW@cognizant.com
+ notification_emailaddress_on_failure: CISTZAppCAEOperations@cognizant.com
+
+
+ /* ----------------- AHW_CAE_0140_020.DI_Error_Summary ----------------- */ 
+
+ insert_job: AHW_CAE_0140_020.DI_Error_Summary   job_type: CMD 
+ box_name: AHW_CAE_0140__DI_Reports
+ command: $${CAEParmS} HBA_CAE_DI_ErrorSummary.xml $${AHW_CAEParmE}$${CAEParmE2}
+ machine: AHW_CAE.B61PRODBAT0002
+ owner: caebatchprod.service@b61
+ permission: 
+ date_conditions: 0
+ condition: s(AHW_CAE_0140_020.DI_Error_Pull)
+ description: "If job fails , re run again , if fails a second time , set to CN and send email. CAE will resolve next day."
+ std_out_file: "$${AHW_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.out"
+ std_err_file: "$${AHW_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.err"
+ alarm_if_fail: 1
+ job_load: 2
+ priority: 50
+ alarm_if_terminated: 1
+ group: AHW_CAE
+ application: CAE-NOTCOUNTED.H
+ send_notification: 1
+ notification_template: "PROD1_ZAYO"
+ resources: (AHW_CAE.RC_BatchControl,QUANTITY=10,FREE=A)
+ notification_emailaddress_on_failure: BusServCustomerLeadsAHW@cognizant.com
+ notification_emailaddress_on_failure: CISTZAppCAEOperations@cognizant.com
+
+
+ /* ----------------- AHW_CAE_0140_030.DI_ExtracPackage_Error_Report ----------------- */ 
+
+ insert_job: AHW_CAE_0140_030.DI_ExtracPackage_Error_Report   job_type: CMD 
+ box_name: AHW_CAE_0140__DI_Reports
+ command: $${CAEParmS} HBA_CAE_DI_ExtractPackage_ErrorRPT.xml $${AHW_CAEParmE}$${CAEParmE2}
+ machine: AHW_CAE.B61PRODBAT0002
+ owner: caebatchprod.service@b61
+ permission: 
+ date_conditions: 0
+ condition: s(AHW_CAE_0140_020.DI_Error_Summary)
+ description: "If job fails , re run again , if fails a second time , set to CN and send email. CAE will resolve next day."
+ std_out_file: "$${AHW_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.out"
+ std_err_file: "$${AHW_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.err"
+ alarm_if_fail: 1
+ job_load: 2
+ priority: 50
+ alarm_if_terminated: 1
+ group: AHW_CAE
+ application: CAE-COUNTED.H
+ send_notification: 1
+ notification_template: "PROD1_ZAYO"
+ resources: (AHW_CAE.RC_BatchControl,QUANTITY=10,FREE=A)
+ notification_emailaddress_on_failure: BusServCustomerLeadsAHW@cognizant.com
+ notification_emailaddress_on_failure: CISTZAppCAEOperations@cognizant.com
+
+
+ /* ----------------- AHW_CAE_0140_040.1_DI_Mem_Error_Report ----------------- */ 
+
+ insert_job: AHW_CAE_0140_040.1_DI_Mem_Error_Report   job_type: CMD 
+ box_name: AHW_CAE_0140__DI_Reports
+ command: $${CAEParmS} HBA_CAE_DI_Member_ErrorRPT.xml $${AHW_CAEParmE}$${CAEParmE2}
+ machine: AHW_CAE.B61PRODBAT0002
+ owner: caebatchprod.service@b61
+ permission: 
+ date_conditions: 0
+ condition: s(AHW_CAE_0140_030.DI_ExtracPackage_Error_Report)
+ description: "If job fails , re run again , if fails a second time , set to CN and send email. CAE will resolve next day."
+ std_out_file: "$${AHW_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.out"
+ std_err_file: "$${AHW_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.err"
+ alarm_if_fail: 1
+ job_load: 2
+ priority: 50
+ alarm_if_terminated: 1
+ group: AHW_CAE
+ application: CAE-COUNTED.H
+ send_notification: 1
+ notification_template: "PROD1_ZAYO"
+ resources: (AHW_CAE.RC_BatchControl,QUANTITY=10,FREE=A)
+ notification_emailaddress_on_failure: BusServCustomerLeadsAHW@cognizant.com
+ notification_emailaddress_on_failure: CISTZAppCAEOperations@cognizant.com
+
+
+ /* ----------------- AHW_CAE_0140_050.DI_MemProvider_Error_Report ----------------- */ 
+
+ insert_job: AHW_CAE_0140_050.DI_MemProvider_Error_Report   job_type: CMD 
+ box_name: AHW_CAE_0140__DI_Reports
+ command: $${CAEParmS} HBA_CAE_DI_MemberProvider_ErrorRPT.xml $${AHW_CAEParmE}$${CAEParmE2}
+ machine: AHW_CAE.B61PRODBAT0002
+ owner: caebatchprod.service@b61
+ permission: 
+ date_conditions: 0
+ condition: s(AHW_CAE_0140_040.1_DI_Mem_Error_Report)
+ description: "If job fails , re run again , if fails a second time , set to CN and send email. CAE will resolve next day."
+ std_out_file: "$${AHW_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.out"
+ std_err_file: "$${AHW_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.err"
+ alarm_if_fail: 1
+ job_load: 2
+ priority: 50
+ alarm_if_terminated: 1
+ group: AHW_CAE
+ application: CAE-COUNTED.H
+ send_notification: 1
+ notification_template: "PROD1_ZAYO"
+ resources: (AHW_CAE.RC_BatchControl,QUANTITY=10,FREE=A)
+ notification_emailaddress_on_failure: BusServCustomerLeadsAHW@cognizant.com
+ notification_emailaddress_on_failure: CISTZAppCAEOperations@cognizant.com
+
+
+ /* ----------------- AHW_CAE_0140_060.DI_Provider_Error_Report ----------------- */ 
+
+ insert_job: AHW_CAE_0140_060.DI_Provider_Error_Report   job_type: CMD 
+ box_name: AHW_CAE_0140__DI_Reports
+ command: $${CAEParmS} HBA_CAE_DI_Provider_ErrorRPT.xml $${AHW_CAEParmE}$${CAEParmE2}
+ machine: AHW_CAE.B61PRODBAT0002
+ owner: caebatchprod.service@b61
+ permission: 
+ date_conditions: 0
+ condition: s(AHW_CAE_0140_050.DI_MemProvider_Error_Report)
+ description: "If job fails , re run again , if fails a second time , set to CN and send email. CAE will resolve next day."
+ std_out_file: "$${AHW_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.out"
+ std_err_file: "$${AHW_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.err"
+ alarm_if_fail: 1
+ job_load: 2
+ priority: 50
+ alarm_if_terminated: 1
+ group: AHW_CAE
+ application: CAE-COUNTED.H
+ send_notification: 1
+ notification_template: "PROD1_ZAYO"
+ resources: (AHW_CAE.RC_BatchControl,QUANTITY=10,FREE=A)
+ notification_emailaddress_on_failure: BusServCustomerLeadsAHW@cognizant.com
+ notification_emailaddress_on_failure: CISTZAppCAEOperations@cognizant.com
+
+
+ /* ----------------- AHW_CAE_0140_070.DI_MemConcept_Error_Report ----------------- */ 
+
+ insert_job: AHW_CAE_0140_070.DI_MemConcept_Error_Report   job_type: CMD 
+ box_name: AHW_CAE_0140__DI_Reports
+ command: $${CAEParmS} HBA_CAE_DI_MemberConcept_ErrorRPT.xml $${AHW_CAEParmE}$${CAEParmE2}
+ machine: AHW_CAE.B61PRODBAT0002
+ owner: caebatchprod.service@b61
+ permission: 
+ date_conditions: 0
+ condition: s(AHW_CAE_0140_060.DI_Provider_Error_Report)
+ description: "If job fails , re run again , if fails a second time , set to CN and send email. CAE will resolve next day."
+ std_out_file: "$${AHW_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.out"
+ std_err_file: "$${AHW_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.err"
+ alarm_if_fail: 1
+ job_load: 2
+ priority: 50
+ alarm_if_terminated: 1
+ group: AHW_CAE
+ application: CAE-COUNTED.H
+ send_notification: 1
+ notification_template: "PROD1_ZAYO"
+ resources: (AHW_CAE.RC_BatchControl,QUANTITY=10,FREE=A)
+ notification_emailaddress_on_failure: BusServCustomerLeadsAHW@cognizant.com
+ notification_emailaddress_on_failure: CISTZAppCAEOperations@cognizant.com
+
+
+ /* ----------------- AHW_CAE_0140_080.DI_MemCoverage_Error_Report ----------------- */ 
+
+ insert_job: AHW_CAE_0140_080.DI_MemCoverage_Error_Report   job_type: CMD 
+ box_name: AHW_CAE_0140__DI_Reports
+ command: $${CAEParmS} HBA_CAE_DI_MemberCoverage_ErrorRPT.xml $${AHW_CAEParmE}$${CAEParmE2}
+ machine: AHW_CAE.B61PRODBAT0002
+ owner: caebatchprod.service@b61
+ permission: 
+ date_conditions: 0
+ condition: s(AHW_CAE_0140_070.DI_MemConcept_Error_Report)
+ description: "If job fails , re run again , if fails a second time , set to CN and send email. CAE will resolve next day."
+ std_out_file: "$${AHW_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.out"
+ std_err_file: "$${AHW_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.err"
+ alarm_if_fail: 1
+ job_load: 2
+ priority: 50
+ alarm_if_terminated: 1
+ group: AHW_CAE
+ application: CAE-COUNTED.H
+ send_notification: 1
+ notification_template: "PROD1_ZAYO"
+ resources: (AHW_CAE.RC_BatchControl,QUANTITY=10,FREE=A)
+ notification_emailaddress_on_failure: BusServCustomerLeadsAHW@cognizant.com
+ notification_emailaddress_on_failure: CISTZAppCAEOperations@cognizant.com
+
+
+ /* ----------------- AHW_CAE_0140_090.DI_MemElig_Error_Report ----------------- */ 
+
+ insert_job: AHW_CAE_0140_090.DI_MemElig_Error_Report   job_type: CMD 
+ box_name: AHW_CAE_0140__DI_Reports
+ command: $${CAEParmS} HBA_CAE_DI_MemberElig_ErrorRPT.xml $${AHW_CAEParmE}$${CAEParmE2}
+ machine: AHW_CAE.B61PRODBAT0002
+ owner: caebatchprod.service@b61
+ permission: 
+ date_conditions: 0
+ condition: s(AHW_CAE_0140_080.DI_MemCoverage_Error_Report)
+ description: "If job fails , re run again , if fails a second time , set to CN and send email. CAE will resolve next day."
+ std_out_file: "$${AHW_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.out"
+ std_err_file: "$${AHW_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.err"
+ alarm_if_fail: 1
+ job_load: 2
+ priority: 50
+ alarm_if_terminated: 1
+ group: AHW_CAE
+ application: CAE-COUNTED.H
+ send_notification: 1
+ notification_template: "PROD1_ZAYO"
+ resources: (AHW_CAE.RC_BatchControl,QUANTITY=10,FREE=A)
+ notification_emailaddress_on_failure: BusServCustomerLeadsAHW@cognizant.com
+ notification_emailaddress_on_failure: CISTZAppCAEOperations@cognizant.com
+
+
+ /* ----------------- AHW_CAE_0140_0100.DI_MemDiagnosi_Error_Report ----------------- */ 
+
+ insert_job: AHW_CAE_0140_0100.DI_MemDiagnosi_Error_Report   job_type: CMD 
+ box_name: AHW_CAE_0140__DI_Reports
+ command: $${CAEParmS} HBA_CAE_DI_MemberDiagnosis_ErrorRPT.xml $${AHW_CAEParmE}$${CAEParmE2}
+ machine: AHW_CAE.B61PRODBAT0002
+ owner: caebatchprod.service@b61
+ permission: 
+ date_conditions: 0
+ condition: s(AHW_CAE_0140_090.DI_MemElig_Error_Report)
+ description: "If job fails , re run again , if fails a second time , set to CN and send email. CAE will resolve next day."
+ std_out_file: "$${AHW_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.out"
+ std_err_file: "$${AHW_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.err"
+ alarm_if_fail: 1
+ job_load: 2
+ priority: 50
+ alarm_if_terminated: 1
+ group: AHW_CAE
+ application: CAE-COUNTED.H
+ send_notification: 1
+ notification_template: "PROD1_ZAYO"
+ resources: (AHW_CAE.RC_BatchControl,QUANTITY=10,FREE=A)
+ notification_emailaddress_on_failure: BusServCustomerLeadsAHW@cognizant.com
+ notification_emailaddress_on_failure: CISTZAppCAEOperations@cognizant.com
+
+
+ /* ----------------- AHW_CAE_0140_0110.DI_MemProvList_Error_Report ----------------- */ 
+
+ insert_job: AHW_CAE_0140_0110.DI_MemProvList_Error_Report   job_type: CMD 
+ box_name: AHW_CAE_0140__DI_Reports
+ command: $${CAEParmS} HBA_CAE_DI_MemberProvList_ErrorRPT.xml $${AHW_CAEParmE}$${CAEParmE2}
+ machine: AHW_CAE.B61PRODBAT0002
+ owner: caebatchprod.service@b61
+ permission: 
+ date_conditions: 0
+ condition: s(AHW_CAE_0140_0100.DI_MemDiagnosi_Error_Report)
+ description: "If job fails , re run again , if fails a second time , set to CN and send email. CAE will resolve next day."
+ std_out_file: "$${AHW_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.out"
+ std_err_file: "$${AHW_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.err"
+ alarm_if_fail: 1
+ job_load: 2
+ priority: 50
+ alarm_if_terminated: 1
+ group: AHW_CAE
+ application: CAE-COUNTED.H
+ send_notification: 1
+ notification_template: "PROD1_ZAYO"
+ resources: (AHW_CAE.RC_BatchControl,QUANTITY=10,FREE=A)
+ notification_emailaddress_on_failure: BusServCustomerLeadsAHW@cognizant.com
+ notification_emailaddress_on_failure: CISTZAppCAEOperations@cognizant.com
+
+
+ /* ----------------- AHW_CAE_0140_0120.DI_MemProcedur_Error_Report ----------------- */ 
+
+ insert_job: AHW_CAE_0140_0120.DI_MemProcedur_Error_Report   job_type: CMD 
+ box_name: AHW_CAE_0140__DI_Reports
+ command: $${CAEParmS} HBA_CAE_DI_MemberProcedure_ErrorRPT.xml $${AHW_CAEParmE}$${CAEParmE2}
+ machine: AHW_CAE.B61PRODBAT0002
+ owner: caebatchprod.service@b61
+ permission: 
+ date_conditions: 0
+ condition: s(AHW_CAE_0140_0110.DI_MemProvList_Error_Report)
+ description: "If job fails , re run again , if fails a second time , set to CN and send email. CAE will resolve next day."
+ std_out_file: "$${AHW_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.out"
+ std_err_file: "$${AHW_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.err"
+ alarm_if_fail: 1
+ job_load: 2
+ priority: 50
+ alarm_if_terminated: 1
+ group: AHW_CAE
+ application: CAE-COUNTED.H
+ send_notification: 1
+ notification_template: "PROD1_ZAYO"
+ resources: (AHW_CAE.RC_BatchControl,QUANTITY=10,FREE=A)
+ notification_emailaddress_on_failure: BusServCustomerLeadsAHW@cognizant.com
+ notification_emailaddress_on_failure: CISTZAppCAEOperations@cognizant.com
+
+
+ /* ----------------- AHW_CAE_0140_0130.DI_MemContract_Error_Report ----------------- */ 
+
+ insert_job: AHW_CAE_0140_0130.DI_MemContract_Error_Report   job_type: CMD 
+ box_name: AHW_CAE_0140__DI_Reports
+ command: $${CAEParmS} HBA_CAE_DI_MemberContact_ErrorRPT.xml $${AHW_CAEParmE}$${CAEParmE2}
+ machine: AHW_CAE.B61PRODBAT0002
+ owner: caebatchprod.service@b61
+ permission: 
+ date_conditions: 0
+ condition: s(AHW_CAE_0140_0120.DI_MemProcedur_Error_Report)
+ description: "If job fails , re run again , if fails a second time , set to CN and send email. CAE will resolve next day."
+ std_out_file: "$${AHW_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.out"
+ std_err_file: "$${AHW_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.err"
+ alarm_if_fail: 1
+ job_load: 2
+ priority: 50
+ alarm_if_terminated: 1
+ group: AHW_CAE
+ application: CAE-COUNTED.H
+ send_notification: 1
+ notification_template: "PROD1_ZAYO"
+ resources: (AHW_CAE.RC_BatchControl,QUANTITY=10,FREE=A)
+ notification_emailaddress_on_failure: BusServCustomerLeadsAHW@cognizant.com
+ notification_emailaddress_on_failure: CISTZAppCAEOperations@cognizant.com
+
+
+ /* ----------------- AHW_CAE_0140_0140.DI_NetworkSetNetwork_Error_Report ----------------- */ 
+
+ insert_job: AHW_CAE_0140_0140.DI_NetworkSetNetwork_Error_Report   job_type: CMD 
+ box_name: AHW_CAE_0140__DI_Reports
+ command: $${CAEParmS} HBA_CAE_DI_NetworkSetNetwork_ErrorRPT.xml $${AHW_CAEParmE}$${CAEParmE2}
+ machine: AHW_CAE.B61PRODBAT0002
+ owner: caebatchprod.service@b61
+ permission: 
+ date_conditions: 0
+ condition: s(AHW_CAE_0140_0130.DI_MemContract_Error_Report)
+ description: "If job fails , re run again , if fails a second time , set to CN and send email. CAE will resolve next day."
+ std_out_file: "$${AHW_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.out"
+ std_err_file: "$${AHW_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.err"
+ alarm_if_fail: 1
+ job_load: 2
+ priority: 50
+ alarm_if_terminated: 1
+ group: AHW_CAE
+ application: CAE-COUNTED.H
+ send_notification: 1
+ notification_template: "PROD1_ZAYO"
+ resources: (AHW_CAE.RC_BatchControl,QUANTITY=10,FREE=A)
+ notification_emailaddress_on_failure: BusServCustomerLeadsAHW@cognizant.com
+ notification_emailaddress_on_failure: CISTZAppCAEOperations@cognizant.com
+
+
+ /* ----------------- AHW_CAE_0140_0150.DI_MemberCost_Error_Report ----------------- */ 
+
+ insert_job: AHW_CAE_0140_0150.DI_MemberCost_Error_Report   job_type: CMD 
+ box_name: AHW_CAE_0140__DI_Reports
+ command: $${CAEParmS} HBA_CAE_DI_MemberCost_ErrorRPT.xml $${AHW_CAEParmE}$${CAEParmE2}
+ machine: AHW_CAE.B61PRODBAT0002
+ owner: caebatchprod.service@b61
+ permission: 
+ date_conditions: 0
+ condition: s(AHW_CAE_0140_0140.DI_NetworkSetNetwork_Error_Report)
+ description: "If job fails , re run again , if fails a second time , set to CN and send email. CAE will resolve next day."
+ std_out_file: "$${AHW_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.out"
+ std_err_file: "$${AHW_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.err"
+ alarm_if_fail: 1
+ job_load: 2
+ priority: 50
+ alarm_if_terminated: 1
+ group: AHW_CAE
+ application: CAE-COUNTED.H
+ send_notification: 1
+ notification_template: "PROD1_ZAYO"
+ resources: (AHW_CAE.RC_BatchControl,QUANTITY=10,FREE=A)
+ notification_emailaddress_on_failure: BusServCustomerLeadsAHW@cognizant.com
+ notification_emailaddress_on_failure: CISTZAppCAEOperations@cognizant.com
+
+
+ /* ----------------- AHW_CAE_0140_0160.DI_MemberEligNetSet_Error_Report ----------------- */ 
+
+ insert_job: AHW_CAE_0140_0160.DI_MemberEligNetSet_Error_Report   job_type: CMD 
+ box_name: AHW_CAE_0140__DI_Reports
+ command: $${CAEParmS} HBA_CAE_DI_MemberEligNetSet_ErrorRPT.xml $${AHW_CAEParmE}$${CAEParmE2}
+ machine: AHW_CAE.B61PRODBAT0002
+ owner: caebatchprod.service@b61
+ permission: 
+ date_conditions: 0
+ condition: s(AHW_CAE_0140_0150.DI_MemberCost_Error_Report)
+ description: "If job fails , re run again , if fails a second time , set to CN and send email. CAE will resolve next day."
+ std_out_file: "$${AHW_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.out"
+ std_err_file: "$${AHW_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.err"
+ alarm_if_fail: 1
+ job_load: 2
+ priority: 50
+ alarm_if_terminated: 1
+ group: AHW_CAE
+ application: CAE-COUNTED.H
+ send_notification: 1
+ notification_template: "PROD1_ZAYO"
+ resources: (AHW_CAE.RC_BatchControl,QUANTITY=10,FREE=A)
+ notification_emailaddress_on_failure: BusServCustomerLeadsAHW@cognizant.com
+ notification_emailaddress_on_failure: CISTZAppCAEOperations@cognizant.com
+
+
+ /* ----------------- AHW_CAE_0140_0170.DI_NetworkProvider_Error_Report ----------------- */ 
+
+ insert_job: AHW_CAE_0140_0170.DI_NetworkProvider_Error_Report   job_type: CMD 
+ box_name: AHW_CAE_0140__DI_Reports
+ command: $${CAEParmS} HBA_CAE_DI_NetworkProvider_ErrorRPT.xml $${AHW_CAEParmE}$${CAEParmE2}
+ machine: AHW_CAE.B61PRODBAT0002
+ owner: caebatchprod.service@b61
+ permission: 
+ date_conditions: 0
+ condition: s(AHW_CAE_0140_0160.DI_MemberEligNetSet_Error_Report)
+ description: "If jobs fails, please rerun it once. If it fails again, send an email and page the following: CISTZCAEHostedImpUpg@cognizant.com & CISTZOnShoreCAEOnCall@cognizant.com"
+ std_out_file: "$${AHW_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.out"
+ std_err_file: "$${AHW_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.err"
+ alarm_if_fail: 1
+ job_load: 2
+ priority: 50
+ alarm_if_terminated: 1
+ group: AHW_CAE
+ application: CAE-COUNTED.H
+ send_notification: 1
+ notification_template: "PROD1_ZAYO"
+ resources: (AHW_CAE.RC_BatchControl,QUANTITY=10,FREE=A)
+ notification_emailaddress_on_failure: BusServCustomerLeadsAHW@cognizant.com
+ notification_emailaddress_on_failure: CISTZAppCAEOperations@cognizant.com
+
+
+ /* ----------------- AHW_CAE_0140_0180.DI_Provider_Error_Report ----------------- */ 
+
+ insert_job: AHW_CAE_0140_0180.DI_Provider_Error_Report   job_type: CMD 
+ box_name: AHW_CAE_0140__DI_Reports
+ command: $${CAEParmS} HBA_CAE_DI_Provider_ErrorRPT.xml $${AHW_CAEParmE}$${CAEParmE2}
+ machine: AHW_CAE.B61PRODBAT0002
+ owner: caebatchprod.service@b61
+ permission: 
+ date_conditions: 0
+ condition: s(AHW_CAE_0140_0170.DI_NetworkProvider_Error_Report)
+ description: "If job fails , re run again , if fails a second time , set to CN and send email. CAE will resolve next day."
+ std_out_file: "$${AHW_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.out"
+ std_err_file: "$${AHW_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.err"
+ alarm_if_fail: 1
+ job_load: 2
+ priority: 50
+ alarm_if_terminated: 1
+ group: AHW_CAE
+ application: CAE-COUNTED.H
+ send_notification: 1
+ notification_template: "PROD1_ZAYO"
+ resources: (AHW_CAE.RC_BatchControl,QUANTITY=10,FREE=A)
+ notification_emailaddress_on_failure: BusServCustomerLeadsAHW@cognizant.com
+ notification_emailaddress_on_failure: CISTZAppCAEOperations@cognizant.com
+
+
+ /* ----------------- AHW_CAE_0140_0190.DI_ProviderHeader_Error_Report ----------------- */ 
+
+ insert_job: AHW_CAE_0140_0190.DI_ProviderHeader_Error_Report   job_type: CMD 
+ box_name: AHW_CAE_0140__DI_Reports
+ command: $${CAEParmS} HBA_CAE_DI_ProviderHeader_ErrorRPT.xml $${AHW_CAEParmE}$${CAEParmE2}
+ machine: AHW_CAE.B61PRODBAT0002
+ owner: caebatchprod.service@b61
+ permission: 
+ date_conditions: 0
+ condition: s(AHW_CAE_0140_0180.DI_Provider_Error_Report)
+ description: "If job fails , re run again , if fails a second time , set to CN and send email. CAE will resolve next day."
+ std_out_file: "$${AHW_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.out"
+ std_err_file: "$${AHW_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.err"
+ alarm_if_fail: 1
+ job_load: 2
+ priority: 50
+ alarm_if_terminated: 1
+ group: AHW_CAE
+ application: CAE-COUNTED.H
+ send_notification: 1
+ notification_template: "PROD1_ZAYO"
+ resources: (AHW_CAE.RC_BatchControl,QUANTITY=10,FREE=A)
+ notification_emailaddress_on_failure: BusServCustomerLeadsAHW@cognizant.com
+ notification_emailaddress_on_failure: CISTZAppCAEOperations@cognizant.com
+
+
+ /* ----------------- AHW_CAE_0140_0200.DI_ProviderProvAddr_Error_Report ----------------- */ 
+
+ insert_job: AHW_CAE_0140_0200.DI_ProviderProvAddr_Error_Report   job_type: CMD 
+ box_name: AHW_CAE_0140__DI_Reports
+ command: $${CAEParmS} HBA_CAE_DI_ProviderProvAddr_ErrorRPT.xml $${AHW_CAEParmE}$${CAEParmE2}
+ machine: AHW_CAE.B61PRODBAT0002
+ owner: caebatchprod.service@b61
+ permission: 
+ date_conditions: 0
+ condition: s(AHW_CAE_0140_0190.DI_ProviderHeader_Error_Report)
+ description: "If job fails , re run again , if fails a second time , set to CN and send email. CAE will resolve next day."
+ std_out_file: "$${AHW_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.out"
+ std_err_file: "$${AHW_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.err"
+ alarm_if_fail: 1
+ job_load: 2
+ priority: 50
+ alarm_if_terminated: 1
+ group: AHW_CAE
+ application: CAE-COUNTED.H
+ send_notification: 1
+ notification_template: "PROD1_ZAYO"
+ resources: (AHW_CAE.RC_BatchControl,QUANTITY=10,FREE=A)
+ notification_emailaddress_on_failure: BusServCustomerLeadsAHW@cognizant.com
+ notification_emailaddress_on_failure: CISTZAppCAEOperations@cognizant.com
+
+
+ /* ----------------- AHW_CAE_0140_0210.DI_MemMedication_Error_Report ----------------- */ 
+
+ insert_job: AHW_CAE_0140_0210.DI_MemMedication_Error_Report   job_type: CMD 
+ box_name: AHW_CAE_0140__DI_Reports
+ command: $${CAEParmS} HBA_CAE_DI_MemMedication_ErrorRPT.xml $${AHW_CAEParmE}$${CAEParmE2}
+ machine: AHW_CAE.B61PRODBAT0002
+ owner: caebatchprod.service@b61
+ permission: 
+ date_conditions: 0
+ condition: s(AHW_CAE_0140_0200.DI_ProviderProvAddr_Error_Report)
+ description: "If job fails , re run again , if fails a second time , set to CN and send email. CAE will resolve next day."
+ std_out_file: "$${AHW_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.out"
+ std_err_file: "$${AHW_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.err"
+ alarm_if_fail: 1
+ job_load: 2
+ priority: 50
+ alarm_if_terminated: 1
+ group: AHW_CAE
+ application: CAE-COUNTED.H
+ send_notification: 1
+ notification_template: "PROD1_ZAYO"
+ resources: (AHW_CAE.RC_BatchControl,QUANTITY=10,FREE=A)
+ notification_emailaddress_on_failure: BusServCustomerLeadsAHW@cognizant.com
+ notification_emailaddress_on_failure: CISTZAppCAEOperations@cognizant.com
+
+
+ /* ----------------- AHW_CAE_0140_0220.DI_AREToStaging_RPT ----------------- */ 
+
+ insert_job: AHW_CAE_0140_0220.DI_AREToStaging_RPT   job_type: CMD 
+ box_name: AHW_CAE_0140__DI_Reports
+ command: $${CAEParmS} HBA_CAE_DI_AREToStaging_RPT.xml $${AHW_CAEParmE}$${CAEParmE2}
+ machine: AHW_CAE.B61PRODBAT0002
+ owner: caebatchprod.service@b61
+ permission: 
+ date_conditions: 1
+ run_calendar: CTS.Daily_except_Maint_Wknd_Sa
+ start_times: "22:00"
+ condition: s(AHW_CAE_0140_0210.DI_MemMedication_Error_Report)
+ description: "If job fails , re run again , if fails a second time , set to CN and send email. CAE will resolve next day."
+ std_out_file: "$${AHW_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.out"
+ std_err_file: "$${AHW_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.err"
+ alarm_if_fail: 1
+ job_load: 2
+ priority: 50
+ alarm_if_terminated: 1
+ group: AHW_CAE
+ application: CAE-NOTCOUNTED.H
+ send_notification: 1
+ notification_template: "PROD1_ZAYO"
+ resources: (AHW_CAE.RC_BatchControl,QUANTITY=10,FREE=A)
+ notification_emailaddress_on_failure: BusServCustomerLeadsAHW@cognizant.com
+ notification_emailaddress_on_failure: CISTZAppCAEOperations@cognizant.com
+
+
+ /* ----------------- AHW_CAE_0140_0230.DI_StagingToARELoad ----------------- */ 
+
+ insert_job: AHW_CAE_0140_0230.DI_StagingToARELoad   job_type: CMD 
+ box_name: AHW_CAE_0140__DI_Reports
+ command: $${CAEParmS} HBA_CAE_DI_StagingToARELoad_RPT.xml $${AHW_CAEParmE}$${CAEParmE2}
+ machine: AHW_CAE.B61PRODBAT0002
+ owner: caebatchprod.service@b61
+ permission: 
+ date_conditions: 1
+ run_calendar: CTS.Daily_except_Maint_Wknd_Sa
+ start_times: "22:00"
+ condition: s(AHW_CAE_0140_0220.DI_AREToStaging_RPT)
+ description: "If job fails , re run again , if fails a second time , set to CN and send email. CAE will resolve next day."
+ std_out_file: "$${AHW_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.out"
+ std_err_file: "$${AHW_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.err"
+ alarm_if_fail: 1
+ job_load: 2
+ priority: 50
+ alarm_if_terminated: 1
+ group: AHW_CAE
+ application: CAE-NOTCOUNTED.H
+ send_notification: 1
+ notification_template: "PROD1_ZAYO"
+ resources: (AHW_CAE.RC_BatchControl,QUANTITY=10,FREE=A)
+ notification_emailaddress_on_failure: BusServCustomerLeadsAHW@cognizant.com
+ notification_emailaddress_on_failure: CISTZAppCAEOperations@cognizant.com
+
+
+ /* ----------------- AHW_CAE_0140_0240.DI_StagingToOLTPDL ----------------- */ 
+
+ insert_job: AHW_CAE_0140_0240.DI_StagingToOLTPDL   job_type: CMD 
+ box_name: AHW_CAE_0140__DI_Reports
+ command: $${CAEParmS} HBA_CAE_DI_StagingToOLTPDL_RPT.xml $${AHW_CAEParmE}$${CAEParmE2}
+ machine: AHW_CAE.B61PRODBAT0002
+ owner: caebatchprod.service@b61
+ permission: 
+ date_conditions: 1
+ run_calendar: CTS.Daily_except_Maint_Wknd_Sa
+ start_times: "22:00"
+ condition: s(AHW_CAE_0140_0230.DI_StagingToARELoad)
+ description: "If job fails , re run again , if fails a second time , set to CN and send email. CAE will resolve next day."
+ std_out_file: "$${AHW_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.out"
+ std_err_file: "$${AHW_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.err"
+ alarm_if_fail: 1
+ job_load: 2
+ priority: 50
+ alarm_if_terminated: 1
+ group: AHW_CAE
+ application: CAE-NOTCOUNTED.H
+ send_notification: 1
+ notification_template: "PROD1_ZAYO"
+ resources: (AHW_CAE.RC_BatchControl,QUANTITY=10,FREE=A)
+ notification_emailaddress_on_failure: BusServCustomerLeadsAHW@cognizant.com
+ notification_emailaddress_on_failure: CISTZAppCAEOperations@cognizant.com
+
+
+ /* ----------------- AHW_CAE_0140_0250.DI_StagingToOltpLoad ----------------- */ 
+
+ insert_job: AHW_CAE_0140_0250.DI_StagingToOltpLoad   job_type: CMD 
+ box_name: AHW_CAE_0140__DI_Reports
+ command: $${CAEParmS} HBA_CAE_DI_StagingToOltpLoad_RPT.xml $${AHW_CAEParmE}$${CAEParmE2}
+ machine: AHW_CAE.B61PRODBAT0002
+ owner: caebatchprod.service@b61
+ permission: 
+ date_conditions: 1
+ run_calendar: CTS.Daily_except_Maint_Wknd_Sa
+ start_times: "22:00"
+ condition: s(AHW_CAE_0140_0240.DI_StagingToOLTPDL)
+ description: "If job fails , re run again , if fails a second time , set to CN and send email. CAE will resolve next day."
+ std_out_file: "$${AHW_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.out"
+ std_err_file: "$${AHW_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.err"
+ alarm_if_fail: 1
+ job_load: 2
+ priority: 50
+ alarm_if_terminated: 1
+ group: AHW_CAE
+ application: CAE-NOTCOUNTED.H
+ send_notification: 1
+ notification_template: "PROD1_ZAYO"
+ resources: (AHW_CAE.RC_BatchControl,QUANTITY=10,FREE=A)
+ notification_emailaddress_on_failure: BusServCustomerLeadsAHW@cognizant.com
+ notification_emailaddress_on_failure: CISTZAppCAEOperations@cognizant.com
+
+
+/* ----------------- AHW_CAE_0150__DB_Maintenance ----------------- */ 
+
+insert_job: AHW_CAE_0150__DB_Maintenance   job_type: BOX 
+owner: caebatchprod.service@b61
+permission: 
+date_conditions: 1
+run_calendar: CTS.Monday
+start_times: "01:00"
+alarm_if_fail: 1
+alarm_if_terminated: 1
+group: AHW_CAE
+application: BOX.CAE-NOTCOUNTED.H
+send_notification: 1
+notification_template: "PROD1_ZAYO"
+notification_emailaddress_on_failure: BusServCustomerLeadsAHW@cognizant.com
+notification_emailaddress_on_failure: CISTZAppCAEOperations@cognizant.com
+
+
+ /* ----------------- AHW_CAE_0150_010.DB_Maint_OLTP ----------------- */ 
+
+ insert_job: AHW_CAE_0150_010.DB_Maint_OLTP   job_type: CMD 
+ box_name: AHW_CAE_0150__DB_Maintenance
+ command: $${CAEParmS} HBA_CAE_DB_Maint_OLTP.xml $${AHW_CAEParmE}$${CAEParmE2}
+ machine: AHW_CAE.B61PRODBAT0002
+ owner: caebatchprod.service@b61
+ permission: 
+ date_conditions: 1
+ run_calendar: CTS.Sunday
+ start_times: "20:00"
+ description: "Scheduling Notes:   CTS : M - F##*##Operator Notes:##Title:  DB Maint OLTP##Purpose:##Special Instructions:###Escalations:"
+ std_out_file: "$${AHW_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.out"
+ std_err_file: "$${AHW_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.err"
+ alarm_if_fail: 1
+ job_load: 2
+ priority: 50
+ alarm_if_terminated: 1
+ group: AHW_CAE
+ application: BACKUP.CAE-NOTCOUNTED.NH
+ send_notification: 1
+ notification_template: "PROD1_ZAYO"
+ resources: (AHW_CAE.RC_BatchControl,QUANTITY=10,FREE=A)
+ notification_emailaddress_on_failure: BusServCustomerLeadsAHW@cognizant.com
+ notification_emailaddress_on_failure: CISTZAppCAEOperations@cognizant.com
+
+
+/* ----------------- AHW_CAE_0160__Generate_Letters ----------------- */ 
+
+insert_job: AHW_CAE_0160__Generate_Letters   job_type: BOX 
+owner: caebatchprod.service@b61
+permission: 
+date_conditions: 1
+run_calendar: CTS.Daily_except_Maint_Wknd_Sa
+start_times: "19:55"
+alarm_if_fail: 1
+alarm_if_terminated: 1
+group: AHW_CAE
+application: BOX.CAE-NOTCOUNTED.H
+send_notification: 1
+notification_template: "PROD1_ZAYO"
+notification_emailaddress_on_failure: BusServCustomerLeadsAHW@cognizant.com
+notification_emailaddress_on_failure: CISTZAppCAEOperations@cognizant.com
+
+
+ /* ----------------- AHW_CAE_0160_010.Generate_Letter ----------------- */ 
+
+ insert_job: AHW_CAE_0160_010.Generate_Letter   job_type: CMD 
+ box_name: AHW_CAE_0160__Generate_Letters
+ command: $${CAEParmS} HBA_CAE_AHW_Letter_Batch.xml $${AHW_CAEParmE}$${CAEParmE2}
+ machine: AHW_CAE.B61PRODTCS0001
+ owner: caebatchprod.service@b61
+ permission: 
+ date_conditions: 1
+ run_calendar: CTS.Daily_except_Maint_Wknd_Su
+ start_times: "01:00"
+ description: "Scheduling Notes:   CTS : M - F##*##Operator Notes:##Title: AHW CAE : 04.12 Generate Letter##Purpose:##Special Instructions:###Escalations:"
+ std_out_file: "$${AHW_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.out"
+ std_err_file: "$${AHW_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.err"
+ alarm_if_fail: 1
+ job_load: 2
+ priority: 50
+ alarm_if_terminated: 1
+ group: AHW_CAE
+ application: CAE-NOTCOUNTED.NH
+ send_notification: 1
+ notification_template: "PROD1_ZAYO"
+ resources: (AHW_CAE.RC_BatchControl,QUANTITY=10,FREE=A)
+ notification_emailaddress_on_failure: BusServCustomerLeadsAHW@cognizant.com
+ notification_emailaddress_on_failure: CISTZAppCAEOperations@cognizant.com
+
+
+/* ----------------- AHW_CAE_0170__Letters_Out ----------------- */ 
+
+insert_job: AHW_CAE_0170__Letters_Out   job_type: BOX 
+owner: caebatchprod.service@b61
+permission: 
+date_conditions: 1
+run_calendar: CTS.Daily_except_Maint_Wknd_Sa
+start_times: "19:55"
+alarm_if_fail: 1
+alarm_if_terminated: 1
+group: AHW_CAE
+application: BOX.CAE-NOTCOUNTED.H
+send_notification: 1
+notification_template: "PROD1_ZAYO"
+notification_emailaddress_on_failure: BusServCustomerLeadsAHW@cognizant.com
+notification_emailaddress_on_failure: CISTZAppCAEOperations@cognizant.com
+
+
+ /* ----------------- AHW_CAE_0170_010.ETS_LETTERS_OUT_Roseville ----------------- */ 
+
+ insert_job: AHW_CAE_0170_010.ETS_LETTERS_OUT_Roseville   job_type: CMD 
+ box_name: AHW_CAE_0170__Letters_Out
+ command: $${ETSParmS1} $${ETSParmS2}ETS_CAEX_5XX_B61X_LETT_OUT_Roseville.xml $${ETSParmE}
+ machine: EDI_QNXT.A02MFTRTR0004
+ owner: b61prodedi@A02
+ permission: 
+ date_conditions: 1
+ run_calendar: CTS.Daily_except_Maint_Wknd_Su
+ start_times: "02:00"
+ description: "Scheduling Notes:  ##************************************##Operator Notes:##Title:   ETS_NETX_CIGX_SARX_PAYOR_55_OUT#Purpose: ##Special Instructions:  HotJob!!!  For exit 1012 no file set to completed normally. For any other failure, open an Onyx ticket and page the EDI primary. ##Escalations:   EDI Hosted Support"
+ std_out_file: "$${ETSLOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.out"
+ std_err_file: "$${ETSLOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.err"
+ alarm_if_fail: 1
+ job_load: 2
+ priority: 50
+ alarm_if_terminated: 1
+ group: AHW_CAE
+ application: EDI-NOTCOUNTED.H
+ send_notification: 1
+ notification_template: "PROD1_ZAYO"
+ resources: (AHW_CAE.RC_BatchControl,QUANTITY=10,FREE=A)
+ notification_emailaddress_on_failure: BusServCustomerLeadsAHW@cognizant.com
+ notification_emailaddress_on_failure: CISTZAppCAEOperations@cognizant.com
+
+
+ /* ----------------- AHW_CAE_0170_020.ETS_LETTERS_OUT_Portland ----------------- */ 
+
+ insert_job: AHW_CAE_0170_020.ETS_LETTERS_OUT_Portland   job_type: CMD 
+ box_name: AHW_CAE_0170__Letters_Out
+ command: $${ETSParmS1} $${ETSParmS2}ETS_CAEX_5XX_B61X_LETT_OUT_Portland.xml $${ETSParmE}
+ machine: EDI_QNXT.A02MFTRTR0004
+ owner: b61prodedi@A02
+ permission: 
+ date_conditions: 1
+ run_calendar: CTS.Daily_except_Maint_Wknd_Su
+ start_times: "01:00"
+ condition: s(AHW_CAE_0160_010.Generate_Letter)
+ description: "Scheduling Notes:  ##************************************##Operator Notes:##Title:   ETS_NETX_CIGX_SARX_PAYOR_55_OUT#Purpose: ##Special Instructions:  HotJob!!!  For exit 1012 no file set to completed normally. For any other failure, open an Onyx ticket and page the EDI primary. ##Escalations:   EDI Hosted Support"
+ std_out_file: "$${ETSLOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.out"
+ std_err_file: "$${ETSLOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.err"
+ alarm_if_fail: 1
+ job_load: 2
+ priority: 50
+ alarm_if_terminated: 1
+ group: AHW_CAE
+ application: EDI-NOTCOUNTED.H
+ send_notification: 1
+ notification_template: "PROD1_ZAYO"
+ resources: (AHW_CAE.RC_BatchControl,QUANTITY=10,FREE=A)
+ notification_emailaddress_on_failure: BusServCustomerLeadsAHW@cognizant.com
+ notification_emailaddress_on_failure: CISTZAppCAEOperations@cognizant.com
+
+
+/* ----------------- AHW_CAE_9120_010.Batch_Window ----------------- */ 
+
+insert_job: AHW_CAE_9120_010.Batch_Window   job_type: CMD 
+command: cmd.exe /c set
+machine: AHW_CAE.B61PRODBAT0002
+owner: caebatchprod.service@b61
+permission: 
+date_conditions: 1
+run_calendar: CTS.Daily_except_Maint_Wknd_Su
+start_times: "02:10"
+condition: s(AHW_CAE_0130_010.PCPDataSynch) & s(AHW_CAE_0130_050.DailyEvaluatorLogRPT)
+description: "Scheduling Notes:##*#Operator Notes:##Title: Tidal Emai Check##Purpose: This job is designed  to verify whether batch has completed within its batch window##Special Instructions:  ##Escalations: Scheduling"
+std_out_file: "$${AHW_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.out"
+std_err_file: "$${AHW_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.err"
+alarm_if_fail: 1
+job_load: 2
+priority: 50
+alarm_if_terminated: 1
+group: AHW_CAE
+application: UTILITY.CAE-NOTCOUNTED.NH
+send_notification: 1
+notification_template: "PROD1_ZAYO"
+resources: (AHW_CAE.RC_BatchControl,QUANTITY=10,FREE=A)
+notification_emailaddress_on_failure: BusServCustomerLeadsAHW@cognizant.com
+notification_emailaddress_on_failure: CISTZAppCAEOperations@cognizant.com
+
+
+/* ----------------- AHW_CAE_9130_010.Cleanup_Proc ----------------- */ 
+
+insert_job: AHW_CAE_9130_010.Cleanup_Proc   job_type: CMD 
+command: "cmd.exe" /c cscript.exe c\:\Tools\CleanupProc\cleanupproc.js c\:\Tools\CleanupProc\cleanupcfg.xml
+machine: AHW_CAE.B61PRODBAT0002
+owner: caebatchprod.service@b61
+permission: 
+date_conditions: 1
+run_calendar: CTS.Monday
+start_times: "01:00"
+description: "Scheduling Notes:   CTS : M - F##*##Operator Notes:##Title: Cleanup Proc##Purpose:##Special Instructions:###Escalations:"
+std_out_file: "$${AHW_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.out"
+std_err_file: "$${AHW_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.err"
+alarm_if_fail: 1
+job_load: 2
+priority: 50
+alarm_if_terminated: 1
+group: AHW_CAE
+application: UTILITY.CAE-NOTCOUNTED.NH
+send_notification: 1
+notification_template: "PROD1_ZAYO"
+resources: (AHW_CAE.RC_BatchControl,QUANTITY=10,FREE=A)
+notification_emailaddress_on_failure: BusServCustomerLeadsAHW@cognizant.com
+notification_emailaddress_on_failure: CISTZAppCAEOperations@cognizant.com
+
+
+/* ----------------- AHW_CAE_9110.020.ResourceControl_Maint_Sat_End ----------------- */ 
+
+insert_job: AHW_CAE_9110.020.ResourceControl_Maint_Sat_End   job_type: CMD 
+command: cd c\:\clientfiles\resources\AHW && jil < AHW_CAE.ResourceControl_open.jil
+machine: a02schwaeclus
+owner: waaep.service@A02
+permission: 
+date_conditions: 0
+run_calendar: CTS.Maint_Wknd-Sun
+start_times: "07:30"
+description: "AHW_CAE.ResourceControl_Maint_Sat_End Notes: For all failures, force start the job. If the job fails more than three times, page scheduling."
+alarm_if_fail: 1
+alarm_if_terminated: 1
+group: AHW_CAE
+application: UTILITY-NOTCOUNTED.NH
+send_notification: 1
+notification_template: "PROD1_ZAYO"
+notification_emailaddress_on_failure: BusServCustomerLeadsAHW@cognizant.com
+notification_emailaddress_on_failure: CISTZAppCAEOperations@cognizant.com
+
+
+/* ----------------- AHW_CAE_9110.010.ResourceControl_Maint_Sat_Start ----------------- */ 
+
+insert_job: AHW_CAE_9110.010.ResourceControl_Maint_Sat_Start   job_type: CMD 
+command: cd c\:\clientfiles\resources\AHW && jil < AHW_CAE.ResourceControl_close.jil
+machine: a02schwaeclus
+owner: waaep.service@A02
+permission: 
+date_conditions: 0
+run_calendar: CTS.Maint_Wknd-Sat
+start_times: "20:30"
+description: "AHW_CAE.ResourceControl_Maint_Sat_Start Notes: For all failures, force start the job. If the job fails more than three times, page scheduling."
+alarm_if_fail: 1
+alarm_if_terminated: 1
+group: AHW_CAE
+application: UTILITY-NOTCOUNTED.NH
+send_notification: 1
+notification_template: "PROD1_ZAYO"
+notification_emailaddress_on_failure: BusServCustomerLeadsAHW@cognizant.com
+notification_emailaddress_on_failure: CISTZAppCAEOperations@cognizant.com
+
+
+/* ----------------- AHW_CAE_0100__Batch_Initiator ----------------- */ 
+
+insert_job: AHW_CAE_0100__Batch_Initiator   job_type: BOX 
+owner: caebatchprod.service@b61
+permission: 
+date_conditions: 1
+run_calendar: CTS.Daily
+start_times: "19:55"
+description: "Do not hold this box. To hold batch, hold the job AHW_CAE.00.00_CAE_Batch_Start."
+alarm_if_fail: 1
+alarm_if_terminated: 1
+group: AHW_CAE
+application: BOX-NOTCOUNTED.H
+send_notification: 1
+notification_template: "PROD1_ZAYO"
+notification_emailaddress_on_failure: BusServCustomerLeadsAHW@cognizant.com
+notification_emailaddress_on_failure: CISTZAppCAEOperations@cognizant.com
+
+
+ /* ----------------- AHW_CAE_0100_010.Batch_Start ----------------- */ 
+
+ insert_job: AHW_CAE_0100_010.Batch_Start   job_type: CMD 
+ box_name: AHW_CAE_0100__Batch_Initiator
+ command: dir
+ machine: AHW_CAE.B61PRODBAT0002
+ owner: caebatchprod.service@b61
+ permission: 
+ date_conditions: 1
+ run_calendar: CTS.Daily
+ start_times: "20:00"
+ description: "Holding this job will hold batch, but allow prebatch backups to run. To begin batch, take this job off hold, by selecting \"Off Hold\" from the drop down and pressing go. Please confirm that this job runs to success and batch jobs have begun running."
+ alarm_if_fail: 1
+ job_load: 2
+ priority: 50
+ alarm_if_terminated: 1
+ group: AHW_CAE
+ application: UTILITY-NOTCOUNTED.H
+ send_notification: 1
+ notification_template: "PROD1_ZAYO"
+ resources: (AHW_CAE.RC_BatchControl,QUANTITY=10,FREE=A)
+ notification_emailaddress_on_failure: BusServCustomerLeadsAHW@cognizant.com
+ notification_emailaddress_on_failure: CISTZAppCAEOperations@cognizant.com
+
+
+/* ----------------- AHW_CAE_0110__Pre_Processing ----------------- */ 
+
+insert_job: AHW_CAE_0110__Pre_Processing   job_type: BOX 
+owner: caebatchprod.service@b61
+permission: 
+date_conditions: 1
+run_calendar: CTS.Sun_thru_Fri
+start_times: "22:00"
+alarm_if_fail: 1
+alarm_if_terminated: 1
+group: AHW_CAE
+application: BOX.CAE-NOTCOUNTED.H
+send_notification: 1
+notification_template: "PROD1_ZAYO"
+notification_emailaddress_on_failure: BusServCustomerLeadsAHW@cognizant.com
+notification_emailaddress_on_failure: CISTZAppCAEOperations@cognizant.com
+
+
+ /* ----------------- AHW_CAE_0110_010_Pre-Backup_OLTP ----------------- */ 
+
+ insert_job: AHW_CAE_0110_010_Pre-Backup_OLTP   job_type: CMD 
+ box_name: AHW_CAE_0110__Pre_Processing
+ command: $${CAEParmS} HBA_CAE_PreBatch_OLTP.xml $${AHW_CAEParmE}$${CAEParmE2}
+ machine: AHW_CAE.B61PRODBAT0002
+ owner: caebatchprod.service@b61
+ permission: 
+ date_conditions: 1
+ run_calendar: CTS.Sun_thru_Fri
+ start_times: "22:05"
+ description: "Scheduling Notes:   CTS : M - F##*##Operator Notes:##Title:  AHW CAE : 01 Pre-Backup OLTP##Purpose:##Special Instructions:###Escalations:"
+ std_out_file: "$${AHW_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.out"
+ std_err_file: "$${AHW_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.err"
+ alarm_if_fail: 1
+ job_load: 2
+ priority: 50
+ alarm_if_terminated: 1
+ group: AHW_CAE
+ application: BACKUP.CAE-COUNTED.H
+ send_notification: 1
+ notification_template: "PROD1_ZAYO"
+ resources: (AHW_CAE.RC_BatchControl,QUANTITY=10,FREE=A)
+ notification_emailaddress_on_failure: BusServCustomerLeadsAHW@cognizant.com
+ notification_emailaddress_on_failure: CISTZAppCAEOperations@cognizant.com
+
+
+/* ----------------- AHW_CAE_0120__Daily.01 ----------------- */ 
+
+insert_job: AHW_CAE_0120__Daily.01   job_type: BOX 
+owner: caebatchprod.service@b61
+permission: 
+date_conditions: 1
+run_calendar: CTS.Daily_except_Maint_Wknd_Sa
+start_times: "20:25"
+description: "RITM1443850- Time changes."
+alarm_if_fail: 1
+alarm_if_terminated: 1
+group: AHW_CAE
+application: BOX.CAE-NOTCOUNTED.H
+send_notification: 1
+notification_template: "PROD1_ZAYO"
+notification_emailaddress_on_failure: BusServCustomerLeadsAHW@cognizant.com
+notification_emailaddress_on_failure: CISTZAppCAEOperations@cognizant.com
+
+
+ /* ----------------- AHW_CAE_0120_010.Deactivate_Campaign_Agent ----------------- */ 
+
+ insert_job: AHW_CAE_0120_010.Deactivate_Campaign_Agent   job_type: CMD 
+ box_name: AHW_CAE_0120__Daily.01
+ command: $${CAEParmS} HBA_CAE_Deactivate_Campaign_Agent.xml $${AHW_CAEParmE}$${CAEParmE2}
+ machine: AHW_CAE.B61PRODBAT0002
+ owner: caebatchprod.service@b61
+ permission: 
+ date_conditions: 1
+ run_calendar: CTS.Daily_except_Maint_Wknd_Sa
+ start_times: "20:30"
+ condition: s(AHW_CAE_0100_010.Batch_Start) & s(AHW_CAE_0110_010_Pre-Backup_OLTP)
+ description: "RITM1443850- Time changes.#Scheduling Notes:   CTS : M - F##*##Operator Notes:##Title:  AHW CAE : 04 Deactivate Campaign Agent##Purpose:##Special Instructions:###Escalations:"
+ std_out_file: "$${AHW_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.out"
+ std_err_file: "$${AHW_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.err"
+ alarm_if_fail: 1
+ job_load: 2
+ priority: 50
+ alarm_if_terminated: 1
+ group: AHW_CAE
+ application: CAE-NOTCOUNTED.H
+ send_notification: 1
+ notification_template: "PROD1_ZAYO"
+ resources: (AHW_CAE.RC_BatchControl,QUANTITY=10,FREE=A)
+ notification_emailaddress_on_failure: BusServCustomerLeadsAHW@cognizant.com
+ notification_emailaddress_on_failure: CISTZAppCAEOperations@cognizant.com
+
+
+ /* ----------------- AHW_CAE_0120_020.Execute_DI ----------------- */ 
+
+ insert_job: AHW_CAE_0120_020.Execute_DI   job_type: CMD 
+ box_name: AHW_CAE_0120__Daily.01
+ command: $${CAEParmS} HBA_CAE_Execute_Startup_DI.xml $${AHW_CAEParmE}$${CAEParmE2}
+ machine: AHW_CAE.B61PRODBAT0002
+ owner: caebatchprod.service@b61
+ permission: 
+ date_conditions: 0
+ condition: s(AHW_CAE_0120_010.Deactivate_Campaign_Agent)
+ description: "If job fails, wait 40-50 minutes, run again if fails then page out ONSHORE email distro of CISTZOnShoreCAEOnCall(Cognizant)<CISTOnShoreCAEOnCall@cognizant.com.    During the months of December , January , February and possibly late flow in March .  The job will run long during these times due to all new open enrollment data ( large) will be flowing from QNXT to CAE and then loading .  Do not PAGE out for long running unless this exceeds the 4 hour limit."
+ std_out_file: "$${AHW_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.out"
+ std_err_file: "$${AHW_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.err"
+ alarm_if_fail: 1
+ job_load: 2
+ priority: 50
+ alarm_if_terminated: 1
+ group: AHW_CAE
+ application: CAE-COUNTED.H
+ send_notification: 1
+ notification_template: "PROD1_ZAYO"
+ resources: (AHW_CAE.RC_BatchControl,QUANTITY=10,FREE=A)
+ notification_emailaddress_on_failure: BusServCustomerLeadsAHW@cognizant.com
+ notification_emailaddress_on_failure: CISTZAppCAEOperations@cognizant.com
+
+
+/* ----------------- AHW_CAE_0130__Daily.02 ----------------- */ 
+
+insert_job: AHW_CAE_0130__Daily.02   job_type: BOX 
+owner: caebatchprod.service@b61
+permission: 
+date_conditions: 1
+run_calendar: CTS.Daily_except_Maint_Wknd_Sa
+start_times: "19:55"
+alarm_if_fail: 1
+alarm_if_terminated: 1
+group: AHW_CAE
+application: BOX.CAE-NOTCOUNTED.H
+send_notification: 1
+notification_template: "PROD1_ZAYO"
+notification_emailaddress_on_failure: BusServCustomerLeadsAHW@cognizant.com
+notification_emailaddress_on_failure: CISTZAppCAEOperations@cognizant.com
+
+
+ /* ----------------- AHW_CAE_0130_010.UpdateIsEligible ----------------- */ 
+
+ insert_job: AHW_CAE_0130_010.UpdateIsEligible   job_type: CMD 
+ box_name: AHW_CAE_0130__Daily.02
+ command: $${CAEParmS} HBA_CAE_UpdateIsEligible.xml $${AHW_CAEParmE}$${CAEParmE2}
+ machine: AHW_CAE.B61PRODBAT0002
+ owner: caebatchprod.service@b61
+ permission: 
+ date_conditions: 1
+ run_calendar: CTS.Daily_except_Maint_Wknd_Sa
+ start_times: "22:00"
+ condition: s(AHW_CAE_0120_020.Execute_DI)
+ description: "Scheduling Notes:   CTS : M - F##*##Operator Notes:##Title:  UpdateIsEligible##Purpose:##Special Instructions:###Escalations:"
+ std_out_file: "$${AHW_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.out"
+ std_err_file: "$${AHW_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.err"
+ alarm_if_fail: 1
+ job_load: 2
+ priority: 50
+ alarm_if_terminated: 1
+ group: AHW_CAE
+ application: CAE-COUNTED.H
+ send_notification: 1
+ notification_template: "PROD1_ZAYO"
+ resources: (AHW_CAE.RC_BatchControl,QUANTITY=10,FREE=A)
+ notification_emailaddress_on_failure: BusServCustomerLeadsAHW@cognizant.com
+ notification_emailaddress_on_failure: CISTZAppCAEOperations@cognizant.com
+
+
+ /* ----------------- AHW_CAE_0130_010.PCPDataSynch ----------------- */ 
+
+ insert_job: AHW_CAE_0130_010.PCPDataSynch   job_type: CMD 
+ box_name: AHW_CAE_0130__Daily.02
+ command: $${CAEParmS} HBA_CAE_PCPDataSynch.xml $${AHW_CAEParmE}$${CAEParmE2}
+ machine: AHW_CAE.B61PRODBAT0002
+ owner: caebatchprod.service@b61
+ permission: 
+ date_conditions: 0
+ condition: s(AHW_CAE_0130_010.UpdateIsEligible)
+ description: "Scheduling Notes:   CTS : M - F##*##Operator Notes:##Title:  PCPDataSynch##Purpose:##Special Instructions:###Escalations:"
+ std_out_file: "$${AHW_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.out"
+ std_err_file: "$${AHW_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.err"
+ alarm_if_fail: 1
+ job_load: 2
+ priority: 50
+ alarm_if_terminated: 1
+ group: AHW_CAE
+ application: CAE-NOTCOUNTED.H
+ send_notification: 1
+ notification_template: "PROD1_ZAYO"
+ resources: (AHW_CAE.RC_BatchControl,QUANTITY=10,FREE=A)
+ notification_emailaddress_on_failure: BusServCustomerLeadsAHW@cognizant.com
+ notification_emailaddress_on_failure: CISTZAppCAEOperations@cognizant.com
+
+
+ /* ----------------- AHW_CAE_0130_020.Activate_Campaign ----------------- */ 
+
+ insert_job: AHW_CAE_0130_020.Activate_Campaign   job_type: CMD 
+ box_name: AHW_CAE_0130__Daily.02
+ command: $${CAEParmS} HBA_CAE_Activate_Campaign.xml $${AHW_CAEParmE}$${CAEParmE2}
+ machine: AHW_CAE.B61PRODBAT0002
+ owner: caebatchprod.service@b61
+ permission: 
+ date_conditions: 0
+ condition: s(AHW_CAE_0130_010.PCPDataSynch)
+ description: "Scheduling Notes:   CTS : M - F##*##Operator Notes:##Title: Activate Campaign##Purpose:##Special Instructions:###Escalations:"
+ std_out_file: "$${AHW_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.out"
+ std_err_file: "$${AHW_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.err"
+ alarm_if_fail: 1
+ job_load: 2
+ priority: 50
+ alarm_if_terminated: 1
+ group: AHW_CAE
+ application: CAE-COUNTED.H
+ send_notification: 1
+ notification_template: "PROD1_ZAYO"
+ resources: (AHW_CAE.RC_BatchControl,QUANTITY=10,FREE=A)
+ notification_emailaddress_on_failure: BusServCustomerLeadsAHW@cognizant.com
+ notification_emailaddress_on_failure: CISTZAppCAEOperations@cognizant.com
+
+
+ /* ----------------- AHW_CAE_0130_030.Check_Evaluators_AgentTable ----------------- */ 
+
+ insert_job: AHW_CAE_0130_030.Check_Evaluators_AgentTable   job_type: CMD 
+ box_name: AHW_CAE_0130__Daily.02
+ command: $${CAEParmS} HBA_CAE_Check_Evaluators_AgentTable.xml $${AHW_CAEParmE}$${CAEParmE2}
+ machine: AHW_CAE.B61PRODBAT0002
+ owner: caebatchprod.service@b61
+ permission: 
+ date_conditions: 0
+ condition: s(AHW_CAE_0130_020.Activate_Campaign)
+ description: "Scheduling Notes:   CTS : M - F##*##Operator Notes:##Title: Check Evaluators AgentTable##Purpose:##Special Instructions:###Escalations:"
+ std_out_file: "$${AHW_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.out"
+ std_err_file: "$${AHW_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.err"
+ alarm_if_fail: 1
+ job_load: 2
+ priority: 50
+ alarm_if_terminated: 1
+ group: AHW_CAE
+ application: CAE-NOTCOUNTED.H
+ send_notification: 1
+ notification_template: "PROD1_ZAYO"
+ resources: (AHW_CAE.RC_BatchControl,QUANTITY=10,FREE=A)
+ notification_emailaddress_on_failure: BusServCustomerLeadsAHW@cognizant.com
+ notification_emailaddress_on_failure: CISTZAppCAEOperations@cognizant.com
+
+
+ /* ----------------- AHW_CAE_0130_040.Check_Runners_AgentTable ----------------- */ 
+
+ insert_job: AHW_CAE_0130_040.Check_Runners_AgentTable   job_type: CMD 
+ box_name: AHW_CAE_0130__Daily.02
+ command: $${CAEParmS} HBA_CAE_Check_Runners_AgentTable.xml $${AHW_CAEParmE}$${CAEParmE2}
+ machine: AHW_CAE.B61PRODBAT0002
+ owner: caebatchprod.service@b61
+ permission: 
+ date_conditions: 0
+ condition: s(AHW_CAE_0130_030.Check_Evaluators_AgentTable)
+ description: "Scheduling Notes:   CTS : M - F##*##Operator Notes:##Title: Check Runners AgentTable##Purpose:##Special Instructions:###Escalations:"
+ std_out_file: "$${AHW_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.out"
+ std_err_file: "$${AHW_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.err"
+ alarm_if_fail: 1
+ job_load: 2
+ priority: 50
+ alarm_if_terminated: 1
+ group: AHW_CAE
+ application: CAE-NOTCOUNTED.H
+ send_notification: 1
+ notification_template: "PROD1_ZAYO"
+ resources: (AHW_CAE.RC_BatchControl,QUANTITY=10,FREE=A)
+ notification_emailaddress_on_failure: BusServCustomerLeadsAHW@cognizant.com
+ notification_emailaddress_on_failure: CISTZAppCAEOperations@cognizant.com
+
+
+ /* ----------------- AHW_CAE_0130_050.DailyEvaluatorLogRPT ----------------- */ 
+
+ insert_job: AHW_CAE_0130_050.DailyEvaluatorLogRPT   job_type: CMD 
+ box_name: AHW_CAE_0130__Daily.02
+ command: $${CAEParmS} HBA_CAE_DailyEvaluatorLog_Report.xml $${AHW_CAEParmE}$${CAEParmE2}
+ machine: AHW_CAE.B61PRODBAT0002
+ owner: caebatchprod.service@b61
+ permission: 
+ date_conditions: 0
+ condition: s(AHW_CAE_0130_040.Check_Runners_AgentTable)
+ description: "Scheduling Notes:   CTS : M - F##*##Operator Notes:##Title: DailyEvaluatorLogRPT##Purpose:##Special Instructions:###Escalations:"
+ std_out_file: "$${AHW_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.out"
+ std_err_file: "$${AHW_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.err"
+ alarm_if_fail: 1
+ job_load: 2
+ priority: 50
+ alarm_if_terminated: 1
+ group: AHW_CAE
+ application: CAE-NOTCOUNTED.H
+ send_notification: 1
+ notification_template: "PROD1_ZAYO"
+ resources: (AHW_CAE.RC_BatchControl,QUANTITY=10,FREE=A)
+ notification_emailaddress_on_failure: BusServCustomerLeadsAHW@cognizant.com
+ notification_emailaddress_on_failure: CISTZAppCAEOperations@cognizant.com
+
+
+ /* ----------------- AHW_CAE_0130_060.DailyRunnersLogRPT ----------------- */ 
+
+ insert_job: AHW_CAE_0130_060.DailyRunnersLogRPT   job_type: CMD 
+ box_name: AHW_CAE_0130__Daily.02
+ command: $${CAEParmS} HBA_CAE_DailyRunnerLog_Report.xml $${AHW_CAEParmE}$${CAEParmE2}
+ machine: AHW_CAE.B61PRODBAT0002
+ owner: caebatchprod.service@b61
+ permission: 
+ date_conditions: 0
+ condition: s(AHW_CAE_0130_050.DailyEvaluatorLogRPT)
+ description: "Scheduling Notes:   CTS : M - F##*##Operator Notes:##Title: DailyRunnersLogRPT##Purpose:##Special Instructions:###Escalations:"
+ std_out_file: "$${AHW_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.out"
+ std_err_file: "$${AHW_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.err"
+ alarm_if_fail: 1
+ job_load: 2
+ priority: 50
+ alarm_if_terminated: 1
+ group: AHW_CAE
+ application: CAE-NOTCOUNTED.H
+ send_notification: 1
+ notification_template: "PROD1_ZAYO"
+ resources: (AHW_CAE.RC_BatchControl,QUANTITY=10,FREE=A)
+ notification_emailaddress_on_failure: BusServCustomerLeadsAHW@cognizant.com
+ notification_emailaddress_on_failure: CISTZAppCAEOperations@cognizant.com
+
+
+/* ----------------- AHW_CAE_6100__ETS_MEMB_MEDC_IN ----------------- */ 
+
+insert_job: AHW_CAE_6100__ETS_MEMB_MEDC_IN   job_type: BOX 
+owner: caebatchprod.service@b61
+permission: 
+date_conditions: 1
+run_calendar: CTS.Daily
+start_mins: 03,13,23,33,43,53
+condition: s(AHW_CAE_6100__ETS_MEMB_MEDC_IN)
+box_success: s(AHW_CAE_6100_020.ETS_MEMB_MEDC_IN) | (t(AHW_CAE_6100_010.ETS_MEMB_MEDC_IN.FT00) & n(AHW_CAE_6100_020.ETS_MEMB_MEDC_IN))
+alarm_if_fail: 1
+alarm_if_terminated: 1
+group: AHW_CAE
+application: BOX.CAE-NOTCOUNTED.H
+send_notification: 1
+notification_template: "PROD1_ZAYO"
+notification_emailaddress_on_failure: BusServCustomerLeadsAHW@cognizant.com
+notification_emailaddress_on_failure: CISTZAppCAEOperations@cognizant.com
+
+
+ /* ----------------- AHW_CAE_6100_010.ETS_MEMB_MEDC_IN.FT00 ----------------- */ 
+
+ insert_job: AHW_CAE_6100_010.ETS_MEMB_MEDC_IN.FT00   job_type: FT 
+ box_name: AHW_CAE_6100__ETS_MEMB_MEDC_IN
+ machine: A02-PRD1-FW-CLUSTER
+ owner: b61prodedi@A02
+ permission: 
+ date_conditions: 0
+ description: "File Trigger for AHW - Special Instructions: For all failures, wait 5 minutes, then attempt a force start of the job."
+ term_run_time: 1440
+ max_run_alarm: 1445
+ alarm_if_fail: 1
+ job_load: 2
+ priority: 50
+ alarm_if_terminated: 1
+ group: AHW_CAE
+ application: FT-NOTCOUNTED.H
+ send_notification: 1
+ notification_template: "PROD1_ZAYO"
+ watch_file: "\\B61.cishoc.com\dfs\GSPRD\PUBLIC\PROD\CAE\5x\Region_3\Drop_off\MEMBERMEDICATION_DAT*.txt"
+ watch_file_recursive: 0
+ watch_file_type: CREATE
+ watch_file_win_user: b61prodedi@A02
+ watch_no_change: 2
+ continuous: 0
+ watch_file_change_type: "SIZE"
+ notification_emailaddress_on_failure: BusServCustomerLeadsAHW@cognizant.com
+ notification_emailaddress_on_failure: CISTZAppCAEOperations@cognizant.com
+
+
+ /* ----------------- AHW_CAE_6100_020.ETS_MEMB_MEDC_IN ----------------- */ 
+
+ insert_job: AHW_CAE_6100_020.ETS_MEMB_MEDC_IN   job_type: CMD 
+ box_name: AHW_CAE_6100__ETS_MEMB_MEDC_IN
+ command: $${ETSParmS1} $${ETSParmS2}ETS_CAEX_5XX_B61X_MEMB_MEDC_IN.xml $${ETSParmE}
+ machine: EDI_QNXT.A02MFTRTR0004
+ owner: b61prodedi@A02
+ permission: 
+ date_conditions: 0
+ condition: s(AHW_CAE_6100_010.ETS_MEMB_MEDC_IN.FT00)
+ description: "Escalations: EDI Hosted Support"
+ std_out_file: "$${ETSLOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.out"
+ std_err_file: "$${ETSLOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.err"
+ alarm_if_fail: 1
+ job_load: 2
+ priority: 50
+ alarm_if_terminated: 1
+ group: AHW_CAE
+ application: EDI-NOTCOUNTED.H
+ send_notification: 1
+ notification_template: "PROD1_ZAYO"
+ resources: (AHW_CAE.RC_BatchControl,QUANTITY=10,FREE=A)
+ notification_emailaddress_on_failure: BusServCustomerLeadsAHW@cognizant.com
+ notification_emailaddress_on_failure: CISTZAppCAEOperations@cognizant.com
+
+
+/* ----------------- AHW_CAE_9930_HOC3_Metrics ----------------- */ 
+
+insert_job: AHW_CAE_9930_HOC3_Metrics   job_type: BOX 
+owner: caebatchprod.service@b61
+permission: 
+date_conditions: 1
+run_calendar: CTS.Daily
+start_times: "06:00"
+alarm_if_fail: 1
+alarm_if_terminated: 1
+group: AHW_CAE
+application: BOX.CAE-NOTCOUNTED.H
+send_notification: 1
+notification_template: "PROD1_ZAYO"
+notification_emailaddress_on_failure: BusServCustomerLeadsAHW@cognizant.com
+notification_emailaddress_on_failure: CISTZAppCAEOperations@cognizant.com
+
+
+ /* ----------------- AHW_CAE_9930_010.CAE_Batch_Metrics ----------------- */ 
+
+ insert_job: AHW_CAE_9930_010.CAE_Batch_Metrics   job_type: CMD 
+ box_name: AHW_CAE_9930_HOC3_Metrics
+ command: cd C\:\Automation\Batch_Metrics && AHW_CAE_MetricsReport.bat $$Run_period $$BATCH_DATE
+ machine: AHW_CAE.B61PRODBAT0002
+ owner: caebatchprod.service@b61
+ permission: 
+ date_conditions: 0
+ description: "cd C:\\Automation\\Batch_Metrics && BCN_CAE_MetricsReport.bat $$Run_period $$BATCH_DATE"
+ std_out_file: "$${AHW_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.out"
+ std_err_file: "$${AHW_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.err"
+ alarm_if_fail: 1
+ job_load: 2
+ priority: 50
+ alarm_if_terminated: 1
+ group: AHW_CAE
+ application: CAE-COUNTED.H
+ send_notification: 1
+ notification_template: "PROD1_ZAYO"
+ resources: (AHW_CAE.RC_BatchControl,QUANTITY=10,FREE=A)
+ notification_emailaddress_on_failure: BusServCustomerLeadsAHW@cognizant.com
+ notification_emailaddress_on_failure: CISTZAppCAEOperations@cognizant.com
+

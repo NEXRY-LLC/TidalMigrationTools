@@ -1,0 +1,59 @@
+APPL SSIS3456 WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/**********************************************************************/
+/** this appl combines 4 appls into 1 for on request run **/
+/** it will run appls SSIS6003, then 6004, 6005 and 6006 **/
+/** this is only to be run when requested by support     **/
+/**********************************************************************/
+/*04/10/2019-jfc-added lis and lie - no other changes                 */
+/**********************************************************************/
+
+NOTIFY FAILURE ABEND ALERT(REMD)
+
+JOB LIS.!ESPAPPL LINK PROCESS
+   RUN DAILY
+   RELEASE ADD(INTERFACE_6003)
+ENDJOB
+
+NT_JOB INTERFACE_6003
+  AGENT CYBA_BIRDmAKFIS
+  USER sapcyber
+  CMDNAME "K:\OTC SSIS Production\BatchFiles\+
+  BAOE\DTEXEC_Interface_6003.bat"
+  RUN DAILY
+  RELEASE ADD(INTERFACE_6004)
+ENDJOB
+
+NT_JOB INTERFACE_6004
+  AGENT CYBA_BIRDmAKFIS
+  USER sapcyber
+  CMDNAME "K:\OTC SSIS Production\BatchFiles\+
+  BAOE\DTEXEC_Interface_6004.bat"
+  RUN DAILY
+  RELEASE ADD(INTERFACE_6005)
+ENDJOB
+
+NT_JOB INTERFACE_6005
+  AGENT CYBA_BIRDmAKFIS
+  USER sapcyber
+  CMDNAME "K:\OTC SSIS Production\BatchFiles\+
+  BAOE\DTEXEC_Interface_6005.bat"
+  RUN DAILY
+  RELEASE ADD(INTERFACE_6006)
+ENDJOB
+
+NT_JOB INTERFACE_6006
+  AGENT CYBA_BIRDmAKFIS
+  USER sapcyber
+  CMDNAME "K:\OTC SSIS Production\BatchFiles\+
+  BAOE\DTEXEC_Interface_6006.bat"
+  RUN DAILY
+  RELEASE ADD(LIE.!ESPAPPL)
+ENDJOB
+
+JOB LIE.!ESPAPPL LINK PROCESS
+  RUN DAILY
+ENDJOB
+

@@ -1,0 +1,39 @@
+APPL JCTEST17 WAIT NOPOST_WHILE_WAITING
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/**********************************************************************/
+/* THIS IS A TEST OF THE ESP SCHEDULING SYSTEM                        */
+/**********************************************************************/
+/*01/23/2017-TESTING RELDELAY STATEMENTS                         */
+/**********************************************************************/
+/********************************************************************/
+/*THIS WON'T WORK BECAUSE 21 IS GREATER THAN 04
+/* IF TODAY('WEEKDAY') AND ESPAHH GE '21' AND ESPAHH LE '04' THEN -
+/*    RELDELAY 60
+/*NEED TO SEPARATE THE TIMES, SO NUMBERS ARE IN ORDER
+/* IF TODAY('WEEKDAY') AND ESPAHH GE '21' AND ESPAHH LE '23' THEN -
+/*   RELDELAY 60
+/* IF TODAY('WEEKDAY') AND ESPAHH GE '00' AND ESPAHH LE '04' THEN -
+/*   RELDELAY 60
+/********************************************************************/
+
+NOTIFY FAILURE ABEND MAILBOX(COSTELLOJOHN)
+TAG TEST
+
+JOB JCTEST.T17 LINK PROCESS
+  RUN TODAY
+  RELDELAY 60
+ENDJOB
+
+APPLEND JCTEST17
+  ESPNOMSG TRIGGER !ESPEVENT ADD
+  RELDELAY 60
+  IF TODAY('WEEKDAY') AND ESPAHH GE '05' AND ESPAHH LE '10' THEN -
+     RELDELAY 30
+  IF TODAY('WEEKEND') THEN RELDELAY 120
+   IF ESPAHH = '23' THEN NORUN TODAY
+   IF TODAY('SAT') AND ESPAHH = '22' THEN NORUN TODAY
+   IF TODAY('SUN') AND ESPAHH = '20' THEN NORUN TODAY
+ENDJOB
+

@@ -1,0 +1,34 @@
+APPL JCTEST14 WAIT NOPOST_WHILE_WAITING
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/**********************************************************************/
+/* THIS IS A TEST OF THE ESP SCHEDULING SYSTEM                        */
+/**********************************************************************/
+/*08/22/2016-TESTING APPLEND NORUN STATEMENTS                         */
+/*10/24/2016-TESTING DATE VARIABLES                                   */
+/**********************************************************************/
+
+NOTIFY FAILURE ABEND MAILBOX(COSTELLOJOHN)
+TAG TEST
+
+/**********************************************************************/
+/*SET GENTIME AND DATE VARIABLE                                       */
+/**********************************************************************/
+GENTIME FSOY FIRST SATURDAY OF YEAR STARTING TODAY
+IF USER4 = '' THEN !USER4 = '!FSOYYY!FSOYDD'
+/**********************************************************************/
+JOB SWESPJC2
+  CCCHK RC(5:4095) FAIL
+  NOTIFY OVERDUE MAILBOX(C0STELLOJOHN)
+  ECHO '!FSOYYY!FSOYDDD'
+  ECHO '!USER4'
+  RUN TODAY
+  RELDELAY 5
+ENDJOB
+
+APPLEND TRIGNEW1.!ESPAPPL
+  ESPNOMSG TRIGGER !ESPEVENT ADD
+  IF TODAY('SUN') AND ESPSHH GT '19' THEN NORUN TODAY
+ENDJOB
+

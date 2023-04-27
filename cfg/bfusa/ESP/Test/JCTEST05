@@ -1,0 +1,212 @@
+APPL JCTEST05 WAIT NOPOST_WHILE_WAITING
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/*****************************************************************/
+/* TEMPLATES - THIS APPLICATION IS FOR TESTING TEMPLATES         */
+/*****************************************************************/
+
+TAG TEST
+S101 = 'YESTERDAY'
+S201 = 'YESTERDAY'
+S301 = 'YESTERDAY'
+S401 = 'YESTERDAY'
+S501 = 'YESTERDAY'
+S601 = 'YESTERDAY'
+IF !USER2 = 101 THEN S101 = 'TODAY'
+IF !USER2 = 201 THEN S201 = 'TODAY'
+IF !USER2 = 301 THEN S301 = 'TODAY'
+IF !USER2 = 401 THEN S401 = 'TODAY'
+IF !USER2 = 501 THEN S501 = 'TODAY'
+IF !USER2 = 601 THEN S601 = 'TODAY'
+
+/*****************************************************************/
+/*****************************************************************/
+/* TEMPLATE1 - ENTER 101 IN PARAMETER 2 FOR THIS TEMPLATE        */
+/*****************************************************************/
+/*****************************************************************/
+
+JOB SWESPJC2
+ RUN !S101
+ RELEASE ADD(SWESPJC2.1)
+ENDJOB
+
+TEMPLATE MULTIRUN (1,OFFSET NEXT())
+ /*CHANGE SWESPJC2 BELOW TO RUN YOUR JOBNAME */
+  JOB SWESPJC2.!OFFSET LINK PROCESS
+    RUN !S101
+    RELDELAY !OFFSET
+    RELEASE ADD(TASK.SWESPJC2)
+  ENDJOB
+ENDTEMPL
+
+/*CHANGE NUMBERS TO REPRESENT MINUTES EACH JOB WILL WAIT TO RUN */
+MULTIRUN 1 -
+IF TODAY ('AUG 03 2016') THEN JOB ATTR BYPASS
+MULTIRUN 2
+MULTIRUN 3
+MULTIRUN 4
+MULTIRUN 10
+MULTIRUN 30
+
+JOB TASK.SWESPJC2 TASK REQUEST
+  RUN !S101
+  RELEASE ADD(DO.NEXT)
+ENDJOB
+
+JOB DO.NEXT LINK PROCESS
+  RUN !S101
+ENDJOB
+
+/*END TEMPLATE1
+
+/*********************************************************************/
+/*********************************************************************/
+/* TEMPLATE2 - ENTER 201 IN PARAMETER 2 FOR THIS TEMPLATE            */
+/*           - LINUX JOBS THAT RUN IN SUCCESSION WITH DIFFERENT      */
+/*           - JOBNAMES, ARGS AND RELEASE STATEMENTS                 */
+/*********************************************************************/
+/*********************************************************************/
+
+JOB LIS.!ESPAPPL
+ RUN !S201
+ RELEASE ADD(SWESPJC2.13.00)
+ENDJOB
+
+TEMPLATE MULTIRUN (3,OFFSET, LATE, NEXT())
+  JOB SWESPJC2.!OFFSET
+    CCCHK RC(1:4095) FAIL CONTINUE
+    RUN !S201
+    DELAYSUB !OFFSET
+    ABANDON SUBMISSION !LATE
+    RELEASE ADD(!NEXT)
+  ENDJOB
+ENDTEMPL
+
+/*TEMPLATE VALUES
+MULTIRUN 13.00 13.05 SWESPJC2.13.15
+MULTIRUN 13.15 13.20 SWESPJC2.13.30
+MULTIRUN 13.30 13.35 SWESPJC2.13.45
+MULTIRUN 13.45 13.50 SWESPJC2.14.00
+MULTIRUN 14.00 14.05 SWESPJC2.14.15
+MULTIRUN 14.15 14.20 SWESPJC2.14.30
+MULTIRUN 14.30 14.35 SWESPJC2.14.45
+MULTIRUN 14.45 14.50 LIE.!ESPAPPL
+
+JOB LIE.!ESPAPPL LINK PROCESS
+   RUN !S201
+ENDJOB
+
+
+/*END TEMPLATE2
+
+/*****************************************************************/
+/*****************************************************************/
+/* TEMPLATE3 - ENTER 301 IN PARAMETER 2 FOR THIS TEMPLATE        */
+/*           - RUN JOB EVERY HOUR FOR 12 HOUR PERIOD             */
+/*****************************************************************/
+/*****************************************************************/
+
+JOB SWESPJC2
+ RUN !S301
+ RELEASE ADD(SWESPJC2.1)
+ENDJOB
+
+TEMPLATE MULTIRUN (1,OFFSET NEXT())
+  JOB SWESPJC2.!OFFSET LINK PROCESS
+    RUN !S301
+    RELDELAY !OFFSET
+    PREREQ (SWESPJC2) COND(RC(04))
+    RELEASE ADD(TASK.SWESPJC2)
+  ENDJOB
+ENDTEMPL
+
+/*CHANGE NUMBERS TO REPRESENT MINUTES EACH JOB WILL WAIT TO RUN */
+/**RELDELAY cannot be greater than 255                          */
+MULTIRUN 60
+MULTIRUN 120
+MULTIRUN 180
+MULTIRUN 240
+
+/*END TEMPLATE3
+
+
+
+/*****************************************************************/
+/*****************************************************************/
+/* TEMPLATE4 - ENTER 401 IN PARAMETER 2 FOR THIS TEMPLATE        */
+/*           - NT JOBS THAT RUN IN SUCCESSION WITH DIFFERENT     */
+/*           - JOBNAMES, ARGS AND RELEASE STATEMENTS             */
+/*****************************************************************/
+/*****************************************************************/
+
+TEMPLATE QASPSDLY (2,JOBNAME,COMMANDNAME,NEXT())
+  NT_JOB !JOBNAME
+    AGENT CYBA_PPIWPROD
+    USER maestro
+    CMDNAME !COMMANDNAME
+    RUN !S401
+    IF NEXT NE '' THEN RELEASE ADD(!NEXT)
+  ENDJOB
+ENDTEMPL
+
+/********************************************************************/
+/*ENTER JOBNAME, COMMANDNAME & NEXT JOB NAME FOR EACH NEW JOB BELOW */
+/********************************************************************/
+
+QASPSDLY WEB_SITE_LOCK_SPS -
+X:\CMD_SCRIPTS\WEB_SITE_LOCK_SPS.cmd -
+NEXT(LOCK_SPS_PLANNING)
+
+QASPSDLY LOCK_SPS_PLANNING -
+X:\CMD_SCRIPTS\LOCK_SPS_PLANNING.cmd -
+NEXT(CTM_ARTICLE_TEMP)
+
+QASPSDLY CTM_ARTICLE_TEMP -
+X:\CMD_SCRIPTS\CTM_ARTICLE_TEMP.cmd -
+NEXT(SPS_COGNOS) -
+
+QASPSDLY SPS_COGNOS -
+X:\CMD_SCRIPTS\SPS_COGNOS.cmd -
+
+
+/*END TEMPLATE4
+
+/*********************************************************************/
+/*********************************************************************/
+/* TEMPLATE5 - ENTER 501 IN PARAMETER 2 FOR THIS TEMPLATE            */
+/*           - LINUX JOBS THAT RUN IN SUCCESSION WITH DIFFERENT      */
+/*           - JOBNAMES, ARGS AND RELEASE STATEMENTS                 */
+/*********************************************************************/
+/*********************************************************************/
+
+JOB LIS.!ESPAPPL link process
+ RUN !S501
+ RELEASE ADD(SWESPJC5.13.00)
+ENDJOB
+
+TEMPLATE MULTIRUN (1,OFFSET, LATE(), NEXT())
+  JOB SWESPJC5.!OFFSET LINK PROCESS
+    RUN !S501
+    DELAYSUB !OFFSET
+    ABANDON SUBMISSION !LATE
+    RELEASE ADD(!NEXT)
+  ENDJOB
+ENDTEMPL
+
+MULTIRUN 13.00 LATE(13.05) NEXT(SWESPJC5.13.15)
+MULTIRUN 13.15 LATE(13.20) NEXT(SWESPJC5.13.30)
+MULTIRUN 13.30 LATE(13.35) NEXT(SWESPJC5.13.45)
+MULTIRUN 13.45 LATE(13.50) NEXT(SWESPJC5.14.00)
+MULTIRUN 14.00 LATE(14.05) NEXT(SWESPJC5.14.15)
+MULTIRUN 14.15 LATE(14.20) NEXT(SWESPJC5.14.30)
+MULTIRUN 14.30 LATE(14.35) NEXT(SWESPJC5.14.45)
+MULTIRUN 14.45 LATE(14.50) NEXT(LIE.!ESPAPPL)
+
+JOB LIE.!ESPAPPL LINK PROCESS
+   RUN !S501
+ENDJOB
+
+
+/*END TEMPLATE2
+

@@ -1,0 +1,51 @@
+APPL jcftptst WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/********************************************************************/
+/*                 NOTES AND COMMENTS                               */
+/********************************************************************/
+/*05/31/2016 -JFC- TESTING SFTP JOB AND SECURE COPY JOB             */
+/********************************************************************/
+NOTIFY FAILURE EVENT(SW01.RESUBJOB)
+
+SCP_JOB TEST_COPY_DOWN_01 hold
+   /*FROM THIS SERVER*/
+   AGENT APPCYB02PPD
+   LOCALNAME '/ESP$/ESP_TEST_FTP.txt'
+   USER maestro
+   TRANSFERDIRECTION DOWNLOAD
+   /*TO REMOTE SERVER
+   SERVERADDR FPR1-AK-FIS
+   REMOTEDIR '/PUBLIC/Costello'
+   REMOTENAME ESP_TEST_FTP.txt
+   RUN DAILY
+ENDJOB
+
+SCP_JOB TEST_COPY_up_02 hold
+   AGENT APPCYB02PPD
+   LOCALNAME '/ESP$/'
+   USER maestro
+   TRANSFERDIRECTION UPLOAD
+   /*TO REMOTE SERVER
+   SERVERADDR FPR1-AK-FIS
+   REMOTEDIR '/PUBLIC/Costello'
+   REMOTENAME ESP_TEST_FTP.txt
+ noRUN DAILY
+ENDJOB
+
+/********************************************************************/
+
+SCP_JOB TEST_COPY_DOWN_03 hold
+   /*FROM THIS SERVER*/
+   AGENT CYBA_ISBFQ
+   LOCALNAME '/home/jcostell/test_transfer_1'
+   USER bfqadm
+   TRANSFERDIRECTION DOWNLOAD
+   /*TO REMOTE SERVER
+   SERVERADDR FPR1-AK-FIS
+   REMOTEDIR '/PUBLIC/Costello'
+   REMOTENAME ESP_TEST_FTP.txt
+   RUN DAILY
+ENDJOB
+

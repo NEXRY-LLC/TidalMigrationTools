@@ -1,0 +1,26 @@
+APPL USTSODLY WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/*********************************************************************/
+/*12/13/2019 -JFC- NEW APPL CREATED PER INC000002110670              */
+/*********************************************************************/
+
+NOTIFY FAILURE ABEND ALERT(REMD)
+
+JOB LIS.!ESPAPPL LINK PROCESS
+   RUN TODAY
+   DELAYSUB 07:00
+   RELEASE ADD(USTSODLY)
+ENDJOB
+
+JOB USTSODLY
+   CCCHK RC(1:4095) FAIL CONTINUE
+   RUN TODAY
+   RELEASE ADD(LIE.!ESPAPPL)
+ENDJOB
+
+JOB LIE.!ESPAPPL LINK PROCESS
+   RUN TODAY
+ENDJOB
+

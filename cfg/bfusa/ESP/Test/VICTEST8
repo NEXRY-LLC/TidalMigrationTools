@@ -1,0 +1,7 @@
+  APPL XXXXXXX WAIT
+  /*********************************************************************
+  /*********************************************************************
+  /* CREATED ON XX/XX/XX PER XXXXXXXXXXXX - XXX -INC00000XXXXXXX      */
+  notify abend failure alert(remd)
+  INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+

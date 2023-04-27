@@ -1,0 +1,46 @@
+APPL UXDBSXP WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/*********************************************************************/
+/* Commented out 3 jobs on request; cleaned up application.          */
+/* Added job SXPDBWKL.SXPDB(SUNMAINT) per K. Garber to start at      */
+/* 2 AM Saturday -  MFM                                              */
+/*  Removed NBUINCR step  -  05/19/2016    jre                       */
+/*05/31/2016 -JFC- REMOVED SAT RUN OF SXPDBONL.SXPDB PER K. GARBER   */
+/*03/05/2019 -JFC- UPDATED PROC - ADDED LIS AND LIE                  */
+/*********************************************************************/
+
+NOTIFY ABEND FAILURE ALERT(REMD)
+
+JOB LIS.!ESPAPPL LINK PROCESS
+   RUN DAILY
+   RELEASE ADD(SXPDBONL.SXPDB)
+ENDJOB
+
+UNIX_JOB SXPDBONL.SXPDB
+   AGENT CYBA_SXPDB
+   SCRIPTNAME /local/bin/db2_backup_sbrx.sh
+   ARGS PI1 SBXP "ONLINE INCREMENTAL"
+   USER root
+   RUN WEEKDAYS
+   NORUN MAY 26 2016
+   NORUN MAY 27 2016
+   DELAYSUB 20.00
+   RELEASE ADD(SXPDBWKL.SXPDB)
+ENDJOB
+
+UNIX_JOB SXPDBWKL.SXPDB
+   AGENT CYBA_SXPDB
+   SCRIPTNAME /local/bin/db2_wklybkup_sbrx.sh
+   ARGS PI1 SBXP ONLINE
+   USER root
+   RUN FRI
+   NORUN MAY 27 2016
+   DELAYSUB 02.00
+  RELEASE ADD(LIE.!ESPAPPL)
+ENDJOB
+
+JOB LIE.!ESPAPPL LINK PROCESS
+  RUN DAILY
+ENDJOB

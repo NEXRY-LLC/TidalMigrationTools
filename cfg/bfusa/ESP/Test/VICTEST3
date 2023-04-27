@@ -1,0 +1,18 @@
+APPL VICTEST1 WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/**********************************************************************/
+/* CREATED ON 04/08/19 PER NOBODY - VMD -
+/**********************************************************************/
+
+NOTIFY ABEND FAILURE ALERT(REMD)
+
+
+
+
+
+
+
+
+

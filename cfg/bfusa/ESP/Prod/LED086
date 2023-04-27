@@ -1,0 +1,99 @@
+APPL LED086 WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/*********************************************************************/
+/*03/07/2019 -JFC- ADDED LIS AND LIE - UNNUM'D PROC                  */
+/*********************************************************************/
+
+NOTIFY ABEND FAILURE ALERT(REMD)
+
+DATA_OBJECT PARMSET.!ESPAPPL
+   /*Create a timestamp in hhmmMMDDYY format*/
+   SETVAR TMSTMP='!ESPSHH.:!ESPSMN.,!ESPSMM./!ESPSDD./!ESPSYY'
+   SETVAR PID=''
+   SETVAR STMPTM='!ESPSMM./!ESPSDD./!ESPSYY.,!ESPSHH.:!ESPSMN'
+ENDJOB
+
+JOB LIS.!ESPAPPL LINK PROCESS
+   RUN DAILY
+   EARLYSUB 02:30
+   RELEASE (ZSDLEI34_ASN_MONITORING)
+ENDJOB
+
+SAP_JOB ZSDLEI34_ASN_MONITORING
+   AGENT CYBB_BFP030
+   SAPJOBNAME ZSDLEI34_ASN_MONITORING
+   SAPJOBCLASS C
+   STARTMODE ASAP
+   ABAPNAME ZSDLEI34
+   VARIANT DAILY
+   STEPUSER SAPADM
+   LANGUAGE E
+   PRINTDEST CP21
+   PRINTCOPIES 001
+   EXPIRATION 8
+   LINES 65
+   COLUMNS 80
+   BANNER D
+   RECIPIENT SAPADM'
+   ARCMODE PRINT
+   RUN DAILY
+   RELEASE ADD(ZSDLEI34_ASN_MONITORING_CD)
+ENDJOB
+
+JOB SETPID1.!ESPAPPL LINK PROCESS
+   /*get the next PID number from the ConnectDirect*/
+   /*Process ID table (CDPROD).  Save the value into*/
+   /*the applications DataObject for use by the C:D*/
+   /*job and the CDSTAT job (if needed).*/
+   VINCR (PID) TABLE(CDPROD) CLANG
+   VGET  (PID) TABLE(CDPROD) CLANG
+   ESP MGRMSG * . . . PARMSET.!ESPAPPL/!ESPAPPL..!ESPAPGEN/MAIN +
+ACTION SET PID(!PID)
+   RUN DAILY
+   RELEASE ADD(ZSDLEI34_ASN_MONITORING_CD)
+ENDJOB
+
+UNIX_JOB ZSDLEI34_ASN_MONITORING_CD
+   AGENT CYBA_ISBFP3
+   PID= WOBDATA('PARMSET.!ESPAPPL','PID')
+   TMSTMP= WOBDATA('PARMSET.!ESPAPPL','TMSTMP')
+   SCRIPTNAME /apps/condir/bfsbin/submitcd.sh
+   ARGS zsdlei34.cd 5 !PID !TMSTMP
+   RESOURCE ADD(1,ISBFP3CD)
+   USER cdprod
+   RUN DAILY
+   RELEASE ADD(ARCLED086)
+ENDJOB
+
+AIX_JOB CDSTAT1.!ESPAPPL CONDITIONAL
+   AGENT CYBA_ISBFP3
+   /*This job only runs if the C:D job does not end with*/
+   /*a EXITCODE of 0.  It can be rerun as often as*/
+   /*required to check the status of the C:D process.*/
+   /*When the C:D process finishes, complete the job*/
+   /*to release the successors.*/
+   USER cduser
+   STMPTM= WOBDATA('PARMSET.!ESPAPPL','STMPTM')
+   PID= WOBDATA('PARMSET.!ESPAPPL','PID')
+   CMDNAME /apps/condir/bfsbin/cdstat.sh
+   ARGS !STMPTM  j!PID
+   AFTER ADD(ZSDLEI34_ASN_MONITORING_CD)
+   RUN DAILY
+ENDJOB
+
+UNIX_JOB ARCLED086
+   AGENT CYBA_ISBFP3
+   SCRIPTNAME /local/bin/arcfile.sh
+   ARGS interfaces/output/dataout/zsdlei34_asn_monitoring.txt D
+   USER bfpadm
+   RUN DAILY
+  RELEASE ADD(LIE.!ESPAPPL)
+ENDJOB
+
+JOB LIE.!ESPAPPL LINK PROCESS
+  RUN DAILY
+ENDJOB
+
+

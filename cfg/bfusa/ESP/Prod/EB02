@@ -1,0 +1,86 @@
+APPL EB01
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+SEND_IT = 'NO'
+ESP_BG_COLOR    = '#FFFF00'
+/* Background color choices are : '#FF0000'  (red)       */
+/*                                '#FF8800'  (orange)    */
+/*                                '#FFFF00'  (yellow)    */
+ESP_RECIPIENT_1 = ' '
+ESP_RECIPIENT_2 = ' '
+ESP_RECIPIENT_3 = ' '
+ESP_RECIPIENT_4 = ' '
+ESP_RECIPIENT_5 = ' '
+ESP_MESSAGE_1   = ' '
+ESP_MESSAGE_2   = ' '
+ESP_MESSAGE_3   = ' '
+ESP_MESSAGE_4   = ' '
+ESP_MESSAGE_5   = ' '
+ESP_MESSAGE_6   = ' '
+ESP_MESSAGE_7   = ' '
+ESP_MESSAGE_8   = ' '
+ESP_MESSAGE_9   = ' '
+ESP_MESSAGE_10  = ' '
+
+/*    Message lines may be continued as shown here, where the   */
+/*    plus sign says continue on the next line and ignore the   */
+/*    leading spaces.                                           */
+/*                                                              */
+/*    ESP_MESSAGE_1  = 'Job !MNJOB has ended with a maximum +   */
+/*                      RC of !MNMXRC..'                        */
+/*                                                              */
+/*    Note that a line can be from 40 to 70 characters without  */
+/*    wrapping in the resulting email.  This is dependent on    */
+/*    the width of the various characters used in the text.     */
+
+JOB SWESPEML
+
+/* start message for EB860D0x with RC NE 0           */
+  IF (!MNJOB EQ 'EB860D01' OR -
+      !MNJOB EQ 'EB860D02') AND -
+      !MNMXRC NE 0 THEN -
+     DO
+       SEND_IT         = 'YES'
+       ESP_BG_COLOR    = '#FFFF00'
+       ESP_RECIPIENT_1 = 'rcpt to:<bfisservice@bfusa.com>'
+       ESP_MESSAGE_1   = 'Job !MNJOB in application !MNAPPL has ended'
+       ESP_MESSAGE_2   = 'with a maximum RC of !MNMXRC..'
+     ENDDO
+/* end message for EB860D0x with RC NE 0             */
+
+/* start message for EBNAPA00 with RC EQ 1           */
+
+IF !MNAPPL EQ 'EBNAPA00' THEN -
+   DO
+     ESP AJ ALL COMPLETE APPL(EBNAPA00.0)
+   ENDDO
+
+/* end message for EBNAPA00 with RC EQ 1             */
+
+  IF SEND_IT = 'YES' THEN RUN NOW
+
+ENDJOB
+
+/* ALERT FOR EB450S01 IF APPLICATION NOT COMPLETED BY 3:15 PM  */
+
+IF !MNAPPL EQ 'EB450S01' -
+ or -
+IF !MNAPPL EQ 'jctest04' -
+ or -
+IF !MNAPPL EQ 'jctest05' -
+ or -
+IF !MNAPPL EQ 'jctest06' -
+ THEN -
+   DO
+     ESP AJ ALL COMPLETE APPL(!MNAPPL..!MNAPPLGEN)
+   ENDDO
+
+/* start message for jctest04 with RC EQ 1           */
+
+IF !MNAPPL EQ 'jctest04' THEN -
+   DO
+     ESP AJ ALL COMPLETE APPL(!MNAPPL..!MNAPPLGEN)
+   ENDDO
+
+/* end message for  jctest04 with RC EQ 1            */

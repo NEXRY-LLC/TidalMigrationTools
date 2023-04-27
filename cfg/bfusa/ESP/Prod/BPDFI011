@@ -1,0 +1,48 @@
+APPL BPDFI011 WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/**********************************************************************/
+/* CREATED ON 12/21/17 PER ASHWINI GARJE - DSG - INC000001487284      */
+/* INTO PRODUCTION 01/09/2018                                         */
+/**********************************************************************/
+
+/*********************************************************************/
+/*04/09/2019 -VMD- UPDATED PROC PER  INC000001897703
+/*********************************************************************/
+
+NOTIFY ABEND FAILURE ALERT(REMD)
+
+JOB LIS.!ESPAPPL LINK PROCESS
+   RUN DAILY
+   DELAYSUB 1.40
+   RELEASE ADD(FSBP_EU_REORG)
+ENDJOB
+
+SAP_JOB FSBP_EU_REORG
+   AGENT SAP_BZP100
+   SAPJOBNAME EU_REORG
+   SAPJOBCLASS C
+   STARTMODE ASAP
+   ABAPNAME SAPRSLOG
+   STEPUSER S_BC_CYBERM
+   LANGUAGE E
+   PRINTDEST LOCL
+   PRINTCOPIES 001
+   PRINTSPOOLNAME SAPRSLOG_S_B
+   PRINTNEWSPOOL YES
+   EXPIRATION 8
+   LINES 65
+   COLUMNS 80
+   PRINTFORMAT X_PAPER
+   BANNER D
+   RECIPIENT S_BC_CYBERM
+   ARCMODE PRINT
+   RUN DAILY
+   RELEASE ADD(LIE.!ESPAPPL)
+ENDJOB
+
+JOB LIE.!ESPAPPL LINK PROCESS
+   RUN DAILY
+ENDJOB
+

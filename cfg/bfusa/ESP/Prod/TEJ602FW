@@ -1,0 +1,112 @@
+APPL TEJ602FW WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/**********************************************************************/
+/*12/18/2017-jfc-ADDED OVERDUES ALERT TO THIS APPL
+/*12/18/2017-jfc-ABSORBED JOBS FROM APPL TEJ602WC INTO THIS APPL
+/*               AND DELETED APPL TEJ602WC
+/*12/18/2017-JFC-REMOVED NORUN HOLIDAY STATEMENTS
+/**********************************************************************/
+
+NOTIFY FAILURE ABEND ALERT(REMD)
+
+DATA_OBJECT PARMSET.!ESPAPPL
+   /*Create a timestamp in hhmmMMDDYY format*/
+   SETVAR TMSTMP='!ESPSHH.:!ESPSMN.,!ESPSMM./!ESPSDD./!ESPSYY'
+   SETVAR PID=''
+   SETVAR STMPTM='!ESPSMM./!ESPSDD./!ESPSYY.,!ESPSHH.:!ESPSMN'
+ENDJOB
+
+FILE_TRIGGER RECEIVE_WC_TIPS
+   AGENT CYBA_ISHRP1
+   FILENAME +
+'/data/HRP/interfaces/output/dataout/WC_TIPS_Accrual_Out.txt' +
+   CREATE SIZE(1K) NOCHANGE(1)
+   RUN 2ND WORKDAY OF MONTH
+   RELEASE ADD(TEJ602FA_WC)
+ENDJOB
+
+JOB SETPID1.!ESPAPPL LINK PROCESS
+   /*get the next PID number from the ConnectDirect*/
+   /*Process ID table (CDPROD).  Save the value into*/
+   /*the applications DataObject for use by the C:D*/
+   /*job and the CDSTAT job (if needed).*/
+   VINCR (PID) TABLE(CDPROD) CLANG
+   VGET  (PID) TABLE(CDPROD) CLANG
+   ESP MGRMSG * . . . PARMSET.!ESPAPPL/!ESPAPPL..!ESPAPGEN/MAIN +
+ACTION SET PID(!PID)
+   RELDELAY  1
+   RUN 2ND WORKDAY OF MONTH
+   RELEASE ADD(TEJ602FA_WC)
+ENDJOB
+
+UNIX_JOB TEJ602FA_WC
+   AGENT CYBA_ISHRP1
+   EARLYSUB REALNOW PLUS 10 SECONDS
+   PID= WOBDATA('PARMSET.!ESPAPPL','PID')
+   TMSTMP= WOBDATA('PARMSET.!ESPAPPL','TMSTMP')
+   /*@@ "/apps/condir/bfsbin/submitcd.sh TEJ602FA.cd 5"*/
+   SCRIPTNAME /apps/condir/bfsbin/submitcd.sh
+   ARGS TEJ602FW.cd 10 !PID !TMSTMP
+   USER cdhrprd
+   RELDELAY  1
+   RUN 2ND WORKDAY of Month
+   RELEASE ADD(ARCHIVE_WC_TIPS)
+ENDJOB
+
+AIX_JOB CDSTAT1.!ESPAPPL CONDITIONAL
+   AGENT CYBA_ISHRP1
+   /*This job only runs if the C:D job does not end with*/
+   /*a EXITCODE of 0.  It can be rerun as often as*/
+   /*required to check the status of the C:D process.*/
+   /*When the C:D process finishes, complete the job*/
+   /*to release the successors.*/
+   USER cduser
+   STMPTM= WOBDATA('PARMSET.!ESPAPPL','STMPTM')
+   PID= WOBDATA('PARMSET.!ESPAPPL','PID')
+   CMDNAME /apps/condir/bfsbin/cdstat.sh
+   ARGS !STMPTM  j!PID
+   RUN 2ND WORKDAY OF MONTH
+   AFTER ADD(TEJ602FA_WC(A))
+ENDJOB
+
+AIX_JOB ARCHIVE_WC_TIPS
+   AGENT CYBA_ISHRP1
+   SCRIPTNAME /local/bin/arcfile.sh
+   ARGS interfaces/output/dataout/WC_TIPS_Accrual_Out.txt M
+   USER hrpadm
+   RUN 2ND WORKDAY OF MONTH
+   RELEASE ADD(ZFIGLI64_TIPS_ACCR_WC)
+ENDJOB
+
+SAP_JOB ZFIGLI64_TIPS_ACCR_WC
+   AGENT CYBB_BFP030
+   SAPJOBNAME ZFIGLI64_TIPS_ACCR_WC
+   SAPJOBCLASS C
+   STARTMODE ASAP
+   ABAPNAME ZFIGLI64
+   VARIANT 'WC TIPS ACCR'
+   STEPUSER SAPADM
+   LANGUAGE E
+   PRINTDEST CP21
+   EXPIRATION 8
+   COLUMNS 132
+   BANNER D
+   RECIPIENT LESSMILLERLE
+   ARCMODE PRINT
+   PRINTCOPIES 001
+   RUN 2ND WORKDAY OF MONTH
+   RELEASE ADD(ARCHIVE_TIPS_ACCR_WC)
+ENDJOB
+
+UNIX_JOB ARCHIVE_TIPS_ACCR_WC
+   AGENT CYBA_ISBFP3
+   SCRIPTNAME /local/bin/arcfile.sh
+   ARGS interfaces/input/datain/ZFIGLI64_WC_TIPS_Accrual_Out.txt M
+   USER bfpadm
+   RUN 2ND WORKDAY OF MONTH
+   DUEOUT EXEC REALNOW PLUS 168 HOURS
+ENDJOB
+
+

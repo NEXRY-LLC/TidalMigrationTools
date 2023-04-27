@@ -1,0 +1,17 @@
+/**********************************************************************/
+/* THESE DATES ARE USED TO RUN SPECIAL DI- JOBS FOR MARTY MAATZ.      */
+/* DO NOT DELETE OR ALTER DATES WITHOUT PROPER APPROVAL.              */
+/* USED BY JOBS IN APPLS DI810D, DI00005, DB1800I, AND DI200A06.      */
+/* DATES SUPPLIED BY MARTY MAATZ.                                     */
+/**********************************************************************/
+/*** !!!!EVENT DI200A01 SCHEDULES IN THE DAY BEFORE - THESE JOBS RUN
+/*       AFTER MIDNIGHT - SO ADJUST THE DATES TO THE DAY BEFORE!!!!!!!*/
+/**********************************************************************/
+
+   RUN DEC 21 2017
+   RUN DEC 22 2017
+   RUN DEC 23 2017
+   RUN DEC 24 2017
+   RUN DEC 25 2017
+   RUN DEC 26 2017
+

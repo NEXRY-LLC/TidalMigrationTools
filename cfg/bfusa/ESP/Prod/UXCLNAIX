@@ -1,0 +1,53 @@
+APPL UXCLNAIX
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/*********************************************************************/
+/*04/09/2019 -JFC- CLEANED UP PROC - ADDED LIE - NO OTHER CHANGES
+/*********************************************************************/
+
+NOTIFY ABEND FAILURE ALERT(REMD)
+
+JOB LIS.!ESPAPPL LINK PROCESS
+   RUN SAT
+   EARLYSUB 21.00
+   RELEASE ADD(CLEANAIX.ISHRP1)
+   RELEASE ADD(CLEANAIX.ISBFP3)
+ENDJOB
+
+UNIX_JOB CLEANAIX.ISBFP3
+   AGENT CYBA_ISBFP3
+   SCRIPTNAME /local/bin/weekly_arc_cleanup.sh
+   USER bfpadm
+   RUN SAT
+   RELEASE ADD(CLEANAIX.ISBFD)
+ENDJOB
+
+UNIX_JOB CLEANAIX.ISHRP1
+   AGENT CYBA_ISHRP1
+   SCRIPTNAME /local/bin/weekly_arc_cleanup.sh
+   USER hrpadm
+   RUN SAT
+   RELEASE ADD(CLEANAIX.ISHRQ)
+ENDJOB
+
+UNIX_JOB CLEANAIX.ISBFD
+   AGENT CYBA_ISBFD
+   SCRIPTNAME /local/bin/weekly_arc_cleanup.sh
+   USER bfdadm
+   RUN SAT
+   RELEASE ADD(LIE.!ESPAPPL)
+ENDJOB
+
+UNIX_JOB CLEANAIX.ISHRQ
+   AGENT CYBA_ISHRQ
+   SCRIPTNAME /local/bin/weekly_arc_cleanup.sh
+   USER hrqadm
+   RUN SAT
+   RELEASE ADD(LIE.!ESPAPPL)
+ENDJOB
+
+JOB LIE.!ESPAPPL LINK PROCESS
+   RUN SAT
+ENDJOB
+

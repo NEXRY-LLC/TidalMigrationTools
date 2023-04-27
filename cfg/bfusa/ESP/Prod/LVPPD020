@@ -1,0 +1,335 @@
+APPL LVPPD020 WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/**********************************************************************/
+/*IF YOU TURN OFF OR MODIFY THIS APPL -                               */
+/*   - TURN OFF/DISABLE EXTERNAL IN LVPED150                          */
+/**********************************************************************/
+/*INT-003A  Net Change BOM TESS                                       */
+/*SAPLVTES  Create BOM TESS file                                      */
+/*TESLVBM1 (TESSLVBOM1.CD)  Transfer data from AS400 to UNIX SAP      */
+/*TESLVBM2 (TESSLVBOM2.CD)  Transfer data from AS400 to UNIX SAP      */
+/*TESLVBM3 (TESSLVBOM3.CD)  Transfer data from AS400 to UNIX SAP      */
+/*TESSLVMM (TESSLVMM.CD)  Transfer data from AS400 to UNIX SAP        */
+/*LB002TES (ZMMBI002_TESS_F141)  Material Master change process       */
+/*   for Semi-Finished goods                                          */
+/*LB025TES (ZMMBI025-TESS-F141)SAP BOM net change process update      */
+/*LB018TES (ZMMBI018-TESS-F141)SAP BOM In-Bound processing report     */
+/*ARLVBM1T Archive data used in Net Change BOM                        */
+/*ARLVBM2T Archive data used in Net Change BOM                        */
+/*ARLVBM3T Archive data used in Net Change BOM                        */
+/*ARLVMMTS Archive data used in Net Change BOM                        */
+/**********************************************************************/
+/* 02/14/2019 -VIC- REMOVED ALERT LV03 PER INC000001852710
+/* 11/05/2019 -VMD- ADDED DUEOUT STATEMENT FOR SUNMAINT-INC000002078424
+/* 02/24/2020 -JFC- UPDATED AGENT FROM R7 TO R11.5.0
+/*                - CHANGED JOBQ FROM CYBESPV210.CYBESPV2100
+/* 03/05/2020 -DSG- ADDED RESOURCE TO AS400 JOB - INC000002178363
+/**********************************************************************/
+
+NOTIFY ABEND FAILURE ALERT(REMD)
+
+DATA_OBJECT PARMSET.!ESPAPPL
+   /*Create a timestamp in hhmmMMDDYY format*/
+   SETVAR TMSTMP='!ESPSHH.:!ESPSMN.,!ESPSMM./!ESPSDD./!ESPSYY'
+   SETVAR PID=''
+   SETVAR STMPTM='!ESPSMM./!ESPSDD./!ESPSYY.,!ESPSHH.:!ESPSMN'
+ENDJOB
+
+AIX_JOB LIE.LVPPD010 EXTERNAL APPLID(LVPPD010)
+   IF ESPSHH = '19' THEN RUN TODAY
+   RELEASE ADD(LIS.!ESPAPPL)
+ENDJOB
+
+JOB LIS.!ESPAPPL LINK PROCESS
+   RUN DAILY
+   IF ESPSHH = '10' THEN DELAYSUB 11.00
+   IF ESPSHH = '19' THEN DELAYSUB 22.15
+   RELEASE ADD(SAPLVTES.LVPROD)
+ENDJOB
+
+AS400_JOB SAPLVTES.LVPROD
+   RESOURCE ADD(1,LVPROD)
+   AGENT LVPROD
+   COMMAND CYBROBOT SAPLVTES
+   JOBQ CAWAAGENT.CYBESPJOBS
+   RUN DAILY
+   RELEASE ADD(TESSLVBOM1CD)
+ENDJOB
+
+JOB SETPID.!ESPAPPL LINK PROCESS
+   /*get the next PID number from the ConnectDirect*/
+   /*Process ID table (CDPROD).  Save the value into*/
+   /*the applications DataObject for use by the C:D*/
+   /*job and the CDSTAT job (if needed).*/
+   VINCR (PID) TABLE(CDPROD) CLANG
+   VGET  (PID) TABLE(CDPROD) CLANG
+   ESP MGRMSG * . . . PARMSET.!ESPAPPL/!ESPAPPL..!ESPAPGEN/MAIN +
+   ACTION SET PID(!PID)
+   RUN DAILY
+   RELEASE ADD(TESSLVBOM1CD)
+ENDJOB
+
+UNIX_JOB TESSLVBOM1CD
+   AGENT CYBA_ISBFP3
+   EARLYSUB REALNOW PLUS 20 SECONDS
+   PID= WOBDATA('PARMSET.!ESPAPPL','PID')
+   TMSTMP= WOBDATA('PARMSET.!ESPAPPL','TMSTMP')
+   SCRIPTNAME /apps/condir/bfsbin/submitcd.sh
+   ARGS tesslvbom1.cd 10 !PID !TMSTMP
+   RESOURCE ADD(1,ISBFP3CD)
+   USER cdprod
+   RUN DAILY
+   RELEASE ADD(CDSTAT.LVTSBOM1(A))
+   RELEASE ADD(TESSLVBOM2CD)
+ENDJOB
+
+AIX_JOB CDSTAT.LVTSBOM1 CONDITIONAL
+   AGENT CYBA_ISBFP3
+   /*This job only runs if the C:D job does not end with*/
+   /*a EXITCODE of 0.  It can be rerun as often as*/
+   /*required to check the status of the C:D process.*/
+   /*When the C:D process finishes, complete the job*/
+   /*to release the successors.*/
+   USER cduser
+   STMPTM= WOBDATA('PARMSET.!ESPAPPL','STMPTM')
+   PID= WOBDATA('PARMSET.!ESPAPPL','PID')
+   CMDNAME /apps/condir/bfsbin/cdstat.sh
+   ARGS !STMPTM  j!PID
+   RUN DAILY
+ENDJOB
+
+JOB SETPID2.!ESPAPPL LINK PROCESS
+   /*get the next PID number from the ConnectDirect*/
+   /*Process ID table (CDPROD).  Save the value into*/
+   /*the applications DataObject for use by the C:D*/
+   /*job and the CDSTAT job (if needed).*/
+   VINCR (PID) TABLE(CDPROD) CLANG
+   VGET  (PID) TABLE(CDPROD) CLANG
+   ESP MGRMSG * . . . PARMSET.!ESPAPPL/!ESPAPPL..!ESPAPGEN/MAIN +
+   ACTION SET PID(!PID)
+   RUN DAILY
+   RELEASE ADD(TESSLVBOM2CD)
+ENDJOB
+
+UNIX_JOB TESSLVBOM2CD
+   AGENT CYBA_ISBFP3
+   EARLYSUB REALNOW PLUS 20 SECONDS
+   PID= WOBDATA('PARMSET.!ESPAPPL','PID')
+   TMSTMP= WOBDATA('PARMSET.!ESPAPPL','TMSTMP')
+   SCRIPTNAME /apps/condir/bfsbin/submitcd.sh
+   ARGS tesslvbom2.cd 10 !PID !TMSTMP
+   RESOURCE ADD(1,ISBFP3CD)
+   USER cdprod
+   RUN DAILY
+   RELEASE ADD(CDSTAT.LVTSBOM2(A))
+   RELEASE ADD(TESSLVBOM3CD)
+ENDJOB
+
+AIX_JOB CDSTAT.LVTSBOM2 CONDITIONAL
+   AGENT CYBA_ISBFP3
+   /*This job only runs if the C:D job does not end with*/
+   /*a EXITCODE of 0.  It can be rerun as often as*/
+   /*required to check the status of the C:D process.*/
+   /*When the C:D process finishes, complete the job*/
+   /*to release the successors.*/
+   USER cduser
+   STMPTM= WOBDATA('PARMSET.!ESPAPPL','STMPTM')
+   PID= WOBDATA('PARMSET.!ESPAPPL','PID')
+   CMDNAME /apps/condir/bfsbin/cdstat.sh
+   ARGS !STMPTM  j!PID
+   RUN DAILY
+ENDJOB
+
+JOB SETPID3.!ESPAPPL LINK PROCESS
+   /*get the next PID number from the ConnectDirect*/
+   /*Process ID table (CDPROD).  Save the value into*/
+   /*the applications DataObject for use by the C:D*/
+   /*job and the CDSTAT job (if needed).*/
+   VINCR (PID) TABLE(CDPROD) CLANG
+   VGET  (PID) TABLE(CDPROD) CLANG
+   ESP MGRMSG * . . . PARMSET.!ESPAPPL/!ESPAPPL..!ESPAPGEN/MAIN +
+   ACTION SET PID(!PID)
+   RUN DAILY
+   RELEASE ADD(TESSLVBOM3CD)
+ENDJOB
+
+UNIX_JOB TESSLVBOM3CD
+   AGENT CYBA_ISBFP3
+   EARLYSUB REALNOW PLUS 20 SECONDS
+   PID= WOBDATA('PARMSET.!ESPAPPL','PID')
+   TMSTMP= WOBDATA('PARMSET.!ESPAPPL','TMSTMP')
+   SCRIPTNAME /apps/condir/bfsbin/submitcd.sh
+   ARGS tesslvbom3.cd 10 !PID !TMSTMP
+   RESOURCE ADD(1,ISBFP3CD)
+   USER cdprod
+   RUN DAILY
+   RELEASE ADD(CDSTAT.LVTSBOM3(A))
+   RELEASE ADD(TESSLVMMCD)
+ENDJOB
+
+AIX_JOB CDSTAT.LVTSBOM3 CONDITIONAL
+   AGENT CYBA_ISBFP3
+   /*This job only runs if the C:D job does not end with*/
+   /*a EXITCODE of 0.  It can be rerun as often as*/
+   /*required to check the status of the C:D process.*/
+   /*When the C:D process finishes, complete the job*/
+   /*to release the successors.*/
+   USER cduser
+   STMPTM= WOBDATA('PARMSET.!ESPAPPL','STMPTM')
+   PID= WOBDATA('PARMSET.!ESPAPPL','PID')
+   CMDNAME /apps/condir/bfsbin/cdstat.sh
+   ARGS !STMPTM  j!PID
+   RUN DAILY
+ENDJOB
+
+JOB SETPID4.!ESPAPPL LINK PROCESS
+   /*get the next PID number from the ConnectDirect*/
+   /*Process ID table (CDPROD).  Save the value into*/
+   /*the applications DataObject for use by the C:D*/
+   /*job and the CDSTAT job (if needed).*/
+   VINCR (PID) TABLE(CDPROD) CLANG
+   VGET  (PID) TABLE(CDPROD) CLANG
+   ESP MGRMSG * . . . PARMSET.!ESPAPPL/!ESPAPPL..!ESPAPGEN/MAIN +
+   ACTION SET PID(!PID)
+   RUN DAILY
+   RELEASE ADD(TESSLVMMCD)
+ENDJOB
+
+UNIX_JOB TESSLVMMCD
+   AGENT CYBA_ISBFP3
+   EARLYSUB REALNOW PLUS 20 SECONDS
+   PID= WOBDATA('PARMSET.!ESPAPPL','PID')
+   TMSTMP= WOBDATA('PARMSET.!ESPAPPL','TMSTMP')
+   SCRIPTNAME /apps/condir/bfsbin/submitcd.sh
+   ARGS tesslvmm.cd 10 !PID !TMSTMP
+   RESOURCE ADD(1,ISBFP3CD)
+   USER cdprod
+   RUN DAILY
+   RELEASE ADD(CDSTAT.LVTSMMCD(A))
+   RELEASE ADD(ZMMBI002_TESS_F141)
+ENDJOB
+
+AIX_JOB CDSTAT.LVTSMMCD CONDITIONAL
+   AGENT CYBA_ISBFP3
+   /*This job only runs if the C:D job does not end with*/
+   /*a EXITCODE of 0.  It can be rerun as often as*/
+   /*required to check the status of the C:D process.*/
+   /*When the C:D process finishes, complete the job*/
+   /*to release the successors.*/
+   USER cduser
+   STMPTM= WOBDATA('PARMSET.!ESPAPPL','STMPTM')
+   PID= WOBDATA('PARMSET.!ESPAPPL','PID')
+   CMDNAME /apps/condir/bfsbin/cdstat.sh
+   ARGS !STMPTM  j!PID
+   RUN DAILY
+ENDJOB
+
+SAP_JOB ZMMBI002_TESS_F141
+   AGENT CYBB_BFP030
+   SAPJOBNAME ZMMBI002_TESS_F141
+   SAPUSER SAPADM
+   SAPJOBCLASS C
+   ABAPNAME ZMMBI002
+   VARIANT ZMMBI002_F141T
+   LANGUAGE E
+   PRINTDEST CP40
+   EXPIRATION 8
+   COLUMNS 132
+   BANNER D
+   RECIPIENT DUETTAD
+   ARCMODE PRINT
+   PRINTCOPIES 001
+   RUN DAILY
+   RELEASE ADD(ZMMBI025_TESS_F141)
+ENDJOB
+
+SAP_JOB ZMMBI025_TESS_F141
+   AGENT CYBB_BFP030
+   SAPJOBNAME ZMMBI025_TESS_F141
+   SAPUSER SAPADM
+   SAPJOBCLASS C
+   ABAPNAME ZMMBI025
+   VARIANT ZMMBI025_F141T
+   LANGUAGE E
+   PRINTDEST CP40
+   EXPIRATION 8
+   COLUMNS 132
+   BANNER D
+   RECIPIENT DUETTAD
+   ARCMODE PRINT
+   PRINTCOPIES 001
+   RUN DAILY
+   RELEASE ADD(ZMMBI018_TESS_F141)
+ENDJOB
+
+SAP_JOB ZMMBI018_TESS_F141
+   AGENT CYBB_BFP030
+   SAPJOBNAME ZMMBI018_TESS_F141
+   RECIPIENTTYPE MAIL
+   SPOOLRECIPIENT 'restrepohernan@BFUSA.COM'
+   SAPUSER SAPADM
+   SAPJOBCLASS C
+   ABAPNAME ZMMBI018
+   VARIANT ZMMBI018_F141T
+   LANGUAGE E
+   PRINTDEST CP40
+   EXPIRATION 8
+   COLUMNS 132
+   BANNER D
+   RECIPIENT DUETTAD
+   ARCMODE PRINT
+   PRINTCOPIES 001
+   RUN DAILY
+   RELEASE ADD(AR_MMTESS_F141TXT)
+ENDJOB
+
+UNIX_JOB AR_MMTESS_F141TXT
+   AGENT CYBA_ISBFP3
+   SCRIPTNAME /local/bin/arcfile.sh
+   ARGS interfaces/input/datain/MMTESS_F141.TXT D
+   USER bfpadm
+   RUN DAILY
+   RELEASE ADD(AR_BOM1T_F141TXT)
+ENDJOB
+
+UNIX_JOB AR_BOM1T_F141TXT
+   AGENT CYBA_ISBFP3
+   SCRIPTNAME /local/bin/arcfile.sh
+   ARGS interfaces/input/datain/BOM1T_F141.TXT D
+   USER bfpadm
+   RUN DAILY
+   RELEASE ADD(AR_BOM2T_F141TXT)
+ENDJOB
+
+UNIX_JOB AR_BOM2T_F141TXT
+   AGENT CYBA_ISBFP3
+   SCRIPTNAME /local/bin/arcfile.sh
+   ARGS interfaces/input/datain/BOM2T_F141.TXT D
+   USER bfpadm
+   RUN DAILY
+   RELEASE ADD(AR_BOM3T_F141TXT)
+ENDJOB
+
+UNIX_JOB AR_BOM3T_F141TXT
+   AGENT CYBA_ISBFP3
+   SCRIPTNAME /local/bin/arcfile.sh
+   ARGS interfaces/input/datain/BOM3T_F141.TXT D
+   USER bfpadm
+   RUN DAILY
+   RELEASE ADD(LIE.!ESPAPPL)
+ENDJOB
+
+AIX_JOB LIE.!ESPAPPL
+   AGENT CYBA_ISBFP3
+   COMMAND /bin/sleep
+   ARGS 3
+   USER bfpadm
+   RUN DAILY
+    IF ESPSHH = '10' THEN DUEOUT EXEC 13.00
+    IF ESPSHH = '19' THEN DUEOUT EXEC 23.30
+    IF TODAY('SUN') AND ESPSHH EQ '19' THEN DUEOUT EXEC 23.50
+   NOTIFY OVERDUE MAILBOX(AKRONJOBREQ
+ENDJOB
+

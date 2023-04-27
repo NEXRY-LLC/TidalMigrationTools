@@ -1,0 +1,25 @@
+APPL JCTEST07 WAIT
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+/*****************************************************/
+/* THIS IS A TEST OF THE ESP SCHEDULING SYSTEM*/
+/*****************************************************/
+/*07/18/2016-TESTING MAXRUNTIME PARAMETERS*/
+/*****************************************************/
+NOTIFY FAILURE ABEND ALERT(REMX)
+
+JOB LIS.!ESPAPPL LINK PROCESS
+   RUN TODAY
+   RELEASE ADD(SWESPJC2)
+ENDJOB
+
+JOB SWESPJC2
+   CCCHK RC(1:4) FAIL CONTINUE
+   RUN TODAY
+   RELEASE ADD(LIE.!ESPAPPL)
+ENDJOB
+
+JOB LIE.!ESPAPPL LINK PROCESS
+   RUN TODAY
+ENDJOB
+
+

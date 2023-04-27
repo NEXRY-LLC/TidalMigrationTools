@@ -1,0 +1,30 @@
+APPL QAPLTDTS WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/**********************************************************************/
+/*NEW APPL CREATED 06/15/2015 PER DAVE REQUEIRO - JFC                 */
+/**********************************************************************/
+
+NOTIFY FAILURE ABEND ALERT(REMD)
+NOTIFY FAILURE ABEND MAILBOX(QAFAIL)
+TAG PPIW
+
+NT_JOB PLTDTESS
+  AGENT CYBA_PPIWPROD
+  CMDNAME X:\cmd_scripts\PLTDTESS.cmd
+  ARGS
+  USER maestro
+  RUN THU
+  DELAYSUB 13.45
+  RELEASE ADD(TESS_TBRTC_ARCHSPEC)
+ENDJOB
+
+NT_JOB TESS_TBRTC_ARCHSPEC
+  AGENT CYBA_PPIWPROD
+  CMDNAME X:\cmd_scripts\TESS_TBRTC_ARCHSPEC.cmd
+  ARGS
+  USER maestro
+  RUN THU
+ENDJOB
+

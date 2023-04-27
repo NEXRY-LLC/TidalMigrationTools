@@ -1,0 +1,757 @@
+<object-stream>
+  <int>1</int>
+  <com.orsyp.ExportObjects id="1">
+    <users class="linked-list" id="2"/>
+    <domains class="linked-list" id="3"/>
+    <applications class="linked-list" id="4"/>
+    <rules class="linked-list" id="5"/>
+    <resources class="linked-list" id="6"/>
+    <uprocClasses class="linked-list" id="7"/>
+    <uprocs class="linked-list" id="8"/>
+    <mus class="linked-list" id="9"/>
+    <queues class="linked-list" id="10"/>
+    <tasks class="linked-list" id="11"/>
+    <sessions class="linked-list" id="12">
+      <Session id="13">
+        <identifier class="SessionId" id="14">
+          <syntaxRules class="com.orsyp.api.syntaxerules.OwlsSyntaxRules" id="15"/>
+          <name>STRSD29700</name>
+          <version>000</version>
+        </identifier>
+        <syntaxCheck id="16">
+          <current>true</current>
+          <previous>false</previous>
+        </syntaxCheck>
+        <functionalVersion>0</functionalVersion>
+        <label>STARS ENTERPRISE PROD NIGHTLY JOB AND BA</label>
+        <tree id="17">
+          <root id="18">
+            <root reference="18"/>
+            <childOk id="19">
+              <root reference="18"/>
+              <parent reference="18"/>
+              <nextSibling id="20">
+                <root reference="18"/>
+                <parent reference="18"/>
+                <nextSibling id="21">
+                  <root reference="18"/>
+                  <parent reference="18"/>
+                  <nextSibling id="22">
+                    <root reference="18"/>
+                    <parent reference="18"/>
+                    <nextSibling id="23">
+                      <root reference="18"/>
+                      <parent reference="18"/>
+                      <nextSibling id="24">
+                        <root reference="18"/>
+                        <parent reference="18"/>
+                        <nextSibling id="25">
+                          <root reference="18"/>
+                          <parent reference="18"/>
+                          <nextSibling id="26">
+                            <root reference="18"/>
+                            <parent reference="18"/>
+                            <nextSibling id="27">
+                              <root reference="18"/>
+                              <parent reference="18"/>
+                              <nextSibling id="28">
+                                <root reference="18"/>
+                                <parent reference="18"/>
+                                <nextSibling id="29">
+                                  <root reference="18"/>
+                                  <parent reference="18"/>
+                                  <nextSibling id="30">
+                                    <root reference="18"/>
+                                    <parent reference="18"/>
+                                    <nextSibling id="31">
+                                      <root reference="18"/>
+                                      <parent reference="18"/>
+                                      <nextSibling id="32">
+                                        <root reference="18"/>
+                                        <parent reference="18"/>
+                                        <nextSibling id="33">
+                                          <root reference="18"/>
+                                          <parent reference="18"/>
+                                          <nextSibling id="34">
+                                            <root reference="18"/>
+                                            <parent reference="18"/>
+                                            <nextSibling id="35">
+                                              <root reference="18"/>
+                                              <parent reference="18"/>
+                                              <nextSibling id="36">
+                                                <root reference="18"/>
+                                                <parent reference="18"/>
+                                                <nextSibling id="37">
+                                                  <root reference="18"/>
+                                                  <parent reference="18"/>
+                                                  <nextSibling id="38">
+                                                    <root reference="18"/>
+                                                    <parent reference="18"/>
+                                                    <nextSibling id="39">
+                                                      <root reference="18"/>
+                                                      <parent reference="18"/>
+                                                      <nextSibling id="40">
+                                                        <root reference="18"/>
+                                                        <parent reference="18"/>
+                                                        <nextSibling id="41">
+                                                          <root reference="18"/>
+                                                          <parent reference="18"/>
+                                                          <nextSibling id="42">
+                                                            <root reference="18"/>
+                                                            <parent reference="18"/>
+                                                            <nextSibling id="43">
+                                                              <root reference="18"/>
+                                                              <parent reference="18"/>
+                                                              <nextSibling id="44">
+                                                                <root reference="18"/>
+                                                                <parent reference="18"/>
+                                                                <nextSibling id="45">
+                                                                  <root reference="18"/>
+                                                                  <parent reference="18"/>
+                                                                  <nextSibling id="46">
+                                                                    <root reference="18"/>
+                                                                    <parent reference="18"/>
+                                                                    <nextSibling id="47">
+                                                                      <root reference="18"/>
+                                                                      <parent reference="18"/>
+                                                                      <nextSibling id="48">
+                                                                        <root reference="18"/>
+                                                                        <parent reference="18"/>
+                                                                        <nextSibling id="49">
+                                                                          <root reference="18"/>
+                                                                          <parent reference="18"/>
+                                                                          <nextSibling id="50">
+                                                                            <root reference="18"/>
+                                                                            <parent reference="18"/>
+                                                                            <nextSibling id="51">
+                                                                              <root reference="18"/>
+                                                                              <parent reference="18"/>
+                                                                              <nextSibling id="52">
+                                                                                <root reference="18"/>
+                                                                                <parent reference="18"/>
+                                                                                <nextSibling id="53">
+                                                                                  <root reference="18"/>
+                                                                                  <parent reference="18"/>
+                                                                                  <nextSibling id="54">
+                                                                                    <root reference="18"/>
+                                                                                    <parent reference="18"/>
+                                                                                    <nextSibling id="55">
+                                                                                      <root reference="18"/>
+                                                                                      <parent reference="18"/>
+                                                                                      <nextSibling id="56">
+                                                                                        <root reference="18"/>
+                                                                                        <parent reference="18"/>
+                                                                                        <nextSibling id="57">
+                                                                                          <root reference="18"/>
+                                                                                          <parent reference="18"/>
+                                                                                          <previousSibling reference="56"/>
+                                                                                          <data id="58">
+                                                                                            <uprocName>STRTD29700</uprocName>
+                                                                                            <numOrdSession>40</numOrdSession>
+                                                                                            <executionContext id="59">
+                                                                                              <type>MU</type>
+                                                                                              <muName>U_SDB_PROD</muName>
+                                                                                              <syntaxCheck id="60">
+                                                                                                <current>true</current>
+                                                                                                <previous>true</previous>
+                                                                                              </syntaxCheck>
+                                                                                            </executionContext>
+                                                                                            <atom reference="57"/>
+                                                                                          </data>
+                                                                                        </nextSibling>
+                                                                                        <previousSibling reference="55"/>
+                                                                                        <data id="61">
+                                                                                          <uprocName>STRAD29790</uprocName>
+                                                                                          <numOrdSession>39</numOrdSession>
+                                                                                          <executionContext id="62">
+                                                                                            <type>MU</type>
+                                                                                            <muName>U_SDB_PROD</muName>
+                                                                                            <syntaxCheck id="63">
+                                                                                              <current>true</current>
+                                                                                              <previous>true</previous>
+                                                                                            </syntaxCheck>
+                                                                                          </executionContext>
+                                                                                          <atom reference="56"/>
+                                                                                        </data>
+                                                                                      </nextSibling>
+                                                                                      <previousSibling reference="54"/>
+                                                                                      <data id="64">
+                                                                                        <uprocName>STRAD29920</uprocName>
+                                                                                        <numOrdSession>38</numOrdSession>
+                                                                                        <executionContext id="65">
+                                                                                          <type>MU</type>
+                                                                                          <muName>U_SDB_PROD</muName>
+                                                                                          <syntaxCheck id="66">
+                                                                                            <current>true</current>
+                                                                                            <previous>true</previous>
+                                                                                          </syntaxCheck>
+                                                                                        </executionContext>
+                                                                                        <atom reference="55"/>
+                                                                                      </data>
+                                                                                    </nextSibling>
+                                                                                    <previousSibling reference="53"/>
+                                                                                    <data id="67">
+                                                                                      <uprocName>UDBBD29730</uprocName>
+                                                                                      <numOrdSession>37</numOrdSession>
+                                                                                      <executionContext id="68">
+                                                                                        <type>MU</type>
+                                                                                        <muName>U_SDB_PROD</muName>
+                                                                                        <syntaxCheck id="69">
+                                                                                          <current>true</current>
+                                                                                          <previous>true</previous>
+                                                                                        </syntaxCheck>
+                                                                                      </executionContext>
+                                                                                      <atom reference="54"/>
+                                                                                    </data>
+                                                                                  </nextSibling>
+                                                                                  <previousSibling reference="52"/>
+                                                                                  <data id="70">
+                                                                                    <uprocName>UDBBD29770</uprocName>
+                                                                                    <numOrdSession>36</numOrdSession>
+                                                                                    <executionContext id="71">
+                                                                                      <type>MU</type>
+                                                                                      <muName>U_SDB_PROD</muName>
+                                                                                      <syntaxCheck id="72">
+                                                                                        <current>true</current>
+                                                                                        <previous>true</previous>
+                                                                                      </syntaxCheck>
+                                                                                    </executionContext>
+                                                                                    <atom reference="53"/>
+                                                                                  </data>
+                                                                                </nextSibling>
+                                                                                <previousSibling reference="51"/>
+                                                                                <data id="73">
+                                                                                  <uprocName>UDBBD29750</uprocName>
+                                                                                  <numOrdSession>35</numOrdSession>
+                                                                                  <executionContext id="74">
+                                                                                    <type>MU</type>
+                                                                                    <muName>U_SDB_PROD</muName>
+                                                                                    <syntaxCheck id="75">
+                                                                                      <current>true</current>
+                                                                                      <previous>true</previous>
+                                                                                    </syntaxCheck>
+                                                                                  </executionContext>
+                                                                                  <atom reference="52"/>
+                                                                                </data>
+                                                                              </nextSibling>
+                                                                              <previousSibling reference="50"/>
+                                                                              <data id="76">
+                                                                                <uprocName>STRAD29900</uprocName>
+                                                                                <numOrdSession>34</numOrdSession>
+                                                                                <executionContext id="77">
+                                                                                  <type>MU</type>
+                                                                                  <muName>U_SDB_PROD</muName>
+                                                                                  <syntaxCheck id="78">
+                                                                                    <current>true</current>
+                                                                                    <previous>true</previous>
+                                                                                  </syntaxCheck>
+                                                                                </executionContext>
+                                                                                <atom reference="51"/>
+                                                                              </data>
+                                                                            </nextSibling>
+                                                                            <previousSibling reference="49"/>
+                                                                            <data id="79">
+                                                                              <uprocName>STRAD29710</uprocName>
+                                                                              <numOrdSession>33</numOrdSession>
+                                                                              <executionContext id="80">
+                                                                                <type>MU</type>
+                                                                                <muName>U_SDB_PROD</muName>
+                                                                                <syntaxCheck id="81">
+                                                                                  <current>true</current>
+                                                                                  <previous>true</previous>
+                                                                                </syntaxCheck>
+                                                                              </executionContext>
+                                                                              <atom reference="50"/>
+                                                                            </data>
+                                                                          </nextSibling>
+                                                                          <previousSibling reference="48"/>
+                                                                          <data id="82">
+                                                                            <uprocName>STRAD29930</uprocName>
+                                                                            <numOrdSession>32</numOrdSession>
+                                                                            <executionContext id="83">
+                                                                              <type>MU</type>
+                                                                              <muName>U_STAP_PRD</muName>
+                                                                              <syntaxCheck id="84">
+                                                                                <current>true</current>
+                                                                                <previous>true</previous>
+                                                                              </syntaxCheck>
+                                                                            </executionContext>
+                                                                            <atom reference="49"/>
+                                                                          </data>
+                                                                        </nextSibling>
+                                                                        <previousSibling reference="47"/>
+                                                                        <data id="85">
+                                                                          <uprocName>STRAD29840</uprocName>
+                                                                          <numOrdSession>31</numOrdSession>
+                                                                          <executionContext id="86">
+                                                                            <type>MU</type>
+                                                                            <muName>A_STARS</muName>
+                                                                            <syntaxCheck id="87">
+                                                                              <current>true</current>
+                                                                              <previous>true</previous>
+                                                                            </syntaxCheck>
+                                                                          </executionContext>
+                                                                          <atom reference="48"/>
+                                                                        </data>
+                                                                      </nextSibling>
+                                                                      <previousSibling reference="46"/>
+                                                                      <data id="88">
+                                                                        <uprocName>STRAD29835</uprocName>
+                                                                        <numOrdSession>30</numOrdSession>
+                                                                        <executionContext id="89">
+                                                                          <type>MU</type>
+                                                                          <muName>A_STARS</muName>
+                                                                          <syntaxCheck id="90">
+                                                                            <current>true</current>
+                                                                            <previous>true</previous>
+                                                                          </syntaxCheck>
+                                                                        </executionContext>
+                                                                        <atom reference="47"/>
+                                                                      </data>
+                                                                    </nextSibling>
+                                                                    <previousSibling reference="45"/>
+                                                                    <data id="91">
+                                                                      <uprocName>STRAW29835</uprocName>
+                                                                      <numOrdSession>29</numOrdSession>
+                                                                      <executionContext id="92">
+                                                                        <type>MU</type>
+                                                                        <muName>A_STARS</muName>
+                                                                        <syntaxCheck id="93">
+                                                                          <current>true</current>
+                                                                          <previous>true</previous>
+                                                                        </syntaxCheck>
+                                                                      </executionContext>
+                                                                      <atom reference="46"/>
+                                                                    </data>
+                                                                  </nextSibling>
+                                                                  <previousSibling reference="44"/>
+                                                                  <data id="94">
+                                                                    <uprocName>STRAD29960</uprocName>
+                                                                    <numOrdSession>28</numOrdSession>
+                                                                    <executionContext id="95">
+                                                                      <type>MU</type>
+                                                                      <muName>U_STAP_PRD</muName>
+                                                                      <syntaxCheck id="96">
+                                                                        <current>true</current>
+                                                                        <previous>true</previous>
+                                                                      </syntaxCheck>
+                                                                    </executionContext>
+                                                                    <atom reference="45"/>
+                                                                  </data>
+                                                                </nextSibling>
+                                                                <previousSibling reference="43"/>
+                                                                <data id="97">
+                                                                  <uprocName>STRAD00020</uprocName>
+                                                                  <numOrdSession>27</numOrdSession>
+                                                                  <executionContext id="98">
+                                                                    <type>MU</type>
+                                                                    <muName>A_STARWAS2</muName>
+                                                                    <syntaxCheck id="99">
+                                                                      <current>true</current>
+                                                                      <previous>true</previous>
+                                                                    </syntaxCheck>
+                                                                  </executionContext>
+                                                                  <atom reference="44"/>
+                                                                </data>
+                                                              </nextSibling>
+                                                              <previousSibling reference="42"/>
+                                                              <data id="100">
+                                                                <uprocName>STRAD00015</uprocName>
+                                                                <numOrdSession>26</numOrdSession>
+                                                                <executionContext id="101">
+                                                                  <type>MU</type>
+                                                                  <muName>A_STARWAS1</muName>
+                                                                  <syntaxCheck id="102">
+                                                                    <current>true</current>
+                                                                    <previous>true</previous>
+                                                                  </syntaxCheck>
+                                                                </executionContext>
+                                                                <atom reference="43"/>
+                                                              </data>
+                                                            </nextSibling>
+                                                            <previousSibling reference="41"/>
+                                                            <data id="103">
+                                                              <uprocName>STR2D29830</uprocName>
+                                                              <numOrdSession>25</numOrdSession>
+                                                              <executionContext id="104">
+                                                                <type>MU</type>
+                                                                <muName>A_STARS</muName>
+                                                                <syntaxCheck id="105">
+                                                                  <current>true</current>
+                                                                  <previous>true</previous>
+                                                                </syntaxCheck>
+                                                              </executionContext>
+                                                              <atom reference="42"/>
+                                                            </data>
+                                                          </nextSibling>
+                                                          <previousSibling reference="40"/>
+                                                          <data id="106">
+                                                            <uprocName>STRAD29950</uprocName>
+                                                            <numOrdSession>24</numOrdSession>
+                                                            <executionContext id="107">
+                                                              <type>MU</type>
+                                                              <muName>A_STARS</muName>
+                                                              <syntaxCheck id="108">
+                                                                <current>true</current>
+                                                                <previous>true</previous>
+                                                              </syntaxCheck>
+                                                            </executionContext>
+                                                            <atom reference="41"/>
+                                                          </data>
+                                                        </nextSibling>
+                                                        <previousSibling reference="39"/>
+                                                        <data id="109">
+                                                          <uprocName>STRAD29824</uprocName>
+                                                          <numOrdSession>23</numOrdSession>
+                                                          <executionContext id="110">
+                                                            <type>MU</type>
+                                                            <muName>U_STAP_PRD</muName>
+                                                            <syntaxCheck id="111">
+                                                              <current>true</current>
+                                                              <previous>true</previous>
+                                                            </syntaxCheck>
+                                                          </executionContext>
+                                                          <atom reference="40"/>
+                                                        </data>
+                                                      </nextSibling>
+                                                      <previousSibling reference="38"/>
+                                                      <data id="112">
+                                                        <uprocName>STRAD29823</uprocName>
+                                                        <numOrdSession>22</numOrdSession>
+                                                        <executionContext id="113">
+                                                          <type>MU</type>
+                                                          <muName>U_STAP_PRD</muName>
+                                                          <syntaxCheck id="114">
+                                                            <current>true</current>
+                                                            <previous>true</previous>
+                                                          </syntaxCheck>
+                                                        </executionContext>
+                                                        <atom reference="39"/>
+                                                      </data>
+                                                    </nextSibling>
+                                                    <previousSibling reference="37"/>
+                                                    <data id="115">
+                                                      <uprocName>STRAD29822</uprocName>
+                                                      <numOrdSession>21</numOrdSession>
+                                                      <executionContext id="116">
+                                                        <type>MU</type>
+                                                        <muName>U_STAP_PRD</muName>
+                                                        <syntaxCheck id="117">
+                                                          <current>true</current>
+                                                          <previous>true</previous>
+                                                        </syntaxCheck>
+                                                      </executionContext>
+                                                      <atom reference="38"/>
+                                                    </data>
+                                                  </nextSibling>
+                                                  <previousSibling reference="36"/>
+                                                  <data id="118">
+                                                    <uprocName>STRAD29821</uprocName>
+                                                    <numOrdSession>20</numOrdSession>
+                                                    <executionContext id="119">
+                                                      <type>MU</type>
+                                                      <muName>U_STAP_PRD</muName>
+                                                      <syntaxCheck id="120">
+                                                        <current>true</current>
+                                                        <previous>true</previous>
+                                                      </syntaxCheck>
+                                                    </executionContext>
+                                                    <atom reference="37"/>
+                                                  </data>
+                                                </nextSibling>
+                                                <previousSibling reference="35"/>
+                                                <data id="121">
+                                                  <uprocName>STRAD29820</uprocName>
+                                                  <numOrdSession>19</numOrdSession>
+                                                  <executionContext id="122">
+                                                    <type>MU</type>
+                                                    <muName>U_STAP_PRD</muName>
+                                                    <syntaxCheck id="123">
+                                                      <current>true</current>
+                                                      <previous>true</previous>
+                                                    </syntaxCheck>
+                                                  </executionContext>
+                                                  <atom reference="36"/>
+                                                </data>
+                                              </nextSibling>
+                                              <previousSibling reference="34"/>
+                                              <data id="124">
+                                                <uprocName>STRAD29815</uprocName>
+                                                <numOrdSession>18</numOrdSession>
+                                                <executionContext id="125">
+                                                  <type>MU</type>
+                                                  <muName>U_STAP_PRD</muName>
+                                                  <syntaxCheck id="126">
+                                                    <current>true</current>
+                                                    <previous>true</previous>
+                                                  </syntaxCheck>
+                                                </executionContext>
+                                                <atom reference="35"/>
+                                              </data>
+                                            </nextSibling>
+                                            <previousSibling reference="33"/>
+                                            <data id="127">
+                                              <uprocName>STRAD29810</uprocName>
+                                              <numOrdSession>17</numOrdSession>
+                                              <executionContext id="128">
+                                                <type>MU</type>
+                                                <muName>U_STAP_PRD</muName>
+                                                <syntaxCheck id="129">
+                                                  <current>true</current>
+                                                  <previous>true</previous>
+                                                </syntaxCheck>
+                                              </executionContext>
+                                              <atom reference="34"/>
+                                            </data>
+                                          </nextSibling>
+                                          <previousSibling reference="32"/>
+                                          <data id="130">
+                                            <uprocName>STRAD29800</uprocName>
+                                            <numOrdSession>16</numOrdSession>
+                                            <executionContext id="131">
+                                              <type>MU</type>
+                                              <muName>U_STAP_PRD</muName>
+                                              <syntaxCheck id="132">
+                                                <current>true</current>
+                                                <previous>true</previous>
+                                              </syntaxCheck>
+                                            </executionContext>
+                                            <atom reference="33"/>
+                                          </data>
+                                        </nextSibling>
+                                        <previousSibling reference="31"/>
+                                        <data id="133">
+                                          <uprocName>STRAD29780</uprocName>
+                                          <numOrdSession>15</numOrdSession>
+                                          <executionContext id="134">
+                                            <type>MU</type>
+                                            <muName>U_SDB_PROD</muName>
+                                            <syntaxCheck id="135">
+                                              <current>true</current>
+                                              <previous>true</previous>
+                                            </syntaxCheck>
+                                          </executionContext>
+                                          <atom reference="32"/>
+                                        </data>
+                                      </nextSibling>
+                                      <previousSibling reference="30"/>
+                                      <data id="136">
+                                        <uprocName>STRAD29910</uprocName>
+                                        <numOrdSession>14</numOrdSession>
+                                        <executionContext id="137">
+                                          <type>MU</type>
+                                          <muName>U_SDB_PROD</muName>
+                                          <syntaxCheck id="138">
+                                            <current>true</current>
+                                            <previous>true</previous>
+                                          </syntaxCheck>
+                                        </executionContext>
+                                        <atom reference="31"/>
+                                      </data>
+                                    </nextSibling>
+                                    <previousSibling reference="29"/>
+                                    <data id="139">
+                                      <uprocName>UDBBW29730</uprocName>
+                                      <numOrdSession>13</numOrdSession>
+                                      <executionContext id="140">
+                                        <type>MU</type>
+                                        <muName>U_SDB_PROD</muName>
+                                        <syntaxCheck id="141">
+                                          <current>true</current>
+                                          <previous>true</previous>
+                                        </syntaxCheck>
+                                      </executionContext>
+                                      <atom reference="30"/>
+                                    </data>
+                                  </nextSibling>
+                                  <previousSibling reference="28"/>
+                                  <data id="142">
+                                    <uprocName>UDBBW29770</uprocName>
+                                    <numOrdSession>12</numOrdSession>
+                                    <executionContext id="143">
+                                      <type>MU</type>
+                                      <muName>U_SDB_PROD</muName>
+                                      <syntaxCheck id="144">
+                                        <current>true</current>
+                                        <previous>true</previous>
+                                      </syntaxCheck>
+                                    </executionContext>
+                                    <atom reference="29"/>
+                                  </data>
+                                </nextSibling>
+                                <previousSibling reference="27"/>
+                                <data id="145">
+                                  <uprocName>UDBBW29720</uprocName>
+                                  <numOrdSession>11</numOrdSession>
+                                  <executionContext id="146">
+                                    <type>MU</type>
+                                    <muName>U_SDB_PROD</muName>
+                                    <syntaxCheck id="147">
+                                      <current>true</current>
+                                      <previous>true</previous>
+                                    </syntaxCheck>
+                                  </executionContext>
+                                  <atom reference="28"/>
+                                </data>
+                              </nextSibling>
+                              <previousSibling reference="26"/>
+                              <data id="148">
+                                <uprocName>UDBBD29720</uprocName>
+                                <numOrdSession>10</numOrdSession>
+                                <executionContext id="149">
+                                  <type>MU</type>
+                                  <muName>U_SDB_PROD</muName>
+                                  <syntaxCheck id="150">
+                                    <current>true</current>
+                                    <previous>true</previous>
+                                  </syntaxCheck>
+                                </executionContext>
+                                <atom reference="27"/>
+                              </data>
+                            </nextSibling>
+                            <previousSibling reference="25"/>
+                            <data id="151">
+                              <uprocName>UDBBW29760</uprocName>
+                              <numOrdSession>9</numOrdSession>
+                              <executionContext id="152">
+                                <type>MU</type>
+                                <muName>U_SDB_PROD</muName>
+                                <syntaxCheck id="153">
+                                  <current>true</current>
+                                  <previous>true</previous>
+                                </syntaxCheck>
+                              </executionContext>
+                              <atom reference="26"/>
+                            </data>
+                          </nextSibling>
+                          <previousSibling reference="24"/>
+                          <data id="154">
+                            <uprocName>UDBBD29760</uprocName>
+                            <numOrdSession>8</numOrdSession>
+                            <executionContext id="155">
+                              <type>MU</type>
+                              <muName>U_SDB_PROD</muName>
+                              <syntaxCheck id="156">
+                                <current>true</current>
+                                <previous>true</previous>
+                              </syntaxCheck>
+                            </executionContext>
+                            <atom reference="25"/>
+                          </data>
+                        </nextSibling>
+                        <previousSibling reference="23"/>
+                        <data id="157">
+                          <uprocName>UDBBW29740</uprocName>
+                          <numOrdSession>7</numOrdSession>
+                          <executionContext id="158">
+                            <type>MU</type>
+                            <muName>U_SDB_PROD</muName>
+                            <syntaxCheck id="159">
+                              <current>true</current>
+                              <previous>true</previous>
+                            </syntaxCheck>
+                          </executionContext>
+                          <atom reference="24"/>
+                        </data>
+                      </nextSibling>
+                      <previousSibling reference="22"/>
+                      <data id="160">
+                        <uprocName>UDBBD29740</uprocName>
+                        <numOrdSession>6</numOrdSession>
+                        <executionContext id="161">
+                          <type>MU</type>
+                          <muName>U_SDB_PROD</muName>
+                          <syntaxCheck id="162">
+                            <current>true</current>
+                            <previous>true</previous>
+                          </syntaxCheck>
+                        </executionContext>
+                        <atom reference="23"/>
+                      </data>
+                    </nextSibling>
+                    <previousSibling reference="21"/>
+                    <data id="163">
+                      <uprocName>STRAD29890</uprocName>
+                      <numOrdSession>5</numOrdSession>
+                      <executionContext id="164">
+                        <type>MU</type>
+                        <muName>U_SDB_PROD</muName>
+                        <syntaxCheck id="165">
+                          <current>true</current>
+                          <previous>true</previous>
+                        </syntaxCheck>
+                      </executionContext>
+                      <atom reference="22"/>
+                    </data>
+                  </nextSibling>
+                  <previousSibling reference="20"/>
+                  <data id="166">
+                    <uprocName>STRAD29940</uprocName>
+                    <numOrdSession>4</numOrdSession>
+                    <executionContext id="167">
+                      <type>MU</type>
+                      <muName>U_SDB_PROD</muName>
+                      <syntaxCheck id="168">
+                        <current>true</current>
+                        <previous>true</previous>
+                      </syntaxCheck>
+                    </executionContext>
+                    <atom reference="21"/>
+                  </data>
+                </nextSibling>
+                <previousSibling reference="19"/>
+                <data id="169">
+                  <uprocName>STRAD00010</uprocName>
+                  <numOrdSession>3</numOrdSession>
+                  <executionContext id="170">
+                    <type>MU</type>
+                    <muName>A_STARWAS2</muName>
+                    <syntaxCheck id="171">
+                      <current>true</current>
+                      <previous>true</previous>
+                    </syntaxCheck>
+                  </executionContext>
+                  <atom reference="20"/>
+                </data>
+              </nextSibling>
+              <data id="172">
+                <uprocName>STRAD00006</uprocName>
+                <numOrdSession>2</numOrdSession>
+                <executionContext id="173">
+                  <type>MU</type>
+                  <muName>A_STARWAS1</muName>
+                  <syntaxCheck id="174">
+                    <current>true</current>
+                    <previous>true</previous>
+                  </syntaxCheck>
+                </executionContext>
+                <atom reference="19"/>
+              </data>
+            </childOk>
+            <data id="175">
+              <uprocName>STRHD29700</uprocName>
+              <numOrdSession>1</numOrdSession>
+              <executionContext id="176">
+                <type>SAME</type>
+                <syntaxCheck id="177">
+                  <current>true</current>
+                  <previous>true</previous>
+                </syntaxCheck>
+              </executionContext>
+              <atom reference="18"/>
+            </data>
+          </root>
+        </tree>
+        <postSesList id="178"/>
+        <postDevList id="179"/>
+      </Session>
+    </sessions>
+    <triggers class="linked-list" id="180"/>
+    <runbooks class="linked-list" id="181"/>
+    <calendars class="linked-list" id="182"/>
+    <businessViews class="linked-list" id="183"/>
+    <jobChains class="linked-list" id="184"/>
+    <jobEvents class="linked-list" id="185"/>
+    <dqmJobs class="linked-list" id="186"/>
+  </com.orsyp.ExportObjects>
+</object-stream>

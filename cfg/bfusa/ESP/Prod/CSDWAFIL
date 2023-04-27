@@ -1,0 +1,31 @@
+APPL CSDWAFIL WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/*********************************************************************/
+/* - 02/18/2016 - JFC - NEW APPL PER DARRELL DOMER                   */
+/*********************************************************************/
+/* - IF THIS JOB FAILS -                                             */
+/* - SEND EMAIL TO WINTEL GROUP AND LEAVE FOR AM                    */
+/*********************************************************************/
+
+NOTIFY FAILURE ABEND ALERT(REMD)
+
+JOB LIS.!ESPAPPL LINK PROCESS
+  RUN DAILY
+  DELAYSUB 23.15
+  RELEASE ADD(WA3200_FILE_TO_APP8)
+ENDJOB
+
+NT_JOB WA3200_FILE_TO_APP8
+  AGENT SFTGEN01PAKR
+  CMDNAME D:\CybermationJobs\ClaimsSystemJobs\WA3200FileToAPP8.cmd
+  USER svc_CAWorkload
+  RUN DAILY
+  RELEASE ADD(LIE.!ESPAPPL)
+ENDJOB
+
+JOB LIE.!ESPAPPL LINK PROCESS
+  RUN DAILY
+ENDJOB
+

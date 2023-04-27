@@ -1,0 +1,42 @@
+APPL SSisqlrs WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/*********************************************************************/
+/*02/11/2019-JFC-NEW APPL CREATED PER INC 1850412
+/*02/13/2019-JFC-added mailbox notify per INC 1852619
+/*********************************************************************/
+/**The batch job will stop and then restart SQL on the birdp-ak-fis  */
+/*********************************************************************/
+
+/*NOTIFY FAILURE ABEND ALERT(REMD)
+
+JOB LIS.!ESPAPPL LINK PROCESS
+   RUN TODAY
+   RELEASE ADD(SSIS_BIRDP_SQL_RESTART)
+   RELEASE ADD(SSIS_BIRDP_RECYCLE_SQL)
+ENDJOB
+
+NT_JOB SSIS_BIRDP_SQL_RESTART
+   AGENT CYBA_BIRDMAKFIS
+   USER sapcyber
+   CMDNAME \\BIRDP-ak-fis\OTC SSIS Production\Restart.BAT
+   RUN TODAY
+ /*NOTIFY END MAILBOX(SQLADMINS)
+   RELEASE ADD(LIE.!ESPAPPL)
+ENDJOB
+
+NT_JOB SSIS_BIRDP_RECYCLE_SQL
+   AGENT CYBA_BIRDMAKFIS
+   USER sapcyber
+   CMDNAME \\BIRDP-ak-fis\OTC SSIS Production\+
+           RunTaskRecycleSQLServer.bat
+   RUN TODAY
+ /*NOTIFY END MAILBOX(SQLADMINS)
+   RELEASE ADD(LIE.!ESPAPPL)
+ENDJOB
+
+JOB LIE.!ESPAPPL LINK PROCESS
+   RUN TODAY
+ENDJOB
+

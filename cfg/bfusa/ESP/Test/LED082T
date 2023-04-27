@@ -1,0 +1,54 @@
+APPL LED082T WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/*********************************************************************/
+/*05/02/2018 -JFC- NEW APPL CREATE TO RUN LED082 ON TEST ISBFT
+/*********************************************************************/
+
+JOB LIS.!ESPAPPL LINK PROCESS
+    RUN TODAY
+    RELEASE ADD(ZSDLEI23_SHPCONF_TO_AJWMS)
+ENDJOB
+
+FILE_TRIGGER ZSDLEI23_SHPCONF_TO_AJWMS
+    AGENT CYBA_ISBFT
+    FILENAME /data/BFT/interfaces/output/dataout/+
+     !user2 CREATE NOCHANGE(1)
+    RUN TODAY
+    RELEASE ADD(FTP_FILE_2_WPS)
+ENDJOB
+
+UNIX_JOB FTP_FILE_2_WPS
+   AGENT CYBA_ISBFT
+   USER wpsbft
+ /*USER root
+ /*USER bftadm
+   SCRIPTNAME /local/bin/sftp2_wps.sh
+   ARGS BFT "!user2"
+   RUN TODAY
+   RELEASE ADD(ARCHIVE_ZSDLEI23_SHPCONF_TO_AJWMS)
+ENDJOB
+
+UNIX_JOB FTP_FILE_2_WPS_AND_ARCHIVE
+   AGENT CYBA_ISBFT
+   USER wpsbft
+   SCRIPTNAME /local/bin/sftp2_wps_arc.sh
+   ARGS BFT "!user2"
+   RUN TODAY
+   RELEASE ADD(ARCHIVE_ZSDLEI23_SHPCONF_TO_AJWMS)
+ENDJOB
+
+UNIX_JOB ARCHIVE_ZSDLEI23_SHPCONF_TO_AJWMS
+   AGENT CYBA_ISBFT
+   USER bftadm
+   SCRIPTNAME /local/bin/arcfile.sh
+   ARGS interfaces/output/dataout/!user2 w
+   RUN DAILY
+   RELEASE ADD(LIE.!ESPAPPL)
+ ENDJOB
+
+JOB LIE.!ESPAPPL LINK PROCESS
+   RUN DAILY
+ENDJOB
+

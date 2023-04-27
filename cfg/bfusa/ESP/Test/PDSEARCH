@@ -1,0 +1,24 @@
+APPL PDSEARCH WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/*********************************************************************/
+/*05/17/2017 -JFC- NEW APPL CREATION                                 */
+/*********************************************************************/
+/*THIS APPL RUNS A JOB TO DO A 3.14 SEARCH AGAINST THESE DATASETS    */
+/* - DSN=SWS.ESP.APPL.PROCLIB,DISP=SHR
+/* - DSN=SWS.ESP.APPL.REQUEST.PROCLIB,DISP=SHR
+/* - DSN=SWS.ESP.BATCH.COMMANDS,DISP=SHR
+/* -
+/***TRIGGER THE EVENT WITH THE JOB NAME IN THE USER1 PARAMETER       */
+/*********************************************************************/
+
+NOTIFY FAILURE ABEND MAILBOX(SCHEDULERS)
+
+JOB PDSEARCH
+  DATASET 'FTRF.TSTJOBS'
+  ECHO !USER1
+  CCCHK RC(1:4095) FAIL
+  RUN TODAY
+ENDJOB
+

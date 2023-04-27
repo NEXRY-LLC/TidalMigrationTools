@@ -1,0 +1,29 @@
+APPL SSIS6003 WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/*********************************************************************/
+/*Staging BAOE Forecast                                              */
+/*04/09/2019 -JFC- CLEANED UP PROC - ADDED LIE - NO OTHER CHANGES    */
+/*********************************************************************/
+
+NOTIFY FAILURE ABEND ALERT(REMD)
+
+JOB LIS.!ESPAPPL LINK PROCESS
+   RUN DAILY
+   RELEASE ADD(INTERFACE_6003)
+ENDJOB
+
+NT_JOB INTERFACE_6003
+   AGENT CYBA_BIRDmAKFIS
+   USER sapcyber
+   CMDNAME "K:\OTC SSIS Production\BatchFiles\+
+   BAOE\DTEXEC_Interface_6003.bat"
+   RUN DAILY
+  RELEASE ADD(LIE.!ESPAPPL)
+ENDJOB
+
+JOB LIE.!ESPAPPL LINK PROCESS
+  RUN DAILY
+ENDJOB
+

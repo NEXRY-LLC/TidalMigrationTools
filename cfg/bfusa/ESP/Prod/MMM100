@@ -1,0 +1,99 @@
+APPL MMM100
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/*********************************************************************/
+/*INT-403 MRO Vendor Name & Address Extract
+/*04/01/2019 -JFC- CLEANED UP PROC - ADDED LIE - NO OTHER CHANGES
+/*********************************************************************/
+
+NOTIFY FAILURE ABEND ALERT(REMD)
+
+JOB LIS.!ESPAPPL LINK PROCESS
+    RUN LAST DAY OF MONTH
+    DELAYSUB 01.10
+    RELEASE ADD(ZMMPUI04_VENDOR_MASTER_DATA)
+ENDJOB
+
+DATA_OBJECT PARMSET.!ESPAPPL
+   /*Create a timestamp in hhmmMMDDYY format*/
+   SETVAR TMSTMP='!ESPSHH.:!ESPSMN.,!ESPSMM./!ESPSDD./!ESPSYY'
+   SETVAR PID=''
+   SETVAR STMPTM='!ESPSMM./!ESPSDD./!ESPSYY.,!ESPSHH.:!ESPSMN'
+ENDJOB
+
+JOB SETPID.!ESPAPPL LINK PROCESS
+   RUN LAST DAY OF MONTH
+   /*get the next PID number from the ConnectDirect*/
+   /*Process ID table (CDPROD).  Save the value into*/
+   /*the applications DataObject for use by the C:D*/
+   /*job and the CDSTAT job (if needed).*/
+   VINCR (PID) TABLE(CDPROD) CLANG
+   VGET  (PID) TABLE(CDPROD) CLANG
+   ESP MGRMSG * . . . PARMSET.!ESPAPPL/!ESPAPPL..!ESPAPGEN/MAIN +
+ACTION SET PID(!PID)
+   RELEASE ADD(SAPTOMROSS_VENDORCD)
+ENDJOB
+
+SAP_JOB ZMMPUI04_VENDOR_MASTER_DATA
+    SAPUSER SAPADM
+    AGENT CYBB_BFP030
+    SAPJOBNAME ZMMPUI04_VENDOR_MASTER_DATA
+    SAPJOBCLASS C
+    ABAPNAME ZMMPUI04
+    VARIANT PRODUCTION
+    LANGUAGE E
+    PRINTDEST CP21
+    PRINTCOPIES 001
+    EXPIRATION 8
+    COLUMNS 255
+    BANNER D
+    RECIPIENT SYLVESTTOM
+    ARCMODE PRINT
+    RUN LAST DAY OF MONTH
+    RELEASE ADD(SAPTOMROSS_VENDORCD)
+ENDJOB
+
+UNIX_JOB SAPTOMROSS_VENDORCD
+    AGENT CYBA_ISBFP3
+    EARLYSUB REALNOW PLUS 20 SECONDS
+    PID= WOBDATA('PARMSET.!ESPAPPL','PID')
+    TMSTMP= WOBDATA('PARMSET.!ESPAPPL','TMSTMP')
+/*@@ "/apps/condir/bfsbin/submit.sh saptomross_vendor.cd 5"
+    SCRIPTNAME /apps/condir/bfsbin/submitcd.sh
+    ARGS saptomross_vendor.cd 5  !PID !TMSTMP
+    RUN LAST DAY OF MONTH
+    RESOURCE ADD(1,ISBFP3CD)
+    USER cdprod
+    RELEASE ADD(CDSTAT.SAPMRS10(A))
+    RELEASE ADD(RMMPUI04.ISBFP3)
+ENDJOB
+
+AIX_JOB CDSTAT.SAPMRS10    CONDITIONAL
+   AGENT CYBA_ISBFP3
+   /*This job only runs if the C:D job does not end with*/
+   /*a EXITCODE of 0.  It can be rerun as often as*/
+   /*required to check the status of the C:D process.*/
+   /*When the C:D process finishes, complete the job*/
+   /*to release the successors.*/
+   USER cduser
+   STMPTM= WOBDATA('PARMSET.!ESPAPPL','STMPTM')
+   PID= WOBDATA('PARMSET.!ESPAPPL','PID')
+   CMDNAME /apps/condir/bfsbin/cdstat.sh
+   ARGS !STMPTM  j!PID
+   RUN LAST DAY OF MONTH
+ENDJOB
+
+UNIX_JOB RMMPUI04.ISBFP3
+    AGENT CYBA_ISBFP3
+    CMDNAME /bin/rm
+    ARGS /data/BFP/interfaces/output/dataout/zmmpui04_iod_vendor
+    RUN LAST DAY OF MONTH
+    USER cdprod
+    RELEASE ADD(LIE.!ESPAPPL)
+ENDJOB
+
+JOB LIE.!ESPAPPL LINK PROCESS
+    RUN LAST DAY OF MONTH
+ENDJOB
+

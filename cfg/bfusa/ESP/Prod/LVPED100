@@ -1,0 +1,43 @@
+APPL LVPED100 WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/**********************************************************************/
+/* 02/24/2020 -JFC- UPDATED AGENT FROM R7 TO R11.5.0                  */
+/*                - CHANGED JOBQ FROM CYBESPV210.CYBESPV2100          */
+/* 03/05/2020 -DSG- ADDED RESOURCE TO AS400 JOB - INC000002178363
+/*********************************************************************/
+/*MATERIAL & VERSION VALIDATION (Lavergne)                            */
+/*SDC535D-AS400 SFDC processing for material & version validation     */
+/**********************************************************************/
+
+NOTIFY FAILURE ABEND ALERT(REMD)
+
+AIX_JOB LIE.LVBOSS01 EXTERNAL APPLID(LVBOSS01)
+  RUN DAILY
+  RELEASE ADD(LIS.LVPED100)
+ENDJOB
+
+JOB LIS.LVPED100 LINK PROCESS
+  RUN DAILY
+  DELAYSUB 22.25
+  RELEASE ADD(SDC535D.LVPROD)
+ENDJOB
+
+AS400_JOB SDC535D.LVPROD
+  RESOURCE ADD(1,LVPROD)
+  AGENT LVPROD
+  COMMAND CYBROBOT SDC535D
+  JOBQ CAWAAGENT.CYBESPJOBS
+  RUN DAILY
+  RELEASE ADD(LIE.!ESPAPPL)
+ENDJOB
+
+AIX_JOB LIE.!ESPAPPL
+  AGENT CYBA_ISBFP3
+  COMMAND /bin/sleep
+  ARGS 3
+  USER bfpadm
+  RUN DAILY
+ENDJOB
+

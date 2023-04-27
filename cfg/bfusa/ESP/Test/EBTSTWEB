@@ -1,0 +1,36 @@
+APPL ebtstweb WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/**********************************************************************/
+/* 02/08/2019 -JFC- TESTING JOBS ON NEW AGENT BFISWEB                 */
+/**********************************************************************/
+
+FILE_TRIGGER TEST_FILE_1
+  AGENT BFISWEB
+  FILENAME 'D:\apps\test\test_file_1.txt' CREATE
+  RUN TODAY
+  RELEASE ADD(TEST_JOB_1)
+ENDJOB
+
+FILE_TRIGGER LETTERS_COLD
+  AGENT BFISWEB
+  FILENAME 'D:\ftproot\retribution\letters\COLD*.zip' create
+  RUN TODAY
+  RELEASE ADD(TEST_JOB_1)
+ENDJOB
+
+FILE_TRIGGER STATEMENTS_CCHE
+  AGENT BFISWEB
+  FILENAME 'D:\ftproot\retribution\statement\CCHE*.zip' create
+  RUN TODAY
+  RELEASE ADD(TEST_JOB_1)
+ENDJOB
+
+NT_JOB TEST_JOB_1 hold
+  AGENT BFISWEB
+  USER bsprintuser
+  CMDNAME D:\apps\test\test.bat
+  RUN TODAY
+ENDJOB
+

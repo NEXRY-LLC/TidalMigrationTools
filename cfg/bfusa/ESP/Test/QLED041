@@ -1,0 +1,81 @@
+APPL QLED041 WAIT                                                       00010006
+NOTIFY ABEND FAILURE ALERT(REMD)                                        00020003
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'                                 00030003
+                                                                        00040003
+SAP_JOB ZSDLEI41_TWW_COSTCO_MATL_XREF                                   00050003
+   AGENT CYBA_ISBFQ                                                     00060003
+   SAPJOBNAME ZSDLEI41_TWW_COSTCO_MATL_XREF                             00070003
+   SAPJOBCLASS C                                                        00080003
+   STARTMODE ASAP                                                       00090003
+   ABAPNAME ZSDLEI41                                                    00100003
+   STEPUSER SAPADM                                                      00110003
+   LANGUAGE E                                                           00120003
+   PRINTREL YES                                                         00130003
+   EXPIRATION 8                                                         00140003
+   LINES 65                                                             00150003
+   COLUMNS 80                                                           00160003
+   BANNER D                                                             00170003
+   ARCMODE PRINT                                                        00180003
+   PRINTCOPIES 001                                                      00190003
+   RUN TODAY                                                            00200003
+   RELEASE ADD(ZSDLEI41_CD)                                             00210003
+ENDJOB                                                                  00220003
+                                                                        00230003
+DATA_OBJECT PARMSET.!ESPAPPL                                            00240003
+   /*Create a timestamp in hhmmMMDDYY format*/                          00250003
+   SETVAR TMSTMP='!ESPSHH.:!ESPSMN.,!ESPSMM./!ESPSDD./!ESPSYY'          00260003
+   SETVAR PID=''                                                        00270003
+   SETVAR STMPTM='!ESPSMM./!ESPSDD./!ESPSYY.,!ESPSHH.:!ESPSMN'          00280003
+   RUN TODAY                                                            00290003
+ENDJOB                                                                  00300003
+                                                                        00310003
+JOB SETPID.!ESPAPPL LINK PROCESS                                        00320003
+   /*get the next PID number from the ConnectDirect*/                   00330003
+   /*Process ID table (CDPROD).  Save the value into*/                  00340003
+   /*the applications DataObject for use by the C:D*/                   00350003
+   /*job and the CDSTAT job (if needed).*/                              00360003
+   VINCR (PID) TABLE(CDPROD) CLANG                                      00370003
+   VGET  (PID) TABLE(CDPROD) CLANG                                      00380003
+   ESP MGRMSG * . . . PARMSET.!ESPAPPL/!ESPAPPL..!ESPAPGEN/MAIN +       00390003
+ACTION SET PID(!PID)                                                    00400003
+   RELEASE ADD(ZSDLEI41_CD)                                             00410003
+   RUN TODAY                                                            00420003
+ENDJOB                                                                  00430003
+                                                                        00440003
+UNIX_JOB ZSDLEI41_CD                                                    00450003
+   AGENT CYBA_ISBFQ                                                     00460003
+   EARLYSUB REALNOW PLUS 20 SECONDS                                     00470003
+   PID= WOBDATA('PARMSET.!ESPAPPL','PID')                               00480003
+   TMSTMP= WOBDATA('PARMSET.!ESPAPPL','TMSTMP')                         00490003
+   SCRIPTNAME /apps/condir/bfsbin/submitcd.sh                           00500003
+   ARGS zsdlei41.cd 6 !PID !TMSTMP                                      00510003
+   RUN TODAY                                                            00520003
+   USER cdtest                                                          00530003
+   RELEASE ADD(ARCHIVE_ZSDLEI41_CD)                                     00540003
+ENDJOB                                                                  00550003
+                                                                        00560003
+AIX_JOB CDSTAT.!ESPAPPL CONDITIONAL                                     00570003
+   AGENT CYBA_ISBFQ                                                     00580003
+   /*This job only runs if the C:D job does not end with*/              00590003
+   /*a EXITCODE of 0.  It can be rerun as often as*/                    00600003
+   /*required to check the status of the C:D process.*/                 00610003
+   /*When the C:D process finishes, complete the job*/                  00620003
+   /*to release the successors.*/                                       00630003
+   USER cduser                                                          00640003
+   STMPTM= WOBDATA('PARMSET.!ESPAPPL','STMPTM')                         00650003
+   PID= WOBDATA('PARMSET.!ESPAPPL','PID')                               00660003
+   CMDNAME /apps/condir/bfsbin/cdstat.sh                                00670003
+   ARGS !STMPTM  j!PID                                                  00680003
+   AFTER ADD(ZSDLEI41_CD)                                               00690003
+   RUN TODAY                                                            00700003
+ENDJOB                                                                  00710003
+                                                                        00720003
+UNIX_JOB ARCHIVE_ZSDLEI41_CD                                            00730003
+   AGENT CYBA_ISBFQ                                                     00740003
+   USER bfqadm                                                          00750003
+   SCRIPTNAME /local/bin/arcfile.sh                                     00760003
+   ARGS interfaces/output/dataout/zsdlei41_cmir_upload.txt D            00770005
+   RUN TODAY                                                            00780003
+ENDJOB                                                                  00790003
+                                                                        00800003
+                                                                        00810003

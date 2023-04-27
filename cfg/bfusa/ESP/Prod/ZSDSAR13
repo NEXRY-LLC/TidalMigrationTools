@@ -1,0 +1,30 @@
+APPL ZSDSAR13 WAIT
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+OPTIONS NODUEOUTPROPAGATION
+/**********************************************************************/
+/* 12/21/21 -VV - SCTASK0102931 - New schedule created
+/**********************************************************************/
+
+
+
+SAP_JOB ZSDSAR13DAILY
+   AGENT CYBB_BFP030
+   SAPJOBNAME ZSDSAR13DAILY
+   SAPJOBCLASS C
+   STARTMODE ASAP
+   ABAPNAME ZSDSAR13
+   VARIANT DAILY
+   STEPUSER S_BC_CYBERM
+   LANGUAGE E
+   EXPIRATION 8
+   LINES 65
+   COLUMNS 255
+   PRINTFORMAT X_PAPER
+   BANNER D
+   ARCMODE PRINT
+   RUN DAILY
+ENDJOB
+
+
+
+

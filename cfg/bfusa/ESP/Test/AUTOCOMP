@@ -1,0 +1,15 @@
+APPL AUTOCOMP WAIT
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/**********************************************************************/
+/* CREATED ON 12/06/21 - BS09611 - Auto complete of failed job        */
+/**********************************************************************/
+
+JOB COMPLTE.!MNJOB LINK PROCESS
+ RUN TODAY
+ DELAYSUB NOW PLUS 2 MINUTES
+ IF !MNSUB# LT 2 THEN DO
+ ESP AJ !MNFULLNAME COMPLETE APPL(!MNAPPL..!MNAPPLGEN)
+ ENDDO
+ENDJOB
+

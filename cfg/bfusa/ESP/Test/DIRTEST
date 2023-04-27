@@ -1,0 +1,23 @@
+APPL DIRTEST WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/********************************************************************/
+/*                 NOTES AND COMMENTS                               */
+/********************************************************************/
+/*05/31/2016 -JFC- TESTING SFTP JOB AND SECURE COPY JOB             */
+/********************************************************************/
+
+/*NT_JOB TEST_DIR_JOB hold
+   /*FROM THIS SERVER*/
+  /* AGENT DSSAPP01QAKR
+  /* USER maestro
+  /* TRANSFERDIRECTION DOWNLOAD
+   /*TO REMOTE SERVER
+  /* SERVERADDR FPR1-AK-FIS
+   /*REMOTEDIR '/PUBLIC/Costello'
+   /*REMOTENAME ESP_TEST_FTP.txt
+   /*RUN DAILY
+/*ENDJOB
+
+

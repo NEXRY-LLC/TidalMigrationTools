@@ -1,0 +1,102 @@
+APPL APM092 WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+NOTIFY FAILURE ABEND ALERT(REMD)
+
+/*********************************************************************/
+/*CR-276 CSV FILE
+/*********************************************************************/
+/*08/31/2018 -VMD- REMOVED JOB B2M088 EXTERNAL APPLID(APD006)        */
+/*                 PER JERRY HICKS                                   */
+/*06/03/2019 -JFC- DISABLED CONNECT:DIRECT JOBS PER INC000001950212  */
+/*********************************************************************/
+
+JOB LIS.!ESPAPPL LINK PROCESS
+    RUN 1ST WORKDAY OF MONTH
+    DELAYSUB 04.00
+    RELEASE ADD(ZFIAPR08_BFNT_CVS_FILE)
+ENDJOB
+
+DATA_OBJECT PARMSET.!ESPAPPL
+   /*Create a timestamp in hhmmMMDDYY format*/
+   SETVAR TMSTMP='!ESPSHH.:!ESPSMN.,!ESPSMM./!ESPSDD./!ESPSYY'
+   SETVAR PID=''
+   SETVAR STMPTM='!ESPSMM./!ESPSDD./!ESPSYY.,!ESPSHH.:!ESPSMN'
+ENDJOB
+
+JOB SETPID.!ESPAPPL LINK PROCESS
+    /*get the next PID number from the ConnectDirect*/
+    /*Process ID table (CDPROD).  Save the value into*/
+    /*the applications DataObject for use by the C:D*/
+    /*job and the CDSTAT job (if needed).*/
+    VINCR (PID) TABLE(CDPROD) CLANG
+    VGET  (PID) TABLE(CDPROD) CLANG
+    ESP MGRMSG * . . . PARMSET.!ESPAPPL/!ESPAPPL..!ESPAPGEN/MAIN +
+    ACTION SET PID(!PID)
+  /*RUN 1ST WORKDAY OF MONTH
+    RELEASE ADD(ZFIAPR08_CSVCD)
+ENDJOB
+
+SAP_JOB ZFIAPR08_BFNT_CVS_FILE
+    AGENT CYBB_BFP030
+    SAPJOBNAME ZFIAPR08_BFNT_CVS_FILE
+    SAPJOBCLASS C
+    SAPUSER SAPADM
+    ABAPNAME ZFIAPR08
+    VARIANT BFNT-SEL-CVS
+    LANGUAGE E
+    PRINTDEST CC18
+    PRINTCOPIES 001
+    PRINTIMMED YES
+    EXPIRATION 8
+    COLUMNS 255
+    BANNER YES
+    RECIPIENT LEONARDERICA
+    ARCMODE PRINT
+    RUN 1ST WORKDAY OF MONTH
+    RELEASE ADD(ZFIAPR08_CSVCD)
+ENDJOB
+
+UNIX_JOB ZFIAPR08_CSVCD
+    AGENT CYBA_ISBFP3
+    USER cdprod
+    EARLYSUB REALNOW PLUS 20 SECONDS
+    PID= WOBDATA('PARMSET.!ESPAPPL','PID')
+    TMSTMP= WOBDATA('PARMSET.!ESPAPPL','TMSTMP')
+    SCRIPTNAME /apps/condir/bfsbin/submitcd.sh
+    ARGS zfiapr08_csv.cd 5 !PID !TMSTMP
+  /*RUN 1ST WORKDAY OF MONTH
+    RESOURCE ADD(1,ISBFP3CD)
+    RELEASE ADD(CDSTAT.ZFIAPR08_CSVCD(A))
+    RELEASE ADD(ARZFIAPR08)
+ENDJOB
+
+AIX_JOB CDSTAT.ZFIAPR08_CSVCD CONDITIONAL
+   AGENT CYBA_ISBFP3
+   /*This job only runs if the C:D job does not end with*/
+   /*a EXITCODE of 0.  It can be rerun as often as*/
+   /*required to check the status of the C:D process.*/
+   /*When the C:D process finishes, complete the job*/
+   /*to release the successors.*/
+   USER cduser
+   STMPTM= WOBDATA('PARMSET.!ESPAPPL','STMPTM')
+   PID= WOBDATA('PARMSET.!ESPAPPL','PID')
+   CMDNAME /apps/condir/bfsbin/cdstat.sh
+   ARGS !STMPTM  j!PID
+ /*RUN 1ST WORKDAY OF MONTH
+ENDJOB
+
+UNIX_JOB ARZFIAPR08
+    AGENT CYBA_ISBFP3
+    USER bfpadm
+    SCRIPTNAME /local/bin/arcfile.sh
+    ARGS interfaces/output/dataout/zfiapr08_iod_pay_to_min_ind.txt M
+    RUN 1ST WORKDAY OF MONTH
+    RELEASE ADD(LIE.!ESPAPPL)
+ENDJOB
+
+JOB LIE.!ESPAPPL LINK PROCESS
+    RUN 1ST WORKDAY OF MONTH
+ENDJOB
+

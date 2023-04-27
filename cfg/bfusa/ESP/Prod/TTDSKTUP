@@ -1,0 +1,35 @@
+APPL TTDSKTUP WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/*******************************************************************/
+/*12/06/2018-JFC-APPL CREATED PER INC INC000001796073
+/*JOB RUNS hourly between 05.45 and 16.45
+/*08/08/2019 -JFC- ADDED OVERDUE ALERT STATEMENT                     */
+/*05/11/2022 -VV - REQ0144741 - changed user
+/*********************************************************************/
+
+NOTIFY ABEND FAILURE ALERT(REMD)
+NOTIFY OVERDUE ALERT(LATE)
+
+JOB LIS.!ESPAPPL LINK PROCESS
+   RUN DAILY
+   RELDELAY 15
+   RELEASE ADD(TT_SktSlipDataUPload)
+ENDJOB
+
+NT_JOB TT_SktSlipDataUPload
+   AGENT APPCYB02PPD
+   USER bfusa\svc_sktload
+   CMDNAME \\appcyb02ppd\esp$\SktSlipDataUPload\+
+           SktSlipDataUpload_C.exe
+   ARGS
+   RUN DAILY
+   DUEOUT EXEC NOW PLUS 3 HOURS
+   RELEASE ADD(LIE.!ESPAPPL)
+ENDJOB
+
+JOB LIE.!ESPAPPL LINK PROCESS
+   RUN DAILY
+ENDJOB
+

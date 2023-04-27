@@ -1,0 +1,29 @@
+NAME,VALUE
+CMC_FACE_LOGPATH,\\b58.cishoc.com\dfs\GSPRD\PRIVATE\PROD_SQL\Facets\5x\Region_3\Logfiles
+ETSLOGPATH,\\a02mftdfs0001.a02.cishoc.com\CO1MFT\EDIRTRPRD\ELOG\TRACE\WAAE_LOG
+ETS_FTP_ParmS,\\a02mftdfs0001.a02.cishoc.com\CO1MFT\EDISFTPPRD\ETS\Perl\basic_move.exe
+ETSFTPParmS1,\\a02mftdfs0001.a02.cishoc.com\CO1MFT\EDISFTPPRD\ETS\INI\Custom\
+ETSFTPParmE,\\a02mftdfs0001.a02.cishoc.com\CO1MFT\EDISFTPPRD\ETS\INI\System\SystemConfig.xml
+ETSFTPLOGPATH,\\a02mftdfs0001.a02.cishoc.com\CO1MFT\EDISFTPPRD\ETS\ELOG\WAAE_LOG
+ETSParmS1,perl.exe \\a02mftdfs0001.a02.cishoc.com\CO1MFT\EDIRTRPRD\ETS\perl\basic_move.plx
+ETSParmS2,\\a02mftdfs0001.a02.cishoc.com\CO1MFT\EDIRTRPRD\ETS\ini\custom\
+ETSParmE,\\a02mftdfs0001.a02.cishoc.com\CO1MFT\EDIRTRPRD\ETS\ini\system\SystemConfig.xml
+FACEParmS_64bit,C:\Tools\HBA\tzgexec.exe c:\tools\HBA\tzg_hbarun.wsf -~Facets HBA_
+CMC_FACE_ParmE,-@CommonSystemProp.xml --Region=fab58pr0
+MMM_QNXT_LOGPATH,\\b57.cishoc.com\dfs\GSPRD\PRIVATE\PROD\QNXT\5x\Region_3\Logfiles
+QNXTParmS,C:\Tools\HBA\tzgexec.exe c:\tools\HBA\tzg_hbarun.wsf -~QNXT
+MMM_QNXT_ParamE1,-@\\b57.cishoc.com\dfs\GSPRD\PRIVATE\PROD\QNXT\5x\Region_3\Runfiles\
+QNXTParmE2,QNXTCommonSystemProp_PROD.xml
+ETSParmS1,perl.exe \\a02mftdfs0001.a02.cishoc.com\CO1MFT\EDIRTRPRD\ETS\perl\basic_move.plx
+ETSParmS2,\\a02mftdfs0001.a02.cishoc.com\CO1MFT\EDIRTRPRD\ETS\ini\custom\
+ETSParmE,\\a02mftdfs0001.a02.cishoc.com\CO1MFT\EDIRTRPRD\ETS\ini\system\SystemConfig.xml
+ETSLOGPATH,\\a02mftdfs0001.a02.cishoc.com\CO1MFT\EDIRTRPRD\ELOG\TRACE\WAAE_LOG
+BATCH_DATE,1112023
+ETS_FTP_ParmS,\\a02mftdfs0001.a02.cishoc.com\CO1MFT\EDISFTPPRD\ETS\Perl\basic_move.exe
+ETS_FTP_CMD,\\a02mftdfs0001.a02.cishoc.com\CO1MFT\EDISFTPPRD\ETS\INI\Custom\
+ETS_SFTP_E,\\a02mftdfs0001.a02.cishoc.com\CO1MFT\EDISFTPPRD\ETS\INI\System\SystemConfig.xml
+ETSFTPLOGPATH,\\a02mftdfs0001.a02.cishoc.com\CO1MFT\EDISFTPPRD\ETS\ELOG\WAAE_LOG
+ETSWatchParmS1,perl.exe \\a02mftdfs0001.a02.cishoc.com\CO1MFT\EDIRTRPRD\ETS\perl\ETS_GEN_WATCH_FILE.plx
+ETSWatchParmS2,\\a02mftdfs0001.a02.cishoc.com\CO1MFT\EDIRTRPRD\ETS\ini\custom\
+ETSWatchParmE,\\a02mftdfs0001.a02.cishoc.com\CO1MFT\EDIRTRPRD\ETS\ini\system\SystemConfig.xml
+ETSParmS,\\a02mftdfs0001.a02.cishoc.com\CO1MFT\EDIRTRPRD\ETS\ini\custom\

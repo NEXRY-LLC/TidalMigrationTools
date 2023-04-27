@@ -1,0 +1,20 @@
+/**********************************************************************/
+/* IMPORTANT MEMBER CONTAINING NORUN DATES FOR INT-098 WORK FREEZES.  */
+/* DO NOT DELETE OR ALTER DATES WITHOUT PROPER APPROVAL.              */
+/* USED BY JOBS IN APPLS LED84EST, LED84CST AND LED84PST.             */
+/* DATES SUPPLIED BY ELIZABETH WELLS.                                 */
+/* PROCESS RUNS                         , SO INCLUDE BOTH DATES       */
+/* THIS WILL SUPPLY THE RUN DATES FOR EXTERNAL LED053                 */
+/* LED053 DOESNT RUN ON FRIDAY AND SATURDAY                           */
+/**********************************************************************/
+
+   RUN DEC 23 2020
+   RUN DEC 24 2020
+   RUN DEC 27 2020
+   RUN DEC 28 2020
+   RUN DEC 29 2020
+   RUN DEC 30 2020
+   RUN MAY 27 2021
+   RUN JUL 01 2021
+   RUN JUN 30 2021
+   RUN SEP 02 2021

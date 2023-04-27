@@ -1,0 +1,18 @@
+APPL USHSMBIL WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/*********************************************************************/
+/*02/26/2019 -JFC- CLEANED UP PROC - ADDED LIE - NO OTHER CHANGES    */
+/*********************************************************************/
+
+NOTIFY FAILURE ABEND ALERT(REMD)
+
+JOB USHSMBIL
+  /*@@ SYSTEM=DASD
+  CCCHK RC(1:4095) FAIL CONTINUE
+  RUN LAST WORKDAY OF MONTH
+  NORUN HOLIDAYS
+  DELAYSUB 11:45
+ENDJOB
+

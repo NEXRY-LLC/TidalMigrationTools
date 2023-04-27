@@ -1,0 +1,43 @@
+APPL SCESPERR WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/********************************************************************/
+/* THIS APPL CHECKS THE MAINFRAME LOGS FOR ESP ERRORS AND USES      */
+/*      SMTPNOTE TO SEND RESULTS TO SCHEDULING                      */
+/********************************************************************/
+/* WHEN YOU DEMAND IN THE EVENT:                                    */
+/* 1 - ENTER EMAIL ADDRESS INTO "PARAMETER 1" FIELD                 */
+/* 2 - ENTER EMAIL2 ADDRESS INTO "PARAMETER 2" FIELD                */
+/* 3 - ENTER SUBJECT INTO "PARAMETER 3" FIELD                       */
+/* 4 - ENTER DATASET NAME INTO "PARAMETER 4" FIELD                  */
+/********************************************************************/
+
+!USER1 = 'AK-FISSCHEDULING@BFUSA.COM'
+!USER2 = 'AKJOBREQ@BFUSA.COM'
+
+JOB LIS.!ESPAPPL LINK PROCESS
+   RUN DAILY
+   RELEASE ADD(SWESPMSG.AM)
+ENDJOB
+
+JOB SWESPMSG.AM
+   /*@@ SYSTEM=ESP
+   CCCHK RC(5:4095) FAIL CONTINUE
+   RUN DAILY
+   DELAYSUB 4AM
+   RELEASE ADD(SWESPMSG.PM)
+ENDJOB
+
+JOB SWESPMSG.PM
+   /*@@ SYSTEM=ESP
+   CCCHK RC(5:4095) FAIL CONTINUE
+   RUN DAILY
+   DELAYSUB 10PM
+   RELEASE ADD(LIE.!ESPAPPL)
+ENDJOB
+
+JOB LIE.!ESPAPPL LINK PROCESS
+   RUN DAILY
+ENDJOB
+

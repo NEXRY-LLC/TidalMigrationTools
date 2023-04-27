@@ -1,0 +1,124 @@
+APPL WGPPD050 WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/**********************************************************************/
+/*INT-162 WILSON Raw Material Consumption                             */
+/**RAWSAP creates the Raw Material Consumption file                   */
+/**F171RAWC (f171rawcon.cd) moves the raw materials file UNIX to APPM */
+/**WGMIMI04 (zmmimi04_f171_rm_gi) SAP Raw Material process            */
+/**F171RAWCON_DEL  Deletes RawSAP.txt from cdc1-ak-fis                */
+/**********************************************************************/
+/*02/14/2019 -VMD- REMOVED ALERT WG03 PER INC000001852710             */
+/**********************************************************************/
+
+NOTIFY ABEND FAILURE ALERT(REMD)
+
+DATA_OBJECT PARMSET.!ESPAPPL
+   /*Create a timestamp in hhmmMMDDYY format*/
+   SETVAR TMSTMP='!ESPSHH.:!ESPSMN.,!ESPSMM./!ESPSDD./!ESPSYY'
+   SETVAR PID=''
+   SETVAR STMPTM='!ESPSMM./!ESPSDD./!ESPSYY.,!ESPSHH.:!ESPSMN'
+ENDJOB
+
+JOB BFPULOCK EXTERNAL APPLID(SUNMAINT) SCHEDULED('YESTERDAY') +
+   SCOPE(-04)
+   IF ESPSHH = '00' & TODAY('MONDAY') THEN RUN TODAY
+   RELEASE ADD(LIS.!ESPAPPL)
+ENDJOB
+
+JOB LIS.!ESPAPPL LINK PROCESS
+   RUN DAILY
+   RELEASE ADD(F171RAWCONCD)
+ENDJOB
+
+JOB SETPID.!ESPAPPL LINK PROCESS
+   /*get the next PID number from the ConnectDirect*/
+   /*Process ID table (CDPROD).  Save the value into*/
+   /*the applications DataObject for use by the C:D*/
+   /*job and the CDSTAT job (if needed).*/
+   VINCR (PID) TABLE(CDPROD) CLANG
+   VGET  (PID) TABLE(CDPROD) CLANG
+   ESP MGRMSG * . . . PARMSET.!ESPAPPL/!ESPAPPL..!ESPAPGEN/MAIN +
+   ACTION SET PID(!PID)
+   RUN DAILY
+   RELEASE ADD(F171RAWCONCD)
+ENDJOB
+
+FILE_TRIGGER PPD050WI
+   AGENT CYBA_CDC1AKFIS
+   FILENAME \\cdc1-ak-fis\Data\Wilson\Raw_Matl_Consumption\RawSAP+
+   .txt create
+   RUN DAILY
+   RELEASE ADD(F171RAWCONCD)
+ENDJOB
+
+UNIX_JOB F171RAWCONCD
+   AGENT CYBA_ISBFP3
+   EARLYSUB REALNOW PLUS 20 SECONDS
+   PID= WOBDATA('PARMSET.!ESPAPPL','PID')
+   TMSTMP= WOBDATA('PARMSET.!ESPAPPL','TMSTMP')
+   SCRIPTNAME /apps/condir/bfsbin/submitcd.sh
+   ARGS f171rawcon.cd 10 !PID !TMSTMP
+   RESOURCE ADD(1,ISBFP3CD)
+   USER cdprod
+   RUN DAILY
+   RELEASE ADD(CDSTAT.F171RAWC(A))
+   RELEASE ADD(ZMMIMI04_F171_RM_GI)
+ENDJOB
+
+AIX_JOB CDSTAT.F171RAWC CONDITIONAL
+   AGENT CYBA_ISBFP3
+   /*This job only runs if the C:D job does not end with*/
+   /*a EXITCODE of 0.  It can be rerun as often as*/
+   /*required to check the status of the C:D process.*/
+   /*When the C:D process finishes, complete the job*/
+   /*to release the successors.*/
+   USER cduser
+   STMPTM= WOBDATA('PARMSET.!ESPAPPL','STMPTM')
+   PID= WOBDATA('PARMSET.!ESPAPPL','PID')
+   CMDNAME /apps/condir/bfsbin/cdstat.sh
+   ARGS !STMPTM  j!PID
+   RUN DAILY
+ENDJOB
+
+SAP_JOB ZMMIMI04_F171_RM_GI
+   SAPUSER SAPADM
+   AGENT CYBB_BFP030
+   SAPJOBNAME ZMMIMI04_F171_RM_GI
+   SAPJOBCLASS C
+   ABAPNAME ZMMIMI04
+   VARIANT 'VARIANT F171'
+   LANGUAGE E
+   PRINTDEST DZ01
+   PRINTIMMED YES
+   EXPIRATION 8
+   COLUMNS 132
+   BANNER D
+   RECIPIENT DUETTAD
+   ARCMODE PRINT
+   PRINTCOPIES 001
+   RUN DAILY
+   RELEASE ADD(F171RAWCON_DEL)
+ENDJOB
+
+NT_JOB F171RAWCON_DEL
+   AGENT CYBA_CDC1AKFIS
+   CMDNAME D:\DTS_RUN\BatchFiles\Consumption\F171RawCon_DEL.bat
+   ARGS
+   USER maestro
+   RUN DAILY
+   RELEASE ADD(LIE.!ESPAPPL)
+ENDJOB
+
+AIX_JOB LIE.!ESPAPPL
+  AGENT CYBA_ISBFP3
+  COMMAND /bin/sleep
+  ARGS 3
+  USER bfpadm
+  RUN DAILY
+   IF ESPSHH = '00' THEN DUEOUT EXEC 01.00
+   IF ESPSHH = '09' THEN DUEOUT EXEC 10.00
+   NOTIFY OVERDUE MAILBOX(AKRONJOBREQ)
+ENDJOB
+

@@ -1,0 +1,20 @@
+APPL ELD808CE WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/*********************************************************************/
+/*02/28/2018-JFC-MOVED TO OBSOLETE-DELETED EVENT
+/*04/09/2018 -JFC- MOVED BACK TO PRODUCTION PER DANNY
+/*********************************************************************/
+
+NOTIFY FAILURE ABEND ALERT(REMD)
+SCHD1 = 'YESTERDAY'
+IF !USER2 = 1 OR !USER2 = '' THEN SCHD1 = 'TODAY'
+
+JOB ELD808CE
+  OPTIONS NORESTARTSTEP
+  CCCHK RC(1:4095) FAIL CONTINUE
+    /*@@ SCHID=001
+  RUN !SCHD1
+ENDJOB
+

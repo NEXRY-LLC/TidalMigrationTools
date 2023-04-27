@@ -1,0 +1,16 @@
+APPL US11PMNT WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/*********************************************************************/
+/*02/26/2019 -JFC- CLEANED UP PROC - ADDED LIE - NO OTHER CHANGES    */
+/*********************************************************************/
+
+NOTIFY FAILURE ABEND ALERT(REMD)
+
+JOB US11PMNT
+  OPTIONS NORESTARTSTEP
+  RUN DAILY
+  DELAYSUB 23:45
+ENDJOB
+

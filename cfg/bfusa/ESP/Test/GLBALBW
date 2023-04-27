@@ -1,0 +1,22 @@
+APPL GLBALBW WAIT NOPOST_WHILE_WAITING
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/**********************************************************************/
+/* TESTING IN THIS APPL:                                              */
+/* - TAGS                                                             */
+/* - RUN STATEMENTS USING THE PARAMETERS                              */
+/* - NOTIFY JOB USING EVENT AND THE 4 PARAMETERS                      */
+/**********************************************************************/
+
+/*NOTIFY END MAILBOX(OPSTEST)
+NOTIFY FAILURE ABEND END ALERT(REMX)
+NOTIFY FAILURE ABEND END MAILBOX(SCHEDULERS)
+NT_JOB JOB_C009_GL_BALANCE_BW_EXTRACT
+   AGENT DSSAPP01QAKR
+   user svc_sap_ds_q
+   CMDNAME "\\DSSAPP01QAKR\JOB_SCRIPTS\+
+   JOB_C009_GL_BALANCE_BW_EXTRACT.BAT"
+   RUN TODAY
+ENDJOB
+

@@ -1,0 +1,18 @@
+APPL UXWDBSLQ
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/*********************************************************************/
+/*04/20/2021 -Special run for SLQ                                       00010002
+/*********************************************************************/
+/*********************************************************************/
+NOTIFY ABEND FAILURE ALERT(REMD)
+
+
+UNIX_JOB WEEKLY_DB2_BKUP_FOR_SAPSLQ
+   AGENT CYBA_SAPSLQ
+   SCRIPTNAME /db2/db2slq/Commvault_Backup_Scripts/DB2_CV_Backup.sh
+   ARGS SLQ FULL
+   USER db2slq
+   RUN TODAY
+ENDJOB

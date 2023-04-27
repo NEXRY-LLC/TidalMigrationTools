@@ -1,0 +1,23 @@
+APPL QAPRDCON WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/**********************************************************************/
+/*10/18/2016-JFC- NO CHANGES MADE -                                   */
+/**********************************************************************/
+
+NOTIFY FAILURE ABEND ALERT(REMD)
+NOTIFY FAILURE ABEND MAILBOX(QAFAIL)
+TAG PPIW
+CRITPATH ON
+
+NT_JOB PRODUCTION_CONSOLIDATED_CHECKS
+   AGENT CYBA_PPIWPROD
+   CMDNAME X:\CMD_SCRIPTS\PRODUCTION_CONSOLIDATED_CHECKS.cmd
+   ARGS
+   USER maestro
+   NOTIFY FAILURE ABEND MAILBOX(QAFAIL)
+   RUN DAILY
+   DELAYSUB 04.00
+ENDJOB
+

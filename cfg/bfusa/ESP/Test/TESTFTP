@@ -1,0 +1,12 @@
+//TESTFTP  JOB (XXXXXX,SQS8),CLASS=R,MSGCLASS=J
+//*                                                                 ***
+//* FTP TEST
+//*                                                                 ***
+//FTPSTP  EXEC PGM=FTP,REGION=4096K,PARM='(EXIT',COND=(4,LT)
+//SYSTCPD  DD  DSN=SYS1.TCPPARMS(TCPDATA),DISP=SHR
+//SYSFTPD  DD  DSN=SYS1.TCPPARMS(FTPDATA),DISP=SHR
+//NETRC    DD  DSN=FTRF.CD.CNTL(NETRCSPL),DISP=SHR
+//INPUT    DD  DSN=FTRF.CD.CNTL(APPTAX),DISP=SHR
+//OUTPUT   DD  SYSOUT=*
+//SYSPRINT DD  SYSOUT=*
+//*

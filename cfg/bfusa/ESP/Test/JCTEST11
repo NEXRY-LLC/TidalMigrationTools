@@ -1,0 +1,130 @@
+APPL JCTEST11 WAIT NOPOST_WHILE_WAITING
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/*********************************************************************/
+/* - TESTING THE REEXEC COMMAND -                                    */
+/* CAN SET THE REXEC TIME FROM MINUTES TO DAYS                       */
+/* -SET MAXIMUM RERUN ATTEMPTS USING THE IF ESPREEXEC#>  STATEMENT   */
+/* THE ACTUAL MAXIMUM COUNT SHOULD BE MUCH GREATER -                 */
+/*            MAXIMUM COUNT IS FOR PREVENTING "RUN AWAY" SITUATIONS  */
+/*********************************************************************/
+
+NOTIFY FAILURE ABEND MAILBOX(SCHEDULERS)
+TAG TEST
+S101 = 'YESTERDAY'
+S201 = 'YESTERDAY'
+S301 = 'YESTERDAY'
+S401 = 'YESTERDAY'
+S501 = 'YESTERDAY'
+S601 = 'YESTERDAY'
+IF !USER2 = 101 THEN S101 = 'TODAY'
+IF !USER2 = 201 THEN S201 = 'TODAY'
+IF !USER2 = 301 THEN S301 = 'TODAY'
+IF !USER2 = 401 THEN S401 = 'TODAY'
+IF !USER2 = 501 THEN S501 = 'TODAY'
+IF !USER2 = 601 THEN S601 = 'TODAY'
+
+/*****************************************************************/
+/*****************************************************************/
+/* -EXAMPLE1 - ENTER 101 IN PARAMETER 2 FOR THIS EXAMPLE         */
+/*****************************************************************/
+/*****************************************************************/
+
+JOB SWESPJC2
+  CCCHK RC(4) OK CONTINUE
+  RUN !S101
+  RUN !S201
+  RUN !S301
+  RUN !S401
+  RUN !S501
+  RUN !S601
+  RELEASE ADD(REEXEC01)
+  RELEASE ADD(REEXEC02)
+  RELEASE ADD(REEXEC03)
+  RELEASE ADD(REEXEC04)
+  RELEASE ADD(REEXEC05)
+  RELEASE ADD(REEXEC06)
+ENDJOB
+
+JOB REEXEC01 TASK
+  /*IF !ESPREEXEC#=0 THEN REEXEC AT('REALNOW PLUS 12 HOURS')
+  RUN !S101
+   PREREQ (SWESPJC2) COND(RC(04))
+  ESP AJ SWESPJC2 RESUBMIT JOBNAME(SWESPJC2)
+    /*SET REEXEC TIME TO 1-255 MINUTES*/
+     /*SET MAXIMUM TO EXCEED THE AMOUNT OF RERUNS IN THE IF STATEMENT*/
+  REEXEC IN(1) MAXIMUM(4)
+    /*THIS IS WHERE YOU SET YOUR MAX RERUN ATTEMPTS*/
+  IF ESPREEXEC#>3 THEN  ESP AJ ALL COMPLETE APPL(JCTEST11.0)
+ENDJOB
+
+
+/*****************************************************************/
+/*****************************************************************/
+/* -EXAMPLE2 - ENTER 201 IN PARAMETER 2 FOR THIS EXAMPLE         */
+/*****************************************************************/
+/*****************************************************************/
+
+JOB REEXEC02 TASK
+  RUN !S201
+  ESP AJ SWESPJC2 RESUBMIT JOBNAME(SWESPJC2)
+  REEXEC AT('TODAY PLUS 1 WORKDAY') MAXIMUM(1)
+   IF ESPREEXEC#>1 THEN  ESP AJ ALL COMPLETE APPL(JCTEST11.0)
+ENDJOB
+
+
+/*****************************************************************/
+/*****************************************************************/
+/* -EXAMPLE3 - ENTER 301 IN PARAMETER 2 FOR THIS EXAMPLE         */
+/*****************************************************************/
+/*****************************************************************/
+
+JOB REEXEC03 TASK
+  RUN !S301
+  ESP AJ SWESPJC2 RESUBMIT JOBNAME(SWESPJC2)
+  REEXEC AT('REALNOW PLUS 1 HOURS') MAXIMUM(25)
+   IF ESPREEXEC#>23 THEN  ESP AJ ALL COMPLETE APPL(JCTEST11.0)
+  RELEASE ADD(TASK.JCTEST11)
+ENDJOB
+
+
+/*****************************************************************/
+/*****************************************************************/
+/* -EXAMPLE4 - ENTER 401 IN PARAMETER 2 FOR THIS EXAMPLE         */
+/*****************************************************************/
+/*****************************************************************/
+
+JOB REEXEC04 TASK
+  RUN !S401
+  ESP AJ SWESPJC2 RESUBMIT JOBNAME(SWESPJC2)
+  REEXEC AT('REALNOW PLUS 5 min') MAXIMUM(4)
+   IF ESPREEXEC#>3 THEN  ESP AJ ALL COMPLETE APPL(JCTEST11.0)
+ENDJOB
+
+/*****************************************************************/
+/*****************************************************************/
+/* -EXAMPLE5 - ENTER 501 IN PARAMETER 2 FOR THIS EXAMPLE         */
+/*****************************************************************/
+/*****************************************************************/
+
+JOB REEXEC05 TASK
+  RUN !S501
+  ESP AJ SWESPJC2 RESUBMIT JOBNAME(SWESPJC2)
+   REEXEC IN(10) MAXIMUM(5)
+   IF ESPREEXEC#>5 THEN  ESP AJ ALL COMPLETE APPL(JCTEST11.0)
+ENDJOB
+
+/*****************************************************************/
+/*****************************************************************/
+/* -EXAMPLE6 - ENTER 601 IN PARAMETER 2 FOR THIS EXAMPLE         */
+/*****************************************************************/
+/*****************************************************************/
+
+JOB REEXEC06 TASK
+  RUN !S601
+  ESP AJ SWESPJC2 RESUBMIT JOBNAME(SWESPJC2)
+  REEXEC AT('REALNOW PLUS 6 HOURS') MAXIMUM(6)
+   IF ESPREEXEC#>5 THEN  ESP AJ ALL COMPLETE APPL(JCTEST11.0)
+ENDJOB
+

@@ -1,0 +1,164 @@
+APPL US01 WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+TAG 'ALERT'
+
+
+SEND_IT = 'NO'
+ESP_BG_COLOR    = '#FFFF00'
+/* Background color choices are : '#FF0000'  (red)       */
+/*                                '#FF8800'  (orange)    */
+/*                                '#FFFF00'  (yellow)    */
+ESP_RECIPIENT_1 = ' '
+ESP_RECIPIENT_2 = ' '
+ESP_RECIPIENT_3 = ' '
+ESP_RECIPIENT_4 = ' '
+ESP_RECIPIENT_5 = ' '
+ESP_MESSAGE_1   = ' '
+ESP_MESSAGE_2   = ' '
+ESP_MESSAGE_3   = ' '
+ESP_MESSAGE_4   = ' '
+ESP_MESSAGE_5   = ' '
+ESP_MESSAGE_6   = ' '
+ESP_MESSAGE_7   = ' '
+ESP_MESSAGE_8   = ' '
+ESP_MESSAGE_9   = ' '
+ESP_MESSAGE_10  = ' '
+
+/*    Message lines may be continued as shown here, where the   */
+/*    plus sign says continue on the next line and ignore the   */
+/*    leading spaces.                                           */
+/*                                                              */
+/*    ESP_MESSAGE_1  = 'Job !MNJOB has ended with a maximum +   */
+/*                      RC of !MNMXRC..'                        */
+/*                                                              */
+/*    Note that a line can be from 40 to 70 characters without  */
+/*    wrapping in the resulting email.  This is dependent on    */
+/*    the width of the various characters used in the text.     */
+
+JOB LIS.!MNAPPL LINK PROCESS
+   RUN NOW
+   RELEASE ADD(SWESPEML.!MNAPPL)
+ENDJOB
+
+JOB SWESPEML.!MNAPPL
+   RUN NOW
+ENDJOB
+
+/* start message for SWCATLG2 with RC EQ 0           */
+  IF !MNJOB EQ 'SWCATLG2' AND -
+     !MNMXRC EQ 0 THEN -
+     DO
+       SEND_IT         = 'YES'
+       ESP_BG_COLOR    = '#FFFF00'
+       ESP_RECIPIENT_1 = 'rcpt to:<deeringjack@bfusa.com>'
+       ESP_RECIPIENT_2 = 'rcpt to:<SamelsDan@bfusa.com>'
+       ESP_RECIPIENT_3 = -
+'rcpt to:<BSAM-Resource-RACFSecurity-Owners@SalesBridge.onmicrosoft.com>'
+       ESP_MESSAGE_1   = 'Job !MNJOB in application !MNAPPL has ended'
+       ESP_MESSAGE_2   = 'with a maximum RC of !MNMXRC..'
+       ESP_MESSAGE_4   = 'Please run IDCAMS ALTER DSN SCRATCH +
+                          for every DSN in SW.HSM.ALTSCR.'
+     ENDDO
+/* end message for SWCATLG2 with RC EQ 0             */
+
+/* start message for SWSARSTS with RC NE 0           */
+  IF !MNJOB EQ 'SWSARSTS' AND -
+     !MNMXRC EQ 4 THEN -
+     DO
+       SEND_IT         = 'YES'
+       ESP_BG_COLOR    = '#FF8800'
+       ESP_RECIPIENT_1 = 'rcpt to:<deeringjack@bfusa.com>'
+       ESP_RECIPIENT_2 = 'rcpt to:<SamelsDan@bfusa.com>'
+       ESP_RECIPIENT_3 = 'rcpt to:<AK-FISScheduling@bfusa.com>'
+       ESP_RECIPIENT_4 = -
+'rcpt to:<BSAM-Resource-RACFSecurity-Owners@SalesBridge.onmicrosoft.com>'
+       ESP_MESSAGE_1   = 'Job !MNJOB in application !MNAPPL has ended'
+       ESP_MESSAGE_2   = 'with a maximum RC of !MNMXRC..'
+       ESP_MESSAGE_4   = 'Please review the percent used +
+                          and error blocks and tape check'
+       ESP_MESSAGE_5   = 'in DSN=SW.SARSTAT.REPORT.'
+     ENDDO
+/* end message for SWSARSTS with RC EQ 4             */
+
+/* start message for SWSTGCHK with RC EQ 4           */
+  IF !MNJOB EQ 'SWSTGCHK' AND -
+     !MNMXRC EQ 4 THEN -
+     DO
+       SEND_IT         = 'YES'
+       ESP_BG_COLOR    = '#FF8800'
+       ESP_RECIPIENT_1 = 'rcpt to:<deeringjack@bfusa.com>'
+       ESP_RECIPIENT_2 = 'rcpt to:<SamelsDan@bfusa.com>'
+       ESP_RECIPIENT_3 = 'rcpt to:<AK-FISScheduling@bfusa.com>'
+       ESP_RECIPIENT_4 = -
+'rcpt to:<BSAM-Resource-RACFSecurity-Owners@SalesBridge.onmicrosoft.com>'
+       ESP_MESSAGE_1   = 'Job !MNJOB in application !MNAPPL has ended'
+       ESP_MESSAGE_2   = 'with a maximum RC of !MNMXRC..'
+       ESP_MESSAGE_4   = 'Check USUCCU96 and USHSMU96 in SAR +
+                          for percent usage.'
+       ESP_MESSAGE_5   = 'Divide total tracks allocated by tracks +
+                          per device at the end of the reports.'
+       ESP_MESSAGE_7   = 'You may need to add volumes.'
+     ENDDO
+/* end message for SWSTGCHK with RC EQ 4             */
+
+/* start message for SWTMSPTR with RC NE 0           */
+  IF !MNJOB EQ 'SWTMSPTR' AND -
+     !MNMXRC NE 0 THEN -
+     DO
+       SEND_IT         = 'YES'
+       ESP_BG_COLOR    = '#FF8800'
+       ESP_RECIPIENT_1 = 'rcpt to:<deeringjack@bfusa.com>'
+       ESP_RECIPIENT_2 = 'rcpt to:<SamelsDan@bfusa.com>'
+       ESP_RECIPIENT_3 = 'rcpt to:<AK-FISScheduling@bfusa.com>'
+       ESP_RECIPIENT_4 = -
+'rcpt to:<BSAM-Resource-RACFSecurity-Owners@SalesBridge.onmicrosoft.com>'
+       ESP_MESSAGE_1   = 'Job !MNJOB in application !MNAPPL has ended'
+       ESP_MESSAGE_2   = 'with a maximum RC of !MNMXRC..'
+       ESP_MESSAGE_4   = 'Check SWTMSPTR-R01 in SAR +
+                          for bad pointers.'
+     ENDDO
+/* end message for SWTMSPTR with RC NE 0             */
+
+/* start message for SWVTSCHK with RC EQ 4           */
+  IF !MNJOB EQ 'SWVTSCHK' AND -
+     !MNMXRC EQ 8 THEN -
+     DO
+       SEND_IT         = 'YES'
+       ESP_BG_COLOR    = '#FF8800'
+       ESP_RECIPIENT_1 = 'rcpt to:<deeringjack@bfusa.com>'
+       ESP_RECIPIENT_2 = 'rcpt to:<SamelsDan@bfusa.com>'
+       ESP_RECIPIENT_3 = 'rcpt to:<AK-FISScheduling@bfusa.com>'
+       ESP_RECIPIENT_4 = -
+'rcpt to:<BSAM-Resource-RACFSecurity-Owners@SalesBridge.onmicrosoft.com>'
+       ESP_MESSAGE_1   = 'Job !MNJOB in application !MNAPPL has ended'
+       ESP_MESSAGE_2   = 'with a maximum RC of !MNMXRC..'
+       ESP_MESSAGE_4   = 'Please check job SWVTSYNC in SAR.'
+       ESP_MESSAGE_5   = 'There are fewer than 100 free MVCs and +
+                          physical tapes may need'
+       ESP_MESSAGE_6   = 'to be added to the VTS.'
+     ENDDO
+/* end message for SWVTSCHK with RC EQ 4             */
+
+/* start message for USOFFCHK with RC EQ 4           */
+  IF !MNJOB EQ 'USOFFCHK' AND -
+     !MNMXRC EQ 4 THEN -
+     DO
+       SEND_IT         = 'YES'
+       ESP_BG_COLOR    = '#FFFF00'
+       ESP_RECIPIENT_1 = 'rcpt to:<deeringjack@bfusa.com>'
+       ESP_RECIPIENT_2 = 'rcpt to:<SamelsDan@bfusa.com>'
+       ESP_RECIPIENT_3 = 'rcpt to:<AK-FISScheduling@bfusa.com>'
+       ESP_RECIPIENT_4 = -
+'rcpt to:<BSAM-Resource-RACFSecurity-Owners@SalesBridge.onmicrosoft.com>'
+       ESP_MESSAGE_1   = 'Job !MNJOB in application !MNAPPL has ended'
+       ESP_MESSAGE_2   = 'with a maximum RC of !MNMXRC..'
+       ESP_MESSAGE_4   = 'Please check report in hold Q 4 additions +
+                          to the offsite table.'
+     ENDDO
+/* end message for USOFFCHK with RC EQ 4             */
+
+  IF SEND_IT = 'YES' THEN RUN NOW
+
+

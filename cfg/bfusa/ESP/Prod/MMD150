@@ -1,0 +1,51 @@
+APPL MMD150 WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/*********************************************************************/
+/*EXTRACT COLLEY WH DAILY ASN'S                                      */
+/*Remove RUN REF and AFTER ADD STMTS      JRE  01/21/15              */
+/*02/13/2019 -JFC- CHANGED SAP PRINDEST PER INC000001851980          */
+/*********************************************************************/
+
+NOTIFY FAILURE ABEND ALERT(REMD)
+
+JOB LIS.!ESPAPPL LINK PROCESS
+  RUN WEEKDAYS
+  RELEASE ADD(ZMMPOI09_SEABORNE_ASN_EXTRACT)
+ENDJOB
+
+SAP_JOB ZMMPOI09_SEABORNE_ASN_EXTRACT                                   TRACT')
+  AGENT CYBB_BFP030
+  SAPJOBNAME ZMMPOI09_SEABORNE_ASN_EXTRACT
+  SAPJOBCLASS C
+  SAPUSER SAPADM
+  ABAPNAME ZMMPOI09
+  VARIANT COLLEY
+  LANGUAGE E
+  PRINTDEST CP21
+  PRINTCOPIES 001
+  EXPIRATION 8
+  COLUMNS 132
+  BANNER D
+  RECIPIENT SAPADM
+  ARCMODE PRINT
+  RUN WEEKDAYS
+  RELEASE ADD(ZMMPOI09SCP)
+ENDJOB
+
+UNIX_JOB ZMMPOI09SCP
+  AGENT CYBA_ISBFP3
+  SCRIPTNAME /apps/ssh/bin/scp2.sh
+ARGS put /data/BFP/interfaces/output/dataout/zmmpoi09_asn_eorle+
+          ans.txt sftp1.bsaecomm.com:/GFM/A2S/SAP/Upload/zmmpoi0+
+          9_asn_eorleans.txt
+  USER sftpprod
+  RUN WEEKDAYS
+  RELEASE ADD(LIE.!ESPAPPL)
+ENDJOB
+
+JOB LIE.!ESPAPPL LINK PROCESS
+  RUN WEEKDAYS
+ENDJOB
+

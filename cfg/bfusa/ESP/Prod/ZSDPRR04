@@ -1,0 +1,34 @@
+APPL ZSDPRR04 WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/*********************************************************************/
+/*NOTIFY ABEND FAILURE ALERT(REMD)
+/*12/07/2021 -VV - SCTASK0097085 -  <DavisDana@bfusa.com>             /
+/*12/13/2021 -VV - INC0214289    - Modified the User                 */
+/*********************************************************************/
+
+NOTIFY ABEND FAILURE ALERT(REMD)
+
+
+SAP_JOB ZSDPRR04_OTRPRICING_CFB
+   AGENT CYBB_BFP030
+   SAPJOBNAME ZSDPRR04_OTRPRICING-CFB
+   SAPJOBCLASS C
+   STARTMODE ASAP
+   ABAPNAME ZSDPRR04
+   VARIANT 'OTRPRICING-CFB'
+   STEPUSER S_BC_CYBERM
+   LANGUAGE E
+   PRINTDEST LOCL
+   EXPIRATION 8
+   COLUMNS 255
+   BANNER D
+   RECIPIENT S_BC_CYBERM
+   ARCMODE PRINT
+   PRINTCOPIES 001
+   RUN SAT
+ENDJOB
+
+
+

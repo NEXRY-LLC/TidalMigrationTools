@@ -1,0 +1,8 @@
+APPL EB01
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/*********************************************************************/
+/*01/16/2019 -VMD- REMOVED APPL'S EBRTSTMT, BRTLTRS, EBNAPA00,     **/
+/*                 AND EBGACOI FROM THIS ALERT, NO LONGER NEEDED    **/
+/*********************************************************************/

@@ -1,0 +1,26 @@
+APPL USBCDSCR WAIT
+
+ INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/*********************************************************************/
+/*03/18/2019 -JFC-  UPDATED PROC PER  INC000001878222                */
+/*********************************************************************/
+
+NOTIFY FAILURE ABEND ALERT(REMD)
+
+JOB LIS.!ESPAPPL LINK PROCESS
+  RUN DAILY
+  DELAYSUB 01:00
+  RELEASE ADD(USBCDSCR)
+ENDJOB
+
+JOB USBCDSCR
+  CCCHK RC(1:4095) FAIL CONTINUE
+  RUN THU
+  RELEASE ADD(LIE.!ESPAPPL)
+ENDJOB
+
+JOB LIE.!ESPAPPL LINK PROCESS
+  RUN DAILY
+ENDJOB
+

@@ -1,0 +1,131 @@
+<object-stream>
+  <int>1</int>
+  <com.orsyp.ExportObjects id="1">
+<!--    <users class="linked-list" id="2"/>-->
+<!--    <domains class="linked-list" id="3"/>-->
+<!--    <applications class="linked-list" id="4"/>-->
+<!--    <rules class="linked-list" id="5"/>-->
+<!--    <resources class="linked-list" id="6"/>-->
+<!--    <uprocClasses class="linked-list" id="7"/>-->
+<!--    <uprocs class="linked-list" id="8"/>-->
+<!--    <mus class="linked-list" id="9"/>-->
+<!--    <queues class="linked-list" id="10"/>-->
+<!--    <tasks class="linked-list" id="11"/>-->
+    <sessions class="linked-list" id="12">
+      <Session id="13">
+        <identifier class="SessionId" id="14">
+          <syntaxRules class="com.orsyp.api.syntaxerules.OwlsSyntaxRules" id="15"/>
+          <name>BWPSD00215</name>
+          <version>000</version>
+        </identifier>
+        <syntaxCheck id="16">
+          <current>true</current>
+          <previous>false</previous>
+        </syntaxCheck>
+        <functionalVersion>0</functionalVersion>
+        <label>BWP DAILY AUTO RECON GROUP</label>
+        <tree id="17">
+          <root id="18">
+            <root reference="18"/>
+            <childOk id="19">
+              <root reference="18"/>
+              <parent reference="18"/>
+              <nextSibling id="20">
+                <root reference="18"/>
+                <parent reference="18"/>
+                <nextSibling id="21">
+                  <root reference="18"/>
+                  <parent reference="18"/>
+                  <nextSibling id="22">
+                    <root reference="18"/>
+                    <parent reference="18"/>
+                    <previousSibling reference="21"/>
+                    <data id="23">
+                      <uprocName>BWPTD00215</uprocName>
+                      <numOrdSession>5</numOrdSession>
+                      <executionContext id="24">
+                        <type>HDP</type>
+                        <hdp id="25">
+                          <child></child>
+                          <parent></parent>
+                          <syntaxCheck id="26">
+                            <current>true</current>
+                            <previous>true</previous>
+                          </syntaxCheck>
+                        </hdp>
+                        <syntaxCheck id="27">
+                          <current>true</current>
+                          <previous>true</previous>
+                        </syntaxCheck>
+                      </executionContext>
+                      <atom reference="22"/>
+                    </data>
+                  </nextSibling>
+                  <previousSibling reference="20"/>
+                  <data id="28">
+                    <uprocName>BWPPD00240</uprocName>
+                    <numOrdSession>4</numOrdSession>
+                    <executionContext id="29">
+                      <type>SAME</type>
+                      <syntaxCheck id="30">
+                        <current>true</current>
+                        <previous>true</previous>
+                      </syntaxCheck>
+                    </executionContext>
+                    <atom reference="21"/>
+                  </data>
+                </nextSibling>
+                <previousSibling reference="19"/>
+                <data id="31">
+                  <uprocName>BWPPD00235</uprocName>
+                  <numOrdSession>3</numOrdSession>
+                  <executionContext id="32">
+                    <type>SAME</type>
+                    <syntaxCheck id="33">
+                      <current>true</current>
+                      <previous>true</previous>
+                    </syntaxCheck>
+                  </executionContext>
+                  <atom reference="20"/>
+                </data>
+              </nextSibling>
+              <data id="34">
+                <uprocName>BWPPD00230</uprocName>
+                <numOrdSession>2</numOrdSession>
+                <executionContext id="35">
+                  <type>SAME</type>
+                  <syntaxCheck id="36">
+                    <current>true</current>
+                    <previous>true</previous>
+                  </syntaxCheck>
+                </executionContext>
+                <atom reference="19"/>
+              </data>
+            </childOk>
+            <data id="37">
+              <uprocName>BWPHD00215</uprocName>
+              <numOrdSession>1</numOrdSession>
+              <executionContext id="38">
+                <type>SAME</type>
+                <syntaxCheck id="39">
+                  <current>true</current>
+                  <previous>true</previous>
+                </syntaxCheck>
+              </executionContext>
+              <atom reference="18"/>
+            </data>
+          </root>
+        </tree>
+        <postSesList id="40"/>
+        <postDevList id="41"/>
+      </Session>
+    </sessions>
+    <triggers class="linked-list" id="42"/>
+    <runbooks class="linked-list" id="43"/>
+    <calendars class="linked-list" id="44"/>
+    <businessViews class="linked-list" id="45"/>
+    <jobChains class="linked-list" id="46"/>
+    <jobEvents class="linked-list" id="47"/>
+    <dqmJobs class="linked-list" id="48"/>
+  </com.orsyp.ExportObjects>
+</object-stream>

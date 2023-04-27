@@ -1,0 +1,49 @@
+APPL JCTEST08 WAIT NOPOST_WHILE_WAITING
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/**********************************************************************/
+/* TESTING USING PARAMETER VARIABLES AS JOB NAMES                     */
+/*-TESTING USER PARAMETERS FOR DELAY SUB TIMES                        */
+/**********************************************************************/
+/* ENTER JOBNAME IN USER PARAMETER 1                                  */
+/**********************************************************************/
+/**********************************************************************/
+/* ENTER SUBMIT TIME IN USER PARAMETER 2 OR PARAMETER 3               */
+/**********************************************************************/
+/*IF PARAMETER IS LEFT BLANK, THE DELAY SUB WILL BE THE CURRENT TIME- */
+/*   LESS ONE DAY.  ESSENTIALLY, THE JOB WILL RUN IMMEDIATLEY.        */
+/*      **ESSENTIALLY, THE JOB WILL RUN IMMEDIATLEY.                  */
+IF USER2 = '' THEN USER2 = '!ESPATIME LESS 1 DAY'
+/**********************************************************************/
+/*IF PARAMETER IS LEFT BLANK, THE DELAY SUB WILL BE THE CURRENT TIME- */
+/*   PLUS FIVE MINUTES -                                              */
+/***THIS MAY PUSH THE DATE TO THE NEXT DAY OR WEEK!!!                 */
+/*  -IT DEPENDS ON HOW YOUR EVENT IS SET UP                           */
+/* --ON DEMAND EVENTS WILL WORK OK, BUT NOTHING WITH A SCHED OR EXPECT*/
+IF USER3 = '' THEN USER3 = '!ESPATIME PLUS 5 MIN'
+/**********************************************************************/
+
+NOTIFY FAILURE ABEND END OVERDUE MAILBOX(SCHEDULERS)
+TAG TEST
+
+JOB a_!USER1 LINK PROCESS
+  RUN TODAY
+  RELEASE ADD(DATE)
+  RELEASE ADD(DATE2)
+ENDJOB
+
+JOB DATE LINK PROCESS
+  RUN TODAY
+  DELAYSUB !USER3
+  SEND 'ESP ACTUAL DATE !ESPADATE'
+ENDJOB
+
+JOB DATE2 LINK PROCESS
+  RUN TODAY
+  DELAYSUB !USER2
+  SEND 'ESP ACTUAL DATE !ESPAYEAR-!ESPAMM-!ESPADD'
+ENDJOB
+
+
+

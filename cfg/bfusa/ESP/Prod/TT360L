@@ -1,0 +1,32 @@
+APPL TT360L  WAIT
+
+NOTIFY FAILURE ABEND ALERT(REMD)
+
+SCHD1 = 'YESTERDAY'
+
+IF !USER2 = 1 OR !USER2 = '' THEN SCHD1 = 'TODAY'
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/********************************************************************
+/* 02/28/19 -DSG- ADDED INVOKE STMT AND LIE.!ESPAPPL JOB
+/********************************************************************
+
+JOB TTORTC TASK
+    /*@@ SCHID=001
+  RELEASE ADD(TT360L)
+  RUN !SCHD1
+ENDJOB
+
+JOB TT360L
+  /*@@ SYSTEM=RMA
+  CCCHK RC(1:4095) FAIL CONTINUE
+    /*@@ SCHID=001
+  RUN !SCHD1
+  RELEASE ADD(LIE.!ESPAPPL)
+ENDJOB
+
+JOB LIE.!ESPAPPL LINK PROCESS
+   RUN !SCHD1
+ENDJOB
+

@@ -1,0 +1,39 @@
+APPL WADTIREG WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/*********************************************************************/
+/* 06/23/2016 - JFC - CREATED PER JOHN HRITZ & JIAN LEE             */
+/*            - REMEDY INCIDENT INC000001028493                     */
+/*            - Remedy Ticket Group: DEVELOPMENT-BABT>DO-NA-QA      */
+/********************************************************************/
+/* 03/18/2019 -DSG- ADDED LIS & LIE.!ESPAPPL JOBS                   */
+/********************************************************************?
+/* - JOBS IN THIS APPLICATION SHOULD BE CONSIDERED LOW PRIORITY     */
+/* - EMAIL ALERTS FOR ABENDS AND OVERDUES ARE AUTOMATIC             */
+/* - NO PHONE CALL REQUIRED UNLESS ABEND IS LEFT UNRESOLVED         */
+/********************************************************************/
+
+NOTIFY FAILURE ABEND ALERT(REMD)
+NOTIFY FAILURE ABEND OVERDUE MAILBOX(QAWarrGroup)
+TAG QAWARRANTY
+
+JOB LIS.!ESPAPPL LINK PROCESS
+   RUN DAILY
+   RELEASE ADD(TireRegistration_Amazon_Import)
+ENDJOB
+
+NT_JOB TireRegistration_Amazon_Import
+  AGENT CYBA_QAWAPROD
+  CMDNAME \\sqlwis01pakr\CMD_Scripts\TireRegistration_Amazon_Import.CMD
+  USER svc_CAWorkload
+  RUN DAILY
+  DELAYSUB 08.00
+  DUEOUT EXEC 09.00
+  RELEASE ADD(LIE.!ESPAPPL)
+ENDJOB
+
+JOB LIE.!ESPAPPL LINK PROCESS
+   RUN DAILY
+ENDJOB
+

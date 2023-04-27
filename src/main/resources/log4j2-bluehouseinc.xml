@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="INFO" shutdownHook="disable" >
+    <Properties>
+        <Property name="LOG_PATTERN">%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n</Property>
+        <Property name="LOG_INFO_PATTERN">%d{HH:mm:ss.SSS} [%t] %msg%n</Property>
+        
+        <Property name="LOG_DIR">./logs</Property>
+        
+        <Property name="LOG_DEBUG_FILE_PATTERN">${LOG_DIR}/TidalDataConverter-DEBUG-logs-${date:yyyy-MM-dd'_'HH-mm-ss}-%i.log</Property>
+        <Property name="LOG_DEBUG_FILE">${LOG_DIR}/TidalDataConverter-DEBUG-logs-${date:yyyy-MM-dd'_'HH-mm-ss}.log</Property>
+ 
+        
+        <Property name="LOG_INFO_FILE_PATTERN">${LOG_DIR}/TidalDataConverter-INFO-logs-${date:yyyy-MM-dd'_'HH-mm-ss}-%i.log</Property>
+        <Property name="LOG_INFO_FILE">${LOG_DIR}/TidalDataConverter-INFO-logs-${date:yyyy-MM-dd'_'HH-mm-ss}.log</Property>
+        
+       
+        <Property name="LOG_ERROR_FILE_PATTERN">${LOG_DIR}/TidalDataConverter-ERROR-logs-${date:yyyy-MM-dd'_'HH-mm-ss}-%i.log</Property>
+        <Property name="LOG_ERROR_FILE">${LOG_DIR}/TidalDataConverter-ERROR-logs-${date:yyyy-MM-dd'_'HH-mm-ss}.log</Property>
+ 
+        
+        <Property name="LOG_CONSOLE_FILE_PATTERN">${LOG_DIR}/TidalDataConverter-CONSOLE-logs-${date:yyyy-MM-dd'_'HH-mm-ss}-%i.log</Property>
+        <Property name="LOG_CONSOLE_FILE">${LOG_DIR}/TidalDataConverter-CONSOLE-logs-${date:yyyy-MM-dd'_'HH-mm-ss}.log</Property>
+      
+     
+        <Property name="LOG_TRACE_FILE_PATTERN">${LOG_DIR}/TidalDataConverter-TRACE-logs-${date:yyyy-MM-dd'_'HH-mm-ss}-%i.log</Property>       
+        <Property name="LOG_TRACE_FILE">${LOG_DIR}/TidalDataConverter-TRACE-logs-${date:yyyy-MM-dd'_'HH-mm-ss}.log</Property>
+        
+        <Property name="LOG_API_DEBUG_FILE">${LOG_DIR}/TidalAPI-DEBUG-logs-${date:yyyy-MM-dd'_'HH-mm-ss}.log</Property>
+        
+        <Property name="PACKAGE_NAME">com.bluehouseinc</Property>
+    </Properties>
+	<Appenders>
+		<Console name="ConsoleAppender" target="SYSTEM_OUT">
+		    <LevelRangeFilter minLevel="INFO" maxLevel="INFO" onMatch="ACCEPT" onMismatch="DENY" />
+			<PatternLayout pattern="%msg %n" />
+		</Console>
+
+		<RollingFile name="TraceLogAppender" fileName="${LOG_TRACE_FILE}" filePattern="${LOG_TRACE_FILE_PATTERN}" append="true">
+            <PatternLayout pattern="%msg %n" />
+            <LevelRangeFilter minLevel="TRACE" maxLevel="TRACE" onMatch="ACCEPT" onMismatch="DENY" />
+            <Policies>
+                <SizeBasedTriggeringPolicy size="500 MB" />
+            </Policies>
+            <DefaultRolloverStrategy max="10" />
+        </RollingFile>
+        
+		<RollingFile name="ConsoleLogAppender" fileName="${LOG_CONSOLE_FILE}" filePattern="${LOG_CONSOLE_FILE_PATTERN}" append="true">
+            <PatternLayout pattern="%msg %n" />
+            <LevelRangeFilter minLevel="FATAL" maxLevel="INFO" onMatch="ACCEPT" onMismatch="DENY" />
+            <Policies>
+                <SizeBasedTriggeringPolicy size="500 MB" />
+            </Policies>
+            <DefaultRolloverStrategy max="10" />
+        </RollingFile>
+
+        <RollingFile name="ErrorLogAppender" fileName="${LOG_ERROR_FILE}" filePattern="${LOG_ERROR_FILE_PATTERN}" append="true">
+            <PatternLayout pattern="${LOG_PATTERN}" />
+            <LevelRangeFilter minLevel="ERROR" maxLevel="ERROR" onMatch="ACCEPT" onMismatch="DENY" />
+            <Policies>
+                <SizeBasedTriggeringPolicy size="500 MB" />
+            </Policies>
+            <DefaultRolloverStrategy max="10" />
+        </RollingFile>
+
+        <RollingFile name="DebugLogAppender" fileName="${LOG_DEBUG_FILE}" filePattern="${LOG_DEBUG_FILE_PATTERN}" append="true">
+            <PatternLayout pattern="${LOG_PATTERN}"/>
+            <LevelRangeFilter minLevel="DEBUG" maxLevel="DEBUG" onMatch="ACCEPT" onMismatch="DENY" />
+            <Policies>
+                <SizeBasedTriggeringPolicy size="500 MB" />
+            </Policies>
+            <DefaultRolloverStrategy max="10" />
+        </RollingFile>
+
+        <RollingFile name="InfoLogAppender" fileName="${LOG_INFO_FILE}" filePattern="${LOG_INFO_FILE_PATTERN}" append="true">
+            <PatternLayout pattern="${LOG_INFO_PATTERN}" />
+            <LevelRangeFilter minLevel="INFO" maxLevel="INFO" onMatch="ACCEPT" onMismatch="DENY" />
+            <Policies>
+                <SizeBasedTriggeringPolicy size="500 MB" />
+            </Policies>
+            <DefaultRolloverStrategy max="10" />
+        </RollingFile>
+
+        <RollingFile name="APIDebugLogAppender" fileName="${LOG_API_DEBUG_FILE}" filePattern="${LOG_DEBUG_FILE_PATTERN}" append="true">
+            <PatternLayout pattern="${LOG_PATTERN}"/>
+            <LevelRangeFilter minLevel="DEBUG" maxLevel="DEBUG" onMatch="ACCEPT" onMismatch="DENY" />
+            <Policies>
+                <SizeBasedTriggeringPolicy size="500 MB" />
+            </Policies>
+            <DefaultRolloverStrategy max="10" />
+        </RollingFile>
+	</Appenders>
+
+	<Loggers>
+        <Root level="all">
+        <!-- NOTE: To preform logging on DEBUG level for files located in all packages <AppenderRef ref="DebugLogAppender" level="debug"/>
+             tag must be uncommented in this section and commented-out in <Logger level="debug" name="${PACKAGE_NAME}"> tag section -->
+           <!--  <AppenderRef ref="DebugLogAppender" level="debug"/>-->
+
+            <AppenderRef ref="ConsoleLogAppender" />
+        </Root>
+        
+        <Logger name="com.bluehouseinc" additivity="false">
+        	<AppenderRef ref="ConsoleAppender"/>
+            <AppenderRef ref="DebugLogAppender"/>
+            <AppenderRef ref="TraceLogAppender"/>
+            <AppenderRef ref="ErrorLogAppender"/>
+            <AppenderRef ref="ConsoleLogAppender"/>
+            <AppenderRef ref="InfoLogAppender"/>
+        </Logger>
+        
+            
+        <Logger level="debug" name="com.bluehouseinc.tidal.api">
+            <AppenderRef ref="APIDebugLogAppender" level="debug"/>
+        </Logger>
+        
+	</Loggers>
+
+</Configuration>

@@ -1,0 +1,50 @@
+APPL AOPPD040 WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/*********************************************************************/
+/*MRP01D -  Material Requirement Planning                            */
+/*AOMRPDLY (RMMRP00_DAILY_F191) SAP Material Requirement Planning    */
+/*********************************************************************/
+/*02/13/2019 -JFC- CHANGED SAP PRINDEST PER INC000001851980         **/
+/*********************************************************************/
+
+NOTIFY ABEND FAILURE ALERT(REMD)
+
+JOB LIS.!ESPAPPL LINK PROCESS
+   RUN DAILY
+   EARLYSUB 02.00
+   RELEASE ADD(RMMRP000_DAILY_F191)
+ENDJOB
+
+SAP_JOB RMMRP000_DAILY_F191
+   AGENT CYBB_BFP030
+   SAPJOBNAME RMMRP000_DAILY_F191
+   SAPJOBCLASS C
+   STARTMODE ASAP
+   ABAPNAME RMMRP000
+   VARIANT DAILYMRP_F191
+   STEPUSER SAPADM
+   LANGUAGE E
+   PRINTDEST CP40
+   EXPIRATION 8
+   LINES 65
+   COLUMNS 80
+   BANNER D
+   RECIPIENT SAPBATCH
+   ARCMODE PRINT
+   PRINTCOPIES 001
+   RUN DAILY
+   RELEASE ADD(LIE.!ESPAPPL)
+ENDJOB
+
+AIX_JOB LIE.!ESPAPPL
+   AGENT CYBA_ISBFP3
+   COMMAND /bin/sleep
+   ARGS 3
+   USER bfpadm
+   RUN DAILY
+   DUEOUT EXEC 06.00
+   NOTIFY OVERDUE MAILBOX(AKRONJOBREQ)
+ENDJOB
+

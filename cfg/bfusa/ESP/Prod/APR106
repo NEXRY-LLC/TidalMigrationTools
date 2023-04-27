@@ -1,0 +1,76 @@
+APPL APR106 WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/**********************************************************************/
+/*   Changed JPMC signing key        02/23/16     JRE                 */
+/*06/14/2018 -JFC- INCREASED RELDEL FROM 1 MINUTE                     */
+/*                                                                    */
+/*12/10/2018 -VMD CHANGED SERVER NAME IN SEND JOB PER MICHAEL MCKENNEY*/
+/*           CHANGED FROM OLD NAME sfgint01pnsh.bfusa.com to          */
+/*           NEW NAME sfgint01pakr.idm.bfusa.com                      */
+/*03/23/2020 -JFC- UPDATED ENCRYPT KEY PER INC000002193720            */
+/*11/24/2021 -VV - Updated new sterling server-JPM scripts-REQ0098535 */
+/*04/26/2022 -VV - updated ACHFLE2PGP job - REQ0139704
+/**********************************************************************/
+
+NOTIFY ABEND FAILURE ALERT(REMD)
+
+JOB LIS.!ESPAPPL LINK PROCESS
+   RUN TODAY
+   RELEASE ADD(ACHFLE2PGP)
+ENDJOB
+
+AIX_JOB ACHFLE2PGP
+   AGENT CYBA_ISBFP3
+   USER root
+   SCRIPTNAME /local/bin/scp2_bft2sterling.sh
+   ARGS /data/BFP/interfaces/output/dataout/ px01
+   RUN DAILY
+   RELEASE ADD(ARACHFLE)
+ENDJOB
+
+AIX_JOB ARACHFLE
+   AGENT CYBA_ISBFP3
+   USER bfpadm
+   SCRIPTNAME /local/bin/arcfile.sh
+   ARGS interfaces/output/dataout/px01 W
+   RUN DAILY
+   RELEASE ADD(LIE.!ESPAPPL)
+ENDJOB
+
+LINUX_JOB ENCRYPT_ACHFLE
+   AGENT CYBA_PGP2AKFIS
+   SCRIPTNAME /usr/local/scripts/pgpencrypt.sh
+   USER ceadmin
+   ARGS px01 "JPMC_GTI_MFT_FTS" +
+   "bs_signing_key_JPMC_GTI_exp2022"
+/* RUN DAILY
+   RELDELAY 2
+   RELEASE ADD(RENAME_ACHFLE)
+ENDJOB
+
+LINUX_JOB RENAME_ACHFLE
+   AGENT CYBA_PGP2AKFIS
+   SCRIPTNAME /usr/local/scripts/renameToSpec.sh
+   USER root
+   ARGS BSAM JPMC 9743 APSAPACH /home/ceadmin/px01.pgp
+/* RUN DAILY
+   RELEASE ADD(SEND_ACHFLE)
+ENDJOB
+
+LINUX_JOB SEND_ACHFLE
+   AGENT CYBA_PGP2AKFIS
+   SCRIPTNAME /usr/local/bin/scpsend.sh
+   USER root
+   ARGS -u JPMCHASE -p 'BjF&Um$c' -h +
+   bsa-securetransfersint.bfusa.com -P +
+10022 -f /home/ceadmin/BSAM_JPMC_9743_APSAPACH_*.pgp
+/* RUN DAILY
+   RELEASE ADD(LIE.!ESPAPPL)
+ENDJOB
+
+JOB LIE.!ESPAPPL LINK PROCESS
+   RUN DAILY
+ENDJOB
+

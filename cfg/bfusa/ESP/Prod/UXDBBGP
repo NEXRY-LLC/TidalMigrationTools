@@ -1,0 +1,30 @@
+APPL UXDBBGP WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/**********************************************************************/
+/*07/25/2019-JFC-ADDED LIS AND LIE JOBS
+/**********************************************************************/
+
+NOTIFY ABEND FAILURE ALERT(REMD)
+
+JOB LIS.!ESPAPPL LINK PROCESS
+  RUN WEEKDAYS SAT
+  EARLYSUB 20.00
+  RELEASE ADD(BGPDBONL.SAPBGP)
+ENDJOB
+
+UNIX_JOB BGPDBONL.SAPBGP
+  AGENT CYBA_SAPBGP
+  SCRIPTNAME /local/bin/db2_backup.sh
+  ARGS BGP ONLINE
+  USER root
+  RUN WEEKDAYS SAT
+  RELEASE ADD(LIE.!ESPAPPL)
+ENDJOB
+
+JOB LIE.!ESPAPPL LINK PROCESS
+  RUN WEEKDAYS SAT
+ENDJOB
+
+                                                                        00280000

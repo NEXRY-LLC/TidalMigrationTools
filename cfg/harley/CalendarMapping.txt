@@ -1,0 +1,3 @@
+NAME,NEWNAME
+STUB_DYS[ALL],Daily
+STUB_WKD[ALL],Workdays

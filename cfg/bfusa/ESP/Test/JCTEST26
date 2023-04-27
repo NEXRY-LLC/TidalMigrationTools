@@ -1,0 +1,14 @@
+APPL JCTEST26 WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/*****************************************************/
+/*****************************************************/
+
+TAG TEST
+
+JOB TEST_EMAIL_FROM_ESP.!ESPAPPL LINK PROCESS
+  RUN TODAY
+  NOTIFY JOBEND MAILBOX(SCHEDULERS)
+ENDJOB
+

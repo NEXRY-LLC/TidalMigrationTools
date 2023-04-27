@@ -1,0 +1,27 @@
+APPL TESTNTJO
+
+/**********  SET PARAMETER 1 VARIABLE  ********************************/
+/* USE PARAMETER 1 TO SET WHAT AGENT THE JOB SHOULD RUN ON            */
+
+IF USER1 = '' THEN !USER1 = ''
+
+/**********************************************************************/
+/**********  SET PARAMETER 2 VARIABLE  ********************************/
+/* USE PARAMETER 2 TO SET WHAT USER ID THE JOB SHOULD USE             */
+/* THIS NEEDS TO BE A VALID USER ID ALREADY DEFINED IN ESP            */
+/* THIS OPTION IS REQUIRED IF IT IS A WINDOWS SERVER                  */
+
+IF USER1 = 'CYBA_PPIWPROD' THEN !USER2 = 'maestro'
+
+/**********************************************************************/
+/**********************************************************************/
+
+TAG 'SWTEST'
+
+NT_JOB !USER1._TEST_IPCONFIG
+   AGENT !user1
+   CMDNAME c:\windows\system32\ipconfig.exe
+   USER !user2
+   RUN NOW
+ENDJOB
+

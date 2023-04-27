@@ -1,0 +1,30 @@
+APPL QASCS007 WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/**********************************************************************/
+/*10/18/2016-JFC-CONVERTED LIE JOB FROM MVS TO LINK                   */
+/**********************************************************************/
+
+NOTIFY FAILURE ABEND ALERT(REMD)
+NOTIFY FAILURE ABEND MAILBOX(QAFAIL1)
+TAG PPIW
+
+JOB LIS.QASCS007 LINK PROCESS
+   RUN TUE
+   DELAYSUB 12.15
+   RELEASE ADD(SCS_CommDM_EDI_Fcst_Data_Checkcmd)
+ENDJOB
+
+NT_JOB SCS_CommDM_EDI_Fcst_Data_Checkcmd
+   AGENT CYBA_PPIWPROD
+   CMDNAME X:\CMD_SCRIPTS\SCS_CommDM_EDI_Fcst_Data_Check.cmd
+   USER maestro
+   RUN TUE
+   RELEASE ADD(LIE.QASCS007)
+ENDJOB
+
+JOB LIE.QASCS007 LINK PROCESS
+   RUN TUE
+ENDJOB
+

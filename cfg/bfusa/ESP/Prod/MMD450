@@ -1,0 +1,29 @@
+APPL MMD450 WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/********************************************************************/
+/*07/11/2017 -jfc- no changes, just adding note for future searches
+/*            this job transferes files to tfr1-ak-fis:/cygdrive
+/*THIS IS THE AJWMS MMINT0022 INTERFACE
+/********************************************************************/
+
+NOTIFY ABEND FAILURE ALERT(REMD)
+TAG 'OTC CRITICAL'
+
+AIX_JOB INVENTORY_STATUS_CHK
+   AGENT CYBA_ISBFP3
+   USER root
+   SCRIPTNAME /local/bin/sftp_int_status.sh
+   ARGS BFP
+   RELDELAY 4
+   RUN DAILY
+ /*NOTIFY ABEND FAILURE ALERT(MM01)
+ENDJOB
+
+APPLEND MMD450
+   ESPNOMSG TRIGGER !ESPEVENT ADD
+   IF TODAY('SUN') AND ESPSHH EQ '19' AND ESPSMN GT '50' THEN -
+   NORUN TODAY
+ENDJOB
+

@@ -1,0 +1,13 @@
+NAME,NEWNAME
+YESTERDAY,Daily
+'YESTERDAY',Daily
+'TODAY',Daily
+MON,Monday
+TUE,Tuesday
+WED,Wednesday
+THU,Thursday
+FRI,Friday
+SAT,Saturday
+SUN,Sunday
+SUNDAY,Sunday
+UNKNOWN,AdHoc

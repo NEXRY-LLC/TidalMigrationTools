@@ -1,0 +1,33 @@
+APPL XXXXXXXX WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/**********************************************************************/
+/* XX/XX/XX - CREATED PER XXXXXXXXXXXXXXXXXX -XXX- INCXXXXXXXXXXXX
+/**********************************************************************/
+
+NOTIFY ABEND FAILURE ALERT(REMD)
+NOTIFY OVERDUE ALERT(LATE)
+
+JOB LIS.!ESPAPPL LINK PROCESS
+   RUN XXX
+   DELAYSUB XX.XX
+   RELEASE ADD()
+ENDJOB
+
+
+
+
+
+
+
+
+
+
+
+
+JOB LIE.!ESPAPPL LINK PROCESS
+   RUN XXXXX
+   DUEOUT EXEC NOW PLUS 4 HOURS
+ENDJOB
+

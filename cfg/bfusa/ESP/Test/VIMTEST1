@@ -1,0 +1,28 @@
+APPL VIMTEST1 WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/**********************************************************************/
+/* CREATED ON 04/08/19 PER NOBODY - VMD -
+/**********************************************************************/
+
+NOTIFY ABEND FAILURE ALERT(REMD)
+
+ JOB LIS.!ESPAPPL LINK PROCESS
+    RELDELAY 1
+    RUN TODAY
+    RELEASE ADD(LIE.!ESPAPPL)
+ ENDJOB
+
+ JOB LIE.!ESPAPPL LINK PROCESS
+ RUN TODAY
+ ENDJOB
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,10 @@
+APPL FI01 JOB_ANCESTOR_WAIT
+
+/* Alert to mark APPL APD010 complete if any job in it abends  /*
+/*                                                             /*
+
+  IF (!MNAPPL EQ 'APD010') THEN -
+     DO
+       ESP AJ ALL COMPLETE APPL(APD010.0)
+     ENDDO
+

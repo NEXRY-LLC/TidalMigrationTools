@@ -1,0 +1,119 @@
+APPL COD001CD WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/**********************************************************************/
+/*INT-163 All TIPS Plants -  Send Internal Orders Adds/Deletes
+/*ZFICOI02 (ZFICOI02_ORDERS TO TIPS-DAILY)  Create internal orders
+/*           adds/deletes.
+/*COD001CD -  Send TIPS file from SAP to AKNITS
+/*COD001XX -  Delete file zficoi02_iod_orders_ to_tips_daily
+/*TIPSIOUP (TIPSIOUPDT) Distribute data to the plants that are on
+/*          TIPS & SAP.
+/**********************************************************************/
+/* 04/05/2018 -JFC- CLEANED UP THIS APPL - NO SCHED CHANGES  **********/
+/* 02/24/2020 -JFC- UPDATED AGENT FROM R7 TO R11.5.0                  */
+/*                - CHANGED JOBQ FROM CYBESPV210.CYBESPV2100          */
+/* 03/05/2020 -DSG- ADDED RESOURCE TO AS400 JOB - INC000002178387
+/**********************************************************************/
+
+NOTIFY FAILURE ABEND ALERT(REMD)
+
+DATA_OBJECT PARMSET.!ESPAPPL
+   /*Create a timestamp in hhmmMMDDYY format*/
+   SETVAR TMSTMP='!ESPSHH.:!ESPSMN.,!ESPSMM./!ESPSDD./!ESPSYY'
+   SETVAR PID=''
+   SETVAR STMPTM='!ESPSMM./!ESPSDD./!ESPSYY.,!ESPSHH.:!ESPSMN'
+ENDJOB
+
+JOB LIS.COD001CD LINK PROCESS
+   RUN DAILY
+   DELAYSUB 08.00
+   RELEASE ADD(ZFICOI02_ORDERS_TO_TIPS_DAILY)
+ENDJOB
+
+JOB SETPID.!ESPAPPL LINK PROCESS
+   /*get the next PID number from the ConnectDirect*/
+   /*Process ID table (CDPROD).  Save the value into*/
+   /*the applications DataObject for use by the C:D*/
+   /*job and the CDSTAT job (if needed).*/
+   VINCR (PID) TABLE(CDPROD) CLANG
+   VGET  (PID) TABLE(CDPROD) CLANG
+   ESP MGRMSG * . . . PARMSET.!ESPAPPL/!ESPAPPL..!ESPAPGEN/MAIN +
+   ACTION SET PID(!PID)
+   RUN DAILY
+   RELEASE ADD(COD001CD.ISBFP3)
+ENDJOB
+
+SAP_JOB ZFICOI02_ORDERS_TO_TIPS_DAILY
+   AGENT CYBB_BFP030
+   SAPUSER SAPADM
+   SAPJOBNAME 'ZFICOI02_ORDERS TO TIPS - DAILY'
+   SAPJOBCLASS C
+   ABAPNAME ZFICOI02
+   VARIANT 'I/O TO TIPS'
+   LANGUAGE E
+   PRINTDEST CC19
+   PRINTCOPIES 001
+   EXPIRATION 8
+   COLUMNS 132
+   BANNERPAGE YES
+   BANNER YES
+   RECIPIENT SAPADM
+   ARCMODE PRINT
+   RUN DAILY
+   RELEASE ADD(COD001CD.ISBFP3)
+ENDJOB
+
+UNIX_JOB COD001CD.ISBFP3
+   AGENT CYBA_ISBFP3
+   USER cdprod
+   PID= WOBDATA('PARMSET.!ESPAPPL','PID')
+   TMSTMP= WOBDATA('PARMSET.!ESPAPPL','TMSTMP')
+   SCRIPTNAME /apps/condir/bfsbin/submitcd.sh
+   ARGS cod001.cd 5 !PID !TMSTMP
+   RESOURCE ADD(1,ISBFP3CD)
+   RUN DAILY
+   EARLYSUB REALNOW PLUS 20 SECONDS
+   RELEASE ADD(CDSTAT.COD001CD(A))
+   RELEASE ADD(COD001XX.ISBFP3)
+ENDJOB
+
+AIX_JOB CDSTAT.COD001CD     CONDITIONAL
+   AGENT CYBA_ISBFP3
+   USER cduser
+   /*This job only runs if the C:D job does not end with*/
+   /*a EXITCODE of 0.  It can be rerun as often as*/
+   /*required to check the status of the C:D process.*/
+   /*When the C:D process finishes, complete the job*/
+   /*to release the successors.*/
+   STMPTM= WOBDATA('PARMSET.!ESPAPPL','STMPTM')
+   PID= WOBDATA('PARMSET.!ESPAPPL','PID')
+   CMDNAME /apps/condir/bfsbin/cdstat.sh
+   ARGS !STMPTM  j!PID
+   RUN DAILY
+ENDJOB
+
+UNIX_JOB COD001XX.ISBFP3
+   AGENT CYBA_ISBFP3
+   USER cdprod
+   CMDNAME /bin/rm
+   ARGS /data/BFP/interfaces/output/dataout/+
+        zficoi02_iod_orders_to_tips_daily
+   RUN DAILY
+   RELEASE ADD(TIPSIOUP.AKNITS)
+ENDJOB
+
+AS400_JOB TIPSIOUP.AKNITS
+  RESOURCE ADD(1,AKNITS)
+   AGENT AKNITS
+   COMMAND CYBROBOT TIPSIOUPDT
+   JOBQ CAWAAGENT.CYBESPJOBS
+   RUN DAILY
+   RELEASE ADD(LIE.COD001CD)
+ENDJOB
+
+JOB LIE.COD001CD LINK PROCESS
+   RUN DAILY
+ENDJOB
+

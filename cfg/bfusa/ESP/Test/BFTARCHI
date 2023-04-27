@@ -1,0 +1,24 @@
+APPL BFTARCHI WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/*********************************************************************/
+/*04/06/2018 -JFC- APPL TO ARCHIVE FILES ON ISBFT                    */
+/** ENTER THE FILE NAME INTO USER2                                   */
+/*********************************************************************/
+
+FILE_TRIGGER file_!user2
+   AGENT cyba_isbft
+   filename /data/BFT/interfaces/input/datain/!user2 create
+   RUN DAILY
+   RELEASE ADD(ARCHIVE_!USER2)
+ENDJOB
+
+UNIX_JOB ARCHIVE_!user2
+    AGENT cyba_isbft
+    USER bftadm
+    SCRIPTNAME /local/bin/arcfile.sh
+    args interfaces/input/datain/!user2 w
+    RUN DAILY
+ENDJOB
+

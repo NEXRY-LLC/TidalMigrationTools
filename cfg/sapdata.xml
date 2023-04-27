@@ -1,0 +1,61 @@
+<sstps>
+	<connusr>
+		<var.username>365</var.username>
+		<var.value />
+	</connusr>
+	<password>
+		<var.password>365</var.password>
+		<var.value />
+	</password>
+	<conndomain>
+		<var.conndomain>365</var.conndomain>
+		<var.value />
+	</conndomain>
+	<principal>
+		<var.principal>365</var.principal>
+		<var.value />
+	</principal>
+	<keytab>
+		<var.keytab>365</var.keytab>
+		<var.value />
+	</keytab>
+	<job>
+		<jname>BTQ.BWTOP001</jname>
+		<jobcount />
+	</job>
+	<clonetag />
+	<externuid />
+	<spoollistrecipient>
+		<recipient />
+		<rectype />
+		<copy></copy>
+		<blindcopy></blindcopy>
+		<express></express>
+		<noforwarding></noforwarding>
+		<noprint></noprint>
+		<deliver />
+		<mailstatus />
+	</spoollistrecipient>
+	<trkchild>Y</trkchild>
+	<cst>1</cst>
+	<jobclass />
+	<linktype />
+	<sstep1>1</sstep1>
+	<stype1>5</stype1>
+	<text1>BWTOP001 - PPCO TOP</text1>
+	<abap1>BWTOP001</abap1>
+	<cmd>BWTOP001</cmd>
+	<reqid />
+</sstps>
+
+
+
+
+<sapclone>
+	<cname>YSJOBCAN</cname>
+	<trkchild>Y</trkchild>
+	<externuid />
+	<jobclass />
+	<linktype>L</linktype>
+	<usesapname>Y</usesapname>
+</sapclone>

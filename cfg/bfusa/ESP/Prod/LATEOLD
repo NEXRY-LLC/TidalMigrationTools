@@ -1,0 +1,223 @@
+APPL LATE WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/* *************************************************************** */
+/* Change Log                                                      */
+/* *************************************************************** */
+/* 08/08/2019 -jfc- alert for late jobs in esp                     */
+/* *************************************************************** */
+/* The following are some Remedy fields which will be populated    */
+/* by the generated email.                                         */
+/* !1000000000! : This is the Summary field.                       */
+/*                (It cannot continue to a second line.)           */
+/* !1000000151! : This is the Notes field.                         */
+/*                (It can be continued to multiple lines by using  */
+/*                 the [$$ and $$] characters as described below.) */
+/* !z1D_Details! : [$$This is the Work Detail entry.  It can be    */
+/*                 continued to multiple lines by using '[$$' to   */
+/*                 start the entry & '$$]' to close the entry.$$]  */
+/* !z1D_WorklogDetails! : This is the name of the Work Detail      */
+/*                        entry.                                   */
+/* *************************************************************** */
+
+
+GOOD_QUAL = 'Y'
+
+REXXON GEN PROC  /* TURN ON REXX  */
+
+GOOD_QUAL = 'Y'
+IN_QUAL = CLANGVAR('!MNQUAL')
+IF SUBSTR(IN_QUAL,1,1) = '~' THEN
+  DO
+    GOOD_QUAL = 'N'
+  END
+
+"GOOD_QUAL='"GOOD_QUAL"'"
+
+REXXOFF          /* TURN OFF REXX  */
+
+
+IF !GOOD_QUAL = 'N' THEN -
+  DO
+    REM_SYMBOLIC_1A='Job !MNFULLNAME'
+    REM_SYMBOLIC_1B='A job in appl !MNAPPL is LATE and OVERDUE!'
+    REM_SYMBOLIC_2A='Job !MNFULLNAME'
+  ENDDO
+ELSE -
+  DO
+    REM_SYMBOLIC_1A='Job !MNFULLNAME..!MNQUAL'
+    REM_SYMBOLIC_1B='A job in appl !MNAPPL is LATE and OVERDUE!'
+    REM_SYMBOLIC_2A='Job !MNFULLNAME..!MNQUAL'
+  ENDDO
+
+REM_SYMBOLIC_2B='in appl !MNAPPL gen# !MNAPPLGEN is LATE and OVERDUE!'
+
+IF !MNAGENT = '' THEN -
+  DO
+    REM_SYMBOLIC_3='This job should have completed by this time.'
+    REM_SYMBOLIC_4='Check job in ESP.'
+    REM_SYMBOLIC_5='Reach out to support for further instructions.'
+  ENDDO
+ELSE -
+  DO
+    REM_SYMBOLIC_3='This job should have completed by this time.'
+    REM_SYMBOLIC_4='Check job in ESP.'
+    REM_SYMBOLIC_5='Reach out to support for further instructions.'
+  ENDDO
+
+REM_SYMBOLIC_6='!MNFULLNAME'
+
+REM_EXMK='!'
+
+
+DOIT = '?'
+
+REXXON GEN       /* TURN ON REXX  */
+
+DOIT = '?'
+IN_APPL = CLANGVAR('!MNAPPL')
+IN_APPLGEN = CLANGVAR('!MNAPPLGEN')
+IN_JOB = CLANGVAR('!MNJOB')
+IN_QUAL = CLANGVAR('!MNQUAL')
+/* add the qualifier if it is there  */
+IF IN_QUAL = ''  THEN
+  DO
+    IN_JOBQUAL = IN_JOB
+  END
+ELSE
+  DO
+    IN_JOBQUAL = IN_JOB || '.' || IN_QUAL
+  END
+IN_TAG = CLANGVAR('!MNTAG')
+
+
+IF SUBSTR(IN_TAG,3,4) = 'XXXX' THEN   /* if xxTEST in MNTAG, then */
+  DO                                  /*    no ticket             */
+    DOIT = 'TAG_SAYS_NO'
+    SIGNAL ALL_DONE
+  END
+
+
+/* BUILD LAP COMMAND */
+
+LAP_COMMAND = 'ESP LAP' IN_APPL || '.' || IN_APPLGEN 'ALL'
+
+/* TRAP OUTPUT FROM LAP COMMAND     */
+
+X=TRAPOUT('HOLD.')
+
+""LAP_COMMAND""
+
+X=TRAPOUT('OFF')
+
+
+/* display lap output for roy          */
+/* SAY 'HOLD.0 IS' HOLD.0              */
+/* DO X=1 TO HOLD.0                    */
+/*   SAY 'HOLD.'||X|| ' IS' HOLD.X     */
+/* END                                 */
+/* display lap output for roy          */
+
+
+/* PARSE LINE 1 AND SEE IF THE LAP COMMAND WORKED */
+
+PARSE VAR HOLD.1 LAP_APPLCON LAP_APPL LAP_GENCON LAP_GEN THE_REST
+
+IF LAP_APPLCON  \= 'APPL'     |,
+  LAP_APPL      \= IN_APPL    |,
+  LAP_GENCON    \= 'GEN'      |,
+  LAP_GEN       \= IN_APPLGEN THEN
+  DO
+    DOIT = 'YES'
+    SIGNAL ALL_DONE
+  END
+
+/* LOOK FOR THE JOB IN QUESTION */
+
+DO I = 2
+  IF HOLD.I = '' THEN                    /* IF NULL LINE THEN     */
+    DO                                   /*    SKIP IT            */
+      ITERATE
+    END
+  IF SUBSTR(HOLD.I,1,5) = '-----' THEN   /* IF END OF OUTPUT THEN */
+    DO                                   /*    MAKE A TICKET      */
+      /* SAY 'NOT FOUND IN LOOP1'            test message for roy */
+      DOIT = 'YES'
+      SIGNAL ALL_DONE
+    END
+  IF SUBSTR(HOLD.I,1,2) = '  ' THEN
+    DO
+      PARSE VAR HOLD.I LAP_1 THE_REST
+      IF LAP_1 = IN_JOBQUAL THEN
+        DO
+          /* SAY 'GOING TO FOUND_IN_JOB'     test message for roy */
+          J = I + 1
+          SIGNAL FOUND_IN_JOB
+        END
+    END
+END
+
+
+FOUND_IN_JOB:
+
+DO I = J
+  IF HOLD.I = '' THEN                 /* IF NULL LINE THEN     */
+    DO                                /*    SKIP IT            */
+      ITERATE
+    END
+  IF SUBSTR(HOLD.I,1,5) = '-----' |,  /* IF END OF OUTPUT OR   */
+     SUBSTR(HOLD.I,3,1) \= ' ' THEN   /*    NEXT JOB THEN      */
+    DO                                /*    MAKE A TICKET      */
+      /* SAY 'NOT FOUND IN LOOP2'         test message for roy */
+      DOIT = 'YES'
+      SIGNAL ALL_DONE
+    END
+  PARSE VAR HOLD.I LAP_1 LAP_2 THE_REST
+  IF LAP_1 = 'Rerun' & LAP_2 = 'of:' THEN  /* IF RERUN THEN     */
+    DO                                     /*    NO TICKET      */
+      /* SAY 'GOT A RERUN'                 test message for roy */
+      DOIT = 'NO'
+      SIGNAL ALL_DONE
+    END
+END
+
+ALL_DONE:
+
+"DOIT='"DOIT"'"
+
+REXXOFF                     /* TURN OFF REXX */
+
+JOB LIS.!ESPAPPL LINK PROCESS
+   RUN NOW
+   RELEASE ADD(SWESPREM.!MNAPPL)
+   RELEASE ADD(SWESPEMO.!MNAPPL)
+ENDJOB
+
+JOB SWESPREM.!MNAPPL
+  IF !DOIT = 'YES' THEN RUN NOW
+  RELEASE ADD(LIE.!ESPAPPL)
+ENDJOB
+
+JOB SWESPEMO.!MNAPPL
+ /*  IF !DOIT = 'YES' THEN RUN NOW
+     ESP_BG_COLOR    = '#FFFF00'
+     ESP_RECIPIENT_1 = 'RCPT TO:<AK-FISScheduling@BFUSA.COM>'
+     ESP_HEADER      = 'ESP JOB IN !MNAPPL IS OVERDUE.'
+     ESP_MESSAGE_1   = 'JOB = !MNFULLNAME in appl !MNAPPL is LATE.'
+     ESP_MESSAGE_2   = 'JOB TYPE = !MNJOBTYPE on system !MNSYS.'
+   RUN DAILY
+  RELEASE ADD(LIE.!ESPAPPL)
+ENDJOB
+
+JOB LIE.!ESPAPPL LINK PROCESS
+   RUN DAILY
+ENDJOB
+
+/* Background color choices are : '#FF0000'  (red)       */
+/*                                '#FF8800'  (orange)    */
+/*                                '#FFFF00'  (yellow)    */
+
+
+
+

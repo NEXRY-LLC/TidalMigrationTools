@@ -1,0 +1,22 @@
+/**********************************************************************/
+/* IMPORTANT MEMBER CONTAINING NORUN DATES FOR INT-098 WORK FREEZES.  */
+/* DO NOT DELETE OR ALTER DATES WITHOUT PROPER APPROVAL.              */
+/* USED BY JOBS IN APPLS LED84EST, LED84CST AND LED84PST.             */
+/* DATES SUPPLIED BY ELIZABETH WELLS.                                 */
+/* PROCESS RUNS                         , SO INCLUDE BOTH DATES       */
+/**********************************************************************/
+
+   NORUN DEC 22 2017
+   NORUN DEC 23 2017
+   NORUN DEC 24 2017
+   NORUN DEC 25 2017
+   NORUN DEC 26 2017
+   NORUN DEC 27 2017
+
+   NORUN DEC 29 2017
+   NORUN DEC 30 2017
+   NORUN DEC 31 2017
+   NORUN JAN 01 2018
+   NORUN JAN 02 2018
+   NORUN JAN 03 2018
+

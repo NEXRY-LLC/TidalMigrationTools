@@ -1,0 +1,393 @@
+APPL MMD300FG WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/*********************************************************************/
+/*  REMOVED AFTER ADDS AND RUN REF STMTS   JRE  02/15/16)           */
+/*********************************************************************/
+
+NOTIFY FAILURE ABEND ALERT(REMD)
+NOTIFY ABEND FAILURE OVERDUE MAILBOX(AJKRONJOBREQ)
+
+DATA_OBJECT PARMSET.!ESPAPPL
+   RUN WEEKDAYS
+   /*Create a timestamp in hhmmMMDDYY format*/
+   SETVAR TMSTMP='!ESPSHH.:!ESPSMN.,!ESPSMM./!ESPSDD./!ESPSYY'
+   SETVAR PID=''
+   SETVAR STMPTM='!ESPSMM./!ESPSDD./!ESPSYY.,!ESPSHH.:!ESPSMN'
+ENDJOB
+
+JOB LIS.!ESPAPPL LINK PROCESS
+    RUN WEEKDAYS
+    DELAYSUB 07.00
+    RELEASE ADD(ZMMCHI01_MARA_SYNCH_EXT_FG)
+ENDJOB
+
+SAP_JOB ZMMCHI01_MARA_SYNCH_EXT_FG
+    AGENT CYBB_BFP030
+    SAPJOBNAME ZMMCHI01_MARA_SYNCH_EXT_FG
+    SAPUSER SAPADM
+    SAPJOBCLASS C
+    ABAPNAME ZMMCHI01
+    VARIANT MARA_FG
+    LANGUAGE E
+    PRINTDEST CP21
+    PRINTCOPIES 001
+    EXPIRATION 8
+    COLUMNS 255
+    BANNER D
+    RECIPIENT SAPADM
+    ARCMODE PRINT
+    RUN WEEKDAYS
+    RELEASE ADD(MATCHARSYNCH_FGCD)
+ENDJOB
+
+JOB SETPID.!ESPAPPL LINK PROCESS
+   /*get the next PID number from the ConnectDirect*/
+   /*Process ID table (CDPROD).  Save the value into*/
+   /*the applications DataObject for use by the C:D*/
+   /*job and the CDSTAT job (if needed).*/
+   VINCR (PID) TABLE(CDPROD) CLANG
+   VGET  (PID) TABLE(CDPROD) CLANG
+   ESP MGRMSG * . . . PARMSET.!ESPAPPL/!ESPAPPL..!ESPAPGEN/MAIN +
+   ACTION SET PID(!PID)
+   RUN WEEKDAYS
+   RELEASE ADD(MATCHARSYNCH_FGCD)
+ENDJOB
+
+UNIX_JOB MATCHARSYNCH_FGCD
+    AGENT CYBA_ISBFP3
+    AFTER ADD(SETPID.!ESPAPPL)
+    EARLYSUB REALNOW PLUS 20 SECONDS
+    PID= WOBDATA('PARMSET.!ESPAPPL','PID')
+    TMSTMP= WOBDATA('PARMSET.!ESPAPPL','TMSTMP')
+    SCRIPTNAME /apps/condir/bfsbin/submitcd.sh
+    ARGS MATCHARSYNCH_FG.CD 5 !PID !TMSTMP
+    RESOURCE ADD(1,ISBFP3CD)
+    USER cdprod
+    RUN WEEKDAYS
+    RELEASE ADD(CDSTAT.MATCHAFG(A))
+    RELEASE ADD(RM_ZMMCHI01_MARA_FGTXT)
+ENDJOB
+
+AIX_JOB CDSTAT.MATCHAFG     CONDITIONAL
+   /*This job only runs if the C:D job does not end with*/
+   /*a EXITCODE of 0.  It can be rerun as often as*/
+   /*required to check the status of the C:D process.*/
+   /*When the C:D process finishes, complete the job*/
+   /*to release the successors.*/
+   AGENT CYBA_ISBFP3
+   USER cduser
+   STMPTM= WOBDATA('PARMSET.!ESPAPPL','STMPTM')
+   PID= WOBDATA('PARMSET.!ESPAPPL','PID')
+   CMDNAME /apps/condir/bfsbin/cdstat.sh
+   ARGS !STMPTM  j!PID
+   RUN WEEKDAYS
+ENDJOB
+
+UNIX_JOB RM_ZMMCHI01_MARA_FGTXT
+    AGENT CYBA_ISBFP3
+    USER cdprod
+    CMDNAME /bin/rm
+    ARGS /data/BFP/interfaces/output/dataout/zmmchi01_mara_fg.txt
+    RUN WEEKDAYS
+    RELEASE ADD(ZMMCHI01_CABN_SYNCH_EXT_FG)
+ENDJOB
+
+SAP_JOB ZMMCHI01_CABN_SYNCH_EXT_FG
+    SAPUSER SAPADM
+    AGENT CYBB_BFP030
+    SAPJOBNAME ZMMCHI01_CABN_SYNCH_EXT_FG
+    SAPJOBCLASS C
+    ABAPNAME ZMMCHI01
+    VARIANT CABN_FG
+    LANGUAGE E
+    PRINTDEST CP21
+    PRINTCOPIES 001
+    EXPIRATION 8
+    COLUMNS 255
+    BANNER D
+    RECIPIENT SAPADM
+    ARCMODE PRINT
+    RUN WEEKDAYS
+    RELEASE ADD(CABNVALUSYNCH_FGCD)
+ENDJOB
+
+JOB SETPID2.!ESPAPPL LINK PROCESS
+   /*get the next PID number from the ConnectDirect*/
+   /*Process ID table (CDPROD).  Save the value into*/
+   /*the applications DataObject for use by the C:D*/
+   /*job and the CDSTAT job (if needed).*/
+   VINCR (PID) TABLE(CDPROD) CLANG
+   VGET  (PID) TABLE(CDPROD) CLANG
+   ESP MGRMSG * . . . PARMSET.!ESPAPPL/!ESPAPPL..!ESPAPGEN/MAIN +
+   ACTION SET PID(!PID)
+   RUN DAILY
+   RELEASE ADD(CABNVALUSYNCH_FGCD)
+ENDJOB
+
+UNIX_JOB CABNVALUSYNCH_FGCD
+    AGENT CYBA_ISBFP3
+    USER cdprod
+    EARLYSUB REALNOW PLUS 20 SECONDS
+    PID= WOBDATA('PARMSET.!ESPAPPL','PID')
+    TMSTMP= WOBDATA('PARMSET.!ESPAPPL','TMSTMP')
+    SCRIPTNAME /apps/condir/bfsbin/submitcd.sh
+    ARGS CABNVALUSYNCH_FG.CD 5 !PID !TMSTMP
+    RESOURCE ADD(1,ISBFP3CD)
+    RUN WEEKDAYS
+    RELEASE ADD(CDSTAT.FGCABNVA(A))
+    RELEASE ADD(RM_ZMMCHI01_CABN_FGTXT)
+ENDJOB
+
+AIX_JOB CDSTAT.FGCABNVA     CONDITIONAL
+   /*This job only runs if the C:D job does not end with*/
+   /*a EXITCODE of 0.  It can be rerun as often as*/
+   /*required to check the status of the C:D process.*/
+   /*When the C:D process finishes, complete the job*/
+   /*to release the successors.*/
+   AGENT CYBA_ISBFP3
+   USER cduser
+   STMPTM= WOBDATA('PARMSET.!ESPAPPL','STMPTM')
+   PID= WOBDATA('PARMSET.!ESPAPPL','PID')
+   CMDNAME /apps/condir/bfsbin/cdstat.sh
+   ARGS !STMPTM  j!PID
+   RUN WEEKDAYS
+ENDJOB
+
+UNIX_JOB RM_ZMMCHI01_CABN_FGTXT
+    AGENT CYBA_ISBFP3
+    USER cdprod
+    CMDNAME /bin/rm
+    ARGS /data/BFP/interfaces/output/dataout/zmmchi01_cabn_fg.txt
+    RUN WEEKDAYS
+    RELEASE ADD(ZMMCHI01_AUSP_SYNCH_EXT_FG)
+ENDJOB
+
+SAP_JOB ZMMCHI01_AUSP_SYNCH_EXT_FG
+    SAPUSER SAPADM
+    AGENT CYBB_BFP030
+    SAPJOBNAME ZMMCHI01_AUSP_SYNCH_EXT_FG
+    SAPJOBCLASS C
+    ABAPNAME ZMMCHI01
+    VARIANT AUSP_FG
+    LANGUAGE E
+    PRINTDEST CP21
+    PRINTCOPIES 001
+    EXPIRATION 8
+    COLUMNS 255
+    BANNER D
+    RECIPIENT SAPADM
+    ARCMODE PRINT
+    RUN WEEKDAYS
+    RELEASE ADD(AUSPVALUSYNCH_FGCD)
+ENDJOB
+
+JOB SETPID3.!ESPAPPL LINK PROCESS
+   /*get the next PID number from the ConnectDirect*/
+   /*Process ID table (CDPROD).  Save the value into*/
+   /*the applications DataObject for use by the C:D*/
+   /*job and the CDSTAT job (if needed).*/
+   VINCR (PID) TABLE(CDPROD) CLANG
+   VGET  (PID) TABLE(CDPROD) CLANG
+   ESP MGRMSG * . . . PARMSET.!ESPAPPL/!ESPAPPL..!ESPAPGEN/MAIN +
+   ACTION SET PID(!PID)
+   RUN WEEKDAYS
+   RELEASE ADD(AUSPVALUSYNCH_FGCD)
+ENDJOB
+
+UNIX_JOB AUSPVALUSYNCH_FGCD
+    AGENT CYBA_ISBFP3
+    EARLYSUB REALNOW PLUS 20 SECONDS
+    PID= WOBDATA('PARMSET.!ESPAPPL','PID')
+    TMSTMP= WOBDATA('PARMSET.!ESPAPPL','TMSTMP')
+    SCRIPTNAME /apps/condir/bfsbin/submitcd.sh
+    ARGS AUSPVALUSYNCH_FG.CD 5  !PID !TMSTMP
+    RESOURCE ADD(1,ISBFP3CD)
+    USER cdprod
+    RUN WEEKDAYS
+    RELEASE ADD(CDSTAT.AUVUSYFG(A))
+    RELEASE ADD(RM_ZMMCHI01_AUSP_FGTXT)
+ENDJOB
+
+AIX_JOB CDSTAT.AUVUSYFG     CONDITIONAL
+   /*This job only runs if the C:D job does not end with*/
+   /*a EXITCODE of 0.  It can be rerun as often as*/
+   /*required to check the status of the C:D process.*/
+   /*When the C:D process finishes, complete the job*/
+   /*to release the successors.*/
+   AGENT CYBA_ISBFP3
+   USER cduser
+   STMPTM= WOBDATA('PARMSET.!ESPAPPL','STMPTM')
+   PID= WOBDATA('PARMSET.!ESPAPPL','PID')
+   CMDNAME /apps/condir/bfsbin/cdstat.sh
+   ARGS !STMPTM  j!PID
+   RUN WEEKDAYS
+ENDJOB
+
+UNIX_JOB RM_ZMMCHI01_AUSP_FGTXT
+    AGENT CYBA_ISBFP3
+    USER cdprod
+    CMDNAME /bin/rm
+    ARGS /data/BFP/interfaces/output/dataout/zmmchi01_ausp_fg.txt
+    RUN WEEKDAYS
+    RELEASE ADD(ZMMCHI01_CAWN_SYNCH_EXT_FG)
+ENDJOB
+
+SAP_JOB ZMMCHI01_CAWN_SYNCH_EXT_FG
+    SAPUSER SAPADM
+    AGENT CYBB_BFP030
+    SAPJOBNAME ZMMCHI01_CAWN_SYNCH_EXT_FG
+    SAPJOBCLASS C
+    ABAPNAME ZMMCHI01
+    VARIANT CAWN_FG
+    LANGUAGE E
+    PRINTDEST CP21
+    PRINTCOPIES 001
+    EXPIRATION 8
+    COLUMNS 255
+    BANNER D
+    RECIPIENT SAPADM
+    ARCMODE PRINT
+    RUN WEEKDAYS
+    RELEASE ADD(CAWNDATASYNCH_FGCD)
+ENDJOB
+
+JOB SETPID4.!ESPAPPL LINK PROCESS
+   /*get the next PID number from the ConnectDirect*/
+   /*Process ID table (CDPROD).  Save the value into*/
+   /*the applications DataObject for use by the C:D*/
+   /*job and the CDSTAT job (if needed).*/
+   VINCR (PID) TABLE(CDPROD) CLANG
+   VGET  (PID) TABLE(CDPROD) CLANG
+   ESP MGRMSG * . . . PARMSET.!ESPAPPL/!ESPAPPL..!ESPAPGEN/MAIN +
+   ACTION SET PID(!PID)
+   RUN WEEKDAYS
+   RELEASE ADD(CAWNDATASYNCH_FGCD)
+ENDJOB
+
+UNIX_JOB CAWNDATASYNCH_FGCD
+    AGENT CYBA_ISBFP3
+    USER cdprod
+    EARLYSUB REALNOW PLUS 20 SECONDS
+    PID= WOBDATA('PARMSET.!ESPAPPL','PID')
+    TMSTMP= WOBDATA('PARMSET.!ESPAPPL','TMSTMP')
+    SCRIPTNAME /apps/condir/bfsbin/submitcd.sh
+    ARGS CAWNDATASYNCH_FG.CD 5 !PID !TMSTMP
+    RESOURCE ADD(1,ISBFP3CD)
+    RUN WEEKDAYS
+    RELEASE ADD(CDSTAT.FGCAWN(A))
+    RELEASE ADD(RM_ZMMCHI01_CAWN_FGTXT)
+ENDJOB
+
+AIX_JOB CDSTAT.FGCAWN       CONDITIONAL
+   /*This job only runs if the C:D job does not end with*/
+   /*a EXITCODE of 0.  It can be rerun as often as*/
+   /*required to check the status of the C:D process.*/
+   /*When the C:D process finishes, complete the job*/
+   /*to release the successors.*/
+   AGENT CYBA_ISBFP3
+   USER cduser
+   STMPTM= WOBDATA('PARMSET.!ESPAPPL','STMPTM')
+   PID= WOBDATA('PARMSET.!ESPAPPL','PID')
+   CMDNAME /apps/condir/bfsbin/cdstat.sh
+   ARGS !STMPTM  j!PID
+   RUN WEEKDAYS
+ENDJOB
+
+UNIX_JOB RM_ZMMCHI01_CAWN_FGTXT
+    AGENT CYBA_ISBFP3
+    USER cdprod
+    CMDNAME /bin/rm
+    ARGS /data/BFP/interfaces/output/dataout/zmmchi01_cawn_fg.txt
+    RUN WEEKDAYS
+    RELEASE ADD(ZMMCHI01_CAWNT_SYNCH_EXT_FG)
+ENDJOB
+
+SAP_JOB ZMMCHI01_CAWNT_SYNCH_EXT_FG
+    SAPUSER SAPADM
+    AGENT CYBB_BFP030
+    SAPJOBNAME ZMMCHI01_CAWNT_SYNCH_EXT_FG
+    SAPJOBCLASS C
+    ABAPNAME ZMMCHI01
+    VARIANT CAWNT_FG
+    LANGUAGE E
+    PRINTDEST CP21
+    PRINTCOPIES 001
+    EXPIRATION 8
+    COLUMNS 255
+    BANNER D
+    RECIPIENT SAPADM
+    ARCMODE PRINT
+    RUN WEEKDAYS
+    RELEASE ADD(CAWNTDATASYNCH_FGCD)
+ENDJOB
+
+JOB SETPID5.!ESPAPPL LINK PROCESS
+   /*get the next PID number from the ConnectDirect*/
+   /*Process ID table (CDPROD).  Save the value into*/
+   /*the applications DataObject for use by the C:D*/
+   /*job and the CDSTAT job (if needed).*/
+   VINCR (PID) TABLE(CDPROD) CLANG
+   VGET  (PID) TABLE(CDPROD) CLANG
+   ESP MGRMSG * . . . PARMSET.!ESPAPPL/!ESPAPPL..!ESPAPGEN/MAIN +
+   ACTION SET PID(!PID)
+   RUN WEEKDAYS
+   RELEASE ADD(CAWNTDATASYNCH_FGCD)
+ENDJOB
+
+UNIX_JOB CAWNTDATASYNCH_FGCD
+    AGENT CYBA_ISBFP3
+    USER cdprod
+    EARLYSUB REALNOW PLUS 20 SECONDS
+    PID= WOBDATA('PARMSET.!ESPAPPL','PID')
+    TMSTMP= WOBDATA('PARMSET.!ESPAPPL','TMSTMP')
+    SCRIPTNAME /apps/condir/bfsbin/submitcd.sh
+    ARGS CAWNTDATASYNCH_FG.CD 5 !PID !TMSTMP
+    RESOURCE ADD(1,ISBFP3CD)
+    RUN WEEKDAYS
+    RELEASE ADD(CDSTAT.FGCAWNT(A))
+    RELEASE ADD(RM_ZMMCHI01_CAWNT_FGTXT)
+ENDJOB
+
+AIX_JOB CDSTAT.FGCAWNT      CONDITIONAL
+   /*This job only runs if the C:D job does not end with*/
+   /*a EXITCODE of 0.  It can be rerun as often as*/
+   /*required to check the status of the C:D process.*/
+   /*When the C:D process finishes, complete the job*/
+   /*to release the successors.*/
+   AGENT CYBA_ISBFP3
+   USER cduser
+   STMPTM= WOBDATA('PARMSET.!ESPAPPL','STMPTM')
+   PID= WOBDATA('PARMSET.!ESPAPPL','PID')
+   CMDNAME /apps/condir/bfsbin/cdstat.sh
+   ARGS !STMPTM  j!PID
+   RUN WEEKDAYS
+ENDJOB
+
+UNIX_JOB RM_ZMMCHI01_CAWNT_FGTXT
+    AGENT CYBA_ISBFP3
+    CMDNAME /bin/rm
+    ARGS /data/BFP/interfaces/output/dataout/zmmchi01_cawnt_fg.txt
+    USER cdprod
+    RUN WEEKDAYS
+    RELEASE ADD(DEL_CHARS)
+ENDJOB
+
+NT_JOB DEL_CHARS
+    AGENT CYBA_APPMNACHQ
+    USER maestro
+    CMDNAME e:\APPS\DataSync\DEL_CHARS.bat
+    ARGS
+    RUN WEEKDAYS
+    RELEASE ADD(LIE.!ESPAPPL)
+ENDJOB
+
+AIX_JOB LIE.!ESPAPPL
+    AGENT CYBA_ISBFP3
+    USER bfpadm
+    COMMAND /bin/sleep
+    ARGS 3
+    RUN WEEKDAYS
+ENDJOB
+

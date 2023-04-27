@@ -1,0 +1,21 @@
+APPL RT950P92 WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/*********************************************************************/
+/*09/05/2018 -JFC- REMOVED EXTERNAL TO DB0029B PER GREG H
+/*********************************************************************/
+
+NOTIFY FAILURE ABEND ALERT(REMD)
+
+JOB RT950P92
+  CCCHK RC(1:4095) FAIL CONTINUE
+  RUN TODAY
+  RELEASE ADD(DB2146I)
+ENDJOB
+
+JOB DB2146I
+  CCCHK RC(1:4095) FAIL CONTINUE
+  RUN TODAY
+ENDJOB
+

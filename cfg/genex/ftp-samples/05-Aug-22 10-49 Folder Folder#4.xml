@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--Exported at 05-08-2022 10:50:05-->
+<DEFTABLE xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="Folder.xsd">
+    <FOLDER DATACENTER="CTLMPROD" VERSION="919" PLATFORM="UNIX" FOLDER_NAME="Folder#4" REAL_FOLDER_ID="0" TYPE="1">
+        <JOB JOBNAME="ftp_mget_L-local_R-cust" DESCRIPTION="sample job of a multi file get (mget)." CREATED_BY="gehma_g" RUN_AS="SEDGWICK_FTP" CRITICAL="0" TASKTYPE="Job" CYCLIC="0" NODEID="PHLPRDEDI01" INTERVAL="00001M" CONFIRM="0" RETRO="0" MAXWAIT="0" MAXRERUN="0" AUTOARCH="1" MAXDAYS="0" MAXRUNS="0" DAYS="ALL" JAN="1" FEB="1" MAR="1" APR="1" MAY="1" JUN="1" JUL="1" AUG="1" SEP="1" OCT="1" NOV="1" DEC="1" DAYS_AND_OR="O" SHIFT="Ignore Job" SHIFTNUM="+00" SYSDB="1" IND_CYCLIC="S" RULE_BASED_CALENDAR_RELATIONSHIP="O" APPL_TYPE="FILE_TRANS" APPL_VER="9.0.19.200" APPL_FORM="AFT" CM_VER="N/A" MULTY_AGENT="N" USE_INSTREAM_JCL="N" CYCLIC_TOLERANCE="0" CYCLIC_TYPE="C" PARENT_FOLDER="Folder#4">
+            <VARIABLE NAME="%%FTP-PATH" VALUE="Not in use for application jobs" />
+            <VARIABLE NAME="%%FTP-ACCOUNT" VALUE="SEDGWICK_FTP" />
+            <VARIABLE NAME="%%FTP-LOSTYPE" VALUE="Unix" />
+            <VARIABLE NAME="%%FTP-CONNTYPE1" VALUE="FTP" />
+            <VARIABLE NAME="%%FTP-LHOST" VALUE="ftp1.sedgwickcms.com" />
+            <VARIABLE NAME="%%FTP-LUSER" VALUE="genex" />
+            <VARIABLE NAME="%%FTP-LPASSIVE" VALUE="2" />
+            <VARIABLE NAME="%%FTP-ROSTYPE" VALUE="Windows" />
+            <VARIABLE NAME="%%FTP-CONNTYPE2" VALUE="LOCAL" />
+            <VARIABLE NAME="%%FTP-RHOST" VALUE="Local" />
+            <VARIABLE NAME="%%FTP-RUSER" VALUE="GENEXCORP\service-automize" />
+            <VARIABLE NAME="%%FTP-RPASSIVE" VALUE="2" />
+            <VARIABLE NAME="%%FTP-TYPE1" VALUE="I" />
+            <VARIABLE NAME="%%FTP-UPLOAD1" VALUE="2" />
+            <VARIABLE NAME="%%FTP-LPATH1" VALUE="/" />
+            <VARIABLE NAME="%%FTP-RPATH1" VALUE="D:/Projects\" />
+            <VARIABLE NAME="%%FTP-TIMELIMIT_UNIT1" VALUE="1" />
+            <VARIABLE NAME="%%FTP-TIMELIMIT1" VALUE="0" />
+            <VARIABLE NAME="%%FTP-ABSTIME1" VALUE="0" />
+            <VARIABLE NAME="%%FTP-TRANSFER_ALL1" VALUE="1" />
+            <VARIABLE NAME="%%FTP-OVERRIDE_WATCH_INTERVAL1" VALUE="0" />
+            <VARIABLE NAME="%%FTP-WATCH_INTERVAL1" VALUE="30" />
+            <VARIABLE NAME="%%FTP-SRCOPT1" VALUE="0" />
+            <VARIABLE NAME="%%FTP-IF_EXIST1" VALUE="0" />
+            <VARIABLE NAME="%%FTP-DSTOPT1" VALUE="0" />
+            <VARIABLE NAME="%%FTP-UNIQUE1" VALUE="0" />
+            <VARIABLE NAME="%%FTP-RECURSIVE1" VALUE="0" />
+            <VARIABLE NAME="%%FTP-TRIM1" VALUE="1" />
+            <VARIABLE NAME="%%FTP-NULLFLDS1" VALUE="0" />
+            <VARIABLE NAME="%%FTP-VERNUM1" VALUE="0" />
+            <VARIABLE NAME="%%FTP-EXCLUDE_WILDCARD1" VALUE="0" />
+            <VARIABLE NAME="%%FTP-CASEIFS1" VALUE="0" />
+            <VARIABLE NAME="%%FTP-TRANSFER_NUM" VALUE="1" />
+            <VARIABLE NAME="%%FTP-CONT_EXE_NOTOK" VALUE="0" />
+            <VARIABLE NAME="%%FTP-RPF" VALUE="0" />
+            <VARIABLE NAME="%%FTP-USE_DEF_NUMRETRIES" VALUE="0" />
+            <VARIABLE NAME="%%FTP-NUM_RETRIES" VALUE="5" />
+            <VARIABLE NAME="%%FTP-Is" VALUE="5" />
+            <VARIABLE NAME="%%FTP-AUTOREFRESH" VALUE="False" />
+            <VARIABLE NAME="%%FTP-CM_VER" VALUE="8.2.0" />
+        </JOB>
+    </FOLDER>
+</DEFTABLE>

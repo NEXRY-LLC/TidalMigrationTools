@@ -1,0 +1,109 @@
+APPL BLR001
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/*********************************************************************/
+/*03/19/2019 -JFC-  UPDATED PROC PER  INC000001867636                */
+/*********************************************************************/
+
+NOTIFY ABEND FAILURE ALERT(REMD)
+
+JOB LIS.!ESPAPPL LINK PROCESS
+   RUN TODAY
+   RELEASE ADD(ZSDSAI11_CD)
+ENDJOB
+
+DATA_OBJECT PARMSET.!ESPAPPL
+   /*Create a timestamp in hhmmMMDDYY format*/
+   SETVAR TMSTMP='!ESPSHH.:!ESPSMN.,!ESPSMM./!ESPSDD./!ESPSYY'
+   SETVAR PID=''
+   SETVAR STMPTM='!ESPSMM./!ESPSDD./!ESPSYY.,!ESPSHH.:!ESPSMN'
+ENDJOB
+
+JOB SETPID.BLR001 LINK PROCESS
+   RUN TODAY
+   /*get the next PID number from the ConnectDirect*/
+   /*Process ID table (CDPROD).  Save the value into*/
+   /*the applications DataObject for use by the C:D*/
+   /*job and the CDSTAT job (if needed).*/
+   VINCR (PID) TABLE(CDPROD) CLANG
+   VGET  (PID) TABLE(CDPROD) CLANG
+   ESP MGRMSG * . . . PARMSET.!ESPAPPL/!ESPAPPL..!ESPAPGEN/MAIN +
+ACTION SET PID(!PID)
+   RELEASE ADD(ZSDSAI11_CD)
+ENDJOB
+
+UNIX_JOB ZSDSAI11_CD
+   EARLYSUB REALNOW PLUS 40 SECONDS
+   AGENT CYBA_ISBFP3
+   TMSTMP= WOBDATA('PARMSET.!ESPAPPL','TMSTMP')
+   PID= WOBDATA('PARMSET.!ESPAPPL','PID')
+   SCRIPTNAME /apps/condir/bfsbin/submitcd.sh
+   ARGS zsdsai11.cd 2 !PID !TMSTMP
+   RESOURCE ADD(1,ISBFP3CD)
+   USER cdprod
+   RUN TODAY
+   RELEASE ADD(ZSDSAI11_LOAD_ONELINER_SO)
+ENDJOB
+
+SAP_JOB ZSDSAI11_LOAD_ONELINER_SO
+   EARLYSUB REALNOW PLUS 40 SECONDS
+   AGENT CYBB_BFP030
+   SAPJOBNAME ZSDSAI11_LOAD_ONELINER_SO
+   SAPJOBCLASS C
+   STARTMODE ASAP
+   ABAPNAME ZSDSAI11
+   STEPUSER SAPADM
+   LANGUAGE E
+   PRINTDEST CP21
+   EXPIRATION 8
+   LINES 65
+   COLUMNS 80
+   BANNER D
+   RECIPIENT SAPADM
+   ARCMODE PRINT
+   PRINTCOPIES 001
+   RUN TODAY
+   RELEASE ADD(ARBLR001)
+ENDJOB
+
+AIX_JOB CDSTAT.ZSDSAI11 CONDITIONAL
+   /*This job only runs if the C:D job does not end with*/
+   /*a EXITCODE of 0.  It can be rerun as often as*/
+   /*required to check the status of the C:D process.*/
+   /*When the C:D process finishes, complete the job*/
+   /*to release the successors.*/
+   RUN TODAY
+   AFTER ADD(ZSDSAI11_CD(A))
+   AGENT CYBA_ISBFP3
+   USER cduser
+   STMPTM= WOBDATA('PARMSET.!ESPAPPL','STMPTM')
+   PID= WOBDATA('PARMSET.!ESPAPPL','PID')
+   CMDNAME /apps/condir/bfsbin/cdstat.sh
+   ARGS !STMPTM  j!PID
+ENDJOB
+
+UNIX_JOB ARBLR001
+   AGENT CYBA_ISBFP3
+   USER bfpadm
+   SCRIPTNAME /local/bin/arcfile.sh
+   ARGS interfaces/input/datain/zsdsai11_oneline_orders.csv D
+   RUN TODAY
+   RELEASE ADD(ZSDSAI11_DEL)
+ENDJOB
+
+NT_JOB ZSDSAI11_DEL
+   AGENT CYBA_CDC1AKFIS
+   CMDNAME +
+D:\DTS_RUN\BatchFiles\Billing\Oneline_Orders\zsdsai11_DEL.bat
+   ARGS
+   RUN TODAY
+   USER maestro
+  RELEASE ADD(LIE.!ESPAPPL)
+ENDJOB
+
+JOB LIE.!ESPAPPL LINK PROCESS
+  RUN DAILY
+ENDJOB
+
+

@@ -1,0 +1,91 @@
+APPL QASCS014 WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/**********************************************************************/
+/*10/18/2016-JFC-CONVERTED LIE JOB FROM MVS TO LINK                   */
+/**********************************************************************/
+
+NOTIFY FAILURE ABEND ALERT(REMD)
+NOTIFY FAILURE ABEND MAILBOX(QAFAIL1)
+TAG PPIW
+
+JOB LIS.QASCS014 LINK PROCESS
+  RUN DAILY
+  EARLYSUB 01.00
+  RELEASE ADD(SCS_FCST_ACCY_tbl_BFORDM_Orders_Article_Rollupcmd)
+ENDJOB
+
+NT_JOB SCS_FCST_ACCY_tbl_BFORDM_Orders_Article_Rollupcmd
+  AGENT CYBA_PPIWPROD
+  CMDNAME X:\CMD_SCRIPTS\SCS_FCST_ACCY_tbl_BFORDM_Orders_Article+
+  _Rollup.cmd
+  RUN DAILY
+  USER maestro
+  RELEASE ADD(SCS_FCST_ACCY_tbl_CommDM_Orders_Article_Rollupcmd)
+ENDJOB
+
+NT_JOB SCS_FCST_ACCY_tbl_CommDM_Orders_Article_Rollupcmd
+  AGENT CYBA_PPIWPROD
+  CMDNAME X:\CMD_SCRIPTS\SCS_FCST_ACCY_tbl_CommDM_Orders_Article+
+  _Rollup.cmd
+  RUN DAILY
+  USER maestro
+  RELEASE ADD(SCS_FCST_ACCY_tbl_ConsDM_Orders_Article_Rollupcmd)
+ENDJOB
+
+NT_JOB SCS_FCST_ACCY_tbl_ConsDM_Orders_Article_Rollupcmd
+  AGENT CYBA_PPIWPROD
+  CMDNAME X:\CMD_SCRIPTS\SCS_FCST_ACCY_tbl_ConsDM_Orders_Article+
+  _Rollup.cmd
+  RUN DAILY
+  USER maestro
+  RELEASE ADD(SCS_FCST_ACCY_tbl_Fcst_Metrics_Commentscmd)
+ENDJOB
+
+NT_JOB SCS_FCST_ACCY_tbl_Fcst_Metrics_Commentscmd
+  AGENT CYBA_PPIWPROD
+  CMDNAME X:\CMD_SCRIPTS\SCS_FCST_ACCY_tbl_Fcst_Metrics_Comments.cmd
+  RUN DAILY
+  USER maestro
+  RELEASE ADD(SCS_FCST_ACCY_tbl_Fcst_Metrics_Summarycmd)
+ENDJOB
+
+NT_JOB SCS_FCST_ACCY_tbl_Fcst_Metrics_Summarycmd
+   AGENT CYBA_PPIWPROD
+   CMDNAME X:\CMD_SCRIPTS\SCS_FCST_ACCY_tbl_Fcst_Metrics_Summary.cmd
+   RUN DAILY
+   USER maestro
+   RELEASE ADD(SCS_FCST_ACCY_tbl_Fcst_Metrics_Summary_reportcmd)
+ENDJOB
+
+NT_JOB SCS_FCST_ACCY_tbl_Fcst_Metrics_Summary_reportcmd
+   AGENT CYBA_PPIWPROD
+   CMDNAME X:\CMD_SCRIPTS\SCS_FCST_ACCY_tbl_Fcst_Metrics_Summary+
+   _report.cmd
+   RUN DAILY
+   USER maestro
+   RELEASE ADD(SCS_FCST_ACCY_tbl_Fcst_Metrics_Summary_totalscmd)
+ENDJOB
+
+NT_JOB SCS_FCST_ACCY_tbl_Fcst_Metrics_Summary_totalscmd
+   AGENT CYBA_PPIWPROD
+   CMDNAME X:\CMD_SCRIPTS\SCS_FCST_ACCY_tbl_Fcst_Metrics_Summary+
+   _totals.cmd
+   RUN DAILY
+   USER maestro
+   RELEASE ADD(SCS_FCST_ACCY_tbl_Orders_History_Combinedcmd)
+ENDJOB
+
+NT_JOB SCS_FCST_ACCY_tbl_Orders_History_Combinedcmd
+   AGENT CYBA_PPIWPROD
+   CMDNAME X:\CMD_SCRIPTS\SCS_FCST_ACCY_tbl_Orders_History_Combined.cmd
+   RUN DAILY
+   USER maestro
+   RELEASE ADD(LIE.QASCS014)
+ENDJOB
+
+JOB LIE.QASCS014 LINK PROCESS
+   RUN DAILY
+ENDJOB
+

@@ -1,0 +1,16 @@
+APPL JCTEST18 WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/*****************************************************************/
+/* TEMPLATES - THIS APPLICATION IS FOR TESTING TEMPLATES         */
+/*****************************************************************/
+NOTIFY ABEND ALERT(REMA)
+
+JOB JCTESTCC
+  ECHO !USER1
+  CCCHK RC(1:4095) FAIL CONTINUE
+  DATASET 'FTRF.TSTJOBS'
+  RUN TODAY
+ENDJOB
+

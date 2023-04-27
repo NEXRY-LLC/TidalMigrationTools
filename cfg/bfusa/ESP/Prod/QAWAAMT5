@@ -1,0 +1,40 @@
+APPL QAWAAMT5 WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/**********************************************************************/
+/*10/18/2016-JFC-CONVERTED LIE JOB FROM MVS TO LINK                   */
+/**********************************************************************/
+
+NOTIFY FAILURE ABEND ALERT(REMD)
+NOTIFY FAILURE ABEND MAILBOX(QAFAIL)
+TAG PPIW
+
+JOB LIS.QAWAAMT5 LINK PROCESS
+  RUN SUN
+  DELAYSUB 00:15
+  RELEASE ADD(WAAMTS_TKT_NO_TIRE_6_MO_OLD_TMP)
+ENDJOB
+
+NT_JOB WAAMTS_TKT_NO_TIRE_6_MO_OLD_TMP
+   AGENT CYBA_PPIWPROD
+   CMDNAME X:\cmd_scripts\wa_amts_tkt_no_tire_6_mo_old_tmp.cmd
+   ARGS
+   USER maestro
+   RUN SUN
+   RELEASE ADD(WAAMTS_TKT_NO_TIRE_6_MO_OLD)
+ENDJOB
+
+NT_JOB WAAMTS_TKT_NO_TIRE_6_MO_OLD
+   AGENT CYBA_PPIWPROD
+   CMDNAME X:\cmd_scripts\wa_amts_tkt_no_tire_6_mo_old.cmd
+   ARGS
+   USER maestro
+   RUN SUN
+   RELEASE ADD(LIE.QAWAAMT5)
+ENDJOB
+
+JOB LIE.QAWAAMT5 LINK PROCESS
+   RUN SUN
+ENDJOB
+

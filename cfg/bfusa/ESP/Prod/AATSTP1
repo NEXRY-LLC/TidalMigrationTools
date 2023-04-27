@@ -1,0 +1,15 @@
+APPL XXXXXXX WAIT
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+/**********************************************************************/
+/* CREATED ON XX/XX/XX PER XXXXXXXXXXXX - XXX -INC00000XXXXXXX*/
+/**********************************************************************/
+NOTIFY ABEND FAILURE ALERT(REMD)
+
+JOB YOU_ARE_ALL_DONE LINK PROCESS
+ENDJOB
+
+JOB MARK_ME_COMPLETE TASK
+   RELEASE (YOU_ARE_ALL_DONE)
+ENDJOB
+
+

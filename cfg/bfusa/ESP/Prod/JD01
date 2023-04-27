@@ -1,0 +1,11 @@
+APPL JD01
+
+/*********************************************************************/
+/* THIS PROC IS FOR ALERT JD01 - DO NOT DELETE - USE FOR JD01 EVENTS
+/*********************************************************************/
+
+REXXON GEN PROC
+SAY 'THIS IS AN JD01 RULE TEST FOR COMPLETING OWPASDAL'
+REXXOFF
+
+

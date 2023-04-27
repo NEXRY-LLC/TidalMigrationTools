@@ -1,0 +1,31 @@
+APPL SWESP8CN JOB_ANCESTOR_WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/*********************************************************************/
+/*02/28/2019 -VMD- CLEANED UP PROC - ADDED LIE - NO OTHER CHANGES
+/*********************************************************************/
+
+NOTIFY FAILURE ABEND ALERT(REMD)
+
+/*  PERFORM SYSTEM NETWORK CONNECTION FOR SYS3                    */
+
+/* 02/13/09 FCT - CREATE                                          */
+
+JOB LIS.!ESPAPPL LINK PROCESS
+   RUN NOW
+   RELEASE ADD(SWESP8CN)
+ENDJOB
+
+/*  ATTEMPT TO ESTABLISH A NETWORK CONNECTION TO SYS3 FOR SYS5  */
+
+JOB SWESP8CN
+  CCCHK RC(1:4095) FAIL CONTINUE
+  RUN NOW
+  RELEASE ADD(LIE.!ESPAPPL)
+ENDJOB
+
+JOB LIE.!ESPAPPL LINK PROCESS
+   RUN DAILY
+ENDJOB
+

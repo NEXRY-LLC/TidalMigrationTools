@@ -1,0 +1,36 @@
+APPL DSDARCLN WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/**********************************************************************/
+/* 10/20/21 - CREATED PER MANASI DILIP BERDE -SCTASK0083297
+/* If the job fails assign incident to ETL SAP BODS Team and inform the
+/* Manasi Berde - BerdeManasi@contractor.bfusa.com
+/* Swetha Thammineni - ThammineniSwetha@contractor.bfusa.com
+/* Sudheer Vadde - VaddeSudheer@contractor.bfusa.com
+/**********************************************************************/
+
+NOTIFY ABEND FAILURE ALERT(REMD)
+
+FILE_TRIGGER JOB_MDG_ADDR_CLEANSE_FT_MULT_USER
+   AGENT DSSAPP01PAKR
+   FILENAME '\\dssapp01qakr\bods\MDG_ADDRESS\INPUT_FILE+
+   \Address_MDC_MDG*.xlsx' CREATE
+   RUN DAILY
+  RELEASE ADD(JOB_MDG_ADDR_CLEANSE_MUL_USER)
+ENDJOB
+
+NT_JOB JOB_MDG_ADDR_CLEANSE_MUL_USER
+  AGENT DSSAPP01PAKR
+  USER svc_sap_ds_q
+  CMDNAME "\\dssapp01pakr\bods\Job_Scripts\+
+          JOB_MDG_ADDR_CLEANSE_MULTIPLE_USER.bat"
+  RUN DAILY
+  RELEASE ADD(DSDARCLN)
+ENDJOB
+
+APPLEND DSDARCLN
+   ESPNOMSG TRIGGER !ESPEVENT ADD
+   RELDELAY 5
+ENDJOB
+

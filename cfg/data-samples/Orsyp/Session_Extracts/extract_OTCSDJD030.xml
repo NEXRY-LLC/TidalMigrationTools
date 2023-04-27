@@ -1,0 +1,608 @@
+<object-stream>
+  <int>1</int>
+  <com.orsyp.ExportObjects id="1">
+    <users class="linked-list" id="2"/>
+    <domains class="linked-list" id="3"/>
+    <applications class="linked-list" id="4"/>
+    <rules class="linked-list" id="5"/>
+    <resources class="linked-list" id="6"/>
+    <uprocClasses class="linked-list" id="7"/>
+    <uprocs class="linked-list" id="8"/>
+    <mus class="linked-list" id="9"/>
+    <queues class="linked-list" id="10"/>
+    <tasks class="linked-list" id="11"/>
+    <sessions class="linked-list" id="12">
+      <Session id="13">
+        <identifier class="SessionId" id="14">
+          <syntaxRules class="com.orsyp.api.syntaxerules.OwlsSyntaxRules" id="15"/>
+          <name>OTCSDJD030</name>
+          <version>000</version>
+        </identifier>
+        <syntaxCheck id="16">
+          <current>true</current>
+          <previous>false</previous>
+        </syntaxCheck>
+        <functionalVersion>0</functionalVersion>
+        <label>JV NA RESCHED DAILY GROUP</label>
+        <tree id="17">
+          <root id="18">
+            <root reference="18"/>
+            <childOk id="19">
+              <root reference="18"/>
+              <parent reference="18"/>
+              <nextSibling id="20">
+                <root reference="18"/>
+                <parent reference="18"/>
+                <nextSibling id="21">
+                  <root reference="18"/>
+                  <parent reference="18"/>
+                  <childOk id="22">
+                    <root reference="18"/>
+                    <parent reference="21"/>
+                    <nextSibling id="23">
+                      <root reference="18"/>
+                      <parent reference="21"/>
+                      <nextSibling id="24">
+                        <root reference="18"/>
+                        <parent reference="21"/>
+                        <childOk id="25">
+                          <root reference="18"/>
+                          <parent reference="24"/>
+                          <nextSibling id="26">
+                            <root reference="18"/>
+                            <parent reference="24"/>
+                            <nextSibling id="27">
+                              <root reference="18"/>
+                              <parent reference="24"/>
+                              <childOk id="28">
+                                <root reference="18"/>
+                                <parent reference="27"/>
+                                <nextSibling id="29">
+                                  <root reference="18"/>
+                                  <parent reference="27"/>
+                                  <nextSibling id="30">
+                                    <root reference="18"/>
+                                    <parent reference="27"/>
+                                    <childOk id="31">
+                                      <root reference="18"/>
+                                      <parent reference="30"/>
+                                      <nextSibling id="32">
+                                        <root reference="18"/>
+                                        <parent reference="30"/>
+                                        <nextSibling id="33">
+                                          <root reference="18"/>
+                                          <parent reference="30"/>
+                                          <childOk id="34">
+                                            <root reference="18"/>
+                                            <parent reference="33"/>
+                                            <nextSibling id="35">
+                                              <root reference="18"/>
+                                              <parent reference="33"/>
+                                              <nextSibling id="36">
+                                                <root reference="18"/>
+                                                <parent reference="33"/>
+                                                <childOk id="37">
+                                                  <root reference="18"/>
+                                                  <parent reference="36"/>
+                                                  <nextSibling id="38">
+                                                    <root reference="18"/>
+                                                    <parent reference="36"/>
+                                                    <nextSibling id="39">
+                                                      <root reference="18"/>
+                                                      <parent reference="36"/>
+                                                      <childOk id="40">
+                                                        <root reference="18"/>
+                                                        <parent reference="39"/>
+                                                        <nextSibling id="41">
+                                                          <root reference="18"/>
+                                                          <parent reference="39"/>
+                                                          <nextSibling id="42">
+                                                            <root reference="18"/>
+                                                            <parent reference="39"/>
+                                                            <childOk id="43">
+                                                              <root reference="18"/>
+                                                              <parent reference="42"/>
+                                                              <nextSibling id="44">
+                                                                <root reference="18"/>
+                                                                <parent reference="42"/>
+                                                                <nextSibling id="45">
+                                                                  <root reference="18"/>
+                                                                  <parent reference="42"/>
+                                                                  <nextSibling id="46">
+                                                                    <root reference="18"/>
+                                                                    <parent reference="42"/>
+                                                                    <nextSibling id="47">
+                                                                      <root reference="18"/>
+                                                                      <parent reference="42"/>
+                                                                      <nextSibling id="48">
+                                                                        <root reference="18"/>
+                                                                        <parent reference="42"/>
+                                                                        <nextSibling id="49">
+                                                                          <root reference="18"/>
+                                                                          <parent reference="42"/>
+                                                                          <nextSibling id="50">
+                                                                            <root reference="18"/>
+                                                                            <parent reference="42"/>
+                                                                            <nextSibling id="51">
+                                                                              <root reference="18"/>
+                                                                              <parent reference="42"/>
+                                                                              <previousSibling reference="50"/>
+                                                                              <data id="52">
+                                                                                <uprocName>OTCTDJD030</uprocName>
+                                                                                <numOrdSession>34</numOrdSession>
+                                                                                <executionContext id="53">
+                                                                                  <type>SAME</type>
+                                                                                  <syntaxCheck id="54">
+                                                                                    <current>true</current>
+                                                                                    <previous>true</previous>
+                                                                                  </syntaxCheck>
+                                                                                </executionContext>
+                                                                                <atom reference="51"/>
+                                                                              </data>
+                                                                            </nextSibling>
+                                                                            <previousSibling reference="49"/>
+                                                                            <data id="55">
+                                                                              <uprocName>OTCPDJD270</uprocName>
+                                                                              <numOrdSession>33</numOrdSession>
+                                                                              <executionContext id="56">
+                                                                                <type>SAME</type>
+                                                                                <syntaxCheck id="57">
+                                                                                  <current>true</current>
+                                                                                  <previous>true</previous>
+                                                                                </syntaxCheck>
+                                                                              </executionContext>
+                                                                              <atom reference="50"/>
+                                                                            </data>
+                                                                          </nextSibling>
+                                                                          <previousSibling reference="48"/>
+                                                                          <data id="58">
+                                                                            <uprocName>OTCPDJD220</uprocName>
+                                                                            <numOrdSession>32</numOrdSession>
+                                                                            <executionContext id="59">
+                                                                              <type>SAME</type>
+                                                                              <syntaxCheck id="60">
+                                                                                <current>true</current>
+                                                                                <previous>true</previous>
+                                                                              </syntaxCheck>
+                                                                            </executionContext>
+                                                                            <atom reference="49"/>
+                                                                          </data>
+                                                                        </nextSibling>
+                                                                        <previousSibling reference="47"/>
+                                                                        <data id="61">
+                                                                          <uprocName>OTCPDJD215</uprocName>
+                                                                          <numOrdSession>31</numOrdSession>
+                                                                          <executionContext id="62">
+                                                                            <type>SAME</type>
+                                                                            <syntaxCheck id="63">
+                                                                              <current>true</current>
+                                                                              <previous>true</previous>
+                                                                            </syntaxCheck>
+                                                                          </executionContext>
+                                                                          <atom reference="48"/>
+                                                                        </data>
+                                                                      </nextSibling>
+                                                                      <previousSibling reference="46"/>
+                                                                      <data id="64">
+                                                                        <uprocName>OTCPDJC130</uprocName>
+                                                                        <numOrdSession>30</numOrdSession>
+                                                                        <executionContext id="65">
+                                                                          <type>SAME</type>
+                                                                          <syntaxCheck id="66">
+                                                                            <current>true</current>
+                                                                            <previous>true</previous>
+                                                                          </syntaxCheck>
+                                                                        </executionContext>
+                                                                        <atom reference="47"/>
+                                                                      </data>
+                                                                    </nextSibling>
+                                                                    <previousSibling reference="45"/>
+                                                                    <data id="67">
+                                                                      <uprocName>OTCPDJD230</uprocName>
+                                                                      <numOrdSession>29</numOrdSession>
+                                                                      <executionContext id="68">
+                                                                        <type>SAME</type>
+                                                                        <syntaxCheck id="69">
+                                                                          <current>true</current>
+                                                                          <previous>true</previous>
+                                                                        </syntaxCheck>
+                                                                      </executionContext>
+                                                                      <atom reference="46"/>
+                                                                    </data>
+                                                                  </nextSibling>
+                                                                  <previousSibling reference="44"/>
+                                                                  <data id="70">
+                                                                    <uprocName>OTCPDJD225</uprocName>
+                                                                    <numOrdSession>28</numOrdSession>
+                                                                    <executionContext id="71">
+                                                                      <type>SAME</type>
+                                                                      <syntaxCheck id="72">
+                                                                        <current>true</current>
+                                                                        <previous>true</previous>
+                                                                      </syntaxCheck>
+                                                                    </executionContext>
+                                                                    <atom reference="45"/>
+                                                                  </data>
+                                                                </nextSibling>
+                                                                <previousSibling reference="43"/>
+                                                                <data id="73">
+                                                                  <uprocName>OTCPDJD140</uprocName>
+                                                                  <numOrdSession>27</numOrdSession>
+                                                                  <executionContext id="74">
+                                                                    <type>SAME</type>
+                                                                    <syntaxCheck id="75">
+                                                                      <current>true</current>
+                                                                      <previous>true</previous>
+                                                                    </syntaxCheck>
+                                                                  </executionContext>
+                                                                  <atom reference="44"/>
+                                                                </data>
+                                                              </nextSibling>
+                                                              <data id="76">
+                                                                <uprocName>OTCPDJC045</uprocName>
+                                                                <numOrdSession>26</numOrdSession>
+                                                                <executionContext id="77">
+                                                                  <type>SAME</type>
+                                                                  <syntaxCheck id="78">
+                                                                    <current>true</current>
+                                                                    <previous>true</previous>
+                                                                  </syntaxCheck>
+                                                                </executionContext>
+                                                                <atom reference="43"/>
+                                                              </data>
+                                                            </childOk>
+                                                            <previousSibling reference="41"/>
+                                                            <data id="79">
+                                                              <uprocName>OTCUDV005</uprocName>
+                                                              <numOrdSession>25</numOrdSession>
+                                                              <executionContext id="80">
+                                                                <type>SAME</type>
+                                                                <syntaxCheck id="81">
+                                                                  <current>true</current>
+                                                                  <previous>true</previous>
+                                                                </syntaxCheck>
+                                                              </executionContext>
+                                                              <atom reference="42"/>
+                                                            </data>
+                                                          </nextSibling>
+                                                          <previousSibling reference="40"/>
+                                                          <data id="82">
+                                                            <uprocName>OTCPDJC040</uprocName>
+                                                            <numOrdSession>24</numOrdSession>
+                                                            <executionContext id="83">
+                                                              <type>SAME</type>
+                                                              <syntaxCheck id="84">
+                                                                <current>true</current>
+                                                                <previous>true</previous>
+                                                              </syntaxCheck>
+                                                            </executionContext>
+                                                            <atom reference="41"/>
+                                                          </data>
+                                                        </nextSibling>
+                                                        <data id="85">
+                                                          <uprocName>OTCPDJD060</uprocName>
+                                                          <numOrdSession>23</numOrdSession>
+                                                          <executionContext id="86">
+                                                            <type>SAME</type>
+                                                            <syntaxCheck id="87">
+                                                              <current>true</current>
+                                                              <previous>true</previous>
+                                                            </syntaxCheck>
+                                                          </executionContext>
+                                                          <atom reference="40"/>
+                                                        </data>
+                                                      </childOk>
+                                                      <previousSibling reference="38"/>
+                                                      <data id="88">
+                                                        <uprocName>OTCUDV005</uprocName>
+                                                        <numOrdSession>22</numOrdSession>
+                                                        <executionContext id="89">
+                                                          <type>SAME</type>
+                                                          <syntaxCheck id="90">
+                                                            <current>true</current>
+                                                            <previous>true</previous>
+                                                          </syntaxCheck>
+                                                        </executionContext>
+                                                        <atom reference="39"/>
+                                                      </data>
+                                                    </nextSibling>
+                                                    <previousSibling reference="37"/>
+                                                    <data id="91">
+                                                      <uprocName>OTCPDJD055</uprocName>
+                                                      <numOrdSession>21</numOrdSession>
+                                                      <executionContext id="92">
+                                                        <type>SAME</type>
+                                                        <syntaxCheck id="93">
+                                                          <current>true</current>
+                                                          <previous>true</previous>
+                                                        </syntaxCheck>
+                                                      </executionContext>
+                                                      <atom reference="38"/>
+                                                    </data>
+                                                  </nextSibling>
+                                                  <data id="94">
+                                                    <uprocName>OTCPDJC060</uprocName>
+                                                    <numOrdSession>20</numOrdSession>
+                                                    <executionContext id="95">
+                                                      <type>SAME</type>
+                                                      <syntaxCheck id="96">
+                                                        <current>true</current>
+                                                        <previous>true</previous>
+                                                      </syntaxCheck>
+                                                    </executionContext>
+                                                    <atom reference="37"/>
+                                                  </data>
+                                                </childOk>
+                                                <previousSibling reference="35"/>
+                                                <data id="97">
+                                                  <uprocName>OTCUDV005</uprocName>
+                                                  <numOrdSession>19</numOrdSession>
+                                                  <executionContext id="98">
+                                                    <type>SAME</type>
+                                                    <syntaxCheck id="99">
+                                                      <current>true</current>
+                                                      <previous>true</previous>
+                                                    </syntaxCheck>
+                                                  </executionContext>
+                                                  <atom reference="36"/>
+                                                </data>
+                                              </nextSibling>
+                                              <previousSibling reference="34"/>
+                                              <data id="100">
+                                                <uprocName>OTCPDJC055</uprocName>
+                                                <numOrdSession>18</numOrdSession>
+                                                <executionContext id="101">
+                                                  <type>SAME</type>
+                                                  <syntaxCheck id="102">
+                                                    <current>true</current>
+                                                    <previous>true</previous>
+                                                  </syntaxCheck>
+                                                </executionContext>
+                                                <atom reference="35"/>
+                                              </data>
+                                            </nextSibling>
+                                            <data id="103">
+                                              <uprocName>OTCPDJD050</uprocName>
+                                              <numOrdSession>17</numOrdSession>
+                                              <executionContext id="104">
+                                                <type>SAME</type>
+                                                <syntaxCheck id="105">
+                                                  <current>true</current>
+                                                  <previous>true</previous>
+                                                </syntaxCheck>
+                                              </executionContext>
+                                              <atom reference="34"/>
+                                            </data>
+                                          </childOk>
+                                          <previousSibling reference="32"/>
+                                          <data id="106">
+                                            <uprocName>OTCUDV005</uprocName>
+                                            <numOrdSession>16</numOrdSession>
+                                            <executionContext id="107">
+                                              <type>SAME</type>
+                                              <syntaxCheck id="108">
+                                                <current>true</current>
+                                                <previous>true</previous>
+                                              </syntaxCheck>
+                                            </executionContext>
+                                            <atom reference="33"/>
+                                          </data>
+                                        </nextSibling>
+                                        <previousSibling reference="31"/>
+                                        <data id="109">
+                                          <uprocName>OTCPDJC050</uprocName>
+                                          <numOrdSession>15</numOrdSession>
+                                          <executionContext id="110">
+                                            <type>SAME</type>
+                                            <syntaxCheck id="111">
+                                              <current>true</current>
+                                              <previous>true</previous>
+                                            </syntaxCheck>
+                                          </executionContext>
+                                          <atom reference="32"/>
+                                        </data>
+                                      </nextSibling>
+                                      <data id="112">
+                                        <uprocName>OTCPDJD045</uprocName>
+                                        <numOrdSession>14</numOrdSession>
+                                        <executionContext id="113">
+                                          <type>SAME</type>
+                                          <syntaxCheck id="114">
+                                            <current>true</current>
+                                            <previous>true</previous>
+                                          </syntaxCheck>
+                                        </executionContext>
+                                        <atom reference="31"/>
+                                      </data>
+                                    </childOk>
+                                    <previousSibling reference="29"/>
+                                    <data id="115">
+                                      <uprocName>OTCUDV005</uprocName>
+                                      <numOrdSession>13</numOrdSession>
+                                      <executionContext id="116">
+                                        <type>SAME</type>
+                                        <syntaxCheck id="117">
+                                          <current>true</current>
+                                          <previous>true</previous>
+                                        </syntaxCheck>
+                                      </executionContext>
+                                      <atom reference="30"/>
+                                    </data>
+                                  </nextSibling>
+                                  <previousSibling reference="28"/>
+                                  <data id="118">
+                                    <uprocName>OTCPDJC035</uprocName>
+                                    <numOrdSession>12</numOrdSession>
+                                    <executionContext id="119">
+                                      <type>SAME</type>
+                                      <syntaxCheck id="120">
+                                        <current>true</current>
+                                        <previous>true</previous>
+                                      </syntaxCheck>
+                                    </executionContext>
+                                    <atom reference="29"/>
+                                  </data>
+                                </nextSibling>
+                                <data id="121">
+                                  <uprocName>OTCPDJD040</uprocName>
+                                  <numOrdSession>11</numOrdSession>
+                                  <executionContext id="122">
+                                    <type>SAME</type>
+                                    <syntaxCheck id="123">
+                                      <current>true</current>
+                                      <previous>true</previous>
+                                    </syntaxCheck>
+                                  </executionContext>
+                                  <atom reference="28"/>
+                                </data>
+                              </childOk>
+                              <previousSibling reference="26"/>
+                              <data id="124">
+                                <uprocName>OTCUDV005</uprocName>
+                                <numOrdSession>10</numOrdSession>
+                                <executionContext id="125">
+                                  <type>SAME</type>
+                                  <syntaxCheck id="126">
+                                    <current>true</current>
+                                    <previous>true</previous>
+                                  </syntaxCheck>
+                                </executionContext>
+                                <atom reference="27"/>
+                              </data>
+                            </nextSibling>
+                            <previousSibling reference="25"/>
+                            <data id="127">
+                              <uprocName>OTCPDJD020</uprocName>
+                              <numOrdSession>9</numOrdSession>
+                              <executionContext id="128">
+                                <type>SAME</type>
+                                <syntaxCheck id="129">
+                                  <current>true</current>
+                                  <previous>true</previous>
+                                </syntaxCheck>
+                              </executionContext>
+                              <atom reference="26"/>
+                            </data>
+                          </nextSibling>
+                          <data id="130">
+                            <uprocName>OTCPDJC030</uprocName>
+                            <numOrdSession>8</numOrdSession>
+                            <executionContext id="131">
+                              <type>SAME</type>
+                              <syntaxCheck id="132">
+                                <current>true</current>
+                                <previous>true</previous>
+                              </syntaxCheck>
+                            </executionContext>
+                            <atom reference="25"/>
+                          </data>
+                        </childOk>
+                        <previousSibling reference="23"/>
+                        <data id="133">
+                          <uprocName>OTCUDV005</uprocName>
+                          <numOrdSession>7</numOrdSession>
+                          <executionContext id="134">
+                            <type>SAME</type>
+                            <syntaxCheck id="135">
+                              <current>true</current>
+                              <previous>true</previous>
+                            </syntaxCheck>
+                          </executionContext>
+                          <atom reference="24"/>
+                        </data>
+                      </nextSibling>
+                      <previousSibling reference="22"/>
+                      <data id="136">
+                        <uprocName>OTCPDJC135</uprocName>
+                        <numOrdSession>6</numOrdSession>
+                        <executionContext id="137">
+                          <type>SAME</type>
+                          <syntaxCheck id="138">
+                            <current>true</current>
+                            <previous>true</previous>
+                          </syntaxCheck>
+                        </executionContext>
+                        <atom reference="23"/>
+                      </data>
+                    </nextSibling>
+                    <data id="139">
+                      <uprocName>OTCPDJD035</uprocName>
+                      <numOrdSession>5</numOrdSession>
+                      <executionContext id="140">
+                        <type>SAME</type>
+                        <syntaxCheck id="141">
+                          <current>true</current>
+                          <previous>true</previous>
+                        </syntaxCheck>
+                      </executionContext>
+                      <atom reference="22"/>
+                    </data>
+                  </childOk>
+                  <previousSibling reference="20"/>
+                  <data id="142">
+                    <uprocName>OTCUDV005</uprocName>
+                    <numOrdSession>4</numOrdSession>
+                    <executionContext id="143">
+                      <type>SAME</type>
+                      <syntaxCheck id="144">
+                        <current>true</current>
+                        <previous>true</previous>
+                      </syntaxCheck>
+                    </executionContext>
+                    <atom reference="21"/>
+                  </data>
+                </nextSibling>
+                <previousSibling reference="19"/>
+                <data id="145">
+                  <uprocName>OTCPDJD015</uprocName>
+                  <numOrdSession>3</numOrdSession>
+                  <executionContext id="146">
+                    <type>SAME</type>
+                    <syntaxCheck id="147">
+                      <current>true</current>
+                      <previous>true</previous>
+                    </syntaxCheck>
+                  </executionContext>
+                  <atom reference="20"/>
+                </data>
+              </nextSibling>
+              <data id="148">
+                <uprocName>OTCPDJC140</uprocName>
+                <numOrdSession>2</numOrdSession>
+                <executionContext id="149">
+                  <type>SAME</type>
+                  <syntaxCheck id="150">
+                    <current>true</current>
+                    <previous>true</previous>
+                  </syntaxCheck>
+                </executionContext>
+                <atom reference="19"/>
+              </data>
+            </childOk>
+            <data id="151">
+              <uprocName>OTCHDJD030</uprocName>
+              <numOrdSession>1</numOrdSession>
+              <executionContext id="152">
+                <type>SAME</type>
+                <syntaxCheck id="153">
+                  <current>true</current>
+                  <previous>true</previous>
+                </syntaxCheck>
+              </executionContext>
+              <atom reference="18"/>
+            </data>
+          </root>
+        </tree>
+        <postSesList id="154"/>
+        <postDevList id="155"/>
+      </Session>
+    </sessions>
+    <triggers class="linked-list" id="156"/>
+    <runbooks class="linked-list" id="157"/>
+    <calendars class="linked-list" id="158"/>
+    <businessViews class="linked-list" id="159"/>
+    <jobChains class="linked-list" id="160"/>
+    <jobEvents class="linked-list" id="161"/>
+    <dqmJobs class="linked-list" id="162"/>
+  </com.orsyp.ExportObjects>
+</object-stream>

@@ -1,0 +1,43 @@
+APPL JCTEST32
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/********************************************************************/
+/* 09/12/217 - TESTING USER PARAMETERS
+/********************************************************************/
+
+ENV  = ' '
+HOST = ' '
+IF USER3 = '' THEN !ENV  = 'STG'
+IF USER3 = '' THEN !HOST = 'BAOPLBS1-BP-DIV'
+IF USER1 = 'D' THEN ENV = 'DEV'
+IF USER3 = 'D' THEN HOST = 'BAOPLBD1-BP-DIV'
+
+/*********   SET PARAMETER 4 VARIABLE     *****************************/
+/*CREATE RUN-AS-DATE USING GENTIMES AND ALLOW MANUAL ENTRY VIA PARM 4
+/*PARAMETER 4 DATE FORMAT MUST BE YYYY-MM-DD (INCLUDING DASHES)
+IF USER4 = '' THEN !USER4 = 'TODAY'
+GENTIME RAD !USER4
+DATE2 = '!RADYEAR-!RADMM-!RADDD'
+
+/**********************************************************************/
+
+TAG '!DATE2'
+
+JOB JCTEST32.TEST01 LINK PROCESS
+ ECHO BLAH-BLAH-BLAH-!ENV
+ ECHO BLAH-BLAH-BLAH-!HOST
+ ECHO BLAH-BLAH-BLAH-!USER1
+ ECHO BLAH-BLAH-BLAH-!USER2
+ ECHO BLAH-BLAH-BLAH-!USER3
+ ECHO BLAH-BLAH-BLAH-!USER4
+ ECHO BLAH-BLAH-BLAH-!DATE2
+ RUN TODAY
+ENDJOB
+
+
+
+
+
+
+

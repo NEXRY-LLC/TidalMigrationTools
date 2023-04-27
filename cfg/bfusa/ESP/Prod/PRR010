@@ -1,0 +1,100 @@
+APPL PRR010 WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/*********************************************************************/
+/*03/27/2019 -JFC- changes made per INC000001858289                  */
+/*06/11/2019 -JFC- ADDED NOTIFY TO GET CD DATA FROM NEXT RUN        */
+/*********************************************************************/
+
+NOTIFY ABEND FAILURE ALERT(REMD)
+NOTIFY OVERDUE ALERT(LATE)
+
+DATA_OBJECT PARMSET.!ESPAPPL
+   /*Create a timestamp in hhmmMMDDYY format*/
+   SETVAR TMSTMP='!ESPSHH.:!ESPSMN.,!ESPSMM./!ESPSDD./!ESPSYY'
+   SETVAR PID=''
+   SETVAR STMPTM='!ESPSMM./!ESPSDD./!ESPSYY.,!ESPSHH.:!ESPSMN'
+ENDJOB
+
+JOB LIS.!ESPAPPL LINK PROCESS
+   RUN TODAY
+   RELEASE ADD(ZSDPRR03M_BUDGET_EXTRACT)
+ENDJOB
+
+SAP_JOB ZSDPRR03M_BUDGET_EXTRACT
+   AGENT CYBB_BFP030
+   SAPJOBNAME ZSDPRR03M_BUDGET_EXTRACT
+   SAPJOBCLASS C
+   STARTMODE ASAP
+   ABAPNAME ZSDPRR03M
+   VARIANT BUDGET
+   STEPUSER SAPADM
+   LANGUAGE E
+   PRINTDEST CP21
+   EXPIRATION 8
+   LINES 65
+   COLUMNS 80
+   BANNER D
+   RECIPIENT sapadm
+   ARCMODE PRINT
+   PRINTCOPIES 001
+   RUN TODAY
+   RELEASE ADD(ZSDPRR03MCD)
+ENDJOB
+
+JOB SETPID.!ESPAPPL LINK PROCESS
+   /*get the next PID number from the ConnectDirect*/
+   /*Process ID table (CDPROD).  Save the value into*/
+   /*the applications DataObject for use by the C:D*/
+   /*job and the CDSTAT job (if needed).*/
+   VINCR (PID) TABLE(CDPROD) CLANG
+   VGET  (PID) TABLE(CDPROD) CLANG
+   ESP MGRMSG * . . . PARMSET.!ESPAPPL/!ESPAPPL..!ESPAPGEN/MAIN +
+ACTION SET PID(!PID)
+   RUN TODAY
+   RELEASE ADD(ZSDPRR03MCD)
+ENDJOB
+
+UNIX_JOB ZSDPRR03MCD
+   AGENT CYBA_ISBFP3
+   EARLYSUB REALNOW PLUS 20 SECONDS
+   PID= WOBDATA('PARMSET.!ESPAPPL','PID')
+   TMSTMP= WOBDATA('PARMSET.!ESPAPPL','TMSTMP')
+   SCRIPTNAME /apps/condir/bfsbin/submitcd.sh
+   ARGS zsdprr03m.cd 5 !PID !TMSTMP
+   RESOURCE ADD(1,ISBFP3CD)
+   USER cdprod
+   RUN TODAY
+   RELEASE ADD(CDSTAT.ZSDPRR03MCD(A))
+   RELEASE ADD(ARZSDPRR03M)
+ENDJOB
+
+AIX_JOB CDSTAT.ZSDPRR03MCD CONDITIONAL
+   AGENT CYBA_ISBFP3
+   /*This job only runs if the C:D job does not end with*/
+   /*a EXITCODE of 0.  It can be rerun as often as*/
+   /*required to check the status of the C:D process.*/
+   /*When the C:D process finishes, complete the job*/
+   /*to release the successors.*/
+   USER cduser
+   STMPTM= WOBDATA('PARMSET.!ESPAPPL','STMPTM')
+   PID= WOBDATA('PARMSET.!ESPAPPL','PID')
+   CMDNAME /apps/condir/bfsbin/cdstat.sh
+   ARGS !STMPTM  j!PID
+   RUN TODAY
+ENDJOB
+
+UNIX_JOB ARZSDPRR03M
+   AGENT CYBA_ISBFP3
+   SCRIPTNAME /local/bin/arcfile.sh
+   ARGS interfaces/output/dataout/zsdprr03m_budget.txt D
+   USER bfpadm
+   RUN TODAY
+  RELEASE ADD(LIE.!ESPAPPL)
+ENDJOB
+
+JOB LIE.!ESPAPPL LINK PROCESS
+  RUN DAILY
+ENDJOB
+

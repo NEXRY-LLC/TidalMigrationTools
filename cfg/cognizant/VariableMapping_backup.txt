@@ -1,0 +1,247 @@
+NAME,NEWNAME
+%%SUBSTR %%TIME 1 2,<SysTime.HH>
+%%SUBSTR %%TIME 3 2,<SysTime.mm>
+%%SUBSTR %%TIME 5 2,<SysTime.ss>
+%AUTORUN%,<JobRuntime>
+$${YYYY},<SysDate.yyyy>
+$${PreviousDate},<SysDate.yyyymmdd>
+MMDDYYYY,<SysDate.yyyy>
+
+".*(%%(@\\$D|\\$D|@D|D)ATE.{0,1}).*",<SysDate.yyyymmdd>
+".*(%%(@\\$D|\\$D|@D|D)AY.{0,1}).*",<SysDate.dd>
+".*(%%(@\\$T|\\$T|@T|T)IME.{0,1}).*",<SysDate.hhmmss>
+".*(%%(@\\$M|\\$M|@M|M)ONTH.{0,1}).*",<SysDate.mm>
+".*(%%(@\\$Y|\\$Y|@Y|Y)EAR.{0,1}).*",<SysDate.yyyy>
+".*(%%(@\\$J|\\$J|@J|J)OBNAME.{0,1}).*",<JobName>
+".*(%%(@\\$G|\\$G|@G|G)ROUP_ORDID.{0,1}).*",<JobID>
+".*(%%(@\\$C|\\$C|@C|C)OMPSTAT.{0,1}).*",<JobExit>
+".*(%%(@\\$O|\\$O|@O|O)DATE.{0,1}).*",<SysDate.yyyymmdd>
+
+
+ABS_FACE_LOGPATH,\\b12.cishoc.com\dfs\GSPRD\PRIVATE\PROD\Facets\5x\Logfiles
+ABS_FACE_ParmE,-@CommonSystemProp.xml --Region=fab12pr0
+ABS_FACE_ParmE_CMU,-@CommonSystemProp_CMU.xml --Region=fab12pr0
+ABS_PPS_Adhoc,1
+AHW_CAE_LOGPATH,\\B61.cishoc.com\dfs\GSPRD\PRIVATE\PROD\CAE\5x\Region_3\CKNAS\HBA\Logfiles
+AHW_CAEParmE,-@\\B61.cishoc.com\dfs\GSPRD\PRIVATE\PROD\CAE\5x\Region_3\CKNAS\HBA\Runfiles\
+AHW_QNXT_LOGPATH,\\b61.cishoc.com\DFS\GSPRD\PRIVATE\PROD\QNXT\5x\Region_3\Logfiles
+AHW_QNXT_ParamE,-@\\b61.cishoc.com\DFS\GSPRD\PRIVATE\PROD\QNXT\5x\Region_3\Runfiles\
+ATR_TMS_LOGPATH,\\b30.cishoc.com\dfs\GSPRD\PRIVATE\PROD\TMS\5x\Region_3\Logfiles
+ATR_TMS_ParmE,-@\\b30.cishoc.com\dfs\GSPRD\PRIVATE\PROD\TMS\5x\Region_3\Runfiles\TMSCommonSystemProp.xml
+AWHP_CAE_LOGPATH,\\n06.cishoc.com\dfs\GSPRD\PRIVATE\PROD\CAE\5x\Region_3\CKNAS\HBA\Logfiles
+AWHP_CAE_ParmE,-@\\n06.cishoc.com\dfs\GSPRD\PRIVATE\PROD\CAE\5x\Region_3\CKNAS\HBA\RunFiles\
+AWHP_CAE_TRACKERPATH,\\n06.cishoc.com\dfs\GSPRD\PRIVATE\PROD\CAE\5x\Region_3\CKNAS\HBA\Trackers
+AWHP_TMS_LOGPATH,\\n06.cishoc.com\dfs\GSPRD\PRIVATE\PROD\TMS\5x\Region_3\Logfiles
+AWHP_TMS_ParmE,-@\\n06.cishoc.com\dfs\GSPRD\PRIVATE\PROD\TMS\5x\Region_3\RunFiles\TMSCommonSystemProp_Prod.xml
+AWHP_TMS_TRACKERPATH,\\n06.cishoc.com\dfs\GSPRD\PRIVATE\PROD\TMS\5x\Region_3\Trackers
+BATCH_DATE,02082023
+BATCH_DAY,Wed
+BCN_501_PRVD,/usr/client/bcnprod/scripts/tidal/
+BCN_CAE_LOGPATH,\\b09.cishoc.com\DFS\GSPRD\PRIVATE\PROD\CAE\5x\Region_1\CKNAS\HBA\Logfiles
+BCN_CAE_ParmE,-@\\b09.cishoc.com\DFS\GSPRD\PRIVATE\PROD\CAE\5x\Region_1\CKNAS\HBA\Runfiles
+BCN_CAE_ParmE1,\CommonSystemProp_CAE.xml
+BCN_CAE_TRACKERPATH,\\b09.cishoc.com\DFS\GSPRD\PRIVATE\PROD\CAE\5x\Region_1\CKNAS\HBA\Trackers
+BCN_ENV,bcn_
+BCN_FACE_LOGPATH,\\B09.CISHOC.COM\DFS\GSPRD\Private\PROD\Facets\5x\Region_1\Logfiles\
+BCN_FACE_PRD1_LOGPATH,\\B09.CISHOC.COM\DFS\GSPRD\Private\PROD1\Facets\5x\Region_3\Logfiles\
+BCN_Facets_ParamCMU,-@CommonSystemProp_CMU.xml --Region=fab09pr0
+BCN_Facets_ParamE,-@CommonSystemProp.xml --Region=fab09pr0
+BCN_Facets_ParamE_IHT,-@CommonSystemProp.xml --Region=fab09pr0_iht
+BCN_Facets_ParamE_ITS,-@CommonSystemProp.xml --Region=fab09pr0_its
+BCN_Facets_ParamE_MAC,-@CommonSystemProp.xml --Region=fab09pr0_mac
+BCN_Facets_ParamE_PCG,-@CommonSystemProp.xml --Region=fab09pr0_pcg
+BCN_Facets_ParamE_PHI,-@CommonSystemProp.xml --Region=fab09pr0_phi
+BCN_Facets_ParamE_Recall,-@CommonSystemProp.xml --Region=fab09pr0_recall
+BCN_Facets_ParamE_VEN,-@CommonSystemProp.xml --Region=fab09pr0_ven
+BCN_FacetsE_edi,-@CommonSystemProp.xml --Region=fab09pr0_edi
+BCN_FacetsE_egi,-@CommonSystemProp.xml --Region=fab09pr0_egi
+BCN_FacetsE_fhg,-@CommonSystemProp.xml --Region=hgdfyppr0_fhg
+BCN_FTPS_UNIXParamS,/tzg/bcn/v501/prod/ftp/scripts/
+BCN_VitriaParmS,/vitria/build/kit/scripts/
+BCN_VitriaStatsParmS,/vitria/bcnbatchstatsagent/bin/
+BM_Group,ABS_FACE
+BMGroup,EMB_FACE
+BRT_QNXT_LOGPATH,\\b16.cishoc.com\DFS\GSPRD\PRIVATE\PROD\QNXT\5x\Region_3\Logfiles\
+BRT_QNXT_ParamE,-@\\b16.cishoc.com\DFS\GSPRD\PRIVATE\PROD\QNXT\5x\Region_3\Runfiles\
+BRT_TMS_LOGPATH,\\b16.cishoc.com\DFS\GSPRD\PRIVATE\PROD\TMS\BRT\Logfiles
+BRT_TMS_ParmE,-@\\b16.cishoc.com\DFS\GSPRD\PRIVATE\PROD\TMS\BRT\Runfiles\TMSCommonSystemProp.xml
+CAEParmE2,CommonSystemProp_cae.xml
+CAEParmS,C:\Tools\HBA\tzgexec.exe -32 c:\tools\HBA\tzg_hbarun.wsf -~CAE
+CAL_DAY,Thu
+CDHParmE,CommonSystemProp_CDH.xml
+CDHParmS,C:\Tools\HBA\tzgexec.exe -32 c:\tools\HBA\tzg_hbarun.wsf -~CAE
+CFH_QNXT_LOGPATH,\\b14.cishoc.com\dfs\GSPRD\PRIVATE\PROD\QNXT\5x\Region_3\Logfiles
+CFH_QNXT_ParamE,-@\\b14.cishoc.com\dfs\GSPRD\PRIVATE\PROD\QNXT\5x\Region_3\Runfiles\
+CFH_TMS_LOGPATH,\\b14.cishoc.com\dfs\GSPRD\PRIVATE\PROD\TMS\5x\Region_3\Logfiles\
+CFH_TMS_ParmE1,-@\\b14.cishoc.com\dfs\GSPRD\PRIVATE\PROD\TMS\5x\Region_3\Runfiles\TMSCommonSystemProp_PROD.xml
+CIG_TMS_LOGPATH,\\b68.cishoc.com\dfs\GSPRD\PRIVATE\PROD\TMS\5x\Region_3\CIG\Logfiles\
+CIG_TMSParmE1,-@\\b68.cishoc.com\dfs\GSPRD\PRIVATE\PROD\TMS\5x\Region_3\CIG\Runfiles\
+CIG_TMSParmE1_IFP,-@\\b68.cishoc.com\dfs\GSPRD\PRIVATE\PROD\TMS\5x\Region_3\CIG_IFP\Runfiles\
+CIG_TMSParmE1_Retro,-@\\b68.cishoc.com\dfs\GSPRD\PRIVATE\PROD\TMS\5x\Region_3\CIG_Retro\Runfiles\
+CMC_FACE_LOGPATH,\\b58.cishoc.com\dfs\GSPRD\PRIVATE\PROD_SQL\Facets\5x\Region_3\Logfiles
+CMC_FACE_ParmE,-@CommonSystemProp.xml --Region=fab58pr0
+CMC_FACE_SLAPATH,\\b58.cishoc.com\dfs\GSPRD\PRIVATE\PROD_SQL\Facets\5x\Region_3\Hourly_SLA_RPT
+CMC_FACE_SQLLOGPATH,\\b58.cishoc.com\dfs\GSPRD\PRIVATE\PROD_SQL\Facets\5x\Region_3\Logfiles
+CMC_FACE_TRACKPATH,\\b58.cishoc.com\dfs\GSPRD\PRIVATE\PROD_SQL\Facets\5x\Region_3\Trackers
+COA_QNXT_LOGPATH,\\B26.CISHOC.COM\DFS\GSPRD\Private\PROD\QNXT\5x\Region_3\Logfiles
+COA_QNXT_ParmE1,-@\\B26.CISHOC.COM\DFS\GSPRD\Private\PROD\QNXT\5x\Region_3\Runfiles\
+CPHL_QNXTParmE1,-@\\b13.cishoc.com\DFS\GSPRD\PRIVATE\PROD\QNXT\5x\Region_3\Runfiles\
+CPL_QNXT_LOGPATH,\\b13.cishoc.com\DFS\GSPRD\PRIVATE\PROD\QNXT\5x\Region_3\Logfiles
+CPL_QNXTLOGPATH,\\b13.cishoc.com\DFS\GSPRD\PRIVATE\PROD\QNXT\5x\Region_3\Logfiles
+CPL_QNXTParmE1,-@\\b13.cishoc.com\DFS\GSPRD\PRIVATE\PROD\QNXT\5x\Region_3\Runfiles\
+CVS_FACE_LOGPATH,\\b70.cishoc.com\dfs\GSPRD\PRIVATE\PROD\Facets\5x\Region_3\Logfiles
+CVS_FACE_TRACKERPATH,\\b70.cishoc.com\dfs\GSPRD\PRIVATE\PROD\Facets\5x\Region_3\TRACKER
+CVS_FACEParmE,-@CommonSystemProp.xml --Region=facvspr1
+CVS_FACEParmE_02,-@CommonSystemProp.xml --Region=facvspr1_02
+CVS_FACEParmE_03,-@CommonSystemProp.xml --Region=facvspr1_03
+CVS_FACEParmE_04,-@CommonSystemProp.xml --Region=facvspr1_04
+CVS_FACEParmE_05,-@CommonSystemProp.xml --Region=facvspr1_05
+CVS_FACEParmE_06,-@CommonSystemProp.xml --Region=facvspr1_06
+CVS_FACEParmE_07,-@CommonSystemProp.xml --Region=facvspr1_07
+CVS_FACEParmE_08,-@CommonSystemProp.xml --Region=facvspr1_08
+CVS_FACEParmE_09,-@CommonSystemProp.xml --Region=facvspr1_09
+CVS_FACEParmE_cust,-@CommonSystemProp.xml --Region=facvspr1_cust
+CVS_FACEParmE_cust02,-@CommonSystemProp.xml --Region=facvspr1_cust02
+CVS_FACEParmE_cust03,-@CommonSystemProp.xml --Region=facvspr1_cust03
+CVS_FACEParmE_cust04,-@CommonSystemProp.xml --Region=facvspr1_cust04
+CVS_FACEParmE_cust05,-@CommonSystemProp.xml --Region=facvspr1_cust05
+CVS_FACEParmE_cust06,-@CommonSystemProp.xml --Region=facvspr1_cust06
+CVS_FACEParmE_cust07,-@CommonSystemProp.xml --Region=facvspr1_cust07
+CVS_FACEParmE_cust08,-@CommonSystemProp.xml --Region=facvspr1_cust08
+CVS_FACEParmE_cust18,-@CommonSystemProp.xml --Region=facvspr1_cust18
+CVS_FACEParmE_rpt,-@CommonSystemProp.xml --Region=facvspr1_rpt
+CVS_FACEParmS,-@CommonSystemProp.xml --Region=favspr1
+CVS_QNXT_TRACKERPATH,\\b70.cishoc.com\dfs\GSPRD\PRIVATE\PROD\Facets\5x\Region_3\TRACKER
+DD,09
+EDMParmE2,EDMCommonSystemProp.xml
+EDMParmS,C:\Tools\HBA481\tzgexec.exe -32 c:\tools\HBA481\tzg_hbarun.wsf -~CAE
+EMB_CAE_LOGPATH,\\b73.cishoc.com\dfs\GSPRD\PRIVATE\PROD\CAE\5x\Region_3\CKNAS\HBA481\Logfiles
+EMB_CAELOGPATH,\\b73.cishoc.com\dfs\GSPRD\PRIVATE\PROD\CAE\5x\Region_3\CKNAS\HBA481\Logfiles
+EMB_CAEParmE,-@\\b73.cishoc.com\dfs\GSPRD\PRIVATE\PROD\CAE\5x\Region_3\CKNAS\HBA481\Runfiles\
+EMB_FACE_LOGPATH,\\b73.cishoc.com\dfs\gsprd\PRIVATE\PROD\Facets\5x\Region_3\Logfiles
+EMB_FACECMUParmE,-@CommonSystemProp_CMU.xml --Region=fab73pr0
+EMB_FACEParmE,-@CommonSystemProp.xml --Region=fab73pr0
+EMB_FACEParmE2,-@\\embcifsfacetsprod.emb.tzghosting.net\emb\faembpr1\FACETS\Runfiles\CommonSystemProp_SQLJob.xml
+EMB_FACEParmE3,-@\\b73.cishoc.com\dfs\GSPRD\PRIVATE\PROD\Facets\5x\Region_3\Runfiles\CommonSystemProp_SSIS.xml
+EMB_TMS_LOGPATH,\\b73.cishoc.com\dfs\gsprd\PRIVATE\PROD\TMS\5x\Region_3\Logfiles
+EMB_TMS_ParmE,-@\\b73.cishoc.com\dfs\gsprd\PRIVATE\PROD\TMS\5x\Region_3\Runfiles\TMSCommonSystemProp_PROD.xml
+ETS_FTP_CMD,\\a02mftdfs0001.a02.cishoc.com\CO1MFT\EDISFTPPRD\ETS\INI\Custom\
+ETS_FTP_ParmE,"" \\a02mftdfs0001.a02.cishoc.com\CO1MFT\EDISFTPPRD\ETS\INI\System\SystemConfig.xml
+ETS_FTP_ParmS,\\a02mftdfs0001.a02.cishoc.com\CO1MFT\EDISFTPPRD\ETS\Perl\basic_move.exe
+ETS_FTP_PROD1ParmS,\\a02mftdfs0001.a02.cishoc.com\GSPRD\ETS\INI\Custom\
+ETS_FTP_PRODParmS,\\a02mftdfs0001.a02.cishoc.com\CO1MFT\EDISFTPPRD\ETS\INI\Custom\
+ETS_LOG_SIZE,5MB
+ETS_PRD1ParmS,perl.exe F:\ETS\perl\basic_move.plx F:\ETS\ini\custom\
+ETS_Prod1WatchParmS,perl.exe F:\ETS\perl\ETS_GEN_WATCH_FILE.plx F:\ETS\ini\custom\
+ETS_SFTP_E,"" \\a02mftdfs0001.a02.cishoc.com\CO1MFT\EDISFTPPRD\ETS\INI\System\SystemConfig.xml
+ETS_SFTP_S,\\a02mftdfs0001.a02.cishoc.com\CO1MFT\EDISFTPPRD\ETS\INI\Custom\
+ETS_SQLParmS,perl.exe F:\ETS\perl\basic_move.plx F:\ETS\ini\Custom\PROD_SQL\
+ETSFTPLOGPATH,\\a02mftdfs0001.a02.cishoc.com\CO1MFT\EDISFTPPRD\ETS\ELOG\WAAE_LOG
+ETSFTPParmE,"" \\a02mftdfs0001.a02.cishoc.com\CO1MFT\EDISFTPPRD\ETS\INI\System\SystemConfig.xml
+ETSFTPParmS,\\a02mftdfs0001.a02.cishoc.com\CO1MFT\EDISFTPPRD\ETS\Perl\basic_move.exe
+ETSFTPParmS1,\\a02mftdfs0001.a02.cishoc.com\CO1MFT\EDISFTPPRD\ETS\INI\Custom\
+ETSFTPSQLParmS1,\\a02mftdfs0001.a02.cishoc.com\CO1MFT\EDISFTPPRD\ETS\INI\Custom\PROD_SQL\
+ETSLOGPATH,\\a02mftdfs0001.a02.cishoc.com\CO1MFT\EDIRTRPRD\ELOG\TRACE\WAAE_LOG
+ETSLOGPATH_2,C:\ECEDIGS\TRACE\PERL
+ETSParmE,"" \\a02mftdfs0001.a02.cishoc.com\CO1MFT\EDIRTRPRD\ETS\ini\system\SystemConfig.xml
+ETSParmS,perl.exe F:\ETS\perl\basic_move.plx F:\ETS\ini\custom\
+ETSParmS1,perl.exe \\a02mftdfs0001.a02.cishoc.com\CO1MFT\EDIRTRPRD\ETS\perl\basic_move.plx
+ETSParmS2,\\a02mftdfs0001.a02.cishoc.com\CO1MFT\EDIRTRPRD\ETS\ini\custom\
+ETSWatchParmE,\\a02mftdfs0001.a02.cishoc.com\CO1MFT\EDIRTRPRD\ETS\ini\system\SystemConfig.xml
+ETSWatchParmS,perl.exe F:\ETS\perl\ETS_GEN_WATCH_FILE.plx F:\ETS\ini\custom\
+ETSWatchParmS1,perl.exe \\a02mftdfs0001.a02.cishoc.com\CO1MFT\EDIRTRPRD\ETS\perl\ETS_GEN_WATCH_FILE.plx
+ETSWatchParmS2,\\a02mftdfs0001.a02.cishoc.com\CO1MFT\EDIRTRPRD\ETS\ini\custom\
+FACEParmS,C:\Tools\HBA\tzgexec.exe -32 c:\tools\HBA\tzg_hbarun.wsf -~FACETS
+FACEParmS_64bit,C:\Tools\HBA\tzgexec.exe c:\tools\HBA\tzg_hbarun.wsf -~Facets HBA_
+FACEParmS_64bit_NO_HBA,C:\Tools\HBA\tzgexec.exe c:\tools\HBA\tzg_hbarun.wsf -~Facets
+FACEParmS_HBA,C:\Tools\HBA\tzgexec.exe -32 c:\tools\HBA\tzg_hbarun.wsf -~Facets HBA_
+GHP_TMS_LOGPATH,\\b21.cishoc.com\dfs\GSPRD\PRIVATE\PROD\TMS\5x\Region_3\Logfiles
+HCI_QNXT_LOGPATH,\\N05.cishoc.com\DFS\GSPRD\PRIVATE\PROD\QNXT\5x\Region_3\Logfiles
+HCI_QNXT_ParmE,-@\\N05.cishoc.com\DFS\GSPRD\PRIVATE\PROD\QNXT\5x\Region_3\Runfiles\
+HSN_CAE_LOGPATH,\\b63.cishoc.com\dfs\gsprd\PRIVATE\PROD\CAE\5x\Region_3\CKNAS\HBA\logFiles
+HSN_CAE_ParmE,-@\\b63.cishoc.com\dfs\gsprd\PRIVATE\PROD\CAE\5x\Region_3\CKNAS\HBA\RunFiles\
+HSN_QNXT_LOGPATH,\\b63.cishoc.com\dfs\GSPRD\PRIVATE\PROD\QNXT\5x\Region_3\Logfiles
+HSN_QNXT_ParmE,-@\\b63.cishoc.com\dfs\GSPRD\PRIVATE\PROD\QNXT\5x\Region_3\Runfiles\QNXTCommonSystemProp_PROD.xml
+iDashSLACSV,cd "c:\Program Files\CA\idash\bin" && idgencsv -t sla.trend.report -n
+iDashTrackerCSV,cd "c:\Program Files\CA\idash\bin" && idgencsv -t run.report -n
+iDashTrackerPDF,cd "c:\Program Files\CA\idash\bin" && idgenpdf -t run.report -n
+KMH_EDM_DUALLOGPATH,\\b50.cishoc.com\dfs\GSPRD\PRIVATE\PROD\EDM\5x\Region_3\Duals\Logfiles
+KMH_EDM_DUALParmE1,-@\\b50.cishoc.com\dfs\GSPRD\PRIVATE\PROD\EDM\5x\Region_3\Duals\Runfiles\
+KMH_EDM_DUALParmE2,EDMCommonSystemProp_Duals.xml
+KMH_EDM_LOGPATH,\\b50.cishoc.com\dfs\GSPRD\PRIVATE\PROD\EDM\5x\Region_3\MDERPPROD_KMH\Logfiles
+KMH_EDM_TRACKERPATH,\\b50.cishoc.com\dfs\GSPRD\PRIVATE\PROD\EDM\5x\Region_3\Duals\Trackers
+KMH_EDMParmE1,-@\\b50.cishoc.com\dfs\GSPRD\PRIVATE\PROD\EDM\5x\Region_3\MDERPPROD_KMH\Runfiles\
+KMH_EDMParmE2,MDECommonSystemProp_PROD.xml
+KMH_FACE_FHGLOGPATH,\\b50prodfhg0001.b50.cishoc.com\logs\WAE_Logs
+KMH_FACE_LOGPATH,\\b50.cishoc.com\dfs\GSPRD\PRIVATE\PROD\Facets\5x\Region_3\Logfiles
+KMH_FACE_ParamE,-@CommonSystemProp.xml --Region=fab50pr0
+KMH_FACE_SLAPATH,\\b50.cishoc.com\dfs\GSPRD\PRIVATE\PROD\Facets\5x\Region_3\Hourly_SLA_RPT
+KMH_FACE_TRACKPATH,\\b50.cishoc.com\dfs\GSPRD\PRIVATE\PROD\Facets\5x\Region_3\Trackers
+KMH_TMS_LOGPATH,\\b50.cishoc.com\dfs\GSPRD\PRIVATE\PROD\TMS\5x\Region_3\Logfiles
+KMH_TMS_ParamE,-@\\b50.cishoc.com\dfs\GSPRD\PRIVATE\PROD\TMS\5x\Region_3\Runfiles\TMSCommonSystemProp_PROD.xml
+KMH_TMS_TRACKERPATH,\\b50.cishoc.com\dfs\GSPRD\PRIVATE\PROD\TMS\5x\Region_3\Trackers
+LAC_CAE_LOGPATH,\\b11.cishoc.com\dfs\GSPRD\PRIVATE\PROD\CAE\5x\Region_3\CKNAS\HBA\LogFiles
+LAC_CAE_ParmE,-@\\b11.cishoc.com\dfs\GSPRD\PRIVATE\PROD\CAE\5x\Region_3\CKNAS\HBA\RunFiles\CommonSystemProp.xml
+LAC_CAE_TRACKERPATH,\\b11.cishoc.com\dfs\GSPRD\PRIVATE\PROD\CAE\5x\Region_3\CKNAS\HBA\Trackers
+LAC_QNXT_LOGPATH,\\b11.cishoc.com\dfs\GSPRD\PRIVATE\PROD\QNXT\5x\Region_3\Logfiles
+LAC_QNXT_ParmE,-@\\b11.cishoc.com\dfs\GSPRD\PRIVATE\PROD\QNXT\5x\Region_3\Runfiles\
+LAC_QNXT_TRACKERPATH,\\b11.cishoc.com\dfs\GSPRD\PRIVATE\PROD\QNXT\5x\Region_3\Trackers
+MHH_FACE_LOGPATH,\\B48.CISHOC.COM\DFS\GSPRD\PRIVATE\PROD\Facets\5X\Region_3\Logfiles
+MHH_FACE_ParmE,-@CommonSystemProp.xml --Region=fab48pr0
+MHH_FACE_TRACKERPATH,\\B48.cishoc.com\dfs\GSPRD\PRIVATE\PROD\Facets\5x\Region_3\Trackers
+MHH_SMT,C:\smt_batch\ENVM\SMTInterface\smtrun\
+MHH_SMT2,C:\SMT_Batch\ENVT\SMTInterface\smtrun\
+MHH_TMS_LOGPATH,\\B48.CISHOC.COM\DFS\GSPRD\PRIVATE\PROD\TMS\5X\Region_3\Logfiles
+MHH_TMS_ParmE,-@\\b48.cishoc.com\dfs\GSPRD\PRIVATE\PROD\TMS\5x\Region_3\Runfiles\TMSCommonSystemProp_PROD.xml
+MM,02
+MMDDYYYY,02092023
+MMM_EDM_LOGPATH,\\b57.cishoc.com\dfs\GSPRD\PRIVATE\PROD\EDM\5x\Region_3\EDMSharedFolder\LogFiles
+MMM_EDM_ParmE,-@\\B57.cishoc.com\dfs\GSPRD\PRIVATE\PROD\EDM\5x\Region_3\EDMSharedFolder\Runfiles\
+MMM_QNXT_LOGPATH,\\b57.cishoc.com\dfs\GSPRD\PRIVATE\PROD\QNXT\5x\Region_3\Logfiles
+MMM_QNXT_ParamE1,-@\\b57.cishoc.com\dfs\GSPRD\PRIVATE\PROD\QNXT\5x\Region_3\Runfiles\
+MMM_QNXT_TRACKERPATH,\\b57.cishoc.com\dfs\GSPRD\PRIVATE\PROD\QNXT\5x\Region_3\Tracker
+NHP_QNXT_LOGPATH,\\N06.cishoc.com\dfs\GSPRD\Private\PROD\QNXT\5x\Region_3\Logfiles
+NHP_QNXT_ParmE,-@\\N06.cishoc.com\dfs\GSPRD\Private\PROD\QNXT\5x\Region_3\Runfiles\QNXTCommonSystemProp_PROD.xml
+PCH_CAE_LOGPATH,\\n07.cishoc.com\dfs\GSPRD\PRIVATE\PROD\CAE\5x\Region_3\CKNAS\HBA\Logfiles
+PCH_CAE_ParmE1,-@\\N07.cishoc.com\dfs\GSPRD\PRIVATE\PROD\CAE\5x\Region_3\CKNAS\HBA\Runfiles\
+PCH_CAE_TRACKERS,\\n07.cishoc.com\dfs\GSPRD\PRIVATE\PROD\CAE\5x\Region_3\CKNAS\HBA\Trackers
+PCH_QNXT_LOGPATH,\\n07.cishoc.com\dfs\GSPRD\PRIVATE\PROD\QNXT\5x\Region_3\Logfiles
+PCH_QNXT_TRACKERS,\\n07.cishoc.com\dfs\GSPRD\PRIVATE\PROD\QNXT\5x\Region_3\Trackers
+PCH_QNXTParmE,-@\\n07.cishoc.com\dfs\GSPRD\PRIVATE\PROD\QNXT\5x\Region_3\Runfiles\
+PreviousDate,02/08/2023
+PRH_QNXTLOGPATH,\\B08.CISHOC.com\DFS\GSPRD\PRIVATE\PROD\QNXT\5x\Region_3\Logfiles
+PRH_QNXTParmE1,-@\\B08.CISHOC.com\DFS\GSPRD\PRIVATE\PROD\QNXT\5x\Region_3\Runfiles\
+QCA_CAE_LOGPATH,\\b53.cishoc.com\dfs\GSPRD\PRIVATE\PROD\CAE\5x\Region_3\CKNAS\HBA481\Logfiles
+QCA_CAE_ParmE,-@\\b53.cishoc.com\dfs\GSPRD\PRIVATE\PROD\CAE\5x\Region_3\CKNAS\HBA481\RunFiles\
+QCA_FACE_CDHParmE,-@\\b53.cishoc.com\dfs\gsprd\private\prod\Facets\5x\Region_3\Runfiles\
+QCA_FACE_LOGPATH,\\b53.cishoc.com\dfs\gsprd\private\prod\Facets\5x\Region_3\Logfiles
+QCA_FACE_ParmE,-@CommonSystemProp.xml --Region=fab53pr0
+QNXT_ParmS_HBA,C:\Tools\HBA\tzgexec.exe -32 C:\Tools\HBA\tzg_hbarun.wsf -~QNXT HBA_
+QNXTParmE2,QNXTCommonSystemProp_PROD.xml
+QNXTParmS,C:\Tools\HBA\tzgexec.exe c:\tools\HBA\tzg_hbarun.wsf -~QNXT
+Run_period,0
+SMH_QNXT_LOGPATH,\\B08.CISHOC.com\DFS\GSPRD\PRIVATE\PROD\QNXT\5x\Region_3\Logfiles
+SMH_QNXT_ParmE1,-@\\B08.CISHOC.com\GSPRD\PRIVATE\PROD\QNXT\5x\Region_3\Runfiles\
+SMH_QNXTLOGPATH,\\B08.CISHOC.com\DFS\GSPRD\PRIVATE\PROD\QNXT\5x\Region_3\Logfiles
+SMH_QNXTParmE1,-@\\B08.CISHOC.com\GSPRD\PRIVATE\PROD\QNXT\5x\Region_3\Runfiles\
+SMT_ParamE,-@SMT_CommonSystemProp.xml
+SMT_ParamE_M,-@SMT_CommonSystemPropMstr.xml
+SMT_ParamS1,cscript.exe C:\SMTCoreMaster_Batch\SomewhereSecure\
+SMT_ParamS2,\smtrun\smtrun.wsf --runbook=
+TMSParmE2,TMSCommonSystemProp.xml
+TMSParmS,C:\Tools\HBA\tzgexec.exe -32 c:\tools\HBA\tzg_hbarun.wsf -~CAE
+TMSParms2,TMSCommonSystemProp.xml
+VHP_EDMX_LOGPATH,\\b47.cishoc.com\dfs\GSPRD\PRIVATE\PROD\EDMX\5x\Region_3\Logfiles
+VHP_EDMX_ParmE,-@\\b47.cishoc.com\dfs\GSPRD\PRIVATE\PROD\EDMX\5x\Region_3\Runfiles\EDMXCommonSystemProp_PROD.xml
+VHP_QNXT_LOGPATH,\\B47.cishoc.com\dfs\GSPRD\Private\PROD\QNXT\5x\Region_3\Logfiles
+VHP_QNXT_ParamE1,-@\\B47.cishoc.com\dfs\GSPRD\Private\PROD\QNXT\5x\Region_3\Runfiles\
+VHP_QNXT_ParmE1,-@\\B47.cishoc.com\dfs\GSPRD\Private\PROD\QNXT\5x\Region_3\Runfiles\
+VHP_QNXT_TCSLOGPATH,\\B47.cishoc.com\dfs\GSPRD\PRIVATE\PROD\QNXT\5x\Region_3\TCSLettersCustom
+WHA_FACE_LOGPATH,\\b45.cishoc.com\dfs\gsprd\PRIVATE\prod\Facets\5x\Region_3\Logfiles
+WHA_FACE_ParmE,.xml -@CommonSystemProp.xml --Region=fab45pr0
+WHA_FACE_ParmE_IHM,-@\\b45.cishoc.com\dfs\gsprd\PRIVATE\prod\Facets\5x\Region_3\Runfiles\CommonSystemProp_IHM_PROD.xml
+WHA_FACE_PR1LOGPATH,\\b45.cishoc.com\dfs\gsprd\PRIVATE\prod1\Facets\5x\Region_3\Logfiles
+WHA_FACE_PR1ParmE,.xml -@CommonSystemProp.xml --Region=fab45pr1
+WHA_FACE_TRACKERPATH,\\b45.cishoc.com\dfs\GSPRD\PRIVATE\PROD\Facets\5x\Region_3\Trackers
+WHA_IMHF_Processing,NOTRUNNING
+YYYY,2023

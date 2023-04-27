@@ -1,0 +1,14 @@
+APPL RESTENC6
+
+/*********************************************************************/
+/*02/27/2019 -JFC- CLEANED UP PROC - ADDED LIE - NO OTHER CHANGES    */
+/*********************************************************************/
+
+
+NOTIFY FAILURE ABEND ALERT(REMD)
+
+JOB RESTENC6 LINK PROCESS
+    DELAYSUB NOW PLUS 60 SECONDS
+    VS 'ROUTE 2368,F SWESPWM6,ENCPARM RESTART'
+    RUN ANY
+ENDJOB

@@ -1,0 +1,37 @@
+APPL WAPLKFTP WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+NOTIFY FAILURE ABEND ALERT(REMD)
+NOTIFY FAILURE ABEND OVERDUE MAILBOX(QAWarrGroup)
+TAG QAWARRANTY
+
+/********************************************************************/
+/* 02/16/2016 - JFC - CREATED PER JOHN HRITZ & JIAN LEE             */
+/*            - REMEDY INCIDENT INC000000916326                     */
+/*            - Remedy Ticket Group: DEVELOPMENT-BABT>DO-NA-QA      */
+/*10/22/2020 - JFC - SUSPENDED EVENT PER INC000002346347            */
+/********************************************************************/
+/* - JOBS IN THIS APPLICATION SHOULD BE CONSIDERED LOW PRIORITY     */
+/* - EMAIL ALERTS FOR ABENDS AND OVERDUES ARE AUTOMATIC             */
+/* - NO PHONE CALL REQUIRED UNLESS ABEND IS LEFT UNRESOLVED         */
+/********************************************************************/
+
+JOB LIS.!ESPAPPL LINK PROCESS
+   RUN DAILY
+   RELEASE ADD(POLK_DATA_UPLOAD_SSIS)
+ENDJOB
+
+NT_JOB POLK_DATA_UPLOAD_SSIS
+  AGENT CYBA_QAWAPROD
+  CMDNAME \\sqlwis01pakr\CMD_Scripts\PolkDataUploadSSIS.CMD
+  USER svc_CAWorkload
+  RUN DAILY
+  DELAYSUB 10.00
+  DUEOUT EXEC 11.00
+  RELEASE ADD(LIE.!ESPAPPL)
+ENDJOB
+
+JOB LIE.!ESPAPPL LINK PROCESS
+   RUN DAILY
+ENDJOB
+

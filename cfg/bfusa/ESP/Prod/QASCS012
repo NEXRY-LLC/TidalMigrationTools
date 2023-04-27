@@ -1,0 +1,38 @@
+APPL QASCS012 WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/**********************************************************************/
+/*10/18/2016-JFC-CONVERTED LIE JOB FROM MVS TO LINK                   */
+/**********************************************************************/
+
+NOTIFY FAILURE ABEND ALERT(REMD)
+NOTIFY FAILURE ABEND MAILBOX(QAFAIL1)
+TAG PPIW
+
+JOB LIS.QASCS012 LINK PROCESS
+   RUN DAILY
+   DELAYSUB 14.15
+   RELEASE ADD(SCS_Archive_Warren_TBR_PRS_SchedulesCMD)
+ENDJOB
+
+NT_JOB SCS_Archive_Warren_TBR_PRS_SchedulesCMD
+   AGENT CYBA_PPIWPROD
+   CMDNAME X:\CMD_SCRIPTS\SCS_Archive_Warren_TBR_PRS_Schedules.CMD
+   USER maestro
+   RUN DAILY
+   RELEASE ADD(SCS_Archive_Warren_TBR_TAM_SchedulesCMD)
+ENDJOB
+
+NT_JOB SCS_Archive_Warren_TBR_TAM_SchedulesCMD
+   AGENT CYBA_PPIWPROD
+   CMDNAME X:\CMD_SCRIPTS\SCS_Archive_Warren_TBR_TAM_Schedules.CMD
+   USER maestro
+   RUN DAILY
+   RELEASE ADD(LIE.QASCS012)
+ENDJOB
+
+JOB LIE.QASCS012 LINK PROCESS
+   RUN DAILY
+ENDJOB
+

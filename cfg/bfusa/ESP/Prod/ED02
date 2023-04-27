@@ -1,0 +1,416 @@
+APPL ED02
+
+PERFORM_COMPIT   = 'NO'
+PERFORM_FAILIT   = 'NO'
+PERFORM_NOACTION = 'NO'
+PERFORM_POSTTASK = 'NO'
+PERFORM_RERUNIT  = 'NO'
+PERFORM_WAIT     = 1
+ESP_MESSAGE_1    = 'NONE'
+ESP_MESSAGE_2    = 'NONE'
+
+REXXON GEN PROC
+
+PERFORM_COMPIT   = 'NO'
+PERFORM_FAILIT   = 'NO'
+PERFORM_NOACTION = 'NO'
+PERFORM_POSTTASK = 'NO'
+PERFORM_RERUNIT  = 'NO'
+PERFORM_WAIT     = 1
+ESP_MESSAGE_1    = 'NONE'
+ESP_MESSAGE_2    = 'NONE'
+
+/* **************************************************************** */
+/* APPLICATION TABLES START HERE                                    */
+/* **************************************************************** */
+
+/* **************************************************************** */
+/*                                                                  */
+/* THE VALUES TO BE ENTERED FOR EACH TABLE ARE AS FOLLOWS:          */
+/*                                                                  */
+/*     (FOR ALL ENTRIES:                                            */
+/*         XXXXXXXX.YYYYYYYY.   IS THE APPLICATION.JOB NAME         */
+/*                              WHERE XXXXXXXX IS THE APPLICATION   */
+/*                              NAME AND YYYYYYYY IS THE JOB NAME)  */
+/*                                                                  */
+/*     XXXXXXXX.YYYYYYYY. = ''  THIS IS A DUMMY ENTRY TO INITIALIZE */
+/*                              NON-EXISTENT ENTRIES.               */
+/*                              IT MUST BE PRESENT.                 */
+/*                                                                  */
+/*     XXXXXXXX.YYYYYYYY.APPLJOB = 'XXXXXXXX.YYYYYYYY'              */
+/*                              THIS IS A CHECK ENTRY WHERE THE     */
+/*                              APPLICATION AND JOB NAMES SHOULD    */
+/*                              BE THE SAME ON BOTH SIDES OF THE    */
+/*                              EQUAL SIGN.                         */
+/*                              IT MUST BE PRESENT.                 */
+/*                                                                  */
+/*     XXXXXXXX.YYYYYYYY.RETRYS = 999                               */
+/*                              THIS IS THE NUMBER OF RERUNS TO     */
+/*                              ATTEMPT.  IT CAN BE ANY NUMBER      */
+/*                              FROM 1 TO 999.  LEADING ZEROS ARE   */
+/*                              NOT REQUIRED.                       */
+/*                              IT MUST BE PRESENT.                 */
+/*                                                                  */
+/*     XXXXXXXX.YYYYYYYY.WAIT = 999                                 */
+/*                              THIS IS THE NUMBER OF MINUTES TO    */
+/*                              WAIT BETWEEN RERUN ATTEMPTS.  IT    */
+/*                              CAN BE ANY NUMBER FROM 1 TO 999.    */
+/*                              LEADING ZEROS ARE NOT REQUIRED.     */
+/*                              IT MUST BE PRESENT.                 */
+/*                                                                  */
+/*     XXXXXXXX.YYYYYYYY.GIVEUP = 'ZZZZZZZZ'                        */
+/*                              THIS IS THE ACTION TO BE TAKEN WHEN */
+/*                              THE NUMBER OF RETRYS IS EXCEEDED.   */
+/*                              IT MUST BE EITHER 'COMPIT' OR       */
+/*                              'FAILIT' AS DESCRIBED BELOW.        */
+/*                              IT MUST BE PRESENT.                 */
+/*                                                                  */
+/*     XXXXXXXX.YYYYYYYY.99     = 'ZZZZZZZZ'                        */
+/*                              THIS IS THE ACTION TO BE TAKEN WHEN */
+/*                              THE RETURN CODE OF '99' IS FOUND.   */
+/*                              THE '99' CAN BE ONE-FOUR DIGITS.    */
+/*                              THE ACTION MUST BE ONE OF THE FIVE  */
+/*                              VALID ACTIONS DESCRIBED BELOW.      */
+/*                              THERE MAY BE FROM NONE TO HUNDREDS  */
+/*                              OF THESE STATEMENTS.                */
+/*                                                                  */
+/*     XXXXXXXX.YYYYYYYY.OTHER  = 'ZZZZZZZZ'                        */
+/*                              THIS IS THE ACTION TO BE TAKEN WHEN */
+/*                              THE RETURN CODE DOES NOT MATCH ANY  */
+/*                              OF THE PRECEDING RETURN CODES.      */
+/*                              THE ACTION MUST BE ONE OF THE FIVE  */
+/*                              VALID ACTIONS DESCRIBED BELOW.      */
+/*                              IT MUST BE PRESENT.                 */
+/*                                                                  */
+/*     VALID ACTIONS:                                               */
+/*                                                                  */
+/*         ZZZZZZZZ = COMPIT    ISSUE AN 'AJ' COMMAND TO COMPLETE   */
+/*                              THE APPLICATION.                    */
+/*                                                                  */
+/*                    FAILIT    ISSUE AN 'AJ SWFAILIT.!MNJOB'       */
+/*                              COMMAND.  THIS WILL INSERT A        */
+/*                              'SWFAILIT' JOB IN THE APPLICATION   */
+/*                              WHICH WILL FAIL AND THUS ALERT      */
+/*                              OPERATIONS THAT THERE IS A PROBLEM. */
+/*                                                                  */
+/*                    NOACTION  THE ALERT WILL TAKE NO ACTION       */
+/*                              THUS LETTING THE APPLICATION        */
+/*                              CONTINUE AS IT NORMALLY WOULD.      */
+/*                              THIS IS A WAY TO LET CCCHKS IN      */
+/*                              THE APPLICATION WORK AS NORMAL.     */
+/*                                                                  */
+/*                    POSTTASK  ISSUE AN 'AJ TASK.!MNJOB' COMMAND   */
+/*                              TO POST THE TASK WHICH IS HOLDING   */
+/*                              UP FURTHER PROCESSING, I.E.         */
+/*                              THE APPLICATION CONTINUES ON AS     */
+/*                              NORMAL.                             */
+/*                                                                  */
+/*                    RERUNIT   ISSUE THE FOLLOWING TWO COMMANDS:   */
+/*                               EARLYSUB NOW PLUS 999 MINUTES      */
+/*                               AJ !MNJOB RESUBMIT JOBNAME(!MNJOB) */
+/*                              WHERE 999 IS THE VALUE FROM THE     */
+/*                              WAIT ENTRY ABOVE.  THIS WILL RERUN  */
+/*                              THE JOB IN QUESTION WITH THE BAD    */
+/*                              RETURN CODE.  THE RETRYS ENTRY WILL */
+/*                              DETERMINE HOW MANY RERUNS ARE       */
+/*                              ATTEMPTED BEFORE THE GIVEUP ACTION  */
+/*                              IS PERFORMED.                       */
+/*                                                                  */
+/* **************************************************************** */
+
+ED372C.ED372C.              = ''
+ED372C.ED372C.APPLJOB       = 'ED372C.ED372C'
+ED372C.ED372C.RETRYS        = 1
+ED372C.ED372C.WAIT          = 30
+ED372C.ED372C.GIVEUP        = 'COMPIT'
+ED372C.ED372C.0             = 'POSTTASK'
+ED372C.ED372C.1             = 'POSTTASK'
+ED372C.ED372C.4             = 'RERUNIT'
+ED372C.ED372C.OTHER         = 'NOACTION'
+
+ED374A.ED374A.              = ''
+ED374A.ED374A.APPLJOB       = 'ED374A.ED374A'
+ED374A.ED374A.RETRYS        = 1
+ED374A.ED374A.WAIT          = 30
+ED374A.ED374A.GIVEUP        = 'COMPIT'
+ED374A.ED374A.0             = 'POSTTASK'
+ED374A.ED374A.2             = 'RERUNIT'
+ED374A.ED374A.OTHER         = 'NOACTION'
+
+OMDDAILY.ELD868Y.           = ''
+OMDDAILY.ELD868Y.APPLJOB    = 'OMDDAILY.ELD868Y'
+OMDDAILY.ELD868Y.RETRYS     = 2
+OMDDAILY.ELD868Y.WAIT       = 10
+OMDDAILY.ELD868Y.GIVEUP     = 'FAILIT'
+OMDDAILY.ELD868Y.0          = 'POSTTASK'
+OMDDAILY.ELD868Y.1808       = 'RERUNIT'
+OMDDAILY.ELD868Y.OTHER      = 'NOACTION'
+
+APD001.B2D012.           = ''
+APD001.B2D012.APPLJOB    = 'APD001.B2D012'
+APD001.B2D012.RETRYS     = 4
+APD001.B2D012.WAIT       = 5
+APD001.B2D012.GIVEUP     = 'FAILIT'
+APD001.B2D012.0          = 'POSTTASK'
+APD001.B2D012.1          = 'POSTTASK'
+APD001.B2D012.8          = 'RERUNIT'
+APD001.B2D012.OTHER      = 'NOACTION'
+
+APJ2001A.AP007A2.            = ''
+APJ2001A.AP007A2.APPLJOB     = 'APJ2001A.AP007A2'
+APJ2001A.AP007A2.RETRYS      = 2
+APJ2001A.AP007A2.WAIT        = 5
+APJ2001A.AP007A2.GIVEUP      = 'FAILIT'
+APJ2001A.AP007A2.0           = 'POSTTASK'
+APJ2001A.AP007A2.8           = 'RERUNIT'
+APJ2001A.AP007A2.OTHER       = 'NOACTION'
+
+GLD001DI.B2R201.            = ''
+GLD001DI.B2R201.APPLJOB     = 'GLD001DI.B2R201'
+GLD001DI.B2R201.RETRYS      = 4
+GLD001DI.B2R201.WAIT        = 5
+GLD001DI.B2R201.GIVEUP      = 'FAILIT'
+GLD001DI.B2R201.0           = 'POSTTASK'
+GLD001DI.B2R201.8           = 'RERUNIT'
+GLD001DI.B2R201.OTHER       = 'NOACTION'
+
+PC100A.PC101B.              = ''
+PC100A.PC101B.APPLJOB       = 'PC100A.PC101B'
+PC100A.PC101B.RETRYS        = 2
+PC100A.PC101B.WAIT          = 15
+PC100A.PC101B.GIVEUP        = 'FAILIT'
+PC100A.PC101B.0             = 'POSTTASK'
+PC100A.PC101B.16            = 'RERUNIT'
+PC100A.PC101B.OTHER         = 'FAILIT'
+
+JCTEST06.SWESPJC2.          = ''
+JCTEST06.SWESPJC2.APPLJOB   = 'JCTEST06.SWESPJC2'
+JCTEST06.SWESPJC2.RETRYS    = 2
+JCTEST06.SWESPJC2.WAIT      = 1
+JCTEST06.SWESPJC2.GIVEUP    = 'POSTTASK'
+JCTEST06.SWESPJC2.0         = 'RERUNIT'
+JCTEST06.SWESPJC2.4         = 'RERUNIT'
+JCTEST06.SWESPJC2.OTHER     = 'POSTTASK'
+
+CFTGET01.CFTSTAT1.          = ''
+CFTGET01.CFTSTAT1.APPLJOB   = 'CFTGET01.CFTSTAT1'
+CFTGET01.CFTSTAT1.RETRYS    = 3
+CFTGET01.CFTSTAT1.WAIT      = 1
+CFTGET01.CFTSTAT1.GIVEUP    = 'COMPIT'
+CFTGET01.CFTSTAT1.0         = 'RERUNIT'
+CFTGET01.CFTSTAT1.1         = 'RERUNIT'
+CFTGET01.CFTSTAT1.2         = 'RERUNIT'
+CFTGET01.CFTSTAT1.3         = 'RERUNIT'
+CFTGET01.CFTSTAT1.OTHER     = 'RERUNIT'
+
+
+
+/* ***************************** */
+/* APPLICATION TABLES END HERE   */
+/* ***************************** */
+
+/* GET MONITOR APPLICATION, JOB NAME AND MAX RETURN CODE  */
+
+MON_APPL    = CLANGVAR('!MNAPPL')
+MON_JOB     = CLANGVAR('!MNJOB')
+MON_MXRC    = CLANGVAR('!MNMXRC')
+
+/* SAY 'MON_APPL =' MON_APPL  */
+/* SAY 'MON_JOB  =' MON_JOB   */
+/* SAY 'MON_MXRC =' MON_MXRC  */
+
+/* CHECK TO SEE IF THERE IS A TABLE ENTRY FOR THIS APPL & JOB */
+
+NO_TABLE_ENTRY = MON_APPL || '.' || MON_JOB || '.APPLJOB'
+
+INTERPRET "TABLE_APPLJOB =" MON_APPL"."MON_JOB".APPLJOB"
+
+/* SAY 'TABLE_APPLJOB IS' TABLE_APPLJOB   */
+/* SAY 'NO_TABLE_ENTRY IS' NO_TABLE_ENTRY */
+
+IF TABLE_APPLJOB = NO_TABLE_ENTRY THEN
+  DO
+    ESP_MESSAGE_1 = 'NO TABLE ENTRY FOUND FOR APPL' -
+                     MON_APPL 'JOB' MON_JOB
+    PERFORM_FAILIT   = 'YES'
+    SIGNAL ALL_DONE
+  END
+
+/* FIND THE RUN# WHICH SHOULD BE IN THE TAG                    */
+/*   AND SHOULD BE NUMERIC 1-99                                */
+
+MON_TAG     = CLANGVAR('!MNTAG')
+
+FIND_RUN#   = POS('RUN#',MON_TAG)
+
+IF FIND_RUN# = 0 THEN
+  DO
+    ESP_MESSAGE_1 = 'NO RUN# FOUND IN TAG FOR APPL' -
+                     MON_APPL 'JOB' MON_JOB
+    PERFORM_FAILIT   = 'YES'
+    SIGNAL ALL_DONE
+  END
+ELSE
+  DO
+    GOT_IT = FIND_RUN# + 4
+    MON_RUN# = SUBSTR(MON_TAG,GOT_IT,2)
+    MON_RUN# = STRIP(MON_RUN#)
+    FIND_TYPE = DATATYPE(MON_RUN#)
+    IF FIND_TYPE \= 'NUM' THEN
+      DO
+        ESP_MESSAGE_1 = 'RUN# IN TAG IS INVALID FOR APPL' -
+                         MON_APPL 'JOB' MON_JOB
+        ESP_MESSAGE_2 = 'RUN# FOUND IN TAG IS' MON_RUN#
+        PERFORM_FAILIT   = 'YES'
+        SIGNAL ALL_DONE
+      END
+  END
+
+/* SAY 'MON_RUN# =' MON_RUN#          */
+/* SAY 'MON_TAG =' MON_TAG             */
+/* SAY 'ESP_MESSAGE_1 =' ESP_MESSAGE_1 */
+/* SAY 'ESP_MESSAGE_2 =' ESP_MESSAGE_2 */
+
+/* GET TABLE VALUES FOR THIS APPL */
+
+INTERPRET "TABLE_RETRYS =" MON_APPL"."MON_JOB".RETRYS"
+INTERPRET "TABLE_WAIT   =" MON_APPL"."MON_JOB".WAIT"
+INTERPRET "TABLE_GIVEUP =" MON_APPL"."MON_JOB".GIVEUP"
+INTERPRET "TABLE_ACTION =" MON_APPL"."MON_JOB"."MON_MXRC
+
+/* SAY 'TABLE_APPLJOB IS' TABLE_APPLJOB */
+/* SAY 'TABLE_RETRYS IS' TABLE_RETRYS   */
+/* SAY 'TABLE_WAIT IS' TABLE_WAIT       */
+/* SAY 'TABLE_GIVEUP IS' TABLE_GIVEUP   */
+/* SAY 'TABLE_ACTION IS' TABLE_ACTION   */
+
+/* IF THE MXRC IS NOT IN THE TABLE FOR THIS APPL, */
+/*   USE THE 'OTHER' ACTION FOR THIS APPL         */
+
+IF TABLE_ACTION = 'COMPIT' |,
+   TABLE_ACTION = 'FAILIT' |,
+   TABLE_ACTION = 'NOACTION' |,
+   TABLE_ACTION = 'POSTTASK' |,
+   TABLE_ACTION = 'RERUNIT' THEN
+  DO
+    NOP
+  END
+ELSE
+  DO
+    INTERPRET "TABLE_ACTION =" MON_APPL"."MON_JOB".OTHER"
+  END
+
+SELECT
+  WHEN TABLE_ACTION = 'COMPIT' THEN
+    PERFORM_COMPIT   = 'YES'
+  WHEN TABLE_ACTION = 'FAILIT' THEN
+    PERFORM_FAILIT   = 'YES'
+  WHEN TABLE_ACTION = 'NOACTION' THEN
+    PERFORM_NOACTION = 'YES'
+  WHEN TABLE_ACTION = 'POSTTASK' THEN
+    PERFORM_POSTTASK = 'YES'
+  WHEN TABLE_ACTION = 'RERUNIT' THEN
+    DO
+      IF MON_RUN# <= TABLE_RETRYS THEN
+        DO
+        /* RERUNS WITHIN LIMIT, SO RERUN IT */
+          NEW_RUN# = MON_RUN# + 1
+          ESP_MESSAGE_1 = 'RERUNNING APPL' -
+                           MON_APPL 'JOB' MON_JOB
+          ESP_MESSAGE_2 = 'THIS WILL BE RUN#' NEW_RUN#
+          PERFORM_RERUNIT  = 'YES'
+          PERFORM_WAIT = TABLE_WAIT
+        END
+      ELSE
+        DO
+        /* RERUN EXCEED LIMIT, SO GIVEUP */
+          SELECT
+            WHEN TABLE_GIVEUP = 'COMPIT' THEN
+              DO
+                ESP_MESSAGE_1 = 'RERUN LIMIT EXCEEDED FOR APPL' -
+                                 MON_APPL 'JOB' MON_JOB
+                ESP_MESSAGE_2 = 'COMPLETING APPL' -
+                                 MON_APPL 'JOB' MON_JOB
+                PERFORM_COMPIT   = 'YES'
+              END
+            WHEN TABLE_GIVEUP = 'FAILIT' THEN
+              DO
+                ESP_MESSAGE_1 = 'RERUN LIMIT EXCEEDED FOR APPL' -
+                                 MON_APPL 'JOB' MON_JOB
+                ESP_MESSAGE_2 = 'FAILING APPL' -
+                                 MON_APPL 'JOB' MON_JOB
+                PERFORM_FAILIT   = 'YES'
+              END
+            OTHERWISE
+              DO
+                ESP_MESSAGE_1 = 'INVALID GIVEUP VALUE FOR APPL' -
+                                 MON_APPL 'JOB' MON_JOB
+                ESP_MESSAGE_2 = 'THE INVALID VALUE IS' TABLE_GIVEUP
+                PERFORM_FAILIT   = 'YES'
+                SIGNAL ALL_DONE
+              END
+            END
+        END
+    END
+  OTHERWISE
+    DO
+    /* BAD TABLE_ACTION FOUND */
+      ESP_MESSAGE_1 = 'INVALID TABLE ACTION FOUND FOR APPL' -
+                       MON_APPL
+      ESP_MESSAGE_2 = 'THE INVALID VALUE IS' TABLE_ACTION
+    END
+  END
+
+
+ALL_DONE:
+
+"PERFORM_COMPIT='"PERFORM_COMPIT"'"
+"PERFORM_FAILIT='"PERFORM_FAILIT"'"
+"PERFORM_NOACTION='"PERFORM_NOACTION"'"
+"PERFORM_POSTTASK='"PERFORM_POSTTASK"'"
+"PERFORM_RERUNIT='"PERFORM_RERUNIT"'"
+"PERFORM_WAIT='"PERFORM_WAIT"'"
+"ESP_MESSAGE_1='"ESP_MESSAGE_1"'"
+"ESP_MESSAGE_2='"ESP_MESSAGE_2"'"
+
+REXXOFF
+
+IF PERFORM_FAILIT = 'YES' THEN -
+  DO
+    JOB SWFAILIT.!MNAPPL LINK PROCESS
+      ESP AJ SWFAILIT.!MNJOB INSERT APPL(!MNAPPL..!MNAPPLGEN) -
+             DATASET(FTRF.PRDJOBS) MEMBER(SWFAILIT)
+      RUN NOW
+    ENDJOB
+  ENDDO
+
+IF PERFORM_POSTTASK = 'YES' THEN -
+  DO
+    JOB POSTTASK.!MNAPPL LINK PROCESS
+      ESP AJ TASK.!MNJOB APPL(!MNAPPL..!MNAPPLGEN) COMPLETE
+      RUN NOW
+    ENDJOB
+  ENDDO
+
+IF PERFORM_COMPIT = 'YES' THEN -
+  DO
+    JOB COMPIT.!MNAPPL LINK PROCESS
+      ESP AJ ALL APPL(!MNAPPL..!MNAPPLGEN) COMPLETE
+      RUN NOW
+    ENDJOB
+  ENDDO
+
+IF PERFORM_RERUNIT = 'YES' THEN -
+  DO
+    JOB RERUNIT.!MNAPPL LINK PROCESS
+      EARLYSUB NOW PLUS !PERFORM_WAIT MINUTES
+      ESP AJ !MNJOB RESUBMIT JOBNAME(!MNJOB)
+      RUN NOW
+    ENDJOB
+  ENDDO
+
+IF ESP_MESSAGE_1 NE 'NONE' THEN -
+  SEND 'ED02-!ESP_MESSAGE_1'
+IF ESP_MESSAGE_2 NE 'NONE' THEN -
+  SEND 'ED02-!ESP_MESSAGE_2'
+

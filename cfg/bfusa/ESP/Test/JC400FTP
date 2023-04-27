@@ -1,0 +1,43 @@
+APPL JC400FTP WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/********************************************************************/
+/*                 NOTES AND COMMENTS                               */
+/********************************************************************/
+/*05/31/2016 -JFC- TESTING SFTP JOB AND SECURE COPY JOB             */
+/********************************************************************/
+
+
+SCP_JOB TEST_COPY_DOWN_01 hold
+   /*FROM THIS SERVER*/
+   AGENT AKNDEV
+   LOCALNAME 'MSTSTFAO/SAPBOMS1'
+   TRANSFERDIRECTION DOWNLOAD
+   /*TO REMOTE SERVER
+   SERVERADDR sfgint01qakr.idm.bfusa.com
+   user aikenorr_cfs
+   REMOTEDIR '/inbox'
+   REMOTENAME ESP_TEST_FTP.txt
+   RUN DAILY
+ENDJOB
+
+NT_JOB COPY_AKNDEV_2_cdc1 hold
+   AGENT CYBA_CDC1AKFIS
+   CMDNAME D:\DTS_RUN\BatchFiles\Test\+
+           Copy_BOM1_AKNDEV_2_cdc1.bat
+   ARGS
+   USER maestro
+   RUN DAILY
+ENDJOB
+
+NT_JOB COPY_AKNDEV_2_SI hold
+   AGENT CYBA_CDC1AKFIS
+   CMDNAME D:\DTS_RUN\BatchFiles\Test\+
+           Copy_BOM1_AKNDEV_2_si.bat
+   ARGS
+   USER maestro
+   RUN DAILY
+ENDJOB
+
+

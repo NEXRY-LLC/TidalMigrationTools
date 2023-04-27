@@ -1,0 +1,16 @@
+NAME,NEWNAME
+%%SUBSTR %%TIME 1 2,<SysTime.HH>
+%%SUBSTR %%TIME 3 2,<SysTime.mm>
+%%SUBSTR %%TIME 5 2,<SysTime.ss>
+
+
+".*(%%(@\\$D|\\$D|@D|D)ATE.{0,1}).*",<SysDate.yyyymmdd>
+".*(%%(@\\$D|\\$D|@D|D)AY.{0,1}).*",<SysDate.dd>
+".*(%%(@\\$T|\\$T|@T|T)IME.{0,1}).*",<SysDate.hhmmss>
+".*(%%(@\\$M|\\$M|@M|M)ONTH.{0,1}).*",<SysDate.mm>
+".*(%%(@\\$Y|\\$Y|@Y|Y)EAR.{0,1}).*",<SysDate.yyyy>
+".*(%%(@\\$J|\\$J|@J|J)OBNAME.{0,1}).*",<JobName>
+".*(%%(@\\$G|\\$G|@G|G)ROUP_ORDID.{0,1}).*",<JobID>
+".*(%%(@\\$C|\\$C|@C|C)OMPSTAT.{0,1}).*",<JobExit>
+".*(%%(@\\$O|\\$O|@O|O)DATE.{0,1}).*",<SysDate.yyyymmdd>
+

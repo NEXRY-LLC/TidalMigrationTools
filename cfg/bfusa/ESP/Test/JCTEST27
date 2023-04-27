@@ -1,0 +1,30 @@
+APPL JCTEST27 WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/*****************************************************/
+/* testing gentimes
+/*****************************************************/
+
+/*********************************************************************/
+/* GENTIME AND VARIABLE FOR JOB BARPPREV
+/*********************************************************************/
+GENTIME TL1Y TODAY LESS 1 year
+GENTIME TL3Y TODAY LESS 3 years
+GENTIME TL9Y TODAY LESS 9 years
+GENTIME TL7m TODAY LESS 7 months
+GENTIME TL13dp1d TODAY LESS 13 days plus 1 day
+USER3 = '!ESPSYEAR'
+USER4 = '!TL1YYEAR'
+
+variable4 = '!tl13dp1ddate'
+
+TAG TEST
+
+JOB JCTEST27 link process
+  echo user3 = !user3
+  echo user4 = !user4
+  echo variable4 = '!tl13dp1ddate'
+  RUN DAILY
+ENDJOB
+

@@ -1,0 +1,70 @@
+APPL TE25CONB WAIT
+NOTIFY ABEND FAILURE ALERT(REMD)
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/********************************************************************/
+/*  This APPL is for the processing of BSRO information from Concur */
+/*  It runs whenever a file is received from Concur and then        */
+/*  re-triggers itself waiting on another file to be received.      */
+/*  If this application abends in the rename step, it's because     */
+/*  more than one file was sent -                                   */
+/* 1-look at his link                                               */
+/*   http://pgp2-ak-fis.bfusa.com/listing.txt                       */
+/* 2-Look for two  Concur_extract_BSRO_xxxxxxxxxxxxxxxx.txt files   */
+/* 3-Copy the date stamp (xxxxxxxxxx) from the first file name      */
+/* 4-Trigger event TE01.TE25CONR with xxxxxxxxxxxxx as USER 4 parm  */
+/*   This should process the first file on the PGP2 server          */
+/* 5-After event TE01.TE25CONR has completed, there should be only  */
+/*   one file left on the PGP2 server listing                       */
+/* 6-Resubmit the failed RENAME job in this appl-TE25CONB           */
+/* 7-If you are unsure of what to do, then let it sit and email     */
+/*   a scheduler.                                                   */
+/********************************************************************/
+
+/* Replaced sfgint01pnsh.bfusa.com with BSA-securetranfers.bfusa.com
+/* in SEND job per Allen Garrett - 09/22/17 MFM
+
+IF USER4 = '' THEN !USER4 = '?????????????????'
+
+FILE_TRIGGER RECEIVE_CONCUR_FOR_BSRO
+   AGENT CYBA_PGP2AKFIS
+   FILENAME '/home/ceadmin/+
+   Concur_extract_BSRO_?????????????????.txt.pgp' CREATE
+   RUN TODAY
+   RELEASE ADD(DECRYPT_CONCUR_BSRO)
+ENDJOB
+
+ LINUX_JOB DECRYPT_CONCUR_BSRO
+    AGENT CYBA_PGP2AKFIS
+    SCRIPTNAME /usr/local/scripts/pgpdecrypt.sh
+    USER ceadmin
+    ARGS Concur_extract_BSRO_?????????????????.txt.pgp
+    RUN TODAY
+    RELEASE (RENAME_CONCUR_BSRO)
+ ENDJOB
+
+LINUX_JOB RENAME_CONCUR_BSRO
+    AGENT CYBA_PGP2AKFIS
+    CMDNAME /bin/mv
+    ARGS /home/ceadmin/Concur_extract_BSRO_!USER4..txt +
+/home/ceadmin/concur_law_sae.txt
+    USER ceadmin
+    RUN TODAY
+    RELEASE ADD(SEND_BSRO_2STERPROD)
+ENDJOB
+
+LINUX_JOB SEND_BSRO_2STERPROD
+  AGENT CYBA_PGP2AKFIS
+  USER root
+  SCRIPTNAME /usr/local/scripts/scpsend.sh
+  /*ARGS -u LAWPRD -p 'NAD7e#h4JuPr' -h Bsa-securetransfers.bfusa.com +
+/*-f /home/ceadmin/concur_law_sae.txt
+  ARGS -u LAWPRD -p 'NAD7e#h4JuPr' -h sfgint01pnsh.bfusa.com +
+-f /home/ceadmin/concur_law_sae.txt
+  RUN TODAY
+ENDJOB
+
+APPLEND TE25CONB
+   ESPNOMSG TRIGGER !ESPEVENT ADD
+ENDJOB
+

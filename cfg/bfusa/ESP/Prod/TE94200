@@ -1,0 +1,192 @@
+APPL TE94200 WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/*********************************************************************/
+/*08/08/2018 -JFC- CLEANED UP PROC - ADDED LIE - RAN UNNUM
+/*********************************************************************/
+
+NOTIFY FAILURE ABEND ALERT(REMD)
+
+JOB LIS.!ESPAPPL LINK PROCESS
+   RUN 1ST WORKDAY OF MONTH
+   EARLYSUB 04.30
+   RELEASE ADD(EMPLOYEE.INBOUND)
+   RELEASE ADD(EVENT.INBOUND)
+ENDJOB
+
+DATA_OBJECT PARMSET.!ESPAPPL
+   /*Create a timestamp in hhmmMMDDYY format*/
+   SETVAR TMSTMP='!ESPSHH.:!ESPSMN.,!ESPSMM./!ESPSDD./!ESPSYY'
+   SETVAR PID=''
+   SETVAR STMPTM='!ESPSMM./!ESPSDD./!ESPSYY.,!ESPSHH.:!ESPSMN'
+ENDJOB
+
+FILE_TRIGGER EMPLOYEE.INBOUND
+  AGENT CYBA_ISHRP1
+  FILENAME '/data/HRP/interfaces/output/dataout/+
+Employeesap.txt' CREATE NOCHANGE(1)
+   RUN 1ST WORKDAY OF MONTH
+  RELEASE ADD(TE25LYN1.CD)
+ENDJOB
+
+FILE_TRIGGER EVENT.INBOUND
+  AGENT CYBA_ISHRP1
+  FILENAME '/data/HRP/interfaces/output/dataout/+
+Eventsap.txt' CREATE NOCHANGE(1)
+   RUN 1ST WORKDAY OF MONTH
+  RELEASE ADD(TE25LYN1.CD)
+ENDJOB
+
+JOB SETPID1.!ESPAPPL LINK PROCESS
+   /*get the next PID number from the ConnectDirect*/
+   /*Process ID table (CDPROD).  Save the value into*/
+   /*the applications DataObject for use by the C:D*/
+   /*job the CDSTAT job (if needed).*/
+   VINCR (PID) TABLE(CDPROD) CLANG
+   VGET  (PID) TABLE(CDPROD) CLANG
+   ESP MGRMSG * . . . PARMSET.!ESPAPPL/!ESPAPPL..!ESPAPGEN/MAIN +
+ACTION SET PID(!PID)
+   RELEASE ADD(TE25LYN1.CD)
+   RUN  1ST WORKDAY OF MONTH
+ENDJOB
+
+UNIX_JOB TE25LYN1.CD
+   AGENT CYBA_ISHRP1
+   EARLYSUB REALNOW PLUS 10 SECONDS
+   PID= WOBDATA('PARMSET.!ESPAPPL','PID')
+   TMSTMP= WOBDATA('PARMSET.!ESPAPPL','TMSTMP')
+   /*@@ "/apps/condir/bfsbin/submitcd.sh TE25101T.cd 5"*/
+   SCRIPTNAME /apps/condir/bfsbin/submitcd.sh
+   ARGS TE25LYN1.cd 10 !PID !TMSTMP
+   USER cdhrprd
+   RELDELAY  1
+   RESOURCE ADD(1,ISHRP1CD)
+   RUN  1ST WORKDAY OF MONTH
+   RELEASE ADD(ARCFILE.EMPLOYEE)
+ENDJOB
+
+AIX_JOB CDSTAT1.!ESPAPPL CONDITIONAL
+   AGENT CYBA_ISHRP1
+   /*This job only runs if the C:D job does not end with*/
+   /*a EXITCODE of 0.  It can be rerun as often as*/
+   /*required to check the status of the C:D process.*/
+   /*When the C:D process finishes, complete the job*/
+   /*to release the successors.*/
+   USER cduser
+   STMPTM= WOBDATA('PARMSET.!ESPAPPL','STMPTM')
+   PID= WOBDATA('PARMSET.!ESPAPPL','PID')
+   CMDNAME /apps/condir/bfsbin/cdstat.sh
+   ARGS !STMPTM  j!PID
+   AFTER ADD(TE25LYN1.CD(A))
+   RUN  1ST WORKDAY OF MONTH
+ENDJOB
+
+AIX_JOB ARCFILE.EMPLOYEE
+   AGENT CYBA_ISHRP1
+   SCRIPTNAME /local/bin/arcfile.sh
+   ARGS +
+interfaces/output/dataout/Employeesap.txt M
+   USER hrpadm
+   RUN  1ST WORKDAY OF MONTH
+   RELEASE ADD(ARCFILE.EVENT)
+ENDJOB
+
+AIX_JOB ARCFILE.EVENT
+   AGENT CYBA_ISHRP1
+   SCRIPTNAME /local/bin/arcfile.sh
+   ARGS +
+interfaces/output/dataout/Eventsap.txt M
+   USER hrpadm
+   RUN  1ST WORKDAY OF MONTH
+  RELEASE ADD(TE94000)
+ENDJOB
+
+JOB TE94000
+  /*@@ SYSTEM=TEPENS
+  CCCHK RC(1:4095) FAIL CONTINUE
+  RUN 1ST WORKDAY OF MONTH
+  RELEASE ADD(TE94010)
+ENDJOB
+
+JOB TE94010
+  /*@@ SYSTEM=TEPENS
+  CCCHK RC(1:4095) FAIL CONTINUE
+  RUN 1ST WORKDAY OF MONTH
+  RELEASE ADD(TE250010_LYNCHVAL.INBOUND)
+ENDJOB
+
+FILE_TRIGGER TE250010_LYNCHVAL.INBOUND
+    AGENT CYBA_ISHRP1
+    FILENAME '/data/HRP/interfaces/output/dataout/+
+SAPBEN_VENDOR_ZBN_INT_009_LYNCHVAL.TXT' CREATE NOCHANGE(1)
+    RUN 1ST WORKDAY OF MONTH
+    RELEASE ADD(TE250010_LYNCHVAL.cd)
+ENDJOB
+
+ JOB SETPID2.!ESPAPPL LINK PROCESS
+    /*get the next PID number from the ConnectDirect*/
+    /*Process ID table (CDPROD).  Save the value into*/
+    /*the applications DataObject for use by the C:D*/
+    /*job and the CDSTAT job (if needed).*/
+    VINCR (PID) TABLE(CDPROD) CLANG
+    VGET  (PID) TABLE(CDPROD) CLANG
+    ESP MGRMSG * . . . PARMSET.!ESPAPPL/!ESPAPPL..!ESPAPGEN/MAIN +
+ACTION SET PID(!PID)
+    RELDELAY 1
+    RELEASE ADD(TE250010_LYNCHVAL.cd)
+    RUN 1ST WORKDAY OF MONTH
+ ENDJOB
+
+ UNIX_JOB TE250010_LYNCHVAL.cd
+    AGENT CYBA_ISHRP1
+    EARLYSUB REALNOW PLUS 10 SECONDS
+    PID= WOBDATA('PARMSET.!ESPAPPL','PID')
+    TMSTMP= WOBDATA('PARMSET.!ESPAPPL','TMSTMP')
+    /*@@ "/apps/condir/bfsbin/submitcd.sh TE250010_PAR.cd 5"*/
+    SCRIPTNAME /apps/condir/bfsbin/submitcd.sh
+    ARGS TE250010_LYNCHVAL.cd 10 !PID !TMSTMP
+    USER cdhrprd
+    RUN 1ST WORKDAY OF MONTH
+    RELDELAY  1
+    RELEASE ADD(TE94020)
+    RELEASE ADD(ARCHIVE.TE250010_LYNCHVAL)
+ ENDJOB
+
+AIX_JOB ARCHIVE.TE250010_LYNCHVAL
+   AGENT CYBA_ISHRP1
+   SCRIPTNAME /local/bin/arcfile.sh
+   ARGS interfaces/output/dataout/+
+SAPBEN_VENDOR_ZBN_INT_009_LYNCHVAL.TXT M
+   USER hrpadm
+   RUN 1ST WORKDAY OF MONTH
+   RELEASE ADD(LIE.!ESPAPPL)
+ENDJOB
+
+ AIX_JOB CDSTAT2.!ESPAPPL CONDITIONAL
+    AGENT CYBA_ISHRP1
+    /*This job only runs if the C:D job does not end with*/
+    /*a EXITCODE of 0.  It can be rerun as often as*/
+    /*required to check the status of the C:D process.*/
+    /*When the C:D process finishes, complete the job*/
+    /*to release the successors.*/
+    USER cduser
+    STMPTM= WOBDATA('PARMSET.!ESPAPPL','STMPTM')
+    PID= WOBDATA('PARMSET.!ESPAPPL','PID')
+    CMDNAME /apps/condir/bfsbin/cdstat.sh
+    ARGS !STMPTM  j!PID
+    AFTER ADD(TE250010_LYNCHVAL.cd(A))
+    RUN 1ST WORKDAY OF MONTH
+ ENDJOB
+
+JOB TE94020
+  /*@@ SYSTEM=TEPENS
+  CCCHK RC(1:4095) FAIL CONTINUE
+  RUN 1ST WORKDAY OF MONTH
+  RELEASE ADD(LIE.!ESPAPPL)
+ENDJOB
+
+JOB LIE.!ESPAPPL LINK PROCESS
+   RUN DAILY
+ENDJOB
+

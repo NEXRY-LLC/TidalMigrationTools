@@ -1,0 +1,18 @@
+APPL MMD450FT WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/**********************************************************************/
+/* 03/20/19 - CREATED PER GRIMMETT TESTING -DSG- INC00000XXXXXXX
+/**********************************************************************/
+
+/*NOTIFY ABEND FAILURE ALERT(REMD)
+
+FILE_TRIGGER INV_STS_CHK
+   AGENT CYBA_ISBFP3
+   FILENAME '/data/BFP/interfaces/output/status/./Stage_Inductions*' +
+   CREATE
+   /*FILENAME '/data/BFP/interfaces/output/status/+
+   LE57_W000__BAD.txt' CREATE
+   RUN DAILY
+ENDJOB

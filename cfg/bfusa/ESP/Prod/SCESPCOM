@@ -1,0 +1,27 @@
+APPL SCESPCOM WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/*********************************************************************/
+/*THIS APPL RUNS A JOB THAT ISSUES THE ESPCPM COMMAND                */
+/*********************************************************************/
+/**RECOVERY - IF JOBS FAILS - MARK COMPLETE AND EMAIL SCHEDULING     */
+/*APPL RUNS MONDAY MORNING                                           */
+/*********************************************************************/
+
+JOB LIS.!ESPAPPL LINK PROCESS
+  RUN TODAY
+  RELEASE ADD(SWESPCOM)
+ENDJOB
+
+JOB SWESPCOM
+  RUN TODAY
+  RELEASE ADD(LIE.!ESPAPPL)
+ENDJOB
+
+JOB LIE.!ESPAPPL LINK PROCESS
+  RUN TODAY
+  DUEOUT EXEC REALNOW PLUS 4 HOURS
+   NOTIFY OVERDUE MAILBOX(SCHEDULERS)
+ENDJOB
+
