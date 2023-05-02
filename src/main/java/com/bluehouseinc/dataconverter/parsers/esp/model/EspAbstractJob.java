@@ -25,6 +25,8 @@ import lombok.EqualsAndHashCode;
 public abstract class EspAbstractJob extends BaseJobOrGroupObject implements EspJob {
 
 	boolean containsIfLogic = false;
+	boolean containsAdvancedDelaySubLogic = false;
+	boolean containsAdvancedDueOutLogic = false;
 	
 	public abstract EspJobType getJobType();
 	

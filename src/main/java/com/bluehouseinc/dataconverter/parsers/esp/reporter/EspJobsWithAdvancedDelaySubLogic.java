@@ -12,57 +12,46 @@ import com.bluehouseinc.dataconverter.parsers.esp.model.EspDataModel;
 import lombok.extern.log4j.Log4j2;
 
 @Log4j2
-public class EspAgentsByJobType implements IReporter {
+public class EspJobsWithAdvancedDelaySubLogic implements IReporter {
 	EspDataModel espmodel;
-	
-	Map<String, List<String>> jobcount = new HashMap<>();
+
+	List<String> jobcount = new ArrayList<>();
 
 	@Override
 	public <B extends BaseParserDataModel<?, ?>> void doPrint(B model) {
 
 		espmodel = (EspDataModel) model;
-		
+
 		log.trace("#######################################{}#######################################", this.getClass().getSimpleName());
-		
+
 		espmodel.getDataObjects().forEach(f -> doCount(f));
 
-		jobcount.keySet().forEach(f ->{
-			
-			String key = f;
-			
-			log.trace("{}", key);
-			
-			jobcount.get(key).forEach(n ->{
-				log.trace("\t{}", n);
-			});
-			
+		jobcount.forEach(f -> {
+
+			log.trace("{}", f);
+
 
 		});
-		
+
 		log.trace("#######################################{}#######################################", this.getClass().getSimpleName());
-		
+
 	}
 
-	
 	public void doCount(EspAbstractJob job) {
 
-		String key = job.getClass().getSimpleName();
-		String agent = job.getAgent();
-		
-		if(agent == null) {
-			agent = "NOT SET-" + job.getJobType().name();
+		if(job.getFullPath().contains("RESTENC6")) {
+			job.getName().getBytes();
 		}
 		
-		if (jobcount.containsKey(key)) {
-			if(!jobcount.get(key).contains(agent)) {
-				jobcount.get(key).add(agent);
-			}
-		} else {
-			List<String> data = new ArrayList<>();
-			data.add(agent);
-			jobcount.put(key, data);
-		}
 
+		if (job.isContainsAdvancedDueOutLogic()) {
+			String key = job.getFullPath();
+			if (!jobcount.contains(key)) {
+				jobcount.add(key);
+			}
+
+		}
+		
 		if (!job.getChildren().isEmpty()) {
 			job.getChildren().forEach(c -> doCount((EspAbstractJob) c));
 		}

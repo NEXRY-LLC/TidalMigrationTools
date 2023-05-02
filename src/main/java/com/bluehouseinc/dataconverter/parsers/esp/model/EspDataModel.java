@@ -14,11 +14,8 @@ import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.impl.EspJobGroup;
 import com.bluehouseinc.dataconverter.providers.ConfigurationProvider;
 import com.bluehouseinc.transform.ITransformer;
 
-
-
 @Component
-public class EspDataModel extends BaseParserDataModel<EspAbstractJob,EspConfigProvider> implements IParserModel {
-
+public class EspDataModel extends BaseParserDataModel<EspAbstractJob, EspConfigProvider> implements IParserModel {
 
 	private DependencyGraphMapper depgraph;
 
@@ -34,7 +31,7 @@ public class EspDataModel extends BaseParserDataModel<EspAbstractJob,EspConfigPr
 
 	@Override
 	public ITransformer<List<EspAbstractJob>, TidalDataModel> getJobTransformer(TidalDataModel model) {
-		return  new EspToTidalTransformer2(model);
+		return new EspToTidalTransformer2(model);
 	}
 
 	@Override
@@ -42,76 +39,81 @@ public class EspDataModel extends BaseParserDataModel<EspAbstractJob,EspConfigPr
 
 		dataObjects.forEach(jobGroupObject -> doProcessJobDeps(jobGroupObject));
 
+		dataObjects.forEach(jobGroupObject -> buildEmailActions(jobGroupObject));
+
 	}
-
-
-
-
 
 	// Not currently used, but logic for converting into TIDAL emailActions exists if it needs to be used later.
 	public void buildEmailActions(BaseJobOrGroupObject baseJobOrGroupObject) {
-		if (baseJobOrGroupObject instanceof EspJobGroup) {
-			EspJobGroup currentJobGroup = (EspJobGroup) baseJobOrGroupObject;
-			List<String> jobGroupNotifications = currentJobGroup.getEspJobGroupNotifyList();
-			if (jobGroupNotifications != null && !jobGroupNotifications.isEmpty()) {
-				currentJobGroup.getEspJobGroupNotifyList().forEach(notify -> {
-					// RegEx for search: NOTIFY (.*) MAILBOX
-					// NOTIFY ABEND FAILURE ALERT(ADW1) MAILBOX(DGRIMMETT1)
-					if (notify.contains("MAILBOX")) {
-						CsvActionEmail csvActionEmail = new CsvActionEmail();
 
-						String[] notifyElements = notify.split("MAILBOX", 2);
-						String mailBoxString = notifyElements[1];
-						// emailAddressGroup <=> boxName <= MAILBOX(boxName)
-						String emailAddressGroup = mailBoxString.substring(mailBoxString.indexOf("(") + 1, mailBoxString.indexOf(")"));
+		try {
+			if (baseJobOrGroupObject instanceof EspJobGroup) {
+				EspJobGroup currentJobGroup = (EspJobGroup) baseJobOrGroupObject;
+				List<String> jobGroupNotifications = currentJobGroup.getEspJobGroupNotifyList();
+				if (jobGroupNotifications != null && !jobGroupNotifications.isEmpty()) {
+					currentJobGroup.getEspJobGroupNotifyList().forEach(notify -> {
+						// RegEx for search: NOTIFY (.*) MAILBOX
+						// NOTIFY ABEND FAILURE ALERT(ADW1) MAILBOX(DGRIMMETT1)
+						if (notify.contains("MAILBOX")) {
+							CsvActionEmail csvActionEmail = new CsvActionEmail();
 
-						csvActionEmail.setToEmailAddresses(emailAddressGroup);
-						String csvActionEmailName = currentJobGroup.getName() + emailAddressGroup;
+							String[] notifyElements = notify.split("MAILBOX", 2);
+							String mailBoxString = notifyElements[1];
+							// emailAddressGroup <=> boxName <= MAILBOX(boxName)
+							String emailAddressGroup = mailBoxString.substring(mailBoxString.indexOf("(") + 1, mailBoxString.indexOf(")"));
 
-						if (notify.contains("SUBJECT")) {
-							String subject = mailBoxString.substring(mailBoxString.lastIndexOf("(") + 1, mailBoxString.lastIndexOf(")"));
-							csvActionEmailName += subject;
+							csvActionEmail.setToEmailAddresses(emailAddressGroup);
+							String csvActionEmailName = currentJobGroup.getName() + emailAddressGroup;
+
+							if (notify.contains("SUBJECT")) {
+								String subject = mailBoxString.substring(mailBoxString.lastIndexOf("(") + 1, mailBoxString.lastIndexOf(")"));
+								csvActionEmailName += subject;
+							}
+							csvActionEmail.setName(csvActionEmailName);
+
+							this.getTidal().addOwnerToAction(csvActionEmail, this.getTidal().getDefaultOwner());
+							this.getTidal().getEmailActions().add(csvActionEmail);
 						}
-						csvActionEmail.setName(csvActionEmailName);
+					});
 
-						this.getTidal().addOwnerToAction(csvActionEmail, this.getTidal().getDefaultOwner());
-						this.getTidal().getEmailActions().add(csvActionEmail);
+					if ((currentJobGroup).isGroup()) {
+						(currentJobGroup).getChildren().forEach(this::buildEmailActions);
 					}
-				});
+				}
+			} else {
+				EspAbstractJob currentJob = (EspAbstractJob) baseJobOrGroupObject;
+				List<String> jobNotifications = currentJob.getNotifyList();
+				if (jobNotifications != null && !jobNotifications.isEmpty()) {
+					currentJob.getNotifyList().forEach(notify -> {
+						// RegEx for search: NOTIFY (.*) MAILBOX
+						// NOTIFY ABEND FAILURE ALERT(ADW1) MAILBOX(DGRIMMETT1)
+						if (notify.contains("MAILBOX")) {
+							CsvActionEmail csvActionEmail = new CsvActionEmail();
 
-				if ((currentJobGroup).isGroup()) {
-					(currentJobGroup).getChildren().forEach(this::buildEmailActions);
+							String[] notifyElements = notify.split("MAILBOX", 2);
+							String mailBoxString = notifyElements[1];
+
+							// emailAddressGroup <=> boxName <= MAILBOX(boxName)
+							String emailAddressGroup = mailBoxString.substring(mailBoxString.indexOf("(") + 1, mailBoxString.indexOf(")"));
+							csvActionEmail.setToEmailAddresses(emailAddressGroup);
+							String csvActionEmailName = emailAddressGroup;
+
+							if (notify.contains("SUBJECT")) {
+								String subject = mailBoxString.substring(mailBoxString.lastIndexOf("(") + 1, mailBoxString.lastIndexOf(")"));
+								//csvActionEmailName += subject;
+								csvActionEmail.setSubject(subject);
+							}
+							csvActionEmail.setName(csvActionEmailName);
+
+							this.getTidal().addOwnerToAction(csvActionEmail, this.getTidal().getDefaultOwner());
+							this.getTidal().getEmailActions().add(csvActionEmail);
+						}
+					});
 				}
 			}
-		} else {
-			EspAbstractJob currentJob = (EspAbstractJob) baseJobOrGroupObject;
-			List<String> jobNotifications = currentJob.getNotifyList();
-			if (jobNotifications != null && !jobNotifications.isEmpty()) {
-				currentJob.getNotifyList().forEach(notify -> {
-					// RegEx for search: NOTIFY (.*) MAILBOX
-					// NOTIFY ABEND FAILURE ALERT(ADW1) MAILBOX(DGRIMMETT1)
-					if (notify.contains("MAILBOX")) {
-						CsvActionEmail csvActionEmail = new CsvActionEmail();
 
-						String[] notifyElements = notify.split("MAILBOX", 2);
-						String mailBoxString = notifyElements[1];
-
-						// emailAddressGroup <=> boxName <= MAILBOX(boxName)
-						String emailAddressGroup = mailBoxString.substring(mailBoxString.indexOf("(") + 1, mailBoxString.indexOf(")"));
-						csvActionEmail.setToEmailAddresses(emailAddressGroup);
-						String csvActionEmailName = currentJob.getName() + emailAddressGroup;
-
-						if (notify.contains("SUBJECT")) {
-							String subject = mailBoxString.substring(mailBoxString.lastIndexOf("(") + 1, mailBoxString.lastIndexOf(")"));
-							csvActionEmailName += subject;
-						}
-						csvActionEmail.setName(csvActionEmailName);
-
-						this.getTidal().addOwnerToAction(csvActionEmail, this.getTidal().getDefaultOwner());
-						this.getTidal().getEmailActions().add(csvActionEmail);
-					}
-				});
-			}
+		} catch (Exception e) {
+			//e.printStackTrace();
 		}
 	}
 

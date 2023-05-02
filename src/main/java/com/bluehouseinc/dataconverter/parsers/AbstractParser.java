@@ -16,7 +16,9 @@ import com.bluehouseinc.dataconverter.model.TidalDataModel;
 import com.bluehouseinc.dataconverter.parsers.reporters.GenericJobTypeReporter;
 
 import lombok.Data;
+import lombok.extern.log4j.Log4j2;
 
+@Log4j2
 @Data
 public abstract class AbstractParser<E extends BaseParserDataModel<?,?>> implements IParser {
 
@@ -36,6 +38,9 @@ public abstract class AbstractParser<E extends BaseParserDataModel<?,?>> impleme
 
 		parseFile(); // Parse our source data.
 
+		// Finally convert from our parser data model into our Tidal Data Model
+		TidalDataModel model =  getParserDataModel().convertToDomainDataModel();
+		
 		List<IReporter> reporters = new LinkedList<>();
 		reporters.add(new GenericJobTypeReporter());
 		
@@ -43,13 +48,16 @@ public abstract class AbstractParser<E extends BaseParserDataModel<?,?>> impleme
 		// Do some printing if we can on our parser data model.
 		reporters.forEach(
 				r ->{
-					
+					log.trace("#######################################{}#######################################", r.getClass().getSimpleName());
+
 					r.doPrint(getParserDataModel());
-							
+					
+					log.trace("#######################################{}#######################################", r.getClass().getSimpleName());
+
 				});
 
-		// Finally convert from our parser data model into our Tidal Data Model
-		return getParserDataModel().convertToDomainDataModel();
+		return model;
+
 	}
 
 

@@ -68,37 +68,36 @@ public class EspToTidalTransformer2 implements ITransformer<List<EspAbstractJob>
 	public TidalDataModel transform(List<EspAbstractJob> in) throws TransformationException {
 		in.forEach(f -> doProcessObjects(f, null));
 
-		// List<String> programNames = SAPImporter.getJobNames();
-		//
-		// String dosetreporting = "bfusa/SAPActualData.txt";
-		//
-		//
-		// File file = new File(SAPImporter.getSapDataFile());
-		//
-		// CsvToBean<CsvSAPData> saplargedata = SAPImporter.fromFile(file, CsvSAPData.class);
-		//
-		// List<CsvSAPData> actualSAP = new ArrayList<>();
-		//
-		// saplargedata.forEach(f ->{
-		//
-		// if(programNames.contains(f.getJobName())) {
-		//
-		// if(!actualSAP.contains(f)) {
-		// actualSAP.add(f);
-		// }
-		//
-		// }
-		// });
-		//
-		//
-		// try {
-		//
-		// CsvExporter.WriteToFile(dosetreporting, actualSAP);
-		//
-		// } catch (Exception e) {
-		// e.printStackTrace();
-		// }
-		//
+//		List<String> programNames = SAPImporter.getJobNames();
+//
+//		String dosetreporting = "bfusa/SAPActualData.txt";
+//
+//		File file = new File(SAPImporter.getSapDataFile());
+//
+//		CsvToBean<CsvSAPData> saplargedata = SAPImporter.fromFile(file, CsvSAPData.class);
+//
+//		List<CsvSAPData> actualSAP = new ArrayList<>();
+//
+//		saplargedata.forEach(f -> {
+//
+//			if (programNames.contains(f.getJobName())) {
+//
+//				if (!actualSAP.contains(f)) {
+//					actualSAP.add(f);
+//					log.info("Found SAP Program Name[{}]", f);
+//				}
+//
+//			}
+//		});
+//
+//		try {
+//
+//			CsvExporter.WriteToFile(dosetreporting, actualSAP);
+//
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//		}
+
 		return datamodel;
 	}
 
@@ -180,7 +179,7 @@ public class EspToTidalTransformer2 implements ITransformer<List<EspAbstractJob>
 		doProcessJobResources(job, newjob);
 
 		doSetCalendarPlaceHolder(job, newjob);
-		this.datamodel.addCalendarToJobOrGroup(newjob, new CsvCalendar("Daily"));
+		
 
 		return newjob;
 	}
@@ -256,7 +255,7 @@ public class EspToTidalTransformer2 implements ITransformer<List<EspAbstractJob>
 			out.setJobName(sapname.toUpperCase());
 		}
 
-		// SAPImporter.addJobName(out.getJobName());
+		//SAPImporter.addJobName(out.getJobName());
 
 		CsvSAPData sapdata = SAPImporter.getDataByJobName(sapname);
 
@@ -295,11 +294,11 @@ public class EspToTidalTransformer2 implements ITransformer<List<EspAbstractJob>
 			CsvRuntimeUser rte = new CsvRuntimeUser(in.getSapStepUser());
 			rte.setPasswordForSAP("tidal");
 			this.datamodel.addRunTimeUserToJobOrGroup(out, rte);
-		}else {
-			// How ? Bad job. 
+		} else {
+			// How ? Bad job.
 			log.error("doHandleSAP Missing RunTime User for Job[" + in.getFullPath() + "]");
 			out.setJobMode("MISSING DATA");
-			
+
 		}
 
 	}
@@ -364,6 +363,7 @@ public class EspToTidalTransformer2 implements ITransformer<List<EspAbstractJob>
 		out.setName(in.getName());
 
 		if (StringUtils.isBlank(in.getAgent())) {
+			//FIXME: This should only be set for ZoS Job type. 
 			in.setAgent("AgentZOS");
 		}
 
@@ -374,18 +374,21 @@ public class EspToTidalTransformer2 implements ITransformer<List<EspAbstractJob>
 			this.datamodel.addRunTimeUserToJobOrGroup(out, new CsvRuntimeUser(rtu));
 		}
 
-		String starttime = in.getDelaySubmission();
+		String delaysub = in.getDelaySubmission();
 
-		if (!StringUtils.isBlank(starttime)) {
-			starttime = starttime.replace(".", "").replace(":", ""); // esp uses a dot ?? This should be 0700 format
+		if (!StringUtils.isBlank(delaysub)) {
+			delaysub = delaysub.replace(".", "").replace(":", ""); // esp uses a dot ?? This should be 0700 format
 			// only.
 
-			if (NumberUtils.isParsable(starttime)) {
-				out.setStartTime(starttime); // Delay Sub is ESP way of saying dont run until this
+			if (NumberUtils.isParsable(delaysub)) {
+				out.setStartTime(delaysub); // Delay Sub is ESP way of saying dont run until this
 			} else {
-				String stmsg = out.getNotes() + "\nStartTime: " + starttime;
+				// Not parsing likely more than just a time. 
+				// E.G   DELAYSUB 6.30 TODAY PLUS 1 WORKDAY vs.   DELAYSUB 6.30
+				in.setContainsAdvancedDelaySubLogic(true);
+				String stmsg = out.getNotes() + "\nDelaySubmission: " + delaysub;
 				out.setNotes(stmsg);
-				log.error("doHandleGenericData Incorrect Start Time [" + starttime + "] for Job: " + in.getFullPath());
+				log.error("doHandleGenericData Incorrect Start Time [" + delaysub + "] for Job: " + in.getFullPath());
 			}
 
 		}
@@ -394,12 +397,15 @@ public class EspToTidalTransformer2 implements ITransformer<List<EspAbstractJob>
 		out.setNotes(String.join("\n", in.getNoteData()));
 
 		if (in.getDueout() != null) {
-			String endtime = in.getDueout().replace(".", "").replace(":", "");
+			String endtime = in.getDueout().replace("EXEC ", "").replace(".", "").replace(":", "");
 
 			if (NumberUtils.isParsable(endtime)) {
 				out.setEndTime(endtime); // Delay Sub is ESP way of saying dont run until this
 			} else {
-				String stmsg = out.getNotes() + "\nEndTime: " + starttime;
+				// Not parsing likely more than just a time. 
+				// E.G     DUEOUT EXEC NOW PLUS 4 HOURS vs  DUEOUT EXEC 10AM
+				in.setContainsAdvancedDueOutLogic(true);
+				String stmsg = out.getNotes() + "\nEndTime: " + endtime;
 				out.setNotes(stmsg);
 				log.error("doHandleGenericData Incorrect End Time [" + endtime + "] for Job: " + in.getFullPath());
 			}

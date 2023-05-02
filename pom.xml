@@ -8,7 +8,7 @@
 		<relativePath /> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.bluehouseinc</groupId>
-	<artifactId>TidalDataConverter</artifactId>
+	<artifactId>TidalMigrationToolsr</artifactId>
 	<version>0.0.60</version>
 	<name>Tidal Data Converter</name>
 	<description>Converting data and importing into TIDAL system</description>

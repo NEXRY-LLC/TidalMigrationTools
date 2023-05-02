@@ -333,15 +333,15 @@ public class EspJobVisitorImpl implements EspJobVisitor {
 		return runStatement;
 	}
 
-	private EspIfStatement extractIfStatement(String statementParameters) {
-		EspIfStatement runStatement = null;
-		// new EspIfStatement();
-		if (statementParameters.contains("IF")) {
-			String data = statementParameters.substring(statementParameters.indexOf("IF ") + 1);
-			runStatement = new EspIfStatement(data);
-		}
-		return runStatement;
-	}
+//	private EspIfStatement extractIfStatement(String statementParameters) {
+//		EspIfStatement runStatement = null;
+//		// new EspIfStatement();
+//		if (statementParameters.contains("IF")) {
+//			String data = statementParameters.substring(statementParameters.indexOf("IF ") + 1);
+//			runStatement = new EspIfStatement(data);
+//		}
+//		return runStatement;
+//	}
 
 	private EspExitCodeStatement extractExitCodeStatement(String statementParameters) {
 		// EXITCODE 2 SUCCESS
