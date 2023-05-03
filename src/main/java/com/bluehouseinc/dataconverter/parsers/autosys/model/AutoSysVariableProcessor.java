@@ -27,7 +27,7 @@ public class AutoSysVariableProcessor extends BaseVariableProcessor<AutosysAbstr
 	@Override
 	public void processJobVariables(AutosysAbstractJob job) {
 
-		if (job.getName().contains("AHW_QNXT_0110_010.6003_CSSB_SQL")) {
+		if (job.getName().contains("HZN_FACE_2990_015.HZN_Kill_HpXr_svcclogin")) {
 			job.getName();
 		}
 

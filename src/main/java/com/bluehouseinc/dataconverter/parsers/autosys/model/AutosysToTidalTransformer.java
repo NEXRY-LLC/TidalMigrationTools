@@ -54,12 +54,12 @@ public class AutosysToTidalTransformer implements ITransformer<List<AutosysAbstr
 	public void doProcessObjects(AutosysAbstractJob autosysAbstractJob, CsvJobGroup parent) {
 		if (autosysAbstractJob.isGroup()) {
 
-			CsvJobGroup group = (CsvJobGroup) handleBaseJobOrGroupObject(autosysAbstractJob, parent);
+			CsvJobGroup group = (CsvJobGroup) processBaseJobOrGroupObject(autosysAbstractJob, parent);
 
 			autosysAbstractJob.getChildren().forEach(autosysChildJob -> doProcessObjects((AutosysAbstractJob) autosysChildJob, group)); // Parse children
 
 		} else {
-			BaseCsvJobObject newJob = handleBaseJobOrGroupObject(autosysAbstractJob, parent);
+			BaseCsvJobObject newJob = processBaseJobOrGroupObject(autosysAbstractJob, parent);
 			if (newJob == null) {
 				log.error("newJob IS NULL for autosysAbstractJob for name={}; fullPath={}", autosysAbstractJob.getName(), autosysAbstractJob.getFullPath());
 				throw new RuntimeException("Error, (converted BaseCsvJobObject) newJob is NULL!");
@@ -76,32 +76,40 @@ public class AutosysToTidalTransformer implements ITransformer<List<AutosysAbstr
 
 	}
 
-	// TODO: If the job object is missing a calendar set to inherit from parent group.
+
 	// TODO: Check here to see if we can take our file trigger job type and use it to apply to the children jobs that depende on me.
 
-	private BaseCsvJobObject handleBaseJobOrGroupObject(AutosysAbstractJob base, CsvJobGroup parent) {
+	private BaseCsvJobObject processBaseJobOrGroupObject(AutosysAbstractJob base, CsvJobGroup parent) {
 
 		if (base == null) {
 			throw new TidalException("BaseJobOrGroupObject is null");
 		}
 
+		log.debug("processBaseJobOrGroupObject() Processing Job/Group Name[{}]", base.getFullPath());
+
+		
 		BaseCsvJobObject baseCsvJobObject = null;
 		if (base instanceof AutosysBoxJob) {
-			baseCsvJobObject = handleAutosysBoxJob((AutosysBoxJob) base, parent);
+			baseCsvJobObject = processAutosysBoxJob((AutosysBoxJob) base, parent);
 		} else if (base instanceof AutosysCommandLineJob) {
-			baseCsvJobObject = handleAutosysCommandLineJob((AutosysCommandLineJob) base);
+			baseCsvJobObject = processAutosysCommandLineJob((AutosysCommandLineJob) base);
 		} else if (base instanceof AutosysFileWatcherJob) {
-			baseCsvJobObject = handleAutosysFileWatcherJob((AutosysFileWatcherJob) base);
+			baseCsvJobObject = processAutosysFileWatcherJob((AutosysFileWatcherJob) base);
 		} else if (base instanceof AutosysFileTriggerJob) {
-			baseCsvJobObject = handleAutosysFileTriggerJob((AutosysFileTriggerJob) base);
+			baseCsvJobObject = processAutosysFileTriggerJob((AutosysFileTriggerJob) base);
 		} else if (base instanceof AutosysSqlAgentJob) {
-			baseCsvJobObject = handlePlaceHolderJob(base);
+			baseCsvJobObject = processPlaceHolderJob(base);
 		} else if (base instanceof AutosysWindowsServiceMonitoringJob) {
-			baseCsvJobObject = handlePlaceHolderJob(base);
+			baseCsvJobObject = processPlaceHolderJob(base);
 		} else {
-			throw new TidalException("Error, unknown job type for jobName={" + base.getFullPath() + "}");
+			throw new TidalException("Error, unknown job type for Name=[" + base.getFullPath() + "]");
 		}
 
+
+		doSetCommonJobInformation(base, baseCsvJobObject);
+
+		doAddJobClassToJob(base, baseCsvJobObject);
+		
 		if (base instanceof AutosysBoxJob) {
 			// Nothing here
 		} else {
@@ -110,31 +118,25 @@ public class AutosysToTidalTransformer implements ITransformer<List<AutosysAbstr
 			}
 		}
 
+		
 		return baseCsvJobObject;
 	}
 
-	private BaseCsvJobObject handleAutosysBoxJob(AutosysBoxJob autosysBoxJob, CsvJobGroup parent) {
+	private BaseCsvJobObject processAutosysBoxJob(AutosysBoxJob autosysBoxJob, CsvJobGroup parent) {
 		CsvJobGroup csvJobGroup = new CsvJobGroup();
-		setCommonInformation(autosysBoxJob, csvJobGroup);
 
 		if (parent != null) {
 			parent.addChild(csvJobGroup);
 		} else {
 			this.getTidalDataModel().addJobToModel(csvJobGroup);
 		}
-		log.debug("Processing Group Name[{}]", csvJobGroup.getFullPath());
 
 		return csvJobGroup;
 	}
 
-	private BaseCsvJobObject handleAutosysCommandLineJob(AutosysCommandLineJob autosysCommandLineJob) {
+	private BaseCsvJobObject processAutosysCommandLineJob(AutosysCommandLineJob autosysCommandLineJob) {
 		CsvOSJob csvOSJob = new CsvOSJob();
 		String cmd = autosysCommandLineJob.getCommand();
-
-		if (autosysCommandLineJob.getName().equals("CORP_EDI_0110_020.ETS_RAPS_TOCMS_SFTP_OUT")) {
-			log.info("CORP_EDI_0110_020.ETS_RAPS_TOCMS_SFTP_OUT CMD job is reached (autosysCommandLineJob.name[{}])!", autosysCommandLineJob.getName());
-			log.info("autosysCommandLineJob.command={}", cmd);
-		}
 
 		// TODO: Fix this issue with processing unbalanced quotes either:
 		// a) Here in this current method (so APIJobUtils.setJobCommandDetail is NOT modified due to potential unexpected behaviour in conversions for other
@@ -142,7 +144,6 @@ public class AutosysToTidalTransformer implements ITransformer<List<AutosysAbstr
 		// b) In AutosysJobVisitorImpl class
 		// APIJobUtils.setJobCommandDetail(csvOSJob, cmd);
 		setJobCommandDetails(csvOSJob, cmd);
-		setCommonInformation(autosysCommandLineJob, csvOSJob);
 
 		if (autosysCommandLineJob.getProfile() != null) {
 			autosysCommandLineJob.setProfile(autosysCommandLineJob.getProfile().replace(".ksh", ".env").replace(".sh", ".env"));
@@ -152,7 +153,7 @@ public class AutosysToTidalTransformer implements ITransformer<List<AutosysAbstr
 		return csvOSJob;
 	}
 
-	private BaseCsvJobObject handleAutosysFileTriggerJob(AutosysFileTriggerJob autosysFileTriggerJob) {
+	private BaseCsvJobObject processAutosysFileTriggerJob(AutosysFileTriggerJob autosysFileTriggerJob) {
 
 		autosysFileTriggerJob.setName(autosysFileTriggerJob.getName() + "-XXXX-FILETRIGGER");
 
@@ -160,13 +161,11 @@ public class AutosysToTidalTransformer implements ITransformer<List<AutosysAbstr
 		String cmd = "UNSET";
 
 		APIJobUtils.setJobCommandDetail(csvOSJob, cmd);
-		// setJobCommandDetails(csvOSJob, cmd);
-		setCommonInformation(autosysFileTriggerJob, csvOSJob);
 
 		return csvOSJob;
 	}
 
-	private BaseCsvJobObject handleAutosysFileWatcherJob(AutosysFileWatcherJob autosysFileWatcherJob) {
+	private BaseCsvJobObject processAutosysFileWatcherJob(AutosysFileWatcherJob autosysFileWatcherJob) {
 		CsvFileWatcherJob csvFileWatcherJob = new CsvFileWatcherJob();
 		int interval = Integer.parseInt(autosysFileWatcherJob.getWatchInterval());
 		csvFileWatcherJob.setPollInterval(interval);
@@ -179,7 +178,6 @@ public class AutosysToTidalTransformer implements ITransformer<List<AutosysAbstr
 		String file = autosysFileWatcherJob.getWatchFile();
 		String dir = "UNSET";
 		String filemask = "UNSET";
-		log.info("file={}", file);
 
 		if (file.contains("/")) {
 			filemask = file.substring(file.lastIndexOf("/") + 1);
@@ -189,44 +187,47 @@ public class AutosysToTidalTransformer implements ITransformer<List<AutosysAbstr
 			dir = file.substring(0, file.lastIndexOf("\\") + 1);
 		}
 
-		csvFileWatcherJob.setDirectory(dir);
-		csvFileWatcherJob.setFilemask(filemask);
-		setCommonInformation(autosysFileWatcherJob, csvFileWatcherJob);
+		// Remove quotes from our path.. Not needed in TIDAL. 
+		csvFileWatcherJob.setDirectory(dir.replace("\"", ""));
+		csvFileWatcherJob.setFilemask(filemask.replace("\"", ""));
 
 		if (autosysFileWatcherJob.getProfile() != null) {
 			autosysFileWatcherJob.setProfile(autosysFileWatcherJob.getProfile().replace(".ksh", ".env").replace(".sh", ".env"));
 			csvFileWatcherJob.setEnvironmentFile(autosysFileWatcherJob.getProfile());
 		}
 
-		log.info("DIR[{}] FILEMASK[{}]", dir, filemask);
+		log.debug("DIR[{}] FILEMASK[{}]", dir, filemask);
 		return csvFileWatcherJob;
 	}
 
-	private BaseCsvJobObject handleAutosysSqlAgentJob(AutosysSqlAgentJob autosysSqlAgentJob) {
-		// TODO: Implement handleAutosysSqlAgentJob as a job placeholder just like in ESP!!!
+	private BaseCsvJobObject processAutosysSqlAgentJob(AutosysSqlAgentJob autosysSqlAgentJob) {
+		// TODO: Implement processAutosysSqlAgentJob as a job placeholder just like in ESP!!!
 		CsvMsSqlJob csvMsSqlJob = new CsvMsSqlJob();
 		csvMsSqlJob.setId(autosysSqlAgentJob.getId());
 		csvMsSqlJob.setAgentName(autosysSqlAgentJob.getSqlAgentJobname());
-
-		setCommonInformation(autosysSqlAgentJob, csvMsSqlJob);
+		
 		return csvMsSqlJob;
 	}
 
-	private BaseCsvJobObject handlePlaceHolderJob(AutosysAbstractJob autosysAbstractJob) {
-		// NOTE: This method is used as replacement for handling AutosysSqlAgentJob and handleAutosysWindowsServiceMonitoringJob job
+	private BaseCsvJobObject processPlaceHolderJob(AutosysAbstractJob autosysAbstractJob) {
+		
+		
+		// NOTE: This method is used as replacement for handling AutosysSqlAgentJob and processAutosysWindowsServiceMonitoringJob job
 		CsvOSJob csvOSJob = new CsvOSJob();
 		String jobType;
 		String currentJobNotes;
 		if (autosysAbstractJob instanceof AutosysSqlAgentJob) {
 			AutosysSqlAgentJob autosysSqlAgentJob = (AutosysSqlAgentJob) autosysAbstractJob;
 			jobType = "SQLAGENT";
-			currentJobNotes = "sqlagent_jobname=" + autosysSqlAgentJob.getSqlAgentJobname() + System.lineSeparator() + "sqlagent_user_name=" + autosysSqlAgentJob.getSqlAgentUserName() + System.lineSeparator() + "sqlagent_domain_name=" + autosysSqlAgentJob.getSqlAgentDomainName() + System.lineSeparator() + "sqlagent_server_name=" + autosysSqlAgentJob.getSqlAgentServerName() + System.lineSeparator()
-					+ "sqlagent_target_db=" + autosysSqlAgentJob.getSqlAgentTargetDb();
+			currentJobNotes = "sqlagent_jobname=" + autosysSqlAgentJob.getSqlAgentJobname() + System.lineSeparator() + "sqlagent_user_name=" + autosysSqlAgentJob.getSqlAgentUserName() + System.lineSeparator() + "sqlagent_domain_name="
+					+ autosysSqlAgentJob.getSqlAgentDomainName() + System.lineSeparator() + "sqlagent_server_name=" + autosysSqlAgentJob.getSqlAgentServerName() + System.lineSeparator() + "sqlagent_target_db="
+					+ autosysSqlAgentJob.getSqlAgentTargetDb();
 
 		} else if (autosysAbstractJob instanceof AutosysWindowsServiceMonitoringJob) {
 			AutosysWindowsServiceMonitoringJob autosysWindowsServiceMonitoringJob = (AutosysWindowsServiceMonitoringJob) autosysAbstractJob;
 			jobType = "OMS";
-			currentJobNotes = "monitor_mode=" + autosysWindowsServiceMonitoringJob.getMonitorMode().toString() + System.lineSeparator() + "win_service_name=" + autosysWindowsServiceMonitoringJob.getWinServiceName() + System.lineSeparator() + "win_service_status=" + autosysWindowsServiceMonitoringJob.getWinServiceStatus();
+			currentJobNotes = "monitor_mode=" + autosysWindowsServiceMonitoringJob.getMonitorMode().toString() + System.lineSeparator() + "win_service_name=" + autosysWindowsServiceMonitoringJob.getWinServiceName() + System.lineSeparator()
+					+ "win_service_status=" + autosysWindowsServiceMonitoringJob.getWinServiceStatus();
 		} else {
 			jobType = "UNKNOWN";
 			currentJobNotes = null;
@@ -235,21 +236,12 @@ public class AutosysToTidalTransformer implements ITransformer<List<AutosysAbstr
 		csvOSJob.setName(autosysAbstractJob.getName() + "-PLACEHOLDER-" + jobType);
 		csvOSJob.setCommandLine("PLACEHOLDER");
 		csvOSJob.setNotes(currentJobNotes);
-		addJobClassToCsvJob(autosysAbstractJob, csvOSJob);
 
 		return csvOSJob;
 	}
 
-	private BaseCsvJobObject handleAutosysWindowsServiceMonitoringJob(AutosysWindowsServiceMonitoringJob autosysWindowsServiceMonitoringJob) {
-		// TODO: Implement handleAutosysSqlAgentJob method till the END!!!!
-		CsvOSJob csvOSJob = new CsvOSJob();
-		// csvOSJob.setCommandLine();
 
-		setCommonInformation(autosysWindowsServiceMonitoringJob, csvOSJob);
-		return csvOSJob;
-	}
-
-	public void setJobCommandDetails(CsvOSJob csvOSJob, String cmd) {
+	private void setJobCommandDetails(CsvOSJob csvOSJob, String cmd) {
 		if (cmd == null) {
 			cmd = "ERROR NOT SET";
 		}
@@ -264,7 +256,7 @@ public class AutosysToTidalTransformer implements ITransformer<List<AutosysAbstr
 		}
 
 		// TODO-IMPORTANT: Also, modify value of `cmd` parameter since it can contain batch/executable/script file along with parameters and that should be
-		// handled as separate field of CsvOSJob variable (`commandLine` and `parameters`)
+		// processd as separate field of CsvOSJob variable (`commandLine` and `parameters`)
 
 		try {
 			CommandLine cl = CommandLine.parse(cmd);
@@ -280,13 +272,13 @@ public class AutosysToTidalTransformer implements ITransformer<List<AutosysAbstr
 		}
 	}
 
-	private void setCommonInformation(AutosysAbstractJob autosysAbstractJob, BaseCsvJobObject baseCsvJobObject) {
+	private void doSetCommonJobInformation(AutosysAbstractJob autosysAbstractJob, BaseCsvJobObject baseCsvJobObject) {
 
 		baseCsvJobObject.setId(autosysAbstractJob.getId());
 		baseCsvJobObject.setName(autosysAbstractJob.getName());
 		baseCsvJobObject.setNotes(autosysAbstractJob.getDescription());
 
-		if (baseCsvJobObject.getName().equalsIgnoreCase("AHW_QNXT_0300__CreateMemberRelation")) {
+		if (baseCsvJobObject.getName().equalsIgnoreCase("CTS_UTIL_PRD2_0410_010.Monitor_DEV2-0001_WAE_App_Server")) {
 			baseCsvJobObject.getName();
 		}
 
@@ -306,12 +298,14 @@ public class AutosysToTidalTransformer implements ITransformer<List<AutosysAbstr
 		}
 
 		String agent = autosysAbstractJob.getMachine();
-		if (agent == null) {
-
+		if (StringUtils.isBlank(agent)) {
+			getTidalDataModel().addNodeToJobOrGroup(baseCsvJobObject, "UNKNOWN");
 		} else {
 			getTidalDataModel().addNodeToJobOrGroup(baseCsvJobObject, agent);
 
 		}
+		
+		
 		if (autosysAbstractJob.getRunCalendar() != null) {
 			CsvCalendar cal = new CsvCalendar(autosysAbstractJob.getRunCalendar());
 			getTidalDataModel().addCalendarToJobOrGroup(baseCsvJobObject, cal);
@@ -332,7 +326,7 @@ public class AutosysToTidalTransformer implements ITransformer<List<AutosysAbstr
 			// Time objects... We can have a single start time in our start times, so this would be just a plain start time on a job
 			String startTimes = autosysAbstractJob.getStartTimes().replace(" ", "").replace("\"", "");
 			// 12:01
-			startTimes = startTimes.replace("12:01", "12:00").replace("0:01", "0000");
+			// startTimes = startTimes;//.replace("12:01", "12:00").replace("0:01", "0000");
 
 			APIDateUtils.setRerunSameStartTimes(startTimes, baseCsvJobObject, getTidalDataModel(), true);
 		}
@@ -345,14 +339,17 @@ public class AutosysToTidalTransformer implements ITransformer<List<AutosysAbstr
 
 		}
 
-		if (autosysAbstractJob.getStartMins() != null) {
+		if (!StringUtils.isBlank(autosysAbstractJob.getStartMins())) {
+			// If not blank and no comma, must be bad data?
+			String startdata = autosysAbstractJob.getStartMins().trim();
+			// Cant have a start minutes be a single number. 
+			if (startdata.contains(",")) {
+				// TODO: Make this a prop setting to override this but for now make it static
+				// 00,05,10,15,20,25,30,35,40,45,50,55
+				String startTimes = autosysAbstractJob.getStartMins();
 
-			// TODO: Make this a prop setting to override this but for now make it static
-			// 00,05,10,15,20,25,30,35,40,45,50,55
-			String startTimes = autosysAbstractJob.getStartMins();
-
-			APIDateUtils.setRerunSameStartMinutes(startTimes, baseCsvJobObject, getTidalDataModel(), true);
-
+				APIDateUtils.setRerunSameStartMinutes(startTimes, baseCsvJobObject, getTidalDataModel(), true);
+			}
 		}
 
 		if (getAutosysdatamodel().getConfigeProvider().disableCaryOverOnRerun()) {
@@ -363,7 +360,6 @@ public class AutosysToTidalTransformer implements ITransformer<List<AutosysAbstr
 			}
 		}
 
-		log.debug("Performing setCommonInformation for job.name[{}], fullPath[{}]", autosysAbstractJob.getName(), autosysAbstractJob.getFullPath());
 		if (autosysAbstractJob.getResource() != null) {
 			AutosysResourceStatement autosysResource = autosysAbstractJob.getResource();
 			CsvResource csvResource = new CsvResource(autosysResource.getResourceName(), this.getTidalDataModel().getDefaultOwner());
@@ -372,16 +368,6 @@ public class AutosysToTidalTransformer implements ITransformer<List<AutosysAbstr
 			this.getTidalDataModel().addResourceToJob(baseCsvJobObject, csvResource);
 		}
 
-		addJobClassToCsvJob(autosysAbstractJob, baseCsvJobObject);
-
-		// String conditionExpression = autosysDependencyParserUtil.conditionExpressionMap.get(autosysAbstractJob);
-		// if (conditionExpression != null) {
-		// baseCsvJobObject.setCompoundDependency(conditionExpression);
-		// }
-
-		if (baseCsvJobObject.getName().equalsIgnoreCase("CMC_FACE_0250__Auto_Parm")) {
-			baseCsvJobObject.getName();
-		}
 
 		String offstart = getAutosysdatamodel().getConfigeProvider().offSetTimeStart();
 		String offend = getAutosysdatamodel().getConfigeProvider().offSetTimeEnd();
@@ -425,7 +411,7 @@ public class AutosysToTidalTransformer implements ITransformer<List<AutosysAbstr
 		}
 	}
 
-	private void addJobClassToCsvJob(AutosysAbstractJob autosysAbstractJob, BaseCsvJobObject baseCsvJobObject) {
+	private void doAddJobClassToJob(AutosysAbstractJob autosysAbstractJob, BaseCsvJobObject baseCsvJobObject) {
 		if (autosysAbstractJob.getGroupAttribute() != null || autosysAbstractJob.getApplicationAttribute() != null) {
 			CsvJobClass csvJobClass;
 			if (autosysAbstractJob.getGroupAttribute() != null) {

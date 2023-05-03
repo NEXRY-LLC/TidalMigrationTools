@@ -26,6 +26,7 @@ import com.bluehouseinc.dataconverter.providers.ConfigurationProvider;
 import com.bluehouseinc.dataconverter.util.ObjectUtils;
 import com.bluehouseinc.expressions.ExpressionType;
 import com.bluehouseinc.expressions.ExpressionUtil;
+import com.bluehouseinc.tidal.api.exceptions.TidalException;
 import com.bluehouseinc.tidal.api.model.dependency.job.DepLogic;
 import com.bluehouseinc.tidal.api.model.dependency.job.DependentJobStatus;
 import com.bluehouseinc.tidal.api.model.dependency.job.ExitCodeOperator;
@@ -98,21 +99,21 @@ public class AutosysDataModel extends BaseParserDataModel<AutosysAbstractJob,Aut
 		if (me == null) {
 			log.error("Unable to locate job[{}]", autosysAbstractJob.getFullPath());
 		}
-		log.info("[doProcessJobDeps] me={}", (me == null ? "null" : me.getFullPath()));
+		log.debug("[doProcessJobDeps] me={}", (me == null ? "null" : me.getFullPath()));
 
 		doProcessAutosysBaseDependency(autosysAbstractJob, me);
 
 		autosysAbstractJob.getChildren().forEach(job -> {
 			AutosysAbstractJob currentAutosysAbstractJob = (AutosysAbstractJob) job;
-			log.info("[doProcessJobDeps] autosysAbstractJob.getName={}", autosysAbstractJob.getName());
-			log.info("[doProcessJobDeps] currentAutosysAbstractJob.getName={}", currentAutosysAbstractJob.getName());
+			log.debug("[doProcessJobDeps] autosysAbstractJob.getName={}", autosysAbstractJob.getName());
+			log.debug("[doProcessJobDeps] currentAutosysAbstractJob.getName={}", currentAutosysAbstractJob.getName());
 			doProcessJobDeps((AutosysAbstractJob) job);
 		});
 	}
 
 	// From here or the other places we deal with dependency we should be able to detect a FileTrigger type
 	// add use that data to build a new file dependency to my targetJob.
-	private void doProcessAutosysBaseDependency(AutosysAbstractJob sourceJob, BaseCsvJobObject targetJob) {
+	private void doProcessAutosysBaseDependency(final AutosysAbstractJob sourceJob, BaseCsvJobObject targetJob) {
 
 
 		final String expresiondata = sourceJob.getCondition();
@@ -136,8 +137,10 @@ public class AutosysDataModel extends BaseParserDataModel<AutosysAbstractJob,Aut
 		Map<Integer, AutosysBaseDependency> mapOfJobDep = localMap.get(sourceJob.getId());
 
 
-		if (sourceJob.getName().equals("CMC_FACE_6160__ETS_FACE_CMCX_PHPIN_IN")) {
+		if (sourceJob.getName().equals("DHP_EDM_PROD_6100_020.ETS_837_ENC_OUT")) {
 			sourceJob.getName();
+			sourceJob.getName();
+			//
 		}
 
 
@@ -156,28 +159,27 @@ public class AutosysDataModel extends BaseParserDataModel<AutosysAbstractJob,Aut
 
 				mapOfJobDep.entrySet().forEach(f -> {
 
+					final AutosysAbstractJob me = sourceJob;
+					
 					AutosysBaseDependency autoSysBaseDepObject = f.getValue();
 
 					String dependsOnThisJobObjectName = autoSysBaseDepObject.getDependencyName();
 
-					AutosysAbstractJob localSourceJob = sourceJob;
 
-					AutosysAbstractJob parentjob = (AutosysAbstractJob) localSourceJob.getParent();
 
-					log.info("[doProcessJobDeps] looking for job={} in parent job{}", dependsOnThisJobObjectName, parentjob.getFullPath());
+					log.debug("[doProcessJobDeps] looking for our dependent job=[{}] ", dependsOnThisJobObjectName);
 					// We should find a job from our parent at all times.
 					BaseJobOrGroupObject dependsOnThisAutoSysJob = getJobByName(dependsOnThisJobObjectName);
 
 					if (dependsOnThisAutoSysJob == null) {
-						// TODO: Throw exception here.
-						log.info("[doProcessJobDeps] missing job in our AutoSys Data, looking for a job with this name ={}", dependsOnThisJobObjectName);
+						log.info("[doProcessJobDeps] missing job in our AutoSys Data, looking for a job with this name["+dependsOnThisJobObjectName+"]");
+						//throw new TidalException("[doProcessJobDeps] missing job in our AutoSys Data, looking for a job with this name["+dependsOnThisJobObjectName+"]");
 					} else {
 						BaseCsvJobObject dependsOnThisRealCsvJob = this.getTidal().findFirstJobByFullPath(dependsOnThisAutoSysJob.getFullPath());
 
 						if (dependsOnThisRealCsvJob == null) {
 							// Major issues, we should always find a job matching by name for Autosys.
-							// TODO: Throw exception here.
-							log.info("[doProcessJobDeps] missing job in our CSV Data={}", dependsOnThisAutoSysJob.getFullPath());
+							log.info("[doProcessJobDeps] missing dependenct job["+dependsOnThisAutoSysJob.getFullPath()+"] in TIDAL");
 						} else {
 
 							if (autoSysBaseDepObject instanceof AutosysJobStatusDependency) {
@@ -302,10 +304,6 @@ public class AutosysDataModel extends BaseParserDataModel<AutosysAbstractJob,Aut
 		}
 	}
 
-	private <T> void printList(List<T> list) {
-		list.forEach(System.out::println);
-	}
-
 	/**
 	 * Locate a parent object via name, returns the first one found.
 	 *
@@ -317,20 +315,20 @@ public class AutosysDataModel extends BaseParserDataModel<AutosysAbstractJob,Aut
 			return null;
 		}
 
-		List<BaseJobOrGroupObject> parents = ObjectUtils.toFlatStream(this.getDataObjects()).filter(f -> f.getName().trim().toLowerCase().equals(name.trim().toLowerCase())).collect(Collectors.toList());
+		List<BaseJobOrGroupObject> objs = ObjectUtils.toFlatStream(this.getDataObjects()).filter(f -> f.getName().trim().toLowerCase().equals(name.trim().toLowerCase())).collect(Collectors.toList());
 
-		if (parents.isEmpty()) {
+		if (objs.isEmpty()) {
 			return null;
 		}
 
-		if (parents.size() > 1) {
-			log.info("MULTIPLE[{}] JOBS WITH NAME[{}] returning last in the list", parents.size(), name);
-			parents.forEach(baseJobOrGroupObject -> log.info("{}", baseJobOrGroupObject.getFullPath()));
-			long count = parents.size();
+		if (objs.size() > 1) {
+			log.info("MULTIPLE[{}] JOBS WITH NAME[{}] returning last in the list", objs.size(), name);
+			objs.forEach(baseJobOrGroupObject -> log.info("{}", baseJobOrGroupObject.getFullPath()));
+			long count = objs.size();
 
-			return (AutosysAbstractJob) parents.stream().skip(count - 1).findFirst().get();
+			return (AutosysAbstractJob) objs.stream().skip(count - 1).findFirst().get();
 		} else {
-			return (AutosysAbstractJob) parents.get(0);
+			return (AutosysAbstractJob) objs.get(0);
 		}
 	}
 

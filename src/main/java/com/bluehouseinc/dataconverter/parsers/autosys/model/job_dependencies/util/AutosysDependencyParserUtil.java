@@ -101,7 +101,7 @@ public class AutosysDependencyParserUtil {
 		String sanitizedExpressionString = sanitizeExpression(job, fullExpression);
 
 
-		log.info("sanitizedExpressionString=[{}] for job[{}]", sanitizedExpressionString, job.getFullPath());
+		log.debug("sanitizedExpressionString=[{}] for job[{}]", sanitizedExpressionString, job.getFullPath());
 
 		return sanitizedExpressionString;
 	}
@@ -131,7 +131,7 @@ public class AutosysDependencyParserUtil {
 	 */
 	private static String sanitizeExpression(AutosysAbstractJob job, String fullExpression) {
 
-		if (job.getName().equals("CMC_FACE_6180__ETS_FACE_CMCX_OPTI_MED_RX_IN")) {
+		if (job.getName().equals("HZN_FACE_2990_015.HZN_Kill_HpXr_svcclogin")) {
 			job.getName();
 		}
 
@@ -184,7 +184,7 @@ public class AutosysDependencyParserUtil {
 
 			if (jobname.equals(targetname)) {
 				log.error("Job Dependency would result in a loop, skipping target job[{}] dependency for job[{}]", targetname, job.getFullPath());
-				matcher.appendReplacement(sb, "");
+				//matcher.appendReplacement(sb, "");
 			} else {
 				currentJobDependencyMap.put(autosysBaseDependency.getId(), autosysBaseDependency);
 				// AutosysJobStatus foundAutosysJobStatus =
@@ -267,9 +267,8 @@ public class AutosysDependencyParserUtil {
 			String targetname = exitCodeDependency.getDependencyName();
 
 			if (jobname.equals(targetname)) {
-
 				log.error("Job Dependency would result in a loop, skipping target job[{}] dependency for job[{}]", targetname, job.getFullPath());
-				matcher.appendReplacement(sb, "");
+				//matcher.appendReplacement(sb, "");
 			} else {
 				exitCodeDependencyValueMap.put(exitCodeDependency.getId(), exitCodeDependency);
 				matcher.appendReplacement(sb, Integer.toString(exitCodeDependency.getId()));

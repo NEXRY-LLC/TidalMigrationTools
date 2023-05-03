@@ -296,6 +296,11 @@ public class AutosysJobVisitorImpl implements AutosysJobVisitor {
 	 ******************************************************/
 
 	private AutosysResourceStatement extractResourceStatement(String resourceString) {
+		
+		if(StringUtils.isBlank(resourceString)) {
+			return null;
+		}
+		
 		// resources: (ABS_FACE.RC_BatchControl,QUANTITY=10,FREE=A)
 		String[] resourceStringParts = resourceString.substring(resourceString.indexOf("(") + 1, resourceString.indexOf(")")).split(",");
 		List<String> statementParts = new LinkedList<>();
@@ -460,6 +465,13 @@ public class AutosysJobVisitorImpl implements AutosysJobVisitor {
 		case "notification_msg":
 			job.setNotificationMsg(value);
 			break;
+		case "watch_file_groupname":
+		case "fail_codes":
+		case "svcdesk_imp":
+		case "svcdesk_pri":
+			//job.setNotificationMsg(value);
+			break;
+			
 		default:
 			throw new IllegalArgumentException("Invalid key: [" + key + "]; job.name=" + job.getName() + "; job.fullPath=" + job.getFullPath());
 		}
