@@ -16,6 +16,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+
 import org.apache.commons.lang3.math.NumberUtils;
 
 import com.bluehouseinc.dataconverter.common.utils.RegexHelper;
@@ -38,9 +39,6 @@ import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.impl.EspFileTrigger
 import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.impl.EspFtpJob;
 import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.impl.EspJobGroup;
 import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.impl.EspLinuxJob;
-import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.impl.EspZosJob;
-import com.bluehouseinc.dataconverter.parsers.esp.model.schedule.SchEventElement;
-import com.bluehouseinc.dataconverter.parsers.esp.model.schedule.actions.SchScheduleAction;
 import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.impl.EspSAPBwpcJob;
 import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.impl.EspSapEventJob;
 import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.impl.EspSapJob;
@@ -49,12 +47,14 @@ import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.impl.EspServiceMoni
 import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.impl.EspTextMonJob;
 import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.impl.EspUnixJob;
 import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.impl.EspWindowsJob;
+import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.impl.EspZosJob;
+import com.bluehouseinc.dataconverter.parsers.esp.model.schedule.SchEventElement;
+import com.bluehouseinc.dataconverter.parsers.esp.model.schedule.actions.SchScheduleAction;
 import com.bluehouseinc.dataconverter.parsers.esp.model.statements.EspJobResourceStatement;
 import com.bluehouseinc.dataconverter.parsers.esp.model.statements.EspRunStatement;
 import com.bluehouseinc.dataconverter.parsers.esp.model.util.EspFileReaderUtils;
 import com.bluehouseinc.dataconverter.parsers.esp.model.util.EspJobType;
 import com.bluehouseinc.dataconverter.providers.ConfigurationProvider;
-import com.bluehouseinc.dataconverter.util.ObjectUtils;
 import com.bluehouseinc.tidal.api.exceptions.TidalException;
 import com.bluehouseinc.tidal.utils.StringUtils;
 
@@ -141,11 +141,7 @@ public class EspParser extends AbstractParser<EspDataModel> {
 
 	private boolean skipLine(String line) {
 
-		if (line.matches(EMPTY_LINE_PATTERN)) {
-			return true;
-		}
-
-		if (line.trim().startsWith("!USER")) {
+		if (line.matches(EMPTY_LINE_PATTERN) || line.trim().startsWith("!USER")) {
 			return true;
 		}
 
@@ -250,7 +246,7 @@ public class EspParser extends AbstractParser<EspDataModel> {
 							if (jobName.contains("PAYMENT")) {
 								jobName.getBytes();
 							}
-							
+
 							EspJobType jobType = extractJobType(jobTypeString);
 
 							if (StringUtils.isBlank(jobName) || jobType == null) {
@@ -400,7 +396,7 @@ public class EspParser extends AbstractParser<EspDataModel> {
 			throw new TidalException("Unknown Job Type[" + jobType.name() + "]");
 		}
 
-		
+
 		// Add our job to our parent early
 		if (parent != null) {
 			parent.addChild(job);

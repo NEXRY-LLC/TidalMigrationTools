@@ -1,12 +1,10 @@
 package com.bluehouseinc.dataconverter.parsers.esp.model.jobs.impl;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import com.bluehouseinc.dataconverter.importers.csv.CsvSAPData;
 import com.bluehouseinc.dataconverter.parsers.esp.model.EspAbstractJob;
-import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.EspJobVisitor;
 import com.bluehouseinc.dataconverter.parsers.esp.model.util.EspJobType;
 
 import lombok.Data;
@@ -17,12 +15,12 @@ import lombok.EqualsAndHashCode;
 public class EspSapJob extends EspAbstractJob {
 
 	CsvSAPData sapData;
-	
+
 	String abapName; // not required if JOBCOPY statement is used to copy an existing SAP job. Pay attention when converting into TIDAL's SAP job type.
 	String sapUser;
 	String sapStepUser;
-	
-	Map<EspSapJobOptionalStatement, String> optionalStatements = new HashMap<>();;
+
+	Map<EspSapJobOptionalStatement, String> optionalStatements = new HashMap<>();
 
 	public EspSapJob(String name) {
 		super(name);

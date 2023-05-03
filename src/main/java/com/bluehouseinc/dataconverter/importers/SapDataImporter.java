@@ -25,8 +25,8 @@ public class SapDataImporter {
 
 	private ConfigurationProvider cfgProvider;
 
-	private List<String> jobNames = new ArrayList<>();;
-	
+	private List<String> jobNames = new ArrayList<>();
+
 	public SapDataImporter(ConfigurationProvider cfgProvider) {
 		this.sapdata = new ArrayList<>();
 		this.cfgProvider = cfgProvider;
@@ -54,16 +54,16 @@ public class SapDataImporter {
 	public CsvSAPData getDataByJobName(String name) {
 		return getSAPData().stream().filter(f -> f.getJobName().equalsIgnoreCase(name)).findAny().orElse(null);
 	}
-	
+
 	public void addJobName(String name) {
 		if(jobNames.contains(name)) {
-			
+
 		}else {
 			jobNames.add(name);
 		}
 	}
-	
-	
+
+
 	public <E> CsvToBean<E> fromFile(File file, Class<E> cls) {
 
 		CsvToBean<E> data = null;//new ArrayList<>();
@@ -93,5 +93,5 @@ public class SapDataImporter {
 			return data;
 		}
 	}
-	
+
 }

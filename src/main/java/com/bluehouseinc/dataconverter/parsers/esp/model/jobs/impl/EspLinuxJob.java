@@ -9,7 +9,7 @@ public class EspLinuxJob extends EspOSJOb {
 
 	//ABANDON DEPENDENCIES 19.00
 	String abandon;
-	
+
 	public EspLinuxJob(String name) {
 		super(name);
 	}

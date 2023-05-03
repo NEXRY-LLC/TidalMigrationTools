@@ -87,7 +87,7 @@ public class AutosysToTidalTransformer implements ITransformer<List<AutosysAbstr
 
 		log.debug("processBaseJobOrGroupObject() Processing Job/Group Name[{}]", base.getFullPath());
 
-		
+
 		BaseCsvJobObject baseCsvJobObject = null;
 		if (base instanceof AutosysBoxJob) {
 			baseCsvJobObject = processAutosysBoxJob((AutosysBoxJob) base, parent);
@@ -109,7 +109,7 @@ public class AutosysToTidalTransformer implements ITransformer<List<AutosysAbstr
 		doSetCommonJobInformation(base, baseCsvJobObject);
 
 		doAddJobClassToJob(base, baseCsvJobObject);
-		
+
 		if (base instanceof AutosysBoxJob) {
 			// Nothing here
 		} else {
@@ -118,7 +118,7 @@ public class AutosysToTidalTransformer implements ITransformer<List<AutosysAbstr
 			}
 		}
 
-		
+
 		return baseCsvJobObject;
 	}
 
@@ -187,7 +187,7 @@ public class AutosysToTidalTransformer implements ITransformer<List<AutosysAbstr
 			dir = file.substring(0, file.lastIndexOf("\\") + 1);
 		}
 
-		// Remove quotes from our path.. Not needed in TIDAL. 
+		// Remove quotes from our path.. Not needed in TIDAL.
 		csvFileWatcherJob.setDirectory(dir.replace("\"", ""));
 		csvFileWatcherJob.setFilemask(filemask.replace("\"", ""));
 
@@ -205,13 +205,13 @@ public class AutosysToTidalTransformer implements ITransformer<List<AutosysAbstr
 		CsvMsSqlJob csvMsSqlJob = new CsvMsSqlJob();
 		csvMsSqlJob.setId(autosysSqlAgentJob.getId());
 		csvMsSqlJob.setAgentName(autosysSqlAgentJob.getSqlAgentJobname());
-		
+
 		return csvMsSqlJob;
 	}
 
 	private BaseCsvJobObject processPlaceHolderJob(AutosysAbstractJob autosysAbstractJob) {
-		
-		
+
+
 		// NOTE: This method is used as replacement for handling AutosysSqlAgentJob and processAutosysWindowsServiceMonitoringJob job
 		CsvOSJob csvOSJob = new CsvOSJob();
 		String jobType;
@@ -304,8 +304,8 @@ public class AutosysToTidalTransformer implements ITransformer<List<AutosysAbstr
 			getTidalDataModel().addNodeToJobOrGroup(baseCsvJobObject, agent);
 
 		}
-		
-		
+
+
 		if (autosysAbstractJob.getRunCalendar() != null) {
 			CsvCalendar cal = new CsvCalendar(autosysAbstractJob.getRunCalendar());
 			getTidalDataModel().addCalendarToJobOrGroup(baseCsvJobObject, cal);
@@ -342,7 +342,7 @@ public class AutosysToTidalTransformer implements ITransformer<List<AutosysAbstr
 		if (!StringUtils.isBlank(autosysAbstractJob.getStartMins())) {
 			// If not blank and no comma, must be bad data?
 			String startdata = autosysAbstractJob.getStartMins().trim();
-			// Cant have a start minutes be a single number. 
+			// Cant have a start minutes be a single number.
 			if (startdata.contains(",")) {
 				// TODO: Make this a prop setting to override this but for now make it static
 				// 00,05,10,15,20,25,30,35,40,45,50,55

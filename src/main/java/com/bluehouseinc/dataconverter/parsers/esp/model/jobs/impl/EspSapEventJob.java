@@ -14,7 +14,7 @@ import lombok.EqualsAndHashCode;
 public class EspSapEventJob extends EspAbstractJob {
 
 	String event;
-	Map<EspSapEventJobOptionalStatement, String> optionalStatements = new HashMap<>();;
+	Map<EspSapEventJobOptionalStatement, String> optionalStatements = new HashMap<>();
 
 	public EspSapEventJob(String name) {
 		super(name);
@@ -23,7 +23,7 @@ public class EspSapEventJob extends EspAbstractJob {
 	public enum EspSapEventJobOptionalStatement {
 		RFCDEST, SAPCLIENT, SAPLANGUAGE, SAPUSER
 	}
-	
+
 	@Override
 	public EspJobType getJobType() {
 		return EspJobType.SAPE;

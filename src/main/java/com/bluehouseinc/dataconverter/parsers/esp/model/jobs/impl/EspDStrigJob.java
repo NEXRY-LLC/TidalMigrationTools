@@ -1,9 +1,6 @@
 package com.bluehouseinc.dataconverter.parsers.esp.model.jobs.impl;
 
-import java.util.List;
-
 import com.bluehouseinc.dataconverter.parsers.esp.model.EspAbstractJob;
-import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.EspJobVisitor;
 import com.bluehouseinc.dataconverter.parsers.esp.model.util.EspJobType;
 
 import lombok.Data;

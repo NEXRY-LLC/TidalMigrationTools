@@ -40,10 +40,10 @@ public abstract class AbstractParser<E extends BaseParserDataModel<?,?>> impleme
 
 		// Finally convert from our parser data model into our Tidal Data Model
 		TidalDataModel model =  getParserDataModel().convertToDomainDataModel();
-		
+
 		List<IReporter> reporters = new LinkedList<>();
 		reporters.add(new GenericJobTypeReporter());
-		
+
 		reporters.addAll(getModelReporter().getReporters());
 		// Do some printing if we can on our parser data model.
 		reporters.forEach(
@@ -51,7 +51,7 @@ public abstract class AbstractParser<E extends BaseParserDataModel<?,?>> impleme
 					log.trace("#######################################{}#######################################", r.getClass().getSimpleName());
 
 					r.doPrint(getParserDataModel());
-					
+
 					log.trace("#######################################{}#######################################", r.getClass().getSimpleName());
 
 				});

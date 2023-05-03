@@ -1,8 +1,5 @@
 package com.bluehouseinc.dataconverter.parsers.esp.model.jobs;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.impl.EspAgentMonitorJob;
 import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.impl.EspAixJob;
 import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.impl.EspAs400Job;
@@ -10,7 +7,6 @@ import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.impl.EspDStrigJob;
 import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.impl.EspFileTriggerJob;
 import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.impl.EspFtpJob;
 import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.impl.EspLinuxJob;
-import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.impl.EspZosJob;
 import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.impl.EspSAPBwpcJob;
 import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.impl.EspSapEventJob;
 import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.impl.EspSapJob;
@@ -20,8 +16,8 @@ import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.impl.EspSftpJob;
 import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.impl.EspTextMonJob;
 import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.impl.EspUnixJob;
 import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.impl.EspWindowsJob;
+import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.impl.EspZosJob;
 import com.bluehouseinc.dataconverter.parsers.esp.model.statements.EspEnvVarStatement;
-import com.bluehouseinc.dataconverter.parsers.esp.model.statements.EspStatementType;
 
 import io.vavr.Function2;
 
@@ -47,7 +43,7 @@ public class EspJobVisitorHelper {
 
 	/**
 	 * Return the {@link Function2} for our {@link EspAixJob}
-	 * 
+	 *
 	 * @param espAixJob
 	 * @return
 	 */
@@ -180,7 +176,7 @@ public class EspJobVisitorHelper {
 
 	/**
 	 * Return the {@link Function2} for our {@link EspAixJob}
-	 * 
+	 *
 	 * @param espAixJob
 	 * @return
 	 */
@@ -209,21 +205,21 @@ public class EspJobVisitorHelper {
 
 	/**
 	 * Return the {@link Function2} for our {@link EspAixJob}
-	 * 
+	 *
 	 * @param espAixJob
 	 * @return
 	 */
 	Function2<String, String, Boolean> visitJob(EspZosJob job) {
 
 		return (statementType, statementParameters) -> {
-			
-			if(statementType.contains("ESP_RECIPIENT_") 
+
+			if(statementType.contains("ESP_RECIPIENT_")
 					|| statementType.contains("ESP_MESSAGE_")
 					|| statementType.contains("ESP_HEADER")
 					|| statementType.contains("REM_"))  {
 				return true; // Just say yes, not working with this data.
 			}
-			
+
 			switch (statementType) {
 			case "DEQUEUE":
 				job.setDeQueue(statementParameters);
@@ -475,7 +471,7 @@ public class EspJobVisitorHelper {
 		return new EspEnvVarStatement(environmentVariableName, environmentVariableValue);
 	}
 
-	
+
 	Function2<String, String, Boolean> visitJob(EspAppEndData job) {
 		return (statementType, statementParameters) -> {
 			switch (statementType) {

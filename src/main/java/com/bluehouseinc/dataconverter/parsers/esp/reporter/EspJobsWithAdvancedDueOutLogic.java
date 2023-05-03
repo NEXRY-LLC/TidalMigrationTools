@@ -1,9 +1,8 @@
 package com.bluehouseinc.dataconverter.parsers.esp.reporter;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+
 import com.bluehouseinc.dataconverter.model.BaseParserDataModel;
 import com.bluehouseinc.dataconverter.model.IReporter;
 import com.bluehouseinc.dataconverter.parsers.esp.model.EspAbstractJob;
@@ -42,18 +41,18 @@ public class EspJobsWithAdvancedDueOutLogic implements IReporter {
 		if(job.getFullPath().contains("ZMMLMI08_MARDPACIFIC")) {
 			job.getName().getBytes();
 		}
-		
+
 
 		if (job.isContainsAdvancedDelaySubLogic()) {
 			String key = job.getFullPath();
 
-			
+
 			if (!jobcount.contains(key)) {
 				jobcount.add(key);
 			}
 
 		}
-		
+
 		if (!job.getChildren().isEmpty()) {
 			job.getChildren().forEach(c -> doCount((EspAbstractJob) c));
 		}

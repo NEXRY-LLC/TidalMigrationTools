@@ -108,12 +108,19 @@ public class TidalAPI {
 
 	public Users getUserByAccountNameAndDomain(String name, String domain) {
 		Optional<Users> existing;
-		Collection<Users> users = getUsers();
+		final Collection<Users> users = getUsers();
+
 		if (StringUtils.isBlank(domain)) {
 			existing = users.stream().filter(user -> user.getName().trim().equalsIgnoreCase(name)).findFirst();
 		} else {
-			existing = users.stream().filter(user -> user.getName().trim().equalsIgnoreCase(name) && user.getDomain().trim().equalsIgnoreCase(domain))
-					.findFirst();
+			existing = users.stream().filter(user -> {
+				String tu = user.getName().trim();
+				String td = user.getDomain() == null ? "" : user.getDomain().trim();
+				if (tu.equalsIgnoreCase(name.trim()) && td.equalsIgnoreCase(domain.trim())) {
+					return true;
+				}
+				return false;
+			}).findFirst();
 		}
 
 		return existing.orElse(null);

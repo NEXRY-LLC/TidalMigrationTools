@@ -1,7 +1,5 @@
 package com.bluehouseinc.dataconverter.parsers.esp.model.jobs.impl;
 
-import com.bluehouseinc.dataconverter.parsers.esp.model.EspAbstractJob;
-
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 

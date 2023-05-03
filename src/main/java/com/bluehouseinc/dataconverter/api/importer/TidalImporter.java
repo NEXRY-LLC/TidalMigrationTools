@@ -1,11 +1,9 @@
 package com.bluehouseinc.dataconverter.api.importer;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -283,17 +281,17 @@ public class TidalImporter {
 		log.info("Compound Dependency Job Objects To Process [" + model.getCompoundDependnecyJobs().size() + "]");
 		log.info("Job Resource Objects To Process [" + model.getJobResourceJoinsCounter() + "]");
 		log.info("Job Class Objects To Process [" + model.getJobClasses().size() + "]");
-		
+
 		TidalModelReporterData.getReporters().forEach(f -> {
-			
+
 
 			log.trace("#####################################" + f.getClass().getSimpleName() +"#####################################");
-			
+
 			f.doReport(model);
-			
+
 			log.trace("#####################################" + f.getClass().getSimpleName() +"#####################################");
-			
-			
+
+
 		});
 	}
 

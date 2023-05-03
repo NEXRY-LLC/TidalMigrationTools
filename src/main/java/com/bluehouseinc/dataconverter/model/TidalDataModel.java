@@ -465,15 +465,15 @@ public class TidalDataModel {
 			log.error("Runtime User is blank for JOB[]" + ajob.getFullPath() + "");
 			return;
 		}
-		
-		// Handle what we can for domain name splits. This is 
+
+		// Handle what we can for domain name splits. This is
 		if( rt.getRunTimeUserName().contains("\\")) {
 			String temp = rt.getRunTimeUserName().replace("\\", "/");
 			String[] d = temp.split("/");
 			rt.setRunTimeUserDomain(d[0]);
 			rt.setRunTimeUserName(d[1]);
 		}
-		
+
 
 		String maprte =  this.cfgProvider.getProvider().getConfigurations().getOrDefault(MAP_RTE, null);
 

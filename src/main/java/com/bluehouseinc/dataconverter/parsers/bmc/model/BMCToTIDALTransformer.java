@@ -1,12 +1,10 @@
 package com.bluehouseinc.dataconverter.parsers.bmc.model;
 
-import java.io.File;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 import com.bluehouseinc.dataconverter.api.importer.APIJobUtils;
-import com.bluehouseinc.dataconverter.importers.AbstractCsvImporter;
 import com.bluehouseinc.dataconverter.importers.SapDataImporter;
 import com.bluehouseinc.dataconverter.importers.csv.CsvSAPData;
 import com.bluehouseinc.dataconverter.model.TidalDataModel;
@@ -559,7 +557,7 @@ public class BMCToTIDALTransformer implements ITransformer<List<BaseBMCJobOrFold
 
 
 			CsvSAPData sapdata = SAPImporter.getDataByJobName(ps.getJobName());
-			
+
 			if (sapdata != null) {
 				// We found our matching job. Not really needed but just in case we need future processing.
 				bmc.setSapData(sapdata);

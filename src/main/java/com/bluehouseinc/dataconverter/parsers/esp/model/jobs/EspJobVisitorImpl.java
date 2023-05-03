@@ -30,7 +30,6 @@ import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.impl.EspWindowsJob;
 import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.impl.EspZosJob;
 import com.bluehouseinc.dataconverter.parsers.esp.model.statements.EspAfterStatement;
 import com.bluehouseinc.dataconverter.parsers.esp.model.statements.EspExitCodeStatement;
-import com.bluehouseinc.dataconverter.parsers.esp.model.statements.EspIfStatement;
 import com.bluehouseinc.dataconverter.parsers.esp.model.statements.EspJobResourceStatement;
 import com.bluehouseinc.dataconverter.parsers.esp.model.statements.EspNoRunStatement;
 import com.bluehouseinc.dataconverter.parsers.esp.model.statements.EspNotWithStatement;
@@ -51,38 +50,27 @@ import lombok.extern.log4j.Log4j2;
 public class EspJobVisitorImpl implements EspJobVisitor {
 	EspDataModel model;
 	EspJobVisitorHelper helper;
-	
+
 	public EspJobVisitorImpl(EspDataModel model) {
 		this.model = model;
 		this.helper = new EspJobVisitorHelper();
 	}
 
-	
+
 	private boolean containsIfLogic(String line) {
-		if (line.trim().startsWith("if")) {
-			return true;
-		}
-
-		if (line.trim().startsWith("IF")) {
-			return true;
-		}
-		if (line.trim().startsWith("THEN")) {
-			return true;
-		}
-
-		if (line.trim().startsWith("ELSE")) {
+		if (line.trim().startsWith("if") || line.trim().startsWith("IF") || line.trim().startsWith("THEN") || line.trim().startsWith("ELSE")) {
 			return true;
 		}
 		return false;
 	}
-	
-	
-	
+
+
+
 	@Override
 	public <E extends EspAbstractJob> void doProcess(final E job, List<String> lines) {
 
 		List<String> cleaned = new ArrayList<>();
-		
+
 		lines.forEach(f ->{
 			if (containsIfLogic(f)) {
 				job.setContainsIfLogic(true);
@@ -90,54 +78,54 @@ public class EspJobVisitorImpl implements EspJobVisitor {
 				cleaned.add(f);
 			}
 		});
-		
+
 		lines.clear();
 		lines.addAll(cleaned);
-		
+
 		if(job.isContainsIfLogic()) {
 			log.debug("EspJobVisitorImpl doProcess Job{} contains if logic", job.getFullPath());
 		}
-		
+
 		if (job instanceof EspAixJob) {
-			this.visitCommon((EspAixJob) job, lines, this.helper.visitJob((EspAixJob) job));
+			this.visitCommon(job, lines, this.helper.visitJob((EspAixJob) job));
 		} else if (job instanceof EspLinuxJob) {
-			this.visitCommon((EspLinuxJob) job, lines, this.helper.visitJob((EspLinuxJob) job));
+			this.visitCommon(job, lines, this.helper.visitJob((EspLinuxJob) job));
 		} else if (job instanceof EspAgentMonitorJob) {
-			this.visitCommon((EspAgentMonitorJob) job, lines, this.helper.visitJob((EspAgentMonitorJob) job));
+			this.visitCommon(job, lines, this.helper.visitJob((EspAgentMonitorJob) job));
 		} else if (job instanceof EspAs400Job) {
-			this.visitCommon((EspAs400Job) job, lines, this.helper.visitJob((EspAs400Job) job));
+			this.visitCommon(job, lines, this.helper.visitJob((EspAs400Job) job));
 		} else if (job instanceof EspDataObjectJob) {
 			this.visitCommon((EspDataObjectJob) job, lines);
 		} else if (job instanceof EspDStrigJob) {
-			this.visitCommon((EspDStrigJob) job, lines, this.helper.visitJob((EspDStrigJob) job));
+			this.visitCommon(job, lines, this.helper.visitJob((EspDStrigJob) job));
 		} else if (job instanceof EspFileTriggerJob) {
-			this.visitCommon((EspFileTriggerJob) job, lines, this.helper.visitJob((EspFileTriggerJob) job));
+			this.visitCommon(job, lines, this.helper.visitJob((EspFileTriggerJob) job));
 		} else if (job instanceof EspFtpJob) {
-			this.visitCommon((EspFtpJob) job, lines, this.helper.visitJob((EspFtpJob) job));
+			this.visitCommon(job, lines, this.helper.visitJob((EspFtpJob) job));
 		} else if (job instanceof EspLinkProcessData) {
-			this.visitCommon((EspLinkProcessData) job, lines, this.helper.visitJob((EspLinkProcessData) job));
+			this.visitCommon(job, lines, this.helper.visitJob((EspLinkProcessData) job));
 		} else if (job instanceof EspSAPBwpcJob) {
-			this.visitCommon((EspSAPBwpcJob) job, lines, this.helper.visitJob((EspSAPBwpcJob) job));
+			this.visitCommon(job, lines, this.helper.visitJob((EspSAPBwpcJob) job));
 		} else if (job instanceof EspSapEventJob) {
-			this.visitCommon((EspSapEventJob) job, lines, this.helper.visitJob((EspSapEventJob) job));
+			this.visitCommon(job, lines, this.helper.visitJob((EspSapEventJob) job));
 		} else if (job instanceof EspSapJob) {
-			this.visitCommon((EspSapJob) job, lines, this.helper.visitJob((EspSapJob) job));
+			this.visitCommon(job, lines, this.helper.visitJob((EspSapJob) job));
 		} else if (job instanceof EspSecureCopyJob) {
-			this.visitCommon((EspSecureCopyJob) job, lines, this.helper.visitJob((EspSecureCopyJob) job));
+			this.visitCommon(job, lines, this.helper.visitJob((EspSecureCopyJob) job));
 		} else if (job instanceof EspServiceMonitorJob) {
-			this.visitCommon((EspServiceMonitorJob) job, lines, this.helper.visitJob((EspServiceMonitorJob) job));
+			this.visitCommon(job, lines, this.helper.visitJob((EspServiceMonitorJob) job));
 		} else if (job instanceof EspSftpJob) {
-			this.visitCommon((EspSftpJob) job, lines, this.helper.visitJob((EspSftpJob) job));
+			this.visitCommon(job, lines, this.helper.visitJob((EspSftpJob) job));
 		} else if (job instanceof EspTextMonJob) {
-			this.visitCommon((EspTextMonJob) job, lines, this.helper.visitJob((EspTextMonJob) job));
+			this.visitCommon(job, lines, this.helper.visitJob((EspTextMonJob) job));
 		} else if (job instanceof EspUnixJob) {
-			this.visitCommon((EspUnixJob) job, lines, this.helper.visitJob((EspUnixJob) job));
+			this.visitCommon(job, lines, this.helper.visitJob((EspUnixJob) job));
 		} else if (job instanceof EspWindowsJob) {
-			this.visitCommon((EspWindowsJob) job, lines, this.helper.visitJob((EspWindowsJob) job));
+			this.visitCommon(job, lines, this.helper.visitJob((EspWindowsJob) job));
 		} else if (job instanceof EspZosJob) {
-			this.visitCommon((EspZosJob) job, lines, this.helper.visitJob((EspZosJob) job));
+			this.visitCommon(job, lines, this.helper.visitJob((EspZosJob) job));
 		} else if (job instanceof EspAppEndData) {
-			this.visitCommon((EspAppEndData) job, lines, this.helper.visitJob((EspAppEndData) job));
+			this.visitCommon(job, lines, this.helper.visitJob((EspAppEndData) job));
 		} else {
 			throw new TidalException("Unknown Job Type[" + job.getClass().getSimpleName() + "] Job[" + job.getFullPath() + "]");
 		}
@@ -145,7 +133,7 @@ public class EspJobVisitorImpl implements EspJobVisitor {
 
 	/**
 	 * Special Method for data object, this is not a job
-	 * 
+	 *
 	 * @param espDataObjectJob
 	 * @param lines
 	 */
@@ -177,7 +165,7 @@ public class EspJobVisitorImpl implements EspJobVisitor {
 	private void visitCommon(EspAbstractJob job, List<String> lines, Function2<String, String, Boolean> lambdaFunction) {
 
 
-		
+
 		for (String line : lines) {
 			if (line.startsWith("/*")) {
 				job.getNoteData().add(line.substring(line.indexOf("/*") + 2));
@@ -188,7 +176,7 @@ public class EspJobVisitorImpl implements EspJobVisitor {
 			if(line.contains("!ESPAPPL")) {
 				line = line.replace("!ESPAPPL", job.getParent().getName());
 			}
-			
+
 			if(job.getName().contains("ZFI_BYCUSTOMER_PC")) {
 				job.getName();
 			}

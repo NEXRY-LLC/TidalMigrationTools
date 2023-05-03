@@ -18,14 +18,14 @@ import lombok.EqualsAndHashCode;
 public class EspJobGroup extends EspAbstractJob {
 
 	List<EspLinkProcessData> linkProcessDataList = new ArrayList<>();
-	
+
 	SchEventElement eventData;
-	
+
 	List<String> runtimes = new ArrayList<>();
-	
-	// Used to create loops and such. 
+
+	// Used to create loops and such.
 	EspAppEndData applicationEndData;
-	
+
 	public EspJobGroup(String name) {
 		super(name);
 	}

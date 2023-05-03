@@ -20,7 +20,7 @@ public class EspAs400Job extends EspAbstractJob {
 	String As400Lib;
 	String ccExit;
 	String Curlib;
-	
+
 	Map<EspAs400JobOptionalStatement, String> optionalStatements = new HashMap<>();
 
 	public EspAs400Job(String name) {
@@ -36,5 +36,5 @@ public class EspAs400Job extends EspAbstractJob {
 		return EspJobType.AS400;
 	}
 
-	
+
 }

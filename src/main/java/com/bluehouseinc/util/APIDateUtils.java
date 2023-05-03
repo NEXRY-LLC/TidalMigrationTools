@@ -1,7 +1,6 @@
 package com.bluehouseinc.util;
 
 import java.time.Duration;
-import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -57,21 +56,21 @@ public abstract class APIDateUtils {
 		if (rules.size() == 1) {
 			// So lets just take our single time and add to it.. AKA 30 , 60 so our Duration logic will flow.
 			String ruleone = rules.get(0);
-			
+
 			String intone = ruleone.replaceFirst("^0+(?!$)", "");
-			
+
 			int timeone =  Integer.valueOf(intone);
-			int timetwo = timeone+timeone; // I know, I know.. 
-			
+			int timetwo = timeone+timeone; // I know, I know..
+
 			rules.clear();
-			
+
 			String mileone = String.format("%1$" + 4 + "s", Integer.valueOf(timeone)).replace(' ', '0');
 			String miletwo = String.format("%1$" + 4 + "s", Integer.valueOf(timetwo)).replace(' ', '0');
 			rules.add(mileone);
 			rules.add(miletwo);
-			
+
 		}
-		
+
 		for (String starttime : rules) {
 			String milstart = starttime.replace(":", "");
 
@@ -234,7 +233,7 @@ public abstract class APIDateUtils {
 			if(durations == null) {
 				return;
 			}
-			
+
 			if (durations.size() == 1) {
 				// This works :)
 				long minutes = durations.get(0).toMinutes();

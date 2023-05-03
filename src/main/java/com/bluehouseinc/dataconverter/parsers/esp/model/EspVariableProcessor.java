@@ -19,7 +19,7 @@ public class EspVariableProcessor extends BaseVariableProcessor<EspAbstractJob> 
 	private static final String GLOBAL_VARIABLE_PATTERN = ".*?\\!(\\w+).*?";
 	private static final Pattern PATTERN = Pattern.compile(GLOBAL_VARIABLE_PATTERN);
 
-	
+
 	public EspVariableProcessor(TidalDataModel model) {
 		super(model);
 	}
@@ -34,7 +34,7 @@ public class EspVariableProcessor extends BaseVariableProcessor<EspAbstractJob> 
 
 	}
 
-	
+
 	protected void convertReplaceVariblesToTidal(EspAbstractJob job, List<Field> fields) {
 
 		//Now lets process these fields to change over the global variables into TIDAL variables!!!
@@ -75,9 +75,9 @@ public class EspVariableProcessor extends BaseVariableProcessor<EspAbstractJob> 
 	}
 
 	private String convertRegisterGlobalVariablesToTidal(String expression) {
-		
+
 		//RegexHelper.matchesRegexPattern(GLOBAL_VARIABLE_PATTERN, expression);
-		
+
 		Matcher matcher = PATTERN.matcher(expression);
 
 		while (matcher.find()) {

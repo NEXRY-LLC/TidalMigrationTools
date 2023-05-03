@@ -27,16 +27,16 @@ public class CsvFileWatcherJob extends BaseCsvJobObject {
 
 	@CsvBindByName
 	FileActivity fileActivity;
-	
+
 	@CsvBindByName
 	Integer fileActivityInterval;
-	
+
 	@CsvBindByName
 	TimeUnit fileActivityTimeUnit;
-	
+
 	@CsvBindByName
 	TrueFalse fileExist = TrueFalse.YES; // Default
-	
+
 	@Override
 	public JobType getType() {
 		return JobType.FILEWATCHER;

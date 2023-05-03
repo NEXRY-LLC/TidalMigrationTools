@@ -1,9 +1,8 @@
 package com.bluehouseinc.dataconverter.parsers.esp.reporter;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+
 import com.bluehouseinc.dataconverter.model.BaseParserDataModel;
 import com.bluehouseinc.dataconverter.model.IReporter;
 import com.bluehouseinc.dataconverter.parsers.esp.model.EspAbstractJob;
@@ -42,7 +41,7 @@ public class EspJobsWithAdvancedDelaySubLogic implements IReporter {
 		if(job.getFullPath().contains("RESTENC6")) {
 			job.getName().getBytes();
 		}
-		
+
 
 		if (job.isContainsAdvancedDueOutLogic()) {
 			String key = job.getFullPath();
@@ -51,7 +50,7 @@ public class EspJobsWithAdvancedDelaySubLogic implements IReporter {
 			}
 
 		}
-		
+
 		if (!job.getChildren().isEmpty()) {
 			job.getChildren().forEach(c -> doCount((EspAbstractJob) c));
 		}

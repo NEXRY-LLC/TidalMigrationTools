@@ -25,7 +25,7 @@ public class EspZosJob extends EspAbstractJob {
 	String member;
 	String send;
 	String deQueue;
-	
+
 	Map<EspZoSOptionalStatements, String> optionalStatements = new HashMap<>();
 
 	public EspZosJob(String name) {
@@ -35,7 +35,7 @@ public class EspZosJob extends EspAbstractJob {
 	public enum EspZoSOptionalStatements {
 		VINCR, VGET, ESP, VS
 	}
-	
+
 	@Override
 	public EspJobType getJobType() {
 		return EspJobType.ZOS;

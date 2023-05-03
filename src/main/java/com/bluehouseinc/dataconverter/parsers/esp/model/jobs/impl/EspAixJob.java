@@ -8,7 +8,7 @@ import lombok.EqualsAndHashCode;
 @Data
 @EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = true)
 public class EspAixJob extends EspOSJOb {
-	
+
 	public EspAixJob(String name) {
 		super(name);
 	}

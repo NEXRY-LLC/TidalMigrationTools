@@ -17,11 +17,11 @@ public class AutoSysConfProvider extends AbstractConfigProvider {
 
 	public Path getAutoSysPath() {
 		String filePath = getProvider().getOrThrow("autosys.path");
-		
+
 		if(filePath == null) {
 			return null;
 		}
-		
+
 		return Paths.get(filePath);
 	}
 

@@ -12,7 +12,7 @@ import lombok.Data;
 public class SchEventElement {
 
 	List<String> rawDataLines = new ArrayList<>();
-	
+
 	List<SchAction> actions;
 	List<SchComment> comments;
 	SchCalendar calendar;
@@ -24,8 +24,8 @@ public class SchEventElement {
 	String system;
 	String user;
 
-	boolean scheduleDataOnly = true; // Right now this is all we can process. 
-	
+	boolean scheduleDataOnly = true; // Right now this is all we can process.
+
 	//EVENT ID(AI01.AIPED150)  USER(UXESPJC)  OWNER(SWESPJC)  SYSTEM(ESPM) -REPLACE
 	public SchEventElement(String id, String user, String owner, String system){
 		this.actions = new LinkedList<>();

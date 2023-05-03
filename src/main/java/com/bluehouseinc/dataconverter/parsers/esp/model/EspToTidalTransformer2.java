@@ -1,20 +1,11 @@
 package com.bluehouseinc.dataconverter.parsers.esp.model;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.math.NumberUtils;
 
-import com.bluehouseinc.dataconverter.common.utils.RegexHelper;
-import com.bluehouseinc.dataconverter.csv.io.CsvExporter;
 import com.bluehouseinc.dataconverter.importers.SapDataImporter;
 import com.bluehouseinc.dataconverter.importers.csv.CsvSAPData;
 import com.bluehouseinc.dataconverter.model.TidalDataModel;
@@ -46,10 +37,6 @@ import com.bluehouseinc.tidal.utils.StringUtils;
 import com.bluehouseinc.transform.ITransformer;
 import com.bluehouseinc.transform.TransformationException;
 import com.bluehouseinc.util.APIDateUtils;
-import com.opencsv.bean.CsvToBean;
-import com.opencsv.exceptions.CsvDataTypeMismatchException;
-import com.opencsv.exceptions.CsvRequiredFieldEmptyException;
-import com.thoughtworks.xstream.io.path.Path;
 
 import lombok.extern.log4j.Log4j2;
 
@@ -121,7 +108,7 @@ public class EspToTidalTransformer2 implements ITransformer<List<EspAbstractJob>
 
 			if (newJob != null) {
 				if (parent == null) {
-					datamodel.addJobToModel((BaseCsvJobObject) newJob);
+					datamodel.addJobToModel(newJob);
 				} else {
 					parent.addChild(newJob);
 				}
@@ -179,7 +166,7 @@ public class EspToTidalTransformer2 implements ITransformer<List<EspAbstractJob>
 		doProcessJobResources(job, newjob);
 
 		doSetCalendarPlaceHolder(job, newjob);
-		
+
 
 		return newjob;
 	}
@@ -363,7 +350,7 @@ public class EspToTidalTransformer2 implements ITransformer<List<EspAbstractJob>
 		out.setName(in.getName());
 
 		if (StringUtils.isBlank(in.getAgent())) {
-			//FIXME: This should only be set for ZoS Job type. 
+			//FIXME: This should only be set for ZoS Job type.
 			in.setAgent("AgentZOS");
 		}
 
@@ -383,7 +370,7 @@ public class EspToTidalTransformer2 implements ITransformer<List<EspAbstractJob>
 			if (NumberUtils.isParsable(delaysub)) {
 				out.setStartTime(delaysub); // Delay Sub is ESP way of saying dont run until this
 			} else {
-				// Not parsing likely more than just a time. 
+				// Not parsing likely more than just a time.
 				// E.G   DELAYSUB 6.30 TODAY PLUS 1 WORKDAY vs.   DELAYSUB 6.30
 				in.setContainsAdvancedDelaySubLogic(true);
 				String stmsg = out.getNotes() + "\nDelaySubmission: " + delaysub;
@@ -402,7 +389,7 @@ public class EspToTidalTransformer2 implements ITransformer<List<EspAbstractJob>
 			if (NumberUtils.isParsable(endtime)) {
 				out.setEndTime(endtime); // Delay Sub is ESP way of saying dont run until this
 			} else {
-				// Not parsing likely more than just a time. 
+				// Not parsing likely more than just a time.
 				// E.G     DUEOUT EXEC NOW PLUS 4 HOURS vs  DUEOUT EXEC 10AM
 				in.setContainsAdvancedDueOutLogic(true);
 				String stmsg = out.getNotes() + "\nEndTime: " + endtime;

@@ -11,10 +11,10 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = true)
 public class EspOSJOb extends EspAbstractJob {
 
-	
+
 	String params;
 	String command;
-	
+
 	public EspOSJOb(String name) {
 		super(name);
 	}

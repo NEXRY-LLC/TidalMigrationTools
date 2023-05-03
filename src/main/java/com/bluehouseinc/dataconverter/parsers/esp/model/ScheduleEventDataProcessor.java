@@ -3,7 +3,6 @@ package com.bluehouseinc.dataconverter.parsers.esp.model;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -11,7 +10,6 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import com.bluehouseinc.dataconverter.common.utils.RegexHelper;
-import com.bluehouseinc.dataconverter.model.impl.BaseCsvJobObject;
 import com.bluehouseinc.dataconverter.parsers.esp.model.schedule.SchCalendar;
 import com.bluehouseinc.dataconverter.parsers.esp.model.schedule.SchComment;
 import com.bluehouseinc.dataconverter.parsers.esp.model.schedule.SchDString;
@@ -25,7 +23,6 @@ import com.bluehouseinc.dataconverter.parsers.esp.model.schedule.actions.SchSusp
 import com.bluehouseinc.dataconverter.parsers.esp.model.schedule.actions.SchVsAction;
 import com.bluehouseinc.dataconverter.parsers.esp.model.schedule.actions.SchWobtriggerAction;
 import com.bluehouseinc.dataconverter.parsers.esp.model.util.EspFileReaderUtils;
-import com.bluehouseinc.dataconverter.util.ObjectUtils;
 import com.bluehouseinc.tidal.api.exceptions.TidalException;
 
 import lombok.extern.log4j.Log4j2;

@@ -26,7 +26,6 @@ import com.bluehouseinc.dataconverter.providers.ConfigurationProvider;
 import com.bluehouseinc.dataconverter.util.ObjectUtils;
 import com.bluehouseinc.expressions.ExpressionType;
 import com.bluehouseinc.expressions.ExpressionUtil;
-import com.bluehouseinc.tidal.api.exceptions.TidalException;
 import com.bluehouseinc.tidal.api.model.dependency.job.DepLogic;
 import com.bluehouseinc.tidal.api.model.dependency.job.DependentJobStatus;
 import com.bluehouseinc.tidal.api.model.dependency.job.ExitCodeOperator;
@@ -160,7 +159,7 @@ public class AutosysDataModel extends BaseParserDataModel<AutosysAbstractJob,Aut
 				mapOfJobDep.entrySet().forEach(f -> {
 
 					final AutosysAbstractJob me = sourceJob;
-					
+
 					AutosysBaseDependency autoSysBaseDepObject = f.getValue();
 
 					String dependsOnThisJobObjectName = autoSysBaseDepObject.getDependencyName();

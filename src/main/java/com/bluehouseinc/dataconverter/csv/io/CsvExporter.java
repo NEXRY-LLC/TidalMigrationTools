@@ -18,16 +18,16 @@ public class CsvExporter {
 	public static String PATH = "./export";
 
 	public static <T> void WriteToFile(String fileName, List<T> data) throws IOException, CsvDataTypeMismatchException, CsvRequiredFieldEmptyException {
-		
+
 		File dir = new File(PATH);
-		
+
 	 Path reportfile = 	Paths.get(PATH + "/" + fileName);
-		
+
 		if (!dir.exists()) {
 			dir.mkdirs();
 
 		}
-		
+
 
 		try (BufferedWriter writer = Files.newBufferedWriter(Paths.get(PATH + "/" + fileName))) {
 

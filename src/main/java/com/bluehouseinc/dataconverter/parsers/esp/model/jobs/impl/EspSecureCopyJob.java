@@ -1,11 +1,9 @@
 package com.bluehouseinc.dataconverter.parsers.esp.model.jobs.impl;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import com.bluehouseinc.dataconverter.parsers.esp.model.EspAbstractJob;
-import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.EspJobVisitor;
 import com.bluehouseinc.dataconverter.parsers.esp.model.util.EspJobType;
 
 import lombok.Data;
@@ -20,7 +18,7 @@ public class EspSecureCopyJob extends EspAbstractJob {
 	String serverAddr;
 	TransferDirection transferDirection;
 	String localName;
-	Map<EspSecureCopyJobOptionalStatement, String> optionalStatements = new HashMap<>();;
+	Map<EspSecureCopyJobOptionalStatement, String> optionalStatements = new HashMap<>();
 
 	public EspSecureCopyJob(String name) {
 		super(name);
@@ -34,7 +32,7 @@ public class EspSecureCopyJob extends EspAbstractJob {
 	public enum TransferDirection {
 		DOWNLOAD, UPLOAD, D, U
 	}
-	
+
 	@Override
 	public EspJobType getJobType() {
 		return EspJobType.SCP;

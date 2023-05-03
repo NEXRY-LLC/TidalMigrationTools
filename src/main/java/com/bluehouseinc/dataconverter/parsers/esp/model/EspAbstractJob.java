@@ -8,7 +8,6 @@ import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.EspJob;
 import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.EspJobVisitor;
 import com.bluehouseinc.dataconverter.parsers.esp.model.statements.EspAfterStatement;
 import com.bluehouseinc.dataconverter.parsers.esp.model.statements.EspExitCodeStatement;
-import com.bluehouseinc.dataconverter.parsers.esp.model.statements.EspIfStatement;
 import com.bluehouseinc.dataconverter.parsers.esp.model.statements.EspJobResourceStatement;
 import com.bluehouseinc.dataconverter.parsers.esp.model.statements.EspNoRunStatement;
 import com.bluehouseinc.dataconverter.parsers.esp.model.statements.EspNotWithStatement;
@@ -27,9 +26,9 @@ public abstract class EspAbstractJob extends BaseJobOrGroupObject implements Esp
 	boolean containsIfLogic = false;
 	boolean containsAdvancedDelaySubLogic = false;
 	boolean containsAdvancedDueOutLogic = false;
-	
+
 	public abstract EspJobType getJobType();
-	
+
 	String agent;// at the workload object or the application level
 	// TODO: How should CCCHK statement be converted into TIDAL? Is there any adequate definition/implementation which already exists in TIDAL?
 	String comment; // Comment inside of Job definition which is later used for storing in TIDAL as Notes for same Job Definition (JIRA Task already created)
@@ -41,13 +40,13 @@ public abstract class EspAbstractJob extends BaseJobOrGroupObject implements Esp
 	String lateSubmission;
 	String espStatement;
 	String espNoMsg;
-	String invokeObject; 
+	String invokeObject;
 	String exitCode;
 	List<String> ccchk = new ArrayList<>(); // Specify the action taken if a job, step, procstep or program produces a specified condition code.
 	//CCCHK RC(1) OK CONTINUE
-	
+
 	List<String> noteData = new ArrayList<>();
-	
+
 	// String notedata;
 	String options;
 	String pid;
@@ -59,14 +58,14 @@ public abstract class EspAbstractJob extends BaseJobOrGroupObject implements Esp
 	String tag;
 	List<String> notifyList = new ArrayList<>();
 	List<EspJobResourceStatement> resources = new ArrayList<>();
-	List<EspAfterStatement> espAfterStatements = new ArrayList<>();;
-	List<EspExitCodeStatement> exitCodeStatements = new ArrayList<>();;
-	List<EspNotWithStatement> espNotWithStatements = new ArrayList<>();;
-	List<EspRunStatement> espRunStatements = new ArrayList<>();;
-	List<EspNoRunStatement> espNoRunStatements = new ArrayList<>();; // (partially) overrides runFrequency
-	List<EspReleaseStatement> espReleasedJobDependencies = new ArrayList<>();; // similar to OUTCOND in BMC. E.g., RELEASE(JOB1_NAME, JOB2_NAME)
+	List<EspAfterStatement> espAfterStatements = new ArrayList<>();
+	List<EspExitCodeStatement> exitCodeStatements = new ArrayList<>();
+	List<EspNotWithStatement> espNotWithStatements = new ArrayList<>();
+	List<EspRunStatement> espRunStatements = new ArrayList<>();
+	List<EspNoRunStatement> espNoRunStatements = new ArrayList<>(); // (partially) overrides runFrequency
+	List<EspReleaseStatement> espReleasedJobDependencies = new ArrayList<>(); // similar to OUTCOND in BMC. E.g., RELEASE(JOB1_NAME, JOB2_NAME)
 
-	
+
 
 	public EspAbstractJob(String name) {
 		this.name = name;

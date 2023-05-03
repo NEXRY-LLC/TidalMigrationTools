@@ -26,7 +26,7 @@ public class EspConfigProvider extends AbstractConfigProvider {
 	public String getEspEventDataFile() {
 		return getProvider().getOrThrow(DATAFILE);
 	}
-	
+
 	public String getFilesToSkip() {
 		return getProvider().getOrThrow("esp.skipfiles");
 	}

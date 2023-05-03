@@ -19,24 +19,24 @@ public class GenericJobTypeReporter implements IReporter {
 	public <B extends BaseParserDataModel<?, ?>> void doPrint(B model) {
 
 		log.trace("#######################################{}#######################################", this.getClass().getSimpleName());
-		
+
 		model.getDataObjects().forEach(f -> doCount(f));
 
 		jobcount.keySet().forEach(f ->{
-			
+
 			String key = f;
-			
+
 			int cnt = jobcount.get(key).get();
-			
+
 			log.trace("{} = {}", key, cnt);
 
 		});
-		
+
 		log.trace("#######################################{}#######################################", this.getClass().getSimpleName());
-		
+
 	}
 
-	
+
 	public void doCount(BaseJobOrGroupObject job) {
 
 		String key = job.getClass().getSimpleName();
