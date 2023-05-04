@@ -3,6 +3,7 @@ package com.bluehouseinc.dataconverter.parsers.opc.model;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.bluehouseinc.dataconverter.api.importer.TidalAPI;
 import com.bluehouseinc.dataconverter.model.BaseJobOrGroupObject;
 import com.bluehouseinc.dataconverter.model.BaseParserDataModel;
 import com.bluehouseinc.dataconverter.model.BaseVariableProcessor;
@@ -97,7 +98,7 @@ public class Adrep1DataModel extends BaseParserDataModel<OPCOSJob, OPCConfigProv
 			String ownerid = a.getCommonData().getOwnerId();
 
 			if (ownerid == null) {
-				ownerid = "Schedulers"; // Job CXF does not have an owner.
+				ownerid = getConfigeProvider().getProvider().getConfigurations().getOrDefault(TidalAPI.TIDALDefaultOwner, TidalAPI.DEFOWNDERNAME); // Job CXF does not have an owner.
 			}
 
 			CsvOwner owner = new CsvOwner(ownerid);

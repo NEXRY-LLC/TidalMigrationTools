@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.map.HashedMap;
 
+import com.bluehouseinc.dataconverter.api.importer.TidalAPI;
 import com.bluehouseinc.dataconverter.importers.AbstractCsvImporter;
 import com.bluehouseinc.dataconverter.model.csv.NameNewNamePairCsvMapping;
 import com.bluehouseinc.dataconverter.model.csv.NameValuePairCsvMapping;
@@ -47,6 +48,7 @@ import lombok.extern.log4j.Log4j2;
 public class TidalDataModel {
 
 	private static final String MAP_RTE = "TIDAL.MapRunTimeUsers";
+	//TODO: Fix the logic to these defaults for everyone. 
 	private static final String MAP_DEFOWN = "TIDAL.DefaultOwner";
 	private static final String MAP_AGT = "TIDAL.MapAgents";
 	private static final String TIDALMapAgentDataFile = "TIDAL.MapAgentDataFile";
@@ -439,7 +441,7 @@ public class TidalDataModel {
 
 	public CsvOwner getDefaultOwner() {
 		if (this.defaultOwner == null) {
-			String name =  this.cfgProvider.getProvider().getConfigurations().getOrDefault(MAP_DEFOWN, "Schedulers");
+			String name =  this.getCfgProvider().getProvider().getConfigurations().getOrDefault(TidalAPI.TIDALDefaultOwner, TidalAPI.DEFOWNDERNAME);
 			this.defaultOwner = new CsvOwner(name);
 		}
 

@@ -66,7 +66,9 @@ public class TidalAPI {
 
 	protected Owner defaultOwner;
 
-	private static String DEFOWNDERNAME = "Schedulers";
+	public static String DEFOWNDERNAME = "Schedulers";
+	public static String TIDALDefaultOwner = "TIDAL.DefaultOwner";
+	
 	ConfigurationProvider cfgProvider;
 
 	public TidalAPI(TidalSession session, ConfigurationProvider cfgProvider) {
@@ -88,8 +90,11 @@ public class TidalAPI {
 
 		log.debug("Processing Job Map Completed in [" + sw.getTotalTimeSeconds() + "]");
 
-		this.defaultOwner = owners.stream().filter(f -> f.getName().equalsIgnoreCase(DEFOWNDERNAME)).findFirst().get();
-		log.debug("Setting Default Owner [" + sw.getTotalTimeSeconds() + "]");
+		String defuser = getCfgProvider().getConfigurations().getOrDefault(TIDALDefaultOwner, DEFOWNDERNAME);
+		
+		this.defaultOwner = owners.stream().filter(f -> f.getName().equalsIgnoreCase(defuser)).findFirst().get();
+		
+		log.info("\nSetting Default Owner [" + this.defaultOwner + "]");
 
 	}
 

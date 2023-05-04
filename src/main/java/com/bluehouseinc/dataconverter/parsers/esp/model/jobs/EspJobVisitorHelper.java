@@ -314,7 +314,18 @@ public class EspJobVisitorHelper {
 			case "STEPUSER":
 				job.setSapStepUser(statementParameters);
 				break;
-
+			case "SAPJOBCLASS":
+				job.setSapJobClass(statementParameters);
+				break;
+			case "SAPJOBNAME":
+				job.setSapJobName(statementParameters);
+				break;
+			case "VARIANT":
+				job.setVariant(statementParameters);
+				break;
+			case "STARTMODE":
+				job.setStartMode(statementParameters);
+				break;
 			default:
 				try {
 					job.getOptionalStatements().putIfAbsent(EspSapJob.EspSapJobOptionalStatement.valueOf(statementType), statementParameters);

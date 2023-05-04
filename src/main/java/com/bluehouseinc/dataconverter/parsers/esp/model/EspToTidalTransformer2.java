@@ -55,35 +55,35 @@ public class EspToTidalTransformer2 implements ITransformer<List<EspAbstractJob>
 	public TidalDataModel transform(List<EspAbstractJob> in) throws TransformationException {
 		in.forEach(f -> doProcessObjects(f, null));
 
-//		List<String> programNames = SAPImporter.getJobNames();
-//
-//		String dosetreporting = "bfusa/SAPActualData.txt";
-//
-//		File file = new File(SAPImporter.getSapDataFile());
-//
-//		CsvToBean<CsvSAPData> saplargedata = SAPImporter.fromFile(file, CsvSAPData.class);
-//
-//		List<CsvSAPData> actualSAP = new ArrayList<>();
-//
-//		saplargedata.forEach(f -> {
-//
-//			if (programNames.contains(f.getJobName())) {
-//
-//				if (!actualSAP.contains(f)) {
-//					actualSAP.add(f);
-//					log.info("Found SAP Program Name[{}]", f);
-//				}
-//
-//			}
-//		});
-//
-//		try {
-//
-//			CsvExporter.WriteToFile(dosetreporting, actualSAP);
-//
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//		}
+		// List<String> programNames = SAPImporter.getJobNames();
+		//
+		// String dosetreporting = "bfusa/SAPActualData.txt";
+		//
+		// File file = new File(SAPImporter.getSapDataFile());
+		//
+		// CsvToBean<CsvSAPData> saplargedata = SAPImporter.fromFile(file, CsvSAPData.class);
+		//
+		// List<CsvSAPData> actualSAP = new ArrayList<>();
+		//
+		// saplargedata.forEach(f -> {
+		//
+		// if (programNames.contains(f.getJobName())) {
+		//
+		// if (!actualSAP.contains(f)) {
+		// actualSAP.add(f);
+		// log.info("Found SAP Program Name[{}]", f);
+		// }
+		//
+		// }
+		// });
+		//
+		// try {
+		//
+		// CsvExporter.WriteToFile(dosetreporting, actualSAP);
+		//
+		// } catch (Exception e) {
+		// e.printStackTrace();
+		// }
 
 		return datamodel;
 	}
@@ -167,7 +167,6 @@ public class EspToTidalTransformer2 implements ITransformer<List<EspAbstractJob>
 
 		doSetCalendarPlaceHolder(job, newjob);
 
-
 		return newjob;
 	}
 
@@ -230,11 +229,14 @@ public class EspToTidalTransformer2 implements ITransformer<List<EspAbstractJob>
 
 	private void processJob(EspSapJob in, CsvSAPJob out) {
 
-		out.setName(in.getName().toUpperCase()); // Must be upper
+		if (in.getName().contains("RBDAPP01_DR_ORDERS_DCR_1")) {
+			in.getName();
+		}
+		String uppername = in.getName().toUpperCase();
+		out.setName(uppername); // Must be upper, if not already
 
-		out.setProgramName(in.getAbapName());
-
-		String sapname = in.getOptionalStatements().get(EspSapJob.EspSapJobOptionalStatement.SAPJOBNAME);
+		// This is the name of our SAP job as defined in SAP.. its either set in data or we set it to the jobname
+		String sapname = in.getSapJobName();
 
 		if (StringUtils.isBlank(sapname)) {
 			out.setJobName(in.getName().toUpperCase());
@@ -242,7 +244,7 @@ public class EspToTidalTransformer2 implements ITransformer<List<EspAbstractJob>
 			out.setJobName(sapname.toUpperCase());
 		}
 
-		//SAPImporter.addJobName(out.getJobName());
+		// SAPImporter.addJobName(out.getJobName());
 
 		CsvSAPData sapdata = SAPImporter.getDataByJobName(sapname);
 
@@ -268,11 +270,28 @@ public class EspToTidalTransformer2 implements ITransformer<List<EspAbstractJob>
 
 		}
 
-		String jobclass = in.getOptionalStatements().get(EspSapJob.EspSapJobOptionalStatement.SAPJOBCLASS);
-		out.setJobSAPClass(jobclass);
+		out.setJobSAPClass(in.getSapJobClass());
 
-		// out.setJobMode("LINK ME");
+		String progname = in.getAbapName();
 
+		if (!StringUtils.isBlank(progname)) {
+			out.setProgramName(progname);
+		}
+
+		String varname = in.getVariant();
+
+		if (!StringUtils.isBlank(varname)) {
+			out.setVariant(varname);
+		}
+
+		String runasap = in.getStartMode();
+		
+		if(!StringUtils.isBlank(runasap)) {
+			out.setSubmitASAP("true");
+		}
+		
+		//out.setSubmitASAP(in.getsum);
+	
 		if (in.getSapUser() != null) {
 			CsvRuntimeUser rte = new CsvRuntimeUser(in.getSapUser());
 			rte.setPasswordForSAP("tidal");
@@ -350,7 +369,7 @@ public class EspToTidalTransformer2 implements ITransformer<List<EspAbstractJob>
 		out.setName(in.getName());
 
 		if (StringUtils.isBlank(in.getAgent())) {
-			//FIXME: This should only be set for ZoS Job type.
+			// FIXME: This should only be set for ZoS Job type.
 			in.setAgent("AgentZOS");
 		}
 
@@ -371,7 +390,7 @@ public class EspToTidalTransformer2 implements ITransformer<List<EspAbstractJob>
 				out.setStartTime(delaysub); // Delay Sub is ESP way of saying dont run until this
 			} else {
 				// Not parsing likely more than just a time.
-				// E.G   DELAYSUB 6.30 TODAY PLUS 1 WORKDAY vs.   DELAYSUB 6.30
+				// E.G DELAYSUB 6.30 TODAY PLUS 1 WORKDAY vs. DELAYSUB 6.30
 				in.setContainsAdvancedDelaySubLogic(true);
 				String stmsg = out.getNotes() + "\nDelaySubmission: " + delaysub;
 				out.setNotes(stmsg);
@@ -390,7 +409,7 @@ public class EspToTidalTransformer2 implements ITransformer<List<EspAbstractJob>
 				out.setEndTime(endtime); // Delay Sub is ESP way of saying dont run until this
 			} else {
 				// Not parsing likely more than just a time.
-				// E.G     DUEOUT EXEC NOW PLUS 4 HOURS vs  DUEOUT EXEC 10AM
+				// E.G DUEOUT EXEC NOW PLUS 4 HOURS vs DUEOUT EXEC 10AM
 				in.setContainsAdvancedDueOutLogic(true);
 				String stmsg = out.getNotes() + "\nEndTime: " + endtime;
 				out.setNotes(stmsg);

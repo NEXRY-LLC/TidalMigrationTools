@@ -180,13 +180,18 @@ public class JobGroupExecutor extends AbstractAPIExecutor {
 			CsvOwner own = source.getOwner();
 
 			if (own == null) {
-				own = new CsvOwner("Schedulers");
-				source.setOwner(own);
+				source.setOwner(getDataModel().getDefaultOwner());
 			}
 
-			String ownername = own.getOwnerName();
+			String ownername = source.getOwner().getOwnerName();
 			Owner owner = getTidalApi().getOwnerByName(ownername);
-			destination.setOwner(owner);
+			
+			if(owner == null) {
+				 owner =getTidalApi().getOwnerByName(getDataModel().getDefaultOwner().getOwnerName());
+				destination.setOwner(owner);
+			}else {
+				destination.setOwner(owner);
+			}
 
 			if (source.getParentId() == null) {
 				destination.setInheritcalendar(YesNoType.NO); // No top level can ever inher
