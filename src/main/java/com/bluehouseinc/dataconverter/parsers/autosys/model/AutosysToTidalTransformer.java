@@ -76,7 +76,6 @@ public class AutosysToTidalTransformer implements ITransformer<List<AutosysAbstr
 
 	}
 
-
 	// TODO: Check here to see if we can take our file trigger job type and use it to apply to the children jobs that depende on me.
 
 	private BaseCsvJobObject processBaseJobOrGroupObject(AutosysAbstractJob base, CsvJobGroup parent) {
@@ -86,7 +85,6 @@ public class AutosysToTidalTransformer implements ITransformer<List<AutosysAbstr
 		}
 
 		log.debug("processBaseJobOrGroupObject() Processing Job/Group Name[{}]", base.getFullPath());
-
 
 		BaseCsvJobObject baseCsvJobObject = null;
 		if (base instanceof AutosysBoxJob) {
@@ -105,7 +103,6 @@ public class AutosysToTidalTransformer implements ITransformer<List<AutosysAbstr
 			throw new TidalException("Error, unknown job type for Name=[" + base.getFullPath() + "]");
 		}
 
-
 		doSetCommonJobInformation(base, baseCsvJobObject);
 
 		doAddJobClassToJob(base, baseCsvJobObject);
@@ -117,7 +114,6 @@ public class AutosysToTidalTransformer implements ITransformer<List<AutosysAbstr
 				baseCsvJobObject.setInheritCalendar(true);
 			}
 		}
-
 
 		return baseCsvJobObject;
 	}
@@ -211,7 +207,6 @@ public class AutosysToTidalTransformer implements ITransformer<List<AutosysAbstr
 
 	private BaseCsvJobObject processPlaceHolderJob(AutosysAbstractJob autosysAbstractJob) {
 
-
 		// NOTE: This method is used as replacement for handling AutosysSqlAgentJob and processAutosysWindowsServiceMonitoringJob job
 		CsvOSJob csvOSJob = new CsvOSJob();
 		String jobType;
@@ -239,7 +234,6 @@ public class AutosysToTidalTransformer implements ITransformer<List<AutosysAbstr
 
 		return csvOSJob;
 	}
-
 
 	private void setJobCommandDetails(CsvOSJob csvOSJob, String cmd) {
 		if (cmd == null) {
@@ -305,7 +299,6 @@ public class AutosysToTidalTransformer implements ITransformer<List<AutosysAbstr
 
 		}
 
-
 		if (autosysAbstractJob.getRunCalendar() != null) {
 			CsvCalendar cal = new CsvCalendar(autosysAbstractJob.getRunCalendar());
 			getTidalDataModel().addCalendarToJobOrGroup(baseCsvJobObject, cal);
@@ -368,7 +361,6 @@ public class AutosysToTidalTransformer implements ITransformer<List<AutosysAbstr
 			this.getTidalDataModel().addResourceToJob(baseCsvJobObject, csvResource);
 		}
 
-
 		String offstart = getAutosysdatamodel().getConfigeProvider().offSetTimeStart();
 		String offend = getAutosysdatamodel().getConfigeProvider().offSetTimeEnd();
 		String offpref = getAutosysdatamodel().getConfigeProvider().offSetCalendarPrefix();
@@ -400,7 +392,8 @@ public class AutosysToTidalTransformer implements ITransformer<List<AutosysAbstr
 						if (StringUtils.isBlank(offstart)) {
 							baseCsvJobObject.setCalendarOffset(offday);
 						} else {
-							String calpre = baseCsvJobObject.getCalendar().getCalendarName() + offpref;
+							String calname = baseCsvJobObject.getCalendar() == null ? "" : baseCsvJobObject.getCalendar().getCalendarName();
+							String calpre = calname + offpref;
 							getTidalDataModel().addCalendarToJobOrGroup(baseCsvJobObject, new CsvCalendar(calpre));
 						}
 					}

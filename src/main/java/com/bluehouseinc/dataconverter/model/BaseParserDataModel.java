@@ -1,9 +1,12 @@
 package com.bluehouseinc.dataconverter.model;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
+import com.bluehouseinc.dataconverter.model.impl.BaseCsvJobObject;
 import com.bluehouseinc.dataconverter.parsers.IParserModel;
 import com.bluehouseinc.dataconverter.util.ObjectUtils;
 import com.bluehouseinc.tidal.api.exceptions.TidalException;
@@ -19,7 +22,6 @@ import lombok.extern.log4j.Log4j2;
 @Data
 public abstract class BaseParserDataModel<E extends BaseJobOrGroupObject, P extends AbstractConfigProvider> implements IParserModel {
 
-
 	@Getter(value = AccessLevel.PUBLIC)
 	private P configeProvider;
 
@@ -29,7 +31,7 @@ public abstract class BaseParserDataModel<E extends BaseJobOrGroupObject, P exte
 	BaseVariableProcessor<E> variableProcessor;
 
 	@Getter(value = AccessLevel.PUBLIC)
-	ITransformer<List<E>, TidalDataModel>  jobTransformer;
+	ITransformer<List<E>, TidalDataModel> jobTransformer;
 
 	public BaseParserDataModel(P configeProvider) {
 		this.configeProvider = configeProvider;
@@ -42,8 +44,6 @@ public abstract class BaseParserDataModel<E extends BaseJobOrGroupObject, P exte
 
 		if (this.variableProcessor != null) {
 
-
-
 			long startTime = System.currentTimeMillis(); // debugging
 
 			this.getDataObjects().stream().forEach(getVariableProcessor()::processJob);
@@ -52,12 +52,9 @@ public abstract class BaseParserDataModel<E extends BaseJobOrGroupObject, P exte
 			long finishtime = (endTime - startTime) / 1000; // debugging
 			log.info("convertToDomainDataModel.getVariableProcessor={} seconds", finishtime); // debugging
 
-
-
-
 		}
 
-		if(this.jobTransformer != null) {
+		if (this.jobTransformer != null) {
 			try {
 
 				long startTime = System.currentTimeMillis(); // debugging
@@ -68,9 +65,6 @@ public abstract class BaseParserDataModel<E extends BaseJobOrGroupObject, P exte
 				long finishtime = (endTime - startTime) / 1000; // debugging
 				log.info("convertToDomainDataModel.getTransformer={} seconds", finishtime); // debugging
 
-
-
-
 			} catch (TransformationException e) {
 				throw new TidalException(e);
 			}
@@ -78,11 +72,8 @@ public abstract class BaseParserDataModel<E extends BaseJobOrGroupObject, P exte
 
 		doProcessData(this.dataObjects);
 
-
 		return this.getTidal();
 	}
-
-
 
 	public TidalDataModel getTidal() {
 		return TidalDataModel.instance(getConfigeProvider());
@@ -138,6 +129,47 @@ public abstract class BaseParserDataModel<E extends BaseJobOrGroupObject, P exte
 	//
 	// }
 
+	private Map<String, E> cacheJobByName = null;
+	
+	public E getBaseObjectByName(String name) {
+
+		if (cacheJobByName == null) {
+			this.cacheJobByName = new HashMap<>();
+			ObjectUtils.toFlatStream(this.getDataObjects()).forEach(jobOrGroup -> {
+				if (this.cacheJobByName.containsKey(jobOrGroup.getFullPath())) {
+					log.debug("already contains key: " + jobOrGroup.getFullPath());
+				}
+				this.cacheJobByName.put(jobOrGroup.getName(), jobOrGroup);
+			});
+		}
+
+		if (cacheJobByName.containsKey(name)) {
+			return cacheJobByName.get(name);
+		}
+
+		
+		List<E> objs = ObjectUtils.toFlatStream(this.getDataObjects()).filter(f -> f.getName().trim().equalsIgnoreCase(name.trim())).collect(Collectors.toList());
+
+		if (objs.isEmpty()) {
+			return null;
+		}
+
+		if (objs.size() > 1) {
+			log.info("MULTIPLE[{}] JOBS WITH NAME[{}] returning last in the list", objs.size(), name);
+			objs.forEach(baseJobOrGroupObject -> log.info("{}", baseJobOrGroupObject.getFullPath()));
+			long count = objs.size();
+
+			return objs.stream().skip(count - 1).findFirst().get();
+		} else {
+			return objs.get(0);
+		}
+
+	}
+
+	public E getBaseObjectByPath(String path) {
+		return ObjectUtils.toFlatStream(this.getDataObjects()).filter(f -> f.getFullPath().equals(path)).findAny().orElse(null);
+	}
+
 	public E getBaseObjectById(int id) {
 		return ObjectUtils.toFlatStream(this.getDataObjects()).filter(f -> f.getId() == id).findAny().orElse(null);
 	}
@@ -145,6 +177,5 @@ public abstract class BaseParserDataModel<E extends BaseJobOrGroupObject, P exte
 	public List<E> getObjectsByType(Class<E> type) {
 		return ObjectUtils.toFlatStream(this.getDataObjects()).filter(f -> type.isInstance(f)).collect(Collectors.toList());
 	}
-
 
 }

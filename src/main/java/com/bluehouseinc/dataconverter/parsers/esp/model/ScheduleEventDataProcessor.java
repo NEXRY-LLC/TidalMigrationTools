@@ -9,6 +9,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.springframework.stereotype.Component;
+
 import com.bluehouseinc.dataconverter.common.utils.RegexHelper;
 import com.bluehouseinc.dataconverter.parsers.esp.model.schedule.SchCalendar;
 import com.bluehouseinc.dataconverter.parsers.esp.model.schedule.SchComment;
@@ -25,34 +27,35 @@ import com.bluehouseinc.dataconverter.parsers.esp.model.schedule.actions.SchWobt
 import com.bluehouseinc.dataconverter.parsers.esp.model.util.EspFileReaderUtils;
 import com.bluehouseinc.tidal.api.exceptions.TidalException;
 
+import lombok.Data;
 import lombok.extern.log4j.Log4j2;
 
+@Data
+@Component
 @Log4j2
 public class ScheduleEventDataProcessor {
 	private final static String EVENT_PATTERN = "EVENT.*?ID\\((.*?)\\).*?USER\\((.*?)\\).*?OWNER\\((.*?)\\).*?SYSTEM\\((.*?)\\).*?";
 
 	Map<String, SchEventElement> elements;
-	List<SchEventElement> skippedElements;
+	List<SchEventElement> advancedEventData;
 
-	EspDataModel datamodel;
-	String dataFile;
+	public ScheduleEventDataProcessor() {
 
-	public ScheduleEventDataProcessor(EspDataModel datamodel) {
-		this.datamodel = datamodel;
-		this.dataFile = datamodel.getConfigeProvider().getEspEventDataFile();
-		this.elements = new HashMap<>();
-		this.skippedElements = new LinkedList<>();
-		if (this.dataFile == null) {
-			throw new TidalException("Missing esp.schedule.datafile entry");
-		}
 	}
 
-	public void doProcessScheduleData() {
+	public void doProcessScheduleData(String datafile) {
+
+		this.elements = new HashMap<>();
+		this.advancedEventData = new LinkedList<>();
 
 		BufferedReader reader = null;
 
 		try {
-			reader = new BufferedReader(new FileReader(this.dataFile));
+			if (datafile == null) {
+				throw new TidalException("Missing esp.schedule.datafile entry");
+			}
+
+			reader = new BufferedReader(new FileReader(datafile));
 
 			String line;
 
@@ -97,7 +100,9 @@ public class ScheduleEventDataProcessor {
 		String system = RegexHelper.extractNthMatch(eventline, EVENT_PATTERN, 3);
 
 		SchEventElement event = new SchEventElement(id, user, owner, system);
-
+		
+		event.setRawEventLine(eventline);
+		
 		List<String> lines = EspFileReaderUtils.parseJobLines(reader, "ENDDEF", '-');
 
 		for (String line : lines) {
@@ -115,11 +120,10 @@ public class ScheduleEventDataProcessor {
 				break;
 			case "SCHEDULE":
 				SchScheduleAction sched = new SchScheduleAction(value);
-				if (sched.isAtTime()) {
-					event.getActions().add(sched);
-				}else {
+				if (!sched.isAtTime()) {
 					event.setScheduleDataOnly(false);
 				}
+				event.getActions().add(sched);
 				break;
 			case "RESUME":
 				event.getActions().add(new SchResumeAction(value));
@@ -165,20 +169,20 @@ public class ScheduleEventDataProcessor {
 
 		event.setRawDataLines(lines); // Set the data we used. Not really needed but just in case
 
-		if (event.isScheduleDataOnly()) {
+		if (event.getInvoke() != null) { // No invoke statement means its not used or applied to appl id
 			String key = event.getInvoke().getFolderName();
 
-			if (key.contains("IPDREU01")) {
-				key.getBytes();
-			}
+			// Adding all elements so we can use them in the future , for example we can set comments on all objects.
 			if (!this.elements.containsKey(key)) {
 				log.debug("ScheduleEventDataProcessor processEvent[" + event.getId() + "] Registering");
 				this.elements.put(key, event);
 			}
 
-		} else {
-			log.debug("ScheduleEventDataProcessor processEvent[" + event.getId() + "] SKIPPING");
-			this.skippedElements.add(event);
+		}
+		// Add our advance data into its own list for reporting.
+		if (!event.isScheduleDataOnly()) {
+			log.debug("ScheduleEventDataProcessor advancedEventData [" + event.getId() + "] Reporting");
+			this.advancedEventData.add(event);
 		}
 	}
 

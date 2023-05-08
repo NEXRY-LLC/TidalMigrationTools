@@ -18,10 +18,12 @@ import com.bluehouseinc.transform.ITransformer;
 public class EspDataModel extends BaseParserDataModel<EspAbstractJob, EspConfigProvider> implements IParserModel {
 
 	private DependencyGraphMapper depgraph;
-
-	public EspDataModel(ConfigurationProvider cfgProvider) {
+	private ScheduleEventDataProcessor schedDataProcessor;
+	
+	public EspDataModel(ConfigurationProvider cfgProvider, ScheduleEventDataProcessor schedDataProcessor) {
 		super(new EspConfigProvider(cfgProvider));
-		this.depgraph = new DependencyGraphMapper(getConfigeProvider(), getTidal());
+		this.depgraph = new DependencyGraphMapper(getConfigeProvider(), getTidal(),this);
+		this.schedDataProcessor = schedDataProcessor;
 	}
 
 	@Override
@@ -128,4 +130,7 @@ public class EspDataModel extends BaseParserDataModel<EspAbstractJob, EspConfigP
 		}
 	}
 
+	public ScheduleEventDataProcessor getScheduleEventDataProcessor() {
+		return this.schedDataProcessor;
+	}
 }

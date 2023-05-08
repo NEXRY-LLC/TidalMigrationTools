@@ -23,7 +23,8 @@ public class SchEventElement {
 	String id;
 	String system;
 	String user;
-
+	String rawEventLine;
+	
 	boolean scheduleDataOnly = true; // Right now this is all we can process.
 
 	//EVENT ID(AI01.AIPED150)  USER(UXESPJC)  OWNER(SWESPJC)  SYSTEM(ESPM) -REPLACE

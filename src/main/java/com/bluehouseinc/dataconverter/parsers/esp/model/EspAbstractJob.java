@@ -28,7 +28,8 @@ public abstract class EspAbstractJob extends BaseJobOrGroupObject implements Esp
 	boolean containsAdvancedDueOutLogic = false;
 
 	public abstract EspJobType getJobType();
-
+	
+	String externalAppID; //EXTERNAL APPLID(JOBNAME) this job must wait on this other one. 
 	String agent;// at the workload object or the application level
 	// TODO: How should CCCHK statement be converted into TIDAL? Is there any adequate definition/implementation which already exists in TIDAL?
 	String comment; // Comment inside of Job definition which is later used for storing in TIDAL as Notes for same Job Definition (JIRA Task already created)

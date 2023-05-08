@@ -48,6 +48,7 @@ import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.impl.EspTextMonJob;
 import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.impl.EspUnixJob;
 import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.impl.EspWindowsJob;
 import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.impl.EspZosJob;
+import com.bluehouseinc.dataconverter.parsers.esp.model.schedule.SchComment;
 import com.bluehouseinc.dataconverter.parsers.esp.model.schedule.SchEventElement;
 import com.bluehouseinc.dataconverter.parsers.esp.model.schedule.actions.SchScheduleAction;
 import com.bluehouseinc.dataconverter.parsers.esp.model.statements.EspJobResourceStatement;
@@ -82,12 +83,11 @@ public class EspParser extends AbstractParser<EspDataModel> {
 	private final static String ENDING_WITH_8_DIGITS_PATTERN = "\\s{1,}([0-9]{8})$";
 
 	EspJobVisitor espJobVisitor;
-	private ScheduleEventDataProcessor scheduleDataProcessor;
+	//private ScheduleEventDataProcessor scheduleDataProcessor;
 
 	public EspParser(ConfigurationProvider cfgProvider) {
-		super(new EspDataModel(cfgProvider));
+		super(new EspDataModel(cfgProvider,new ScheduleEventDataProcessor()));
 		this.espJobVisitor = new EspJobVisitorImpl(getParserDataModel());
-		this.scheduleDataProcessor = new ScheduleEventDataProcessor(getParserDataModel());
 	}
 
 	private DirectoryStream<Path> getFilteredDirectories(String pathToFiles) throws IOException {
@@ -148,11 +148,12 @@ public class EspParser extends AbstractParser<EspDataModel> {
 		return false;
 	}
 
-
 	@Override
 	public void parseFile() throws Exception {
 
-		this.scheduleDataProcessor.doProcessScheduleData();
+		String eventdatafile = getParserDataModel().getConfigeProvider().getEspEventDataFile();
+		
+		this.getParserDataModel().getScheduleEventDataProcessor().doProcessScheduleData(eventdatafile);
 
 		String pathToFiles = this.getParserDataModel().getConfigeProvider().getEspDataPath();
 
@@ -181,7 +182,7 @@ public class EspParser extends AbstractParser<EspDataModel> {
 
 				if (!isValidApplicationLine(line, filename)) { // Checks does 1st line in file start with APPL keyword
 					log.error("Not valid filename for file = {} missing APPL section", filePath.getFileName().toString());
-					//log.info("Not valid filename for file = {} missing APPL section", filePath.getFileName().toString());
+					// log.info("Not valid filename for file = {} missing APPL section", filePath.getFileName().toString());
 					return;
 				}
 				String jobGroupName = line.split(" ")[1];
@@ -238,10 +239,10 @@ public class EspParser extends AbstractParser<EspDataModel> {
 					if (this.isJobLine(line)) {
 						try {
 
-							String jobName = line.split(" ")[1];
+							String[] jobdata = line.split(" ");
 
-							String jobTypeString = line.split(" ")[0];
-							jobName = line.split(" ")[1];
+							String jobName = jobdata[1];
+							String jobTypeString = jobdata[0];
 
 							if (jobName.contains("PAYMENT")) {
 								jobName.getBytes();
@@ -283,6 +284,14 @@ public class EspParser extends AbstractParser<EspDataModel> {
 								continue;
 							}
 
+							if (line.contains("EXTERNAL APPLID(")) {
+								if (jobdata.length >= 3) {
+									String appid = jobdata[3];
+									appid = appid.replace("APPLID(", "").replace(")", "");
+									currentJob.setExternalAppID(appid);
+								}
+							}
+
 						} catch (Exception e) {
 							throw new TidalException(e);
 							// log.error("FATAL EXCEPTION! More info:\n {}", Arrays.toString(e.getStackTrace()));
@@ -292,7 +301,7 @@ public class EspParser extends AbstractParser<EspDataModel> {
 					this.doProcessGroupData(currentJobGroup, line);
 
 					// Assign event data if we have it for this group.
-					SchEventElement edata = this.scheduleDataProcessor.getElementByName(jobGroupName);
+					SchEventElement edata = this.getParserDataModel().getScheduleEventDataProcessor().getElementByName(jobGroupName);
 
 					this.doProcessGroupSchEventElementLogic(currentJobGroup, edata);
 
@@ -330,7 +339,6 @@ public class EspParser extends AbstractParser<EspDataModel> {
 		if (jobType == null) {
 			throw new TidalException("Unknown jobType , type is null");
 		}
-
 
 		EspAbstractJob job = null;
 
@@ -395,7 +403,6 @@ public class EspParser extends AbstractParser<EspDataModel> {
 		default:
 			throw new TidalException("Unknown Job Type[" + jobType.name() + "]");
 		}
-
 
 		// Add our job to our parent early
 		if (parent != null) {
@@ -552,79 +559,87 @@ public class EspParser extends AbstractParser<EspDataModel> {
 	 * As we progress we are discovering more we can do with this data. Do that work here.
 	 */
 	private void doProcessGroupSchEventElementLogic(EspJobGroup in, SchEventElement data) {
+		// Per rules for now, we can only process the elements are are only schedule at time only.
+
 		if (data != null) {
 			in.setEventData(data);
 
-			// Add our calendar as a run statement to a job.
-			if (data.getCalendar() != null) {
-				String eventCal = data.getCalendar().getData();
-				EspRunStatement runstm = new EspRunStatement();
-				runstm.setCriteria(eventCal);
-				runstm.setJobName(in.getName());
+			data.getComments().forEach(c -> in.setComment(in.getComment() + "\n" + c.getData()));
 
-				in.getEspRunStatements().add(runstm);
-			}
+			if (data.isScheduleDataOnly()) {
 
-			// Attempt to process this and set data on the group object per requirement.
-			List<SchScheduleAction> actions = ScheduleEventDataProcessor.getActionsByType(data, SchScheduleAction.class);
-
-			List<String> times = new ArrayList<>();
-			List<String> cals = new ArrayList<>();
-
-			// We need to get all our times our of our action data and set them into a list
-			// We also need to double check for the same on data, where we way say at this time no this day
-			// If that on data is different, we need to account for it in our calendar data.
-			// The general data is RUN statements so we will simply add to that data set vs making something new.
-
-			actions.forEach(f -> {
-
-				String t = f.getTime().replace(".", "").replace(":", ":").trim();
-
-				String caldata = f.getCalendarData();
-
-				if (caldata != null) {
-					if (!cals.contains(caldata)) {
-						cals.add(caldata); // Add our first element
-					}
-				}
-				if (t.equals("0000")) {
-					t.getClass();
-				} else {
-
-					if (NumberUtils.isParsable(t)) {
-						times.add(t);
-					} else {
-						log.error("doProcessSchEventElementLogic Incorrect Time [" + t + "] for Job: " + in.getFullPath());
-					}
-				}
-			});
-
-			// Must be a single cal description !!!!!!
-			if (cals.size() == 1) {
-				if (!times.isEmpty()) {
-
-					if (times.size() == 1) {
-						in.setDelaySubmission(times.get(0).toString());
-
-						EspRunStatement runstm = new EspRunStatement();
-						runstm.setCriteria(cals.get(0));
-						runstm.setJobName(in.getName());
-						in.getEspRunStatements().add(runstm);
-
-					} else {
-						// add all our start times.
-						in.setRuntimes(times);
-					}
-				}
-			} else {
-
-				cals.forEach(f -> {
-					// Just make this up as run statements
+				// Add our calendar as a run statement to a job.
+				if (data.getCalendar() != null) {
+					String eventCal = data.getCalendar().getData();
 					EspRunStatement runstm = new EspRunStatement();
-					runstm.setCriteria(f);
+					runstm.setCriteria(eventCal);
 					runstm.setJobName(in.getName());
+
 					in.getEspRunStatements().add(runstm);
+				}
+
+				// Attempt to process this and set data on the group object per requirement.
+				List<SchScheduleAction> actions = ScheduleEventDataProcessor.getActionsByType(data, SchScheduleAction.class);
+
+				List<String> times = new ArrayList<>();
+				List<String> cals = new ArrayList<>();
+
+				// We need to get all our times our of our action data and set them into a list
+				// We also need to double check for the same on data, where we way say at this time no this day
+				// If that on data is different, we need to account for it in our calendar data.
+				// The general data is RUN statements so we will simply add to that data set vs making something new.
+
+				actions.forEach(f -> {
+
+					String t = f.getTime().replace(".", "").replace(":", ":").trim();
+
+					String caldata = f.getCalendarData();
+
+					if (caldata != null) {
+						if (!cals.contains(caldata)) {
+							cals.add(caldata); // Add our first element
+						}
+					}
+					if (t.equals("0000")) {
+						t.getClass();
+					} else {
+
+						if (NumberUtils.isParsable(t)) {
+							times.add(t);
+						} else {
+							log.error("doProcessSchEventElementLogic Incorrect Time [" + t + "] for Job: " + in.getFullPath());
+						}
+					}
 				});
+
+				// Must be a single cal description !!!!!!
+				if (cals.size() == 1) {
+					if (!times.isEmpty()) {
+
+						if (times.size() == 1) {
+							in.setDelaySubmission(times.get(0).toString());
+
+							EspRunStatement runstm = new EspRunStatement();
+							runstm.setCriteria(cals.get(0));
+							runstm.setJobName(in.getName());
+							in.getEspRunStatements().add(runstm);
+
+						} else {
+							// add all our start times.
+							in.setRuntimes(times);
+						}
+					}
+				}
+				// else {
+				//
+				// cals.forEach(f -> {
+				// // Just make this up as run statements
+				// EspRunStatement runstm = new EspRunStatement();
+				// runstm.setCriteria(f);
+				// runstm.setJobName(in.getName());
+				// in.getEspRunStatements().add(runstm);
+				// });
+				// }
 			}
 		}
 

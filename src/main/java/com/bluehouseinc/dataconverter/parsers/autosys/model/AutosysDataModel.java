@@ -38,7 +38,7 @@ import lombok.extern.log4j.Log4j2;
 
 @Log4j2
 @Component
-public class AutosysDataModel extends BaseParserDataModel<AutosysAbstractJob,AutoSysConfProvider> implements IParserModel {
+public class AutosysDataModel extends BaseParserDataModel<AutosysAbstractJob, AutoSysConfProvider> implements IParserModel {
 
 	final DependencyBuilder dependencyBuilder;
 
@@ -49,8 +49,6 @@ public class AutosysDataModel extends BaseParserDataModel<AutosysAbstractJob,Aut
 		super(new AutoSysConfProvider(cfgProvider));
 		this.dependencyBuilder = new DependencyBuilder();
 	}
-
-
 
 	@Override
 	public BaseVariableProcessor<AutosysAbstractJob> getVariableProcessor(TidalDataModel model) {
@@ -64,7 +62,6 @@ public class AutosysDataModel extends BaseParserDataModel<AutosysAbstractJob,Aut
 
 	@Override
 	public void doProcessData(List<AutosysAbstractJob> dataObjects) {
-
 
 		long startTime = System.currentTimeMillis(); // debugging
 		dataObjects.forEach(this::doProcessJobDeps);
@@ -114,7 +111,6 @@ public class AutosysDataModel extends BaseParserDataModel<AutosysAbstractJob,Aut
 	// add use that data to build a new file dependency to my targetJob.
 	private void doProcessAutosysBaseDependency(final AutosysAbstractJob sourceJob, BaseCsvJobObject targetJob) {
 
-
 		final String expresiondata = sourceJob.getCondition();
 
 		if (StringUtils.isBlank(expresiondata)) {
@@ -135,13 +131,9 @@ public class AutosysDataModel extends BaseParserDataModel<AutosysAbstractJob,Aut
 		// MUST have data if we have expression data.
 		Map<Integer, AutosysBaseDependency> mapOfJobDep = localMap.get(sourceJob.getId());
 
-
-		if (sourceJob.getName().equals("DHP_EDM_PROD_6100_020.ETS_837_ENC_OUT")) {
+		if (sourceJob.getName().equals("BRT_TMS_0130_030.ExportLegacyTransactions51")) {
 			sourceJob.getName();
-			sourceJob.getName();
-			//
 		}
-
 
 		if (mapOfJobDep != null) {
 
@@ -158,27 +150,27 @@ public class AutosysDataModel extends BaseParserDataModel<AutosysAbstractJob,Aut
 
 				mapOfJobDep.entrySet().forEach(f -> {
 
-					final AutosysAbstractJob me = sourceJob;
+					if (sourceJob.getName().equals("BRT_TMS_0130_030.ExportLegacyTransactions51")) {
+						sourceJob.getName();
+					}
 
 					AutosysBaseDependency autoSysBaseDepObject = f.getValue();
 
 					String dependsOnThisJobObjectName = autoSysBaseDepObject.getDependencyName();
 
-
-
-					log.debug("[doProcessJobDeps] looking for our dependent job=[{}] ", dependsOnThisJobObjectName);
+					//log.debug("[doProcessJobDeps] looking for our dependent job=[{}] ", dependsOnThisJobObjectName);
 					// We should find a job from our parent at all times.
-					BaseJobOrGroupObject dependsOnThisAutoSysJob = getJobByName(dependsOnThisJobObjectName);
+					BaseJobOrGroupObject dependsOnThisAutoSysJob = getBaseObjectByName(dependsOnThisJobObjectName);
 
 					if (dependsOnThisAutoSysJob == null) {
-						log.info("[doProcessJobDeps] missing job in our AutoSys Data, looking for a job with this name["+dependsOnThisJobObjectName+"]");
-						//throw new TidalException("[doProcessJobDeps] missing job in our AutoSys Data, looking for a job with this name["+dependsOnThisJobObjectName+"]");
+						log.error("[doProcessJobDeps] missing job in our AutoSys Data, looking for a job with this name[" + dependsOnThisJobObjectName + "]");
+						// throw new TidalException("[doProcessJobDeps] missing job in our AutoSys Data, looking for a job with this name["+dependsOnThisJobObjectName+"]");
 					} else {
 						BaseCsvJobObject dependsOnThisRealCsvJob = this.getTidal().findFirstJobByFullPath(dependsOnThisAutoSysJob.getFullPath());
 
 						if (dependsOnThisRealCsvJob == null) {
 							// Major issues, we should always find a job matching by name for Autosys.
-							log.info("[doProcessJobDeps] missing dependenct job["+dependsOnThisAutoSysJob.getFullPath()+"] in TIDAL");
+							log.info("[doProcessJobDeps] missing dependenct job[" + dependsOnThisAutoSysJob.getFullPath() + "] in TIDAL");
 						} else {
 
 							if (autoSysBaseDepObject instanceof AutosysJobStatusDependency) {
@@ -194,14 +186,11 @@ public class AutosysDataModel extends BaseParserDataModel<AutosysAbstractJob,Aut
 									usestatus = DependentJobStatus.COMPLETED_NORMAL;
 								} else if (jdep.getStatus() == AutosysJobStatus.DONE) {
 									usestatus = DependentJobStatus.COMPLETED;
-								}
-								if (jdep.getStatus() == AutosysJobStatus.FAILURE) {
+								} else if (jdep.getStatus() == AutosysJobStatus.FAILURE) {
 									usestatus = DependentJobStatus.COMPLETED_ABNORMAL;
-								}
-								if (jdep.getStatus() == AutosysJobStatus.TERMINATED) {
+								} else if (jdep.getStatus() == AutosysJobStatus.TERMINATED) {
 									usestatus = DependentJobStatus.TERMINATED;
-								}
-								if (jdep.getStatus() == AutosysJobStatus.NOTRUNNING) {
+								} else if (jdep.getStatus() == AutosysJobStatus.NOTRUNNING) {
 									usestatus = DependentJobStatus.RUNNING;
 									oper = Operator.NOT_EQUAL;
 								}
@@ -254,7 +243,7 @@ public class AutosysDataModel extends BaseParserDataModel<AutosysAbstractJob,Aut
 				if (!StringUtils.isBlank(expresiondata)) {
 					// We have an issue.. We do not have any data matching but do have an expression of data.
 					// TODO: Throw exception here.
-					log.info("[doProcessJobDeps] missing job in our map but has this condition={}", expresiondata);
+					log.info("[doProcessJobDeps] job{} missing map data but has this condition={}", sourceJob.getFullPath() ,expresiondata);
 				}
 			}
 		} else {
@@ -266,6 +255,10 @@ public class AutosysDataModel extends BaseParserDataModel<AutosysAbstractJob,Aut
 	}
 
 	private void registerCompoundDep(BaseCsvJobObject targetJob) {
+
+		if (targetJob.getName().equals("BRT_TMS_0130_030.ExportLegacyTransactions51")) {
+			targetJob.getName();
+		}
 
 		final String expresiondata = targetJob.getCompoundDependency();
 
@@ -302,38 +295,5 @@ public class AutosysDataModel extends BaseParserDataModel<AutosysAbstractJob,Aut
 			}
 		}
 	}
-
-	/**
-	 * Locate a parent object via name, returns the first one found.
-	 *
-	 * @param name
-	 * @return
-	 */
-	public AutosysAbstractJob getJobByName(String name) {
-		if (name == null) {
-			return null;
-		}
-
-		List<BaseJobOrGroupObject> objs = ObjectUtils.toFlatStream(this.getDataObjects()).filter(f -> f.getName().trim().toLowerCase().equals(name.trim().toLowerCase())).collect(Collectors.toList());
-
-		if (objs.isEmpty()) {
-			return null;
-		}
-
-		if (objs.size() > 1) {
-			log.info("MULTIPLE[{}] JOBS WITH NAME[{}] returning last in the list", objs.size(), name);
-			objs.forEach(baseJobOrGroupObject -> log.info("{}", baseJobOrGroupObject.getFullPath()));
-			long count = objs.size();
-
-			return (AutosysAbstractJob) objs.stream().skip(count - 1).findFirst().get();
-		} else {
-			return (AutosysAbstractJob) objs.get(0);
-		}
-	}
-
-	public AutosysAbstractJob findFirstJobByFullPath(String path) {
-		return ObjectUtils.toFlatStream(this.getDataObjects()).filter(f -> f.getFullPath().equals(path)).findFirst().orElse(null);
-	}
-
 
 }

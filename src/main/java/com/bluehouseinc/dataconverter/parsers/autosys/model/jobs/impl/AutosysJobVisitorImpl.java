@@ -466,6 +466,7 @@ public class AutosysJobVisitorImpl implements AutosysJobVisitor {
 			job.setNotificationMsg(value);
 			break;
 		case "watch_file_groupname":
+		case "box_failure":
 		case "fail_codes":
 		case "svcdesk_imp":
 		case "svcdesk_pri":

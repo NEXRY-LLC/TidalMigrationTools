@@ -26,10 +26,12 @@ public class DependencyGraphMapper {
 
 	private TidalDataModel datamodel;
 	private EspConfigProvider cfgProvider;
+	private EspDataModel espmodel;
 
-	public DependencyGraphMapper(EspConfigProvider cfgProvider, TidalDataModel datamodel) {
+	public DependencyGraphMapper(EspConfigProvider cfgProvider, TidalDataModel datamodel, EspDataModel espmodel) {
 		this.cfgProvider = cfgProvider;
 		this.datamodel = datamodel;
+		this.espmodel = espmodel;
 	}
 
 	public void doProcessJobDeps(EspAbstractJob esp) {
@@ -46,6 +48,8 @@ public class DependencyGraphMapper {
 			throw new RuntimeException("Unable to locate job[" + esp.getFullPath() + "]");
 		}
 
+		doHandleExternalAppID(me,esp);
+		
 		doHandlePrereq(me, esp);
 
 		doHandleReleaseStatements(me, esp);
@@ -127,27 +131,23 @@ public class DependencyGraphMapper {
 
 			String lookfor = statement.getJobName().trim();
 
-			EspAbstractJob mydep = (EspAbstractJob) ObjectUtils.toFlatStream(esp.getParent().getChildren()).filter(child -> child.getName().trim().equalsIgnoreCase(lookfor)).findFirst().orElse(null);
-			
-			
+			EspAbstractJob mydep = this.getEspmodel().getBaseObjectByName(lookfor);
+
 			if (mydep != null) {
 				BaseCsvJobObject jobDependency = this.getDatamodel().findFirstJobByFullPath(mydep.getFullPath());
-				
-				
+
 				if (jobDependency != null) {
-					log.info("doHandleNotWithStatements Registering Dependency for Job[" + me.getFullPath() + "] the ohter job must not be active ["+jobDependency.getFullPath() + "]");
+					log.debug("doHandleNotWithStatements Registering Dependency for Job[" + me.getFullPath() + "] the ohter job must not be active [" + jobDependency.getFullPath() + "]");
 
 					this.getDatamodel().addJobDependencyForJob(me, jobDependency, DepLogic.MATCH, Operator.NOT_EQUAL, DependentJobStatus.ACTIVE, null);
 
 				} else {
-					throw new TidalException("doHandleNotWithStatements ERROR Unable to set Dependency for Job[" + me.getFullPath() + "] unable to locate ["+ mydep.getFullPath() + "]");
+					throw new TidalException("doHandleNotWithStatements ERROR Unable to set Dependency for Job[" + me.getFullPath() + "] unable to locate [" + mydep.getFullPath() + "]");
 				}
-				
-				
-			}else {
-				log.info("doHandleNotWithStatements ERROR Unable to set Dependency for Job[" + me.getFullPath() + "] unable to locate [" +lookfor + "]");
+
+			} else {
+				log.debug("doHandleNotWithStatements ERROR Unable to set Dependency for Job[" + me.getFullPath() + "] unable to locate [" + lookfor + "]");
 			}
-			
 
 		});
 
@@ -178,6 +178,27 @@ public class DependencyGraphMapper {
 				}
 			});
 
+		}
+	}
+
+	private void doHandleExternalAppID(BaseCsvJobObject me, EspAbstractJob esp) {
+
+		String externananme = esp.getExternalAppID();
+
+		if (!StringUtils.isBlank(externananme)) {
+			BaseCsvJobObject jobDependency = this.getDatamodel().findFirstJobByFullPath(externananme);
+			// status does NOT matter, since this job depends on the OTHER job completing
+			// (NO matter what status) -> setting status to NORMAL
+			// this.getTidal().addJobDependencyForJobCompletedNormal(me, jobDependency,
+			// null);
+			if (jobDependency != null) {
+				log.debug("doHandleAfterStatements Registering Dependency for Job[" + me.getFullPath() + "] this job must be completed [" + jobDependency.getFullPath() + "]");
+
+				this.getDatamodel().addJobDependencyForJob(jobDependency, me, DepLogic.MATCH, Operator.EQUAL, DependentJobStatus.COMPLETED_NORMAL, null);
+
+			} else {
+				log.debug("doHandleAfterStatements ERROR Unable to set Dependency for Job[" + me.getFullPath() + "] unable to locate [" + externananme + "]");
+			}
 		}
 	}
 }

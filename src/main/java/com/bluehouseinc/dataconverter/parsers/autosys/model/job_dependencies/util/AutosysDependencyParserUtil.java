@@ -131,7 +131,7 @@ public class AutosysDependencyParserUtil {
 	 */
 	private static String sanitizeExpression(AutosysAbstractJob job, String fullExpression) {
 
-		if (job.getName().equals("HZN_FACE_2990_015.HZN_Kill_HpXr_svcclogin")) {
+		if (job.getName().equals("BRT_TMS_0130_030.ExportLegacyTransactions51")) {
 			job.getName();
 		}
 
