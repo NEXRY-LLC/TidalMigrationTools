@@ -29,6 +29,8 @@ import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.impl.EspZosJob;
 import com.bluehouseinc.dataconverter.parsers.esp.model.statements.EspJobResourceStatement;
 import com.bluehouseinc.dataconverter.parsers.esp.model.statements.EspNoRunStatement;
 import com.bluehouseinc.dataconverter.parsers.esp.model.statements.EspRunStatement;
+import com.bluehouseinc.io.utils.FileMapUtil;
+import com.bluehouseinc.io.utils.FileMapUtil.FileParts;
 import com.bluehouseinc.tidal.api.exceptions.TidalException;
 import com.bluehouseinc.tidal.api.model.TrueFalse;
 import com.bluehouseinc.tidal.api.model.job.filewatcher.FileActivity;
@@ -285,13 +287,13 @@ public class EspToTidalTransformer2 implements ITransformer<List<EspAbstractJob>
 		}
 
 		String runasap = in.getStartMode();
-		
-		if(!StringUtils.isBlank(runasap)) {
+
+		if (!StringUtils.isBlank(runasap)) {
 			out.setSubmitASAP("true");
 		}
-		
-		//out.setSubmitASAP(in.getsum);
-	
+
+		// out.setSubmitASAP(in.getsum);
+
 		if (in.getSapUser() != null) {
 			CsvRuntimeUser rte = new CsvRuntimeUser(in.getSapUser());
 			rte.setPasswordForSAP("tidal");
@@ -318,18 +320,26 @@ public class EspToTidalTransformer2 implements ITransformer<List<EspAbstractJob>
 		String action = null;
 		/// data/BFP/interfaces/input/datain/zfiari07_payment_* CREATE NOCHANGE(1)
 		// [/data/BFP/interfaces/input/datain/zfiari07_payment.txt, NOTEXIST]
-		java.nio.file.Path p = Paths.get(file.replace("\\", "/"));
 
-		String mask = p.getFileName().toString();
+		boolean switchback = false;
 
-		if (p.getParent() != null) {
-			String path = p.getParent().toString();
-			out.setDirectory(path);
-		} else {
-			p.toAbsolutePath();
+		if (file.contains("\\")) {
+			switchback = true;
+			file = file.replace("\\", "/");
 		}
 
+		FileParts fileparts = FileMapUtil.splitFileNameIntoParts(file.replace("\\", "/"));
+
+		String mask = fileparts.getName() + fileparts.getSeparator() + fileparts.getExtention();
+		String directory = fileparts.getPath();
+
+		if (switchback) {
+			directory = directory.replace("/", "\\");
+		} 
+		
+		out.setDirectory(directory);
 		out.setFilemask(mask);
+	
 
 		int interval = 1;
 

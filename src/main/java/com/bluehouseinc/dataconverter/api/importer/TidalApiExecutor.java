@@ -11,8 +11,6 @@ import me.tongfei.progressbar.ProgressBar;
 
 public class TidalApiExecutor extends AbstractAPIExecutor {
 
-	private int LOAD = 20000;
-
 	public TidalApiExecutor(TidalAPI tidal, ConfigurationProvider cfgProvider) {
 		super(tidal, null, cfgProvider);
 	}
@@ -145,7 +143,14 @@ public class TidalApiExecutor extends AbstractAPIExecutor {
 	private void doProcessJobs(ProgressBar bar) {
 		try {
 			bar.setExtraMessage("doProcessJobs");
-			getTidalApi().jobs = getTidalApi().getSf().job().getConstructedJobs(LOAD);
+			String cnt = getTidalApi().getCfgProvider().getConfigurations().getOrDefault("tidal.batch.jobs", null);
+
+			if (cnt == null) {
+				getTidalApi().jobs = getTidalApi().getSf().job().getConstructedJobs();
+			} else {
+				getTidalApi().jobs = getTidalApi().getSf().job().getConstructedJobs(Integer.valueOf(cnt));
+			}
+
 		} catch (Exception e) {
 			throw new TidalException(e);
 		} finally {
@@ -156,7 +161,13 @@ public class TidalApiExecutor extends AbstractAPIExecutor {
 	private void doProcessVariables(ProgressBar bar) {
 		try {
 			bar.setExtraMessage("doProcessVariables");
-			getTidalApi().variables = getTidalApi().getSf().variable().getList(LOAD);
+			String cnt = getTidalApi().getCfgProvider().getConfigurations().getOrDefault("tidal.batch.variables", null);
+
+			if (cnt == null) {
+				getTidalApi().variables = getTidalApi().getSf().variable().getList();
+			} else {
+				getTidalApi().variables = getTidalApi().getSf().variable().getList(Integer.valueOf(cnt));
+			}
 		} catch (Exception e) {
 			throw new TidalException(e);
 		} finally {
@@ -167,7 +178,7 @@ public class TidalApiExecutor extends AbstractAPIExecutor {
 	private void doProcessCalendar(ProgressBar bar) {
 		try {
 			bar.setExtraMessage("doProcessCalendar");
-			getTidalApi().calendars = getTidalApi().getSf().calendar().getList(LOAD);
+			getTidalApi().calendars = getTidalApi().getSf().calendar().getList();
 		} catch (Exception e) {
 			throw new TidalException(e);
 		} finally {
@@ -178,7 +189,7 @@ public class TidalApiExecutor extends AbstractAPIExecutor {
 	private void doProcessOwners(ProgressBar bar) {
 		try {
 			bar.setExtraMessage("doProcessOwners");
-			getTidalApi().owners = getTidalApi().getSf().owners().getList(LOAD);
+			getTidalApi().owners = getTidalApi().getSf().owners().getList();
 		} catch (Exception e) {
 			throw new TidalException(e);
 		} finally {
@@ -189,7 +200,7 @@ public class TidalApiExecutor extends AbstractAPIExecutor {
 	private void doProcessWorkGroup(ProgressBar bar) {
 		try {
 			bar.setExtraMessage("doProcessWorkGroup");
-			getTidalApi().workgroups = getTidalApi().getSf().workGroup().getList(LOAD);
+			getTidalApi().workgroups = getTidalApi().getSf().workGroup().getList();
 		} catch (Exception e) {
 			throw new TidalException(e);
 		} finally {
@@ -200,7 +211,7 @@ public class TidalApiExecutor extends AbstractAPIExecutor {
 	private void doProcessAgents(ProgressBar bar) {
 		try {
 			bar.setExtraMessage("doProcessAgents");
-			getTidalApi().nodes = getTidalApi().getSf().node().getList(LOAD);
+			getTidalApi().nodes = getTidalApi().getSf().node().getList();
 		} catch (Exception e) {
 			throw new TidalException(e);
 		} finally {
@@ -211,7 +222,13 @@ public class TidalApiExecutor extends AbstractAPIExecutor {
 	private void doProcessDeps(ProgressBar bar) {
 		try {
 			bar.setExtraMessage("doProcessDeps");
-			getTidalApi().jobdep = getTidalApi().getSf().jobDependency().getList(LOAD);
+			String cnt = getTidalApi().getCfgProvider().getConfigurations().getOrDefault("tidal.batch.dependency", null);
+
+			if (cnt == null) {
+				getTidalApi().jobdep = getTidalApi().getSf().jobDependency().getList();
+			} else {
+				getTidalApi().jobdep = getTidalApi().getSf().jobDependency().getList(Integer.valueOf(cnt));
+			}
 		} catch (Exception e) {
 			throw new TidalException(e);
 		} finally {
@@ -222,7 +239,7 @@ public class TidalApiExecutor extends AbstractAPIExecutor {
 	private void doProcessAdapters(ProgressBar bar) {
 		try {
 			bar.setExtraMessage("doProcessAdapters");
-			getTidalApi().adapters = getTidalApi().getSf().adapterService().getList(LOAD);
+			getTidalApi().adapters = getTidalApi().getSf().adapterService().getList();
 		} catch (Exception e) {
 			throw new TidalException(e);
 		} finally {
@@ -233,7 +250,7 @@ public class TidalApiExecutor extends AbstractAPIExecutor {
 	private void doProcessAdapterUsers(ProgressBar bar) {
 		try {
 			bar.setExtraMessage("doProcessAdapterUsers");
-			getTidalApi().userService = getTidalApi().getSf().userService().getList(LOAD);
+			getTidalApi().userService = getTidalApi().getSf().userService().getList();
 		} catch (Exception e) {
 			throw new TidalException(e);
 		} finally {
@@ -244,7 +261,7 @@ public class TidalApiExecutor extends AbstractAPIExecutor {
 	private void doProcessEmailActions(ProgressBar bar) {
 		try {
 			bar.setExtraMessage("doProcessEmailActions");
-			getTidalApi().emailActions = getTidalApi().getSf().emailAction().getList(LOAD);
+			getTidalApi().emailActions = getTidalApi().getSf().emailAction().getList();
 		} catch (Exception e) {
 			throw new TidalException(e);
 		} finally {
@@ -255,7 +272,7 @@ public class TidalApiExecutor extends AbstractAPIExecutor {
 	private void doProcessUsers(ProgressBar bar) {
 		try {
 			bar.setExtraMessage("doProcessUsers");
-			getTidalApi().users = getTidalApi().getSf().users().getList(LOAD);
+			getTidalApi().users = getTidalApi().getSf().users().getList();
 		} catch (Exception e) {
 			throw new TidalException(e);
 		} finally {
@@ -266,7 +283,7 @@ public class TidalApiExecutor extends AbstractAPIExecutor {
 	private void doProcessVirtualResources(ProgressBar bar) {
 		try {
 			bar.setExtraMessage("doProcessVirtualResources");
-			getTidalApi().resources = getTidalApi().getSf().virtualResource().getList(LOAD);
+			getTidalApi().resources = getTidalApi().getSf().virtualResource().getList();
 		} catch (Exception e) {
 			throw new TidalException(e);
 		} finally {
@@ -277,7 +294,7 @@ public class TidalApiExecutor extends AbstractAPIExecutor {
 	private void doProcessBuinessUnits(ProgressBar bar) {
 		try {
 			bar.setExtraMessage("doProcessBuinessUnits");
-			getTidalApi().businessUnits = getTidalApi().getSf().businessUnit().getList(LOAD);
+			getTidalApi().businessUnits = getTidalApi().getSf().businessUnit().getList();
 		} catch (Exception e) {
 			throw new TidalException(e);
 		} finally {
@@ -288,7 +305,7 @@ public class TidalApiExecutor extends AbstractAPIExecutor {
 	private void doProcessAgentList(ProgressBar bar) {
 		try {
 			bar.setExtraMessage("doProcessAgentList");
-			getTidalApi().agentList = getTidalApi().getSf().agentList().getList(LOAD);
+			getTidalApi().agentList = getTidalApi().getSf().agentList().getList();
 		} catch (Exception e) {
 			throw new TidalException(e);
 		} finally {
@@ -299,7 +316,7 @@ public class TidalApiExecutor extends AbstractAPIExecutor {
 	private void doProcessJobResJoin(ProgressBar bar) {
 		try {
 			bar.setExtraMessage("doProcessJobResJoin");
-			getTidalApi().resourcesJobJoin = getTidalApi().getSf().resourceJobJoin().getList(LOAD);
+			getTidalApi().resourcesJobJoin = getTidalApi().getSf().resourceJobJoin().getList();
 		} catch (Exception e) {
 			throw new TidalException(e);
 		} finally {
@@ -310,7 +327,7 @@ public class TidalApiExecutor extends AbstractAPIExecutor {
 	private void doProcessJobClass(ProgressBar bar) {
 		try {
 			bar.setExtraMessage("doProcessJobClass");
-			getTidalApi().jobClass = getTidalApi().getSf().jobClass().getList(LOAD);
+			getTidalApi().jobClass = getTidalApi().getSf().jobClass().getList();
 		} catch (Exception e) {
 			throw new TidalException(e);
 		} finally {
