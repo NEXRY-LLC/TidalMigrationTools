@@ -131,8 +131,7 @@ public abstract class BaseParserDataModel<E extends BaseJobOrGroupObject, P exte
 
 	private Map<String, E> cacheJobByName = null;
 	
-	public E getBaseObjectByName(String name) {
-
+	private Map<String, E> getLoadedJobCache() {
 		if (cacheJobByName == null) {
 			this.cacheJobByName = new HashMap<>();
 			ObjectUtils.toFlatStream(this.getDataObjects()).forEach(jobOrGroup -> {
@@ -142,12 +141,31 @@ public abstract class BaseParserDataModel<E extends BaseJobOrGroupObject, P exte
 				this.cacheJobByName.put(jobOrGroup.getName(), jobOrGroup);
 			});
 		}
-
-		if (cacheJobByName.containsKey(name)) {
-			return cacheJobByName.get(name);
+		
+		return cacheJobByName;
+	}
+	
+	
+	public List<E> getBaseObjectsNameBeginsWith(String name) {
+		List<E> data = new ArrayList<>();
+		
+		getLoadedJobCache().keySet().forEach( f -> {
+			
+			if(f.startsWith(name)) {
+				data.add(getLoadedJobCache().get(f));
+			}
+		});
+		
+		return data;
+	}
+	
+	public E getBaseObjectByName(String name) {
+		
+		if (getLoadedJobCache().containsKey(name)) {
+			return getLoadedJobCache().get(name);
 		}
 
-		
+
 		List<E> objs = ObjectUtils.toFlatStream(this.getDataObjects()).filter(f -> f.getName().trim().equalsIgnoreCase(name.trim())).collect(Collectors.toList());
 
 		if (objs.isEmpty()) {

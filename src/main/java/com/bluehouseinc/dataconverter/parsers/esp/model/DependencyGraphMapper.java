@@ -1,5 +1,6 @@
 package com.bluehouseinc.dataconverter.parsers.esp.model;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -48,8 +49,8 @@ public class DependencyGraphMapper {
 			throw new RuntimeException("Unable to locate job[" + esp.getFullPath() + "]");
 		}
 
-		doHandleExternalAppID(me,esp);
-		
+		doHandleExternalAppID(me, esp);
+
 		doHandlePrereq(me, esp);
 
 		doHandleReleaseStatements(me, esp);
@@ -131,9 +132,28 @@ public class DependencyGraphMapper {
 
 			String lookfor = statement.getJobName().trim();
 
-			EspAbstractJob mydep = this.getEspmodel().getBaseObjectByName(lookfor);
+			List<EspAbstractJob> mydeps = new ArrayList<>();
 
-			if (mydep != null) {
+			if (lookfor.contains(".-")) {
+				List<EspAbstractJob> founddeps = this.getEspmodel().getBaseObjectsNameBeginsWith(lookfor.replace(".-", ""));
+				
+				if(!founddeps.isEmpty()) {
+					mydeps.addAll(founddeps);
+				}else {
+					log.debug("doHandleNotWithStatements ERROR Unable to set Dependency for Job[" + me.getFullPath() + "] unable to locate [" + lookfor + "]");
+				}
+				
+			} else {
+				EspAbstractJob mydep = this.getEspmodel().getBaseObjectByName(lookfor);
+				if (mydep != null) {
+					mydeps.add(mydep);
+				}else {
+					log.debug("doHandleNotWithStatements ERROR Unable to set Dependency for Job[" + me.getFullPath() + "] unable to locate [" + lookfor + "]");
+				}
+			}
+
+			mydeps.forEach(mydep ->{
+				
 				BaseCsvJobObject jobDependency = this.getDatamodel().findFirstJobByFullPath(mydep.getFullPath());
 
 				if (jobDependency != null) {
@@ -145,10 +165,8 @@ public class DependencyGraphMapper {
 					throw new TidalException("doHandleNotWithStatements ERROR Unable to set Dependency for Job[" + me.getFullPath() + "] unable to locate [" + mydep.getFullPath() + "]");
 				}
 
-			} else {
-				log.debug("doHandleNotWithStatements ERROR Unable to set Dependency for Job[" + me.getFullPath() + "] unable to locate [" + lookfor + "]");
-			}
-
+			});
+			
 		});
 
 	}

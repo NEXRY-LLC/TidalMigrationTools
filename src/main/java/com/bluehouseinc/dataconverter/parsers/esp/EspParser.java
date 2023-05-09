@@ -547,7 +547,9 @@ public class EspParser extends AbstractParser<EspDataModel> {
 
 			String desub = data.getDelaySubmission();
 			String duout = data.getDueout();
-
+			//String norun = data.noru
+			// TODO: review all options
+			
 			in.setDueout(duout);
 			in.setDelaySubmission(desub);
 

@@ -218,7 +218,6 @@ public class EspJobVisitorImpl implements EspJobVisitor {
 					job.getNotifyList().add(statementParameters);
 					continue;
 				case "NOTWITH":
-					// TODO-4: Check how scope of NOTWITH statement referencing to ONLY Test or also Prod directory/environment!!!
 					job.getEspNotWithStatements().add(extractNotWithStatement(statementParameters));
 					continue;
 				case "NORUN":
@@ -302,9 +301,10 @@ public class EspJobVisitorImpl implements EspJobVisitor {
 	}
 
 	private EspNotWithStatement extractNotWithStatement(String statementParameters) {
-		if (statementParameters.contains("(") && statementParameters.contains(".")) {
-			return new EspNotWithStatement(statementParameters.substring(statementParameters.indexOf("(") + 1, statementParameters.indexOf(".")));
-		}
+		statementParameters = statementParameters.replace("(", "").replace(")", "");
+//		if (statementParameters.contains("(") && statementParameters.contains(".")) {
+//			return new EspNotWithStatement(statementParameters.substring(statementParameters.indexOf("(") + 1, statementParameters.indexOf(".")));
+//		}
 		return new EspNotWithStatement(statementParameters);
 	}
 
