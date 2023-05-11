@@ -39,7 +39,7 @@ public class AutosysJobVisitorImpl implements AutosysJobVisitor {
 	 */
 	private void visitCommon(AutosysAbstractJob job, List<String> lines, List<AutosysAbstractJob> parents, Function2<String, String, Boolean> lambdaFunction) {
 
-		if(job.getName().equals("AHW_QNXT_0300_010.CreateMemberRelation")) {
+		if(job.getName().equals("FAL_QNXT_0120_010.1C3_FALCarrierMemIdUpdate")) {
 			job.getName();
 		}
 		List<String> notificationEmailAddressOnSuccessList = new ArrayList<>();
@@ -317,7 +317,7 @@ public class AutosysJobVisitorImpl implements AutosysJobVisitor {
 	}
 
 	private void fillInDefaultProperties(AutosysAbstractJob job, List<AutosysAbstractJob> parents, String key, String value) {
-		if (job.getName().equals("CMC_FACE_6160__ETS_FACE_CMCX_PHPIN_IN")) {
+		if (job.getName().equals("FAL_QNXT_0120_010.1C3_FALCarrierMemIdUpdate")) {
 			job.getName();
 		}
 

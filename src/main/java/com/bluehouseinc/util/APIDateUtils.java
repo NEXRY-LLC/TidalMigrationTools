@@ -241,7 +241,7 @@ public abstract class APIDateUtils {
 				String negcheck = Long.toString(minutes);
 				negcheck = negcheck.replace("-", "");
 
-				obj.setStartTime(cleaned.get(0)); // Set our start time
+				//obj.setStartTime(cleaned.get(0)); // Set our start time
 				obj.getRerunLogic().setRepeatEvery(Integer.valueOf(negcheck));
 				//obj.getRerunLogic().setRepeatMaxTimes(startList.size());
 

@@ -100,6 +100,9 @@ public class AutosysDependencyParserUtil {
 	static String parserCondition(AutosysAbstractJob job, String fullExpression) {
 		String sanitizedExpressionString = sanitizeExpression(job, fullExpression);
 
+		if(StringUtils.isBlank(sanitizedExpressionString)) {
+			return null;
+		}
 
 		log.debug("sanitizedExpressionString=[{}] for job[{}]", sanitizedExpressionString, job.getFullPath());
 
@@ -131,7 +134,7 @@ public class AutosysDependencyParserUtil {
 	 */
 	private static String sanitizeExpression(AutosysAbstractJob job, String fullExpression) {
 
-		if (job.getName().equals("BRT_TMS_0130_030.ExportLegacyTransactions51")) {
+		if (job.getName().equals("EMB_FACE_0456_070.XmsRunFileIntake_CNY_NYCAPS_Retiree_MA")) {
 			job.getName();
 		}
 
@@ -157,7 +160,7 @@ public class AutosysDependencyParserUtil {
 
 		Matcher matcher = DEPENDENCY_PATTERN.matcher(expression);
 
-		if (job.getName().equals("CMC_FACE_6180__ETS_FACE_CMCX_OPTI_MED_RX_IN")) {
+		if (job.getName().equals("EMB_FACE_0456_070.XmsRunFileIntake_CNY_NYCAPS_Retiree_MA")) {
 			job.getName();
 		}
 
@@ -167,6 +170,7 @@ public class AutosysDependencyParserUtil {
 		 * ... into: s(#1) & (e(#2) | t(#3)) | v(#4)
 		 */
 		while (matcher.find()) {
+			String raw = matcher.group();
 			String depTypeString = matcher.group(1);
 			/*
 			 * `depJobNameRaw` variable needs to keep its parenthesis pair `()` so
@@ -184,6 +188,7 @@ public class AutosysDependencyParserUtil {
 
 			if (jobname.equals(targetname)) {
 				log.error("Job Dependency would result in a loop, skipping target job[{}] dependency for job[{}]", targetname, job.getFullPath());
+				matcher.replaceAll(raw);
 				//matcher.appendReplacement(sb, "");
 			} else {
 				currentJobDependencyMap.put(autosysBaseDependency.getId(), autosysBaseDependency);
@@ -221,6 +226,7 @@ public class AutosysDependencyParserUtil {
 		// its implementation MUST be of LinkedList type to preserve the order because of placeholders
 
 		while (matcher.find()) {
+			
 			String rawVariableName = matcher.group(2);
 			// extracting dependency name nested in parentheses pair
 			String variableName = rawVariableName.substring(rawVariableName.indexOf("(") + 1, rawVariableName.indexOf(")"));
@@ -253,6 +259,7 @@ public class AutosysDependencyParserUtil {
 		Map<Integer, AutosysBaseDependency> exitCodeDependencyValueMap = new LinkedHashMap<>();
 
 		while (matcher.find()) {
+			String raw = matcher.group();
 			String rawExitCodeDependencyName = matcher.group(2);
 			// extracting dependency name nested in parentheses pair...
 			String exitCodeDependencyName = rawExitCodeDependencyName.substring(rawExitCodeDependencyName.indexOf("(") + 1, rawExitCodeDependencyName.indexOf(")"));
@@ -268,7 +275,7 @@ public class AutosysDependencyParserUtil {
 
 			if (jobname.equals(targetname)) {
 				log.error("Job Dependency would result in a loop, skipping target job[{}] dependency for job[{}]", targetname, job.getFullPath());
-				//matcher.appendReplacement(sb, "");
+				matcher.replaceAll(raw);
 			} else {
 				exitCodeDependencyValueMap.put(exitCodeDependency.getId(), exitCodeDependency);
 				matcher.appendReplacement(sb, Integer.toString(exitCodeDependency.getId()));

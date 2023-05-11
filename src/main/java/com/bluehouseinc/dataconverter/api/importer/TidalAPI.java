@@ -92,9 +92,9 @@ public class TidalAPI {
 
 		String defuser = getCfgProvider().getConfigurations().getOrDefault(TIDALDefaultOwner, DEFOWNDERNAME);
 		
-		this.defaultOwner = owners.stream().filter(f -> f.getName().equalsIgnoreCase(defuser)).findFirst().get();
+		log.info("\nSetting Default Owner [" + defuser + "]");
 		
-		log.info("\nSetting Default Owner [" + this.defaultOwner + "]");
+		this.defaultOwner = owners.stream().filter(f -> f.getName().equalsIgnoreCase(defuser)).findFirst().get();
 
 	}
 
