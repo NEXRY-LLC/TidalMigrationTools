@@ -20,8 +20,8 @@ public class AutosysBoxJob extends AutosysAbstractJob {
 	}
 
 	@Override
-	public void accept(AutosysJobVisitor autosysJobVisitor, List<String> lines, List<AutosysAbstractJob> parents) {
-		autosysJobVisitor.visit(this, lines, parents);
+	public void accept(AutosysJobVisitor autosysJobVisitor, List<String> lines) {
+		autosysJobVisitor.visit(this, lines);
 	}
 
 

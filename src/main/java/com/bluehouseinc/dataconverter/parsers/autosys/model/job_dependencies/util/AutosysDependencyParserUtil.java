@@ -134,7 +134,7 @@ public class AutosysDependencyParserUtil {
 	 */
 	private static String sanitizeExpression(AutosysAbstractJob job, String fullExpression) {
 
-		if (job.getName().equals("EMB_FACE_0456_070.XmsRunFileIntake_CNY_NYCAPS_Retiree_MA")) {
+		if (job.getName().equals("CPL_QNXT_6280_020.ETS_EDI_834_837_ALL_IN")) {
 			job.getName();
 		}
 

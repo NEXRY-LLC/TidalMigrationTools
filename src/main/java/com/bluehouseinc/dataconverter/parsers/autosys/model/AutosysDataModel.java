@@ -26,6 +26,7 @@ import com.bluehouseinc.dataconverter.providers.ConfigurationProvider;
 import com.bluehouseinc.dataconverter.util.ObjectUtils;
 import com.bluehouseinc.expressions.ExpressionType;
 import com.bluehouseinc.expressions.ExpressionUtil;
+import com.bluehouseinc.tidal.api.exceptions.TidalException;
 import com.bluehouseinc.tidal.api.model.dependency.job.DepLogic;
 import com.bluehouseinc.tidal.api.model.dependency.job.DependentJobStatus;
 import com.bluehouseinc.tidal.api.model.dependency.job.ExitCodeOperator;
@@ -92,17 +93,17 @@ public class AutosysDataModel extends BaseParserDataModel<AutosysAbstractJob, Au
 	// s(#1) v(#5)
 	public void doProcessJobDeps(AutosysAbstractJob autosysAbstractJob) {
 		BaseCsvJobObject me = this.getTidal().findFirstJobByFullPath(autosysAbstractJob.getFullPath());
+
 		if (me == null) {
-			log.error("Unable to locate job[{}]", autosysAbstractJob.getFullPath());
+			log.info("Unable to locate job[{}]", autosysAbstractJob.getFullPath());
+			throw new TidalException("Unable to Locate Job[{" + autosysAbstractJob.getFullPath() + "}] by Path");
 		}
+
 		log.debug("[doProcessJobDeps] me={}", (me == null ? "null" : me.getFullPath()));
 
 		doProcessAutosysBaseDependency(autosysAbstractJob, me);
 
 		autosysAbstractJob.getChildren().forEach(job -> {
-			AutosysAbstractJob currentAutosysAbstractJob = (AutosysAbstractJob) job;
-			log.debug("[doProcessJobDeps] autosysAbstractJob.getName={}", autosysAbstractJob.getName());
-			log.debug("[doProcessJobDeps] currentAutosysAbstractJob.getName={}", currentAutosysAbstractJob.getName());
 			doProcessJobDeps((AutosysAbstractJob) job);
 		});
 	}
@@ -111,11 +112,17 @@ public class AutosysDataModel extends BaseParserDataModel<AutosysAbstractJob, Au
 	// add use that data to build a new file dependency to my targetJob.
 	private void doProcessAutosysBaseDependency(final AutosysAbstractJob sourceJob, BaseCsvJobObject targetJob) {
 
-		final String expresiondata = sourceJob.getCondition();
+		if (targetJob.getName().startsWith("PCH_QNXT_0220_010.ETS_ChangeHealth_AutoAdjust_IN")) {
+			targetJob.getName();
+		}
 
-		if (StringUtils.isBlank(expresiondata)) {
+		// final String expresiondata = sourceJob.getCondition();
+
+		if (StringUtils.isBlank(sourceJob.getCondition())) {
 			return; // Nothing to process we dont have any expresions to process.
 		}
+
+		targetJob.setCompoundDependency(sourceJob.getCondition());
 
 		/*
 		 * `autosysConditionExpressionMap` holds reference to parsed
@@ -131,15 +138,15 @@ public class AutosysDataModel extends BaseParserDataModel<AutosysAbstractJob, Au
 		// MUST have data if we have expression data.
 		Map<Integer, AutosysBaseDependency> mapOfJobDep = localMap.get(sourceJob.getId());
 
-		if (sourceJob.getName().equals("BRT_TMS_0130_030.ExportLegacyTransactions51")) {
-			sourceJob.getName();
+		if (targetJob.getName().startsWith("DHP_QNXT_6190_070.ETS_MLM_EXTRACT_OUT_MFT_MANUAL")) {
+			targetJob.getName();
 		}
 
 		if (mapOfJobDep != null) {
 
 			if (!mapOfJobDep.isEmpty()) {
-
-				targetJob.setCompoundDependency(expresiondata); // Set me to this so we can replace with real data later.
+				//log.info(sourceJob.getFullPath());
+				// targetJob.setCompoundDependency(expresiondata); // Set me to this so we can replace with real data later.
 
 				// We have depenencies to work with.
 				// Contains Autosys dependency ID's and we need to lookup the csv job, create
@@ -150,20 +157,43 @@ public class AutosysDataModel extends BaseParserDataModel<AutosysAbstractJob, Au
 
 				mapOfJobDep.entrySet().forEach(f -> {
 
-					if (sourceJob.getName().equals("BRT_TMS_0130_030.ExportLegacyTransactions51")) {
-						sourceJob.getName();
-					}
-
 					AutosysBaseDependency autoSysBaseDepObject = f.getValue();
 
 					String dependsOnThisJobObjectName = autoSysBaseDepObject.getDependencyName();
-
-					//log.debug("[doProcessJobDeps] looking for our dependent job=[{}] ", dependsOnThisJobObjectName);
-					// We should find a job from our parent at all times.
+					
+					if(dependsOnThisJobObjectName.equals("DHP_EDM_PROD_6100_010.ETS_837_ENC_OUT.FT00")) {
+						dependsOnThisJobObjectName.getBytes();
+					}
+					//String expressiondata = targetJob.getCompoundDependency();
+					// log.debug("[doProcessJobDeps] looking for our dependent job=[{}] ", dependsOnThisJobObjectName);
 					BaseJobOrGroupObject dependsOnThisAutoSysJob = getBaseObjectByName(dependsOnThisJobObjectName);
 
+					
 					if (dependsOnThisAutoSysJob == null) {
-						log.error("[doProcessJobDeps] missing job in our AutoSys Data, looking for a job with this name[" + dependsOnThisJobObjectName + "]");
+						log.info("[doProcessJobDeps] missing job in our AutoSys Data, looking for a job with this name[" + dependsOnThisJobObjectName + "]");
+
+						return;
+//						String expresiondata = targetJob.getCompoundDependency();
+//
+//						expresiondata = expresiondata.replaceAll(Integer.toString(autoSysBaseDepObject.getId()), "").trim();
+//
+//						if (expresiondata.endsWith("|") | expresiondata.endsWith("&")) {
+//							expresiondata = expresiondata.substring(0, expresiondata.length() - 1).trim();
+//						}
+//
+//						if (expresiondata.startsWith("|") | expresiondata.startsWith("&")) {
+//							expresiondata = expresiondata.substring(1, expresiondata.length()).trim();
+//						}
+//
+//						if(expresiondata.trim().equals("|") | expresiondata.trim().equals("&")) {
+//							targetJob.setCompoundDependency(null);
+//						}else if (expresiondata.contains("|") | expresiondata.contains("&")) {
+//							targetJob.setCompoundDependency(expresiondata);
+//						} else {
+//							// after removing the bad reference, we need to make sure we are still a compound dep.
+//							targetJob.setCompoundDependency(null);
+//						}
+
 						// throw new TidalException("[doProcessJobDeps] missing job in our AutoSys Data, looking for a job with this name["+dependsOnThisJobObjectName+"]");
 					} else {
 						BaseCsvJobObject dependsOnThisRealCsvJob = this.getTidal().findFirstJobByFullPath(dependsOnThisAutoSysJob.getFullPath());
@@ -171,14 +201,14 @@ public class AutosysDataModel extends BaseParserDataModel<AutosysAbstractJob, Au
 						if (dependsOnThisRealCsvJob == null) {
 							// Major issues, we should always find a job matching by name for Autosys.
 							log.info("[doProcessJobDeps] missing dependenct job[" + dependsOnThisAutoSysJob.getFullPath() + "] in TIDAL");
+							throw new TidalException("[doProcessJobDeps] missing dependenct job[" + dependsOnThisAutoSysJob.getFullPath() + "] in TIDAL");
+
 						} else {
 
 							if (autoSysBaseDepObject instanceof AutosysJobStatusDependency) {
 
-								// TODO: Need to set the actaul job status and other details, this is just a normal job dep.
 								AutosysJobStatusDependency jdep = (AutosysJobStatusDependency) autoSysBaseDepObject;
 
-								// TODO: Map from AutosysJobStatus to DependentJobStatus.COMPLETED_NORMAL
 								DependentJobStatus usestatus = null;
 								Operator oper = Operator.EQUAL;
 
@@ -237,19 +267,22 @@ public class AutosysDataModel extends BaseParserDataModel<AutosysAbstractJob, Au
 				});
 
 				// Setup and register the compound deps if needed.
-				registerCompoundDep(targetJob);
+
+				if (!StringUtils.isBlank(targetJob.getCompoundDependency())) {
+					registerCompoundDep(targetJob);
+				}
 
 			} else {
-				if (!StringUtils.isBlank(expresiondata)) {
+				if (!StringUtils.isBlank(sourceJob.getCondition())) {
 					// We have an issue.. We do not have any data matching but do have an expression of data.
 					// TODO: Throw exception here.
-					log.info("[doProcessJobDeps] job{} missing map data but has this condition={}", sourceJob.getFullPath() ,expresiondata);
+					log.info("[doProcessJobDeps] job{} missing map data but has this condition={}", sourceJob.getFullPath(), sourceJob.getCondition());
 				}
 			}
 		} else {
 			// This job has no dependency?
 			// TODO: Throw exception here.
-			log.info("[doProcessJobDeps] missing job in our map but has this condition={}", expresiondata);
+			log.info("[doProcessJobDeps] missing job in our map but has this condition={}", sourceJob.getCondition());
 		}
 
 	}

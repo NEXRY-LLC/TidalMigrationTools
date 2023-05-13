@@ -15,6 +15,8 @@ public class AutoSystReporter implements IModelReport {
 	public List<IReporter> getReporters() {
 		List<IReporter> core = new ArrayList<>();
 
+		core.add(new AutoSysJobPrinter());
+		
 		return core;
 	}
 

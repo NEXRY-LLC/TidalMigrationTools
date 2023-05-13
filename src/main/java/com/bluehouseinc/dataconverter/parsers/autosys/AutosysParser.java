@@ -126,6 +126,9 @@ public class AutosysParser extends AbstractParser<AutosysDataModel> {
 					continue;
 				}
 
+				if(line.contains("DHP_EDM_PROD_6100_010.ETS_837_ENC_OUT.FT00")) {
+					line.getBytes();
+				}
 				if (isJobHeaderLine(line)) {
 					String jobName = RegexHelper.extractNthMatch(line, JOB_HEADER_PATTERN, 1);
 
@@ -165,8 +168,7 @@ public class AutosysParser extends AbstractParser<AutosysDataModel> {
 	private AutosysAbstractJob extractJob(final BufferedReader reader, String line, String jobName) throws Exception {
 		String currentLine;
 		// FIXME: Read https://softwareengineering.stackexchange.com/q/419445/339761 for more info
-		while (!(currentLine = readLine(reader)).matches(JOB_TYPE_PATTERN))
-			;
+		while (!(currentLine = readLine(reader)).matches(JOB_TYPE_PATTERN));
 
 		String jobTypeLine = RegexHelper.extractNthMatch(currentLine, JOB_TYPE_PATTERN, 3);
 		List<String> lines = parseJobLines(reader);
@@ -177,7 +179,7 @@ public class AutosysParser extends AbstractParser<AutosysDataModel> {
 		case BOX:
 		case b:
 			job = new AutosysBoxJob(jobName);
-			this.parents.add(job); // considered as Job Group, i.e., parent object
+			//this.parents.add(job); // considered as Job Group, i.e., parent object
 			break;
 		case CMD:
 		case c:
@@ -202,7 +204,7 @@ public class AutosysParser extends AbstractParser<AutosysDataModel> {
 		}
 
 
-		job.accept(autosysJobVisitor, lines, parents);
+		job.accept(autosysJobVisitor, lines);
 
 
 		if (this.getParserDataModel().getConfigeProvider().clearBoxConditions()) {

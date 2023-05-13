@@ -7,6 +7,7 @@ import com.bluehouseinc.dataconverter.model.BaseJobOrGroupObject;
 import com.bluehouseinc.expressions.parsers.ExpressionParser;
 import com.bluehouseinc.tidal.api.model.job.JobType;
 import com.bluehouseinc.tidal.utils.DependencyBuilder;
+import com.bluehouseinc.tidal.utils.StringUtils;
 import com.opencsv.bean.CsvBindByName;
 import com.opencsv.bean.CsvIgnore;
 import com.opencsv.bean.CsvRecurse;
@@ -107,13 +108,17 @@ public abstract class BaseCsvJobObject extends BaseJobOrGroupObject {
 	@CsvBindByName
 	Integer calendarOffset;
 
-
 	@Setter(value = AccessLevel.PRIVATE)
 	DependencyBuilder compoundDependencyBuilder = new DependencyBuilder();
 
-	public void setCompoundDependency(String data){
-		this.compoundDependencyBuilder.expression =  ExpressionParser.parse(data);
-		this.compoundDependency = data;
+	public void setCompoundDependency(String data) {
+		if (StringUtils.isBlank(data)) {
+			this.compoundDependencyBuilder = null;
+			this.compoundDependency = null;
+		} else {
+			this.compoundDependencyBuilder.expression = ExpressionParser.parse(data);
+			this.compoundDependency = data;
+		}
 	}
 
 	public void setCompoundDependencyStringFromBuilder() {
@@ -121,7 +126,7 @@ public abstract class BaseCsvJobObject extends BaseJobOrGroupObject {
 	}
 
 	public CsvJobRerunLogic getRerunLogic() {
-		if(this.rerunLogic==null) {
+		if (this.rerunLogic == null) {
 			this.rerunLogic = new CsvJobRerunLogic();
 		}
 

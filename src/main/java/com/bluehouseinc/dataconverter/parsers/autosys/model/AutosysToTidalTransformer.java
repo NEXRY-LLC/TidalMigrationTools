@@ -52,6 +52,9 @@ public class AutosysToTidalTransformer implements ITransformer<List<AutosysAbstr
 	}
 
 	public void doProcessObjects(AutosysAbstractJob autosysAbstractJob, CsvJobGroup parent) {
+		
+		log.debug("doProcessObjects() AutosysAbstractJob Name[{}]", autosysAbstractJob.getFullPath());
+		
 		if (autosysAbstractJob.isGroup()) {
 
 			CsvJobGroup group = (CsvJobGroup) processBaseJobOrGroupObject(autosysAbstractJob, parent);
@@ -59,21 +62,9 @@ public class AutosysToTidalTransformer implements ITransformer<List<AutosysAbstr
 			autosysAbstractJob.getChildren().forEach(autosysChildJob -> doProcessObjects((AutosysAbstractJob) autosysChildJob, group)); // Parse children
 
 		} else {
-			BaseCsvJobObject newJob = processBaseJobOrGroupObject(autosysAbstractJob, parent);
-			if (newJob == null) {
-				log.error("newJob IS NULL for autosysAbstractJob for name={}; fullPath={}", autosysAbstractJob.getName(), autosysAbstractJob.getFullPath());
-				throw new RuntimeException("Error, (converted BaseCsvJobObject) newJob is NULL!");
-			}
+			processBaseJobOrGroupObject(autosysAbstractJob, parent);
 
-			if (parent != null) {
-				parent.addChild(newJob);
-			} else {
-				this.getTidalDataModel().addJobToModel(newJob);
-			}
-
-			log.debug("Processing Job Name[{}]", newJob.getFullPath());
 		}
-
 	}
 
 	// TODO: Check here to see if we can take our file trigger job type and use it to apply to the children jobs that depende on me.
@@ -101,6 +92,12 @@ public class AutosysToTidalTransformer implements ITransformer<List<AutosysAbstr
 			baseCsvJobObject = processPlaceHolderJob(base);
 		} else {
 			throw new TidalException("Error, unknown job type for Name=[" + base.getFullPath() + "]");
+		}
+
+		if (parent != null) {
+			parent.addChild(baseCsvJobObject);
+		} else {
+			this.getTidalDataModel().addJobToModel(baseCsvJobObject);
 		}
 
 		doSetCommonJobInformation(base, baseCsvJobObject);
@@ -151,7 +148,7 @@ public class AutosysToTidalTransformer implements ITransformer<List<AutosysAbstr
 
 	private BaseCsvJobObject processAutosysFileTriggerJob(AutosysFileTriggerJob autosysFileTriggerJob) {
 
-		autosysFileTriggerJob.setName(autosysFileTriggerJob.getName() + "-XXXX-FILETRIGGER");
+		//autosysFileTriggerJob.setName(autosysFileTriggerJob.getName() + "-XXXX-FILETRIGGER");
 
 		CsvOSJob csvOSJob = new CsvOSJob();
 		String cmd = "UNSET";
@@ -228,7 +225,7 @@ public class AutosysToTidalTransformer implements ITransformer<List<AutosysAbstr
 			currentJobNotes = null;
 		}
 
-		csvOSJob.setName(autosysAbstractJob.getName() + "-PLACEHOLDER-" + jobType);
+		//csvOSJob.setName(autosysAbstractJob.getName() + "-PLACEHOLDER-" + jobType);
 		csvOSJob.setCommandLine("PLACEHOLDER");
 		csvOSJob.setNotes(currentJobNotes);
 
@@ -272,7 +269,7 @@ public class AutosysToTidalTransformer implements ITransformer<List<AutosysAbstr
 		baseCsvJobObject.setName(autosysAbstractJob.getName());
 		baseCsvJobObject.setNotes(autosysAbstractJob.getDescription());
 
-		if (baseCsvJobObject.getName().equalsIgnoreCase("FAL_QNXT_0120_010.1C3_FALCarrierMemIdUpdate")) {
+		if (baseCsvJobObject.getName().equalsIgnoreCase("CPL_QNXT_6280_020.ETS_EDI_834_837_ALL_IN")) {
 			baseCsvJobObject.getName();
 		}
 

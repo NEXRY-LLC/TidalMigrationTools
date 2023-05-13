@@ -37,9 +37,9 @@ public class AutosysJobVisitorImpl implements AutosysJobVisitor {
 	 * Helper method unique to all other implementations of `visit` method. Same as
 	 * one in EspJobVisitorImpl class.
 	 */
-	private void visitCommon(AutosysAbstractJob job, List<String> lines, List<AutosysAbstractJob> parents, Function2<String, String, Boolean> lambdaFunction) {
+	private void visitCommon(AutosysAbstractJob job, List<String> lines, Function2<String, String, Boolean> lambdaFunction) {
 
-		if(job.getName().equals("FAL_QNXT_0120_010.1C3_FALCarrierMemIdUpdate")) {
+		if (job.getName().equals("FAL_QNXT_0120_010.1C3_FALCarrierMemIdUpdate")) {
 			job.getName();
 		}
 		List<String> notificationEmailAddressOnSuccessList = new ArrayList<>();
@@ -54,18 +54,17 @@ public class AutosysJobVisitorImpl implements AutosysJobVisitor {
 			String key = null;
 			String value = null;
 
-			if(line.contains(":")) {
-				// Fixing this. description: "Special Instructions: For Exit 1012, or 1096 Set job to completed normally,For any other errors. Escalations:  EDI Hosted Support"
+			if (line.contains(":")) {
+				// Fixing this. description: "Special Instructions: For Exit 1012, or 1096 Set job to completed normally,For any other errors. Escalations: EDI Hosted Support"
 				// where there are multiple : chars
 				int idx = line.indexOf(":");
 
 				key = line.substring(0, idx);
-				value = line.substring(idx+1).trim();
+				value = line.substring(idx + 1).trim();
 
-			}else {
+			} else {
 				throw new TidalException("Unknown Line type, missing : char" + line);
 			}
-
 
 			switch (key) {
 			case "notification_emailaddress_on_success":
@@ -92,7 +91,7 @@ public class AutosysJobVisitorImpl implements AutosysJobVisitor {
 					continue;
 			}
 
-			fillInDefaultProperties(job, parents, key, value);
+			fillInDefaultProperties(job, key, value);
 
 			log.debug("Processing job[{}]; Setting name[{}]={}...", job.getFullPath(), key, value);
 		}
@@ -119,15 +118,15 @@ public class AutosysJobVisitorImpl implements AutosysJobVisitor {
 	}
 
 	@Override
-	public void visit(AutosysBoxJob autosysBoxJob, List<String> lines, List<AutosysAbstractJob> parents) {
-		if(autosysBoxJob.getName().equals("CMC_FACE_6180__ETS_FACE_CMCX_OPTI_MED_RX_IN")) {
+	public void visit(AutosysBoxJob autosysBoxJob, List<String> lines) {
+		if (autosysBoxJob.getName().equals("CMC_FACE_6180__ETS_FACE_CMCX_OPTI_MED_RX_IN")) {
 			autosysBoxJob.getName();
 		}
 
-		this.visitCommon(autosysBoxJob, lines, parents, (key, value) -> {
+		this.visitCommon(autosysBoxJob, lines, (key, value) -> {
 			switch (key) {
 			case "box_success":
-					//autosysBoxJob.setBoxSuccess(AutosysDependencyParserUtil.processJobExpresionData(autosysBoxJob, value));
+				// autosysBoxJob.setBoxSuccess(AutosysDependencyParserUtil.processJobExpresionData(autosysBoxJob, value));
 				break;
 			default:
 				// no statement hit
@@ -138,8 +137,8 @@ public class AutosysJobVisitorImpl implements AutosysJobVisitor {
 	}
 
 	@Override
-	public void visit(AutosysCommandLineJob autosysCommandLineJob, List<String> lines, List<AutosysAbstractJob> parents) {
-		this.visitCommon(autosysCommandLineJob, lines, parents, (key, value) -> {
+	public void visit(AutosysCommandLineJob autosysCommandLineJob, List<String> lines) {
+		this.visitCommon(autosysCommandLineJob, lines, (key, value) -> {
 			switch (key) {
 			case "chk_files": // currently NOT present in any AUTOSYS dump file
 				autosysCommandLineJob.setChkFiles(value);
@@ -174,8 +173,8 @@ public class AutosysJobVisitorImpl implements AutosysJobVisitor {
 	}
 
 	@Override
-	public void visit(AutosysFileTriggerJob autosysFileTriggerJob, List<String> lines, List<AutosysAbstractJob> parents) {
-		this.visitCommon(autosysFileTriggerJob, lines, parents, (key, value) -> {
+	public void visit(AutosysFileTriggerJob autosysFileTriggerJob, List<String> lines) {
+		this.visitCommon(autosysFileTriggerJob, lines, (key, value) -> {
 			switch (key) {
 			case "continuous":
 				autosysFileTriggerJob.setContinuous(value);
@@ -219,8 +218,8 @@ public class AutosysJobVisitorImpl implements AutosysJobVisitor {
 	}
 
 	@Override
-	public void visit(AutosysFileWatcherJob autosysFileWatcherJob, List<String> lines, List<AutosysAbstractJob> parents) {
-		this.visitCommon(autosysFileWatcherJob, lines, parents, (key, value) -> {
+	public void visit(AutosysFileWatcherJob autosysFileWatcherJob, List<String> lines) {
+		this.visitCommon(autosysFileWatcherJob, lines, (key, value) -> {
 			switch (key) {
 			case "profile":
 				autosysFileWatcherJob.setProfile(value);
@@ -244,8 +243,8 @@ public class AutosysJobVisitorImpl implements AutosysJobVisitor {
 	}
 
 	@Override
-	public void visit(AutosysSqlAgentJob autosysSqlAgentJob, List<String> lines, List<AutosysAbstractJob> parents) {
-		this.visitCommon(autosysSqlAgentJob, lines, parents, (key, value) -> {
+	public void visit(AutosysSqlAgentJob autosysSqlAgentJob, List<String> lines) {
+		this.visitCommon(autosysSqlAgentJob, lines, (key, value) -> {
 			switch (key) {
 			case "sqlagent_user_name":
 				autosysSqlAgentJob.setSqlAgentUserName(value);
@@ -271,8 +270,8 @@ public class AutosysJobVisitorImpl implements AutosysJobVisitor {
 	}
 
 	@Override
-	public void visit(AutosysWindowsServiceMonitoringJob autosysWindowsServiceMonitoringJob, List<String> lines, List<AutosysAbstractJob> parents) {
-		this.visitCommon(autosysWindowsServiceMonitoringJob, lines, parents, (key, value) -> {
+	public void visit(AutosysWindowsServiceMonitoringJob autosysWindowsServiceMonitoringJob, List<String> lines) {
+		this.visitCommon(autosysWindowsServiceMonitoringJob, lines, (key, value) -> {
 			switch (key) {
 			case "monitor_mode":
 				autosysWindowsServiceMonitoringJob.setMonitorMode(AutosysWindowsServiceMonitoringJob.MonitorModeType.valueOf(value));
@@ -297,7 +296,7 @@ public class AutosysJobVisitorImpl implements AutosysJobVisitor {
 
 	private AutosysResourceStatement extractResourceStatement(String resourceString) {
 
-		if(StringUtils.isBlank(resourceString)) {
+		if (StringUtils.isBlank(resourceString)) {
 			return null;
 		}
 
@@ -316,26 +315,33 @@ public class AutosysJobVisitorImpl implements AutosysJobVisitor {
 		return new AutosysResourceStatement(statementParts.get(0), Integer.parseInt(statementParts.get(1)));
 	}
 
-	private void fillInDefaultProperties(AutosysAbstractJob job, List<AutosysAbstractJob> parents, String key, String value) {
+	private void fillInDefaultProperties(AutosysAbstractJob job, String key, String value) {
 		if (job.getName().equals("FAL_QNXT_0120_010.1C3_FALCarrierMemIdUpdate")) {
 			job.getName();
 		}
 
 		switch (key) {
 		case "box_name":
-			// TODO: Analyze box_name in AUTOSYS documentation for better understanding how
-			// it works as parent. Also, does each job MUST have a parent?
-			AutosysAbstractJob parent = parents.stream().filter(f -> f.getName().trim().toLowerCase().equals(value.trim().toLowerCase())).findAny().orElse(null);
 
-			if (parent != null) {
-				this.model.getBaseObjectById(parent.getId()).addChild(job);
-				log.debug("Added Job[{}] to parent[{}]", job.getFullPath(), parent.getFullPath());
+			value = value.trim();
+			//model.getBaseObjectByName(value.trim());
+
+			if (StringUtils.isBlank(value)) {
+				break;
 			} else {
-				log.error("ERROR in locating Parent[{}] for Job[{}]; object.name={}", value, job.getFullPath(), job.getName());
-				// TODO: Uncomment later below thrown RuntimeException!
-				// throw new RuntimeException("ERROR in locating Parent[" + value + "] for Job["
-				// + object.getFullPath() + "]");
+				AutosysAbstractJob parent = model.getBaseObjectByName(value);
+
+				// parents.stream().filter(f -> f.getName().trim().toLowerCase().equals(value.trim().toLowerCase())).findAny().orElse(null);
+
+				if (parent != null) {
+					parent.addChild(job);
+					//log.debug("Added Job[{}] to parent[{}]", job.getFullPath(), parent.getFullPath());
+				} else {
+					log.info("ERROR in locating Parent[{}] for Job[{}]; object.name={}", value, job.getFullPath(), job.getName());
+					throw new RuntimeException("ERROR in locating Parent[" + value + "] for Job["+ job.getFullPath() + "]");
+				}
 			}
+			
 			break;
 		case "condition":
 			job.setCondition(AutosysDependencyParserUtil.processJobExpresionData(job, value));
@@ -470,7 +476,7 @@ public class AutosysJobVisitorImpl implements AutosysJobVisitor {
 		case "fail_codes":
 		case "svcdesk_imp":
 		case "svcdesk_pri":
-			//job.setNotificationMsg(value);
+			// job.setNotificationMsg(value);
 			break;
 
 		default:

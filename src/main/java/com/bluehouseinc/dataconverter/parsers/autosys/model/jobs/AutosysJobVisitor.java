@@ -11,15 +11,15 @@ import com.bluehouseinc.dataconverter.parsers.autosys.model.jobs.impl.AutosysWin
 
 public interface AutosysJobVisitor {
 
-	void visit(AutosysBoxJob autosysBoxJob, List<String> lines, List<AutosysAbstractJob> parents);
+	void visit(AutosysBoxJob autosysBoxJob, List<String> lines);
 
-	void visit(AutosysCommandLineJob autosysCommandLineJob, List<String> lines, List<AutosysAbstractJob> parents);
+	void visit(AutosysCommandLineJob autosysCommandLineJob, List<String> lines);
 
-	void visit(AutosysFileTriggerJob autosysFileTriggerJob, List<String> lines, List<AutosysAbstractJob> parents);
+	void visit(AutosysFileTriggerJob autosysFileTriggerJob, List<String> lines);
 
-	void visit(AutosysFileWatcherJob autosysFileWatcherJob, List<String> lines, List<AutosysAbstractJob> parents);
+	void visit(AutosysFileWatcherJob autosysFileWatcherJob, List<String> lines);
 
-	void visit(AutosysSqlAgentJob autosysSqlAgentJob, List<String> lines, List<AutosysAbstractJob> parents);
+	void visit(AutosysSqlAgentJob autosysSqlAgentJob, List<String> lines);
 
-	void visit(AutosysWindowsServiceMonitoringJob autosysWindowsServiceMonitoringJob, List<String> lines, List<AutosysAbstractJob> parents);
+	void visit(AutosysWindowsServiceMonitoringJob autosysWindowsServiceMonitoringJob, List<String> lines);
 }

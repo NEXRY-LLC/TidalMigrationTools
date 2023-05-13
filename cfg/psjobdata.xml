@@ -1,302 +1,48 @@
-<jobdef>
-	<userid />
-	<username />
-	<userdomain />
-	<properties />
-	<parameters />
-	<steps>
-		<step psjob_step="1">
-			<distributions />
-			<psjob_procname>CBPURVCH</psjob_procname>
-			<descr>Purolator Invoice Inbound Inv</descr>
-			<psjob_proctype>PSJob</psjob_proctype>
-			<psjob_componentname>CB_AP_VCHR_RUN.GBL</psjob_componentname>
-			<psjob_always>1</psjob_always>
-			<psjob_runcontrol>CB_INB_VCHR_PUR</psjob_runcontrol>
-			<outputtype />
-			<psjob_output>0</psjob_output>
-			<outputformat />
-			<psjob_outfmt>0</psjob_outfmt>
-			<psjob_outdest />
-			<psjob_userdistributionid />
-			<outdest_over>Y</outdest_over>
-			<psjob_server />
-			<psjob_saoutput />
-			<psjob_runmask />
-			<psjob_runvals>
-				<param name="MKT">
-					<var.compound>GBL</var.compound>
-				</param>
-				<param name="RID">
-					<var.compound>CB_AP_VCHR_RUN_RUN_CNTL_ID</var.compound>
-				</param>
-				<param name="URL">
-					<var.compound>http://pswebdev1.cb.crateandbarrel.com:8500/psp/fsuat/EMPLOYEE/ERP/c/CB_INTEGRATION_MNU.CB_AP_VCHR_RUN.GBLc/CB_INTEGRATION_MNU.CB_AP_VCHR_RUN.GBL
-					</var.compound>
-				</param>
-				<param name="PNL">
-					<var.compound>AP Voucher upload program : Load CB Custom Vouchers
-					</var.compound>
-				</param>
-				<param name="RCTL">
-					<var.compound>c/CB_INTEGRATION_MNU.CB_AP_VCHR_RUN.GBL
-					</var.compound>
-				</param>
-			</psjob_runvals>
-			<psjob_extrunvals />
-			<longdescr />
-			<parmlist />
-			<rctable1 />
-			<rctable2>CB_AP_VCHR_RUN</rctable2>
-			<psjob_instance />
-			<psjob_runstatus />
-			<psjob_cmdline />
-			<psjob_runstart />
-			<psjob_runfinish />
-			<psjob_parmlist />
-		</step>
-		<step parent_step="1" psjob_step="2">
-			<distributions />
-			<psjob_procname>CB_VCHR_IN</psjob_procname>
-			<descr>Voucher Interface process</descr>
-			<psjob_proctype>Application Engine</psjob_proctype>
-			<psjob_componentname>CB_AP_VCHR_RUN.GBL</psjob_componentname>
-			<psjob_always>1</psjob_always>
-			<psjob_runcontrol>CB_INB_VCHR_PUR</psjob_runcontrol>
-			<outputtype>File</outputtype>
-			<psjob_output>2</psjob_output>
-			<outputformat>TXT</outputformat>
-			<psjob_outfmt>14</psjob_outfmt>
-			<psjob_outdest>%Log/Output Directory%</psjob_outdest>
-			<psjob_userdistributionid />
-			<outdest_over>N</outdest_over>
-			<psjob_server />
-			<psjob_saoutput />
-			<psjob_runmask />
-			<psjob_runvals>
-				<param name="MKT">
-					<var.compound>GBL</var.compound>
-				</param>
-				<param name="RID">
-					<var.compound>CB_AP_VCHR_RUN_RUN_CNTL_ID</var.compound>
-				</param>
-				<param name="URL">
-					<var.compound>http://pswebdev1.cb.crateandbarrel.com:8500/psp/fsuat/EMPLOYEE/ERP/c/CB_INTEGRATION_MNU.CB_AP_VCHR_RUN.GBLc/CB_INTEGRATION_MNU.CB_AP_VCHR_RUN.GBL
-					</var.compound>
-				</param>
-				<param name="PNL">
-					<var.compound>AP Voucher upload program : Load CB Custom Vouchers
-					</var.compound>
-				</param>
-				<param name="RCTL">
-					<var.compound>c/CB_INTEGRATION_MNU.CB_AP_VCHR_RUN.GBL
-					</var.compound>
-				</param>
-			</psjob_runvals>
-			<psjob_extrunvals />
-			<longdescr>Application engine for loading invoice inbound files to PS
-				stgaing tables
-			</longdescr>
-			<parmlist>-CT %%DBTYPE%% -CD %%DBNAME%% -CO "%%OPRID%%" -CP
-				%%OPRPSWD%% -R %%RUNCNTLID%% -I %%INSTANCE%% -AI %%PRCSNAME%% -OT
-				%%OUTDESTTYPE%% -FP "%%OUTDEST%%" -OF %%OUTDESTFORMAT%% </parmlist>
-			<rctable1 />
-			<rctable2>CB_AP_VCHR_RUN</rctable2>
-			<psjob_instance />
-			<psjob_runstatus />
-			<psjob_cmdline />
-			<psjob_runstart />
-			<psjob_runfinish />
-			<psjob_parmlist />
-		</step>
-		<step parent_step="1" psjob_step="3">
-			<distributions />
-			<psjob_procname>AP_VCHRBLD</psjob_procname>
-			<descr>Voucher Build</descr>
-			<psjob_proctype>Application Engine</psjob_proctype>
-			<psjob_componentname>CB_AP_VCHR_RUN.GBL</psjob_componentname>
-			<psjob_always>1</psjob_always>
-			<psjob_runcontrol>CB_INB_VCHR_PUR</psjob_runcontrol>
-			<outputtype>File</outputtype>
-			<psjob_output>2</psjob_output>
-			<outputformat>TXT</outputformat>
-			<psjob_outfmt>14</psjob_outfmt>
-			<psjob_outdest>%Log/Output Directory%</psjob_outdest>
-			<psjob_userdistributionid />
-			<outdest_over>N</outdest_over>
-			<psjob_server />
-			<psjob_saoutput />
-			<psjob_runmask />
-			<psjob_runvals>
-				<param name="MKT">
-					<var.compound>GBL</var.compound>
-				</param>
-				<param name="RID">
-					<var.compound>CB_AP_VCHR_RUN_RUN_CNTL_ID</var.compound>
-				</param>
-				<param name="URL">
-					<var.compound>http://pswebdev1.cb.crateandbarrel.com:8500/psp/fsuat/EMPLOYEE/ERP/c/CB_INTEGRATION_MNU.CB_AP_VCHR_RUN.GBLc/CB_INTEGRATION_MNU.CB_AP_VCHR_RUN.GBL
-					</var.compound>
-				</param>
-				<param name="PNL">
-					<var.compound>AP Voucher upload program : Load CB Custom Vouchers
-					</var.compound>
-				</param>
-				<param name="RCTL">
-					<var.compound>c/CB_INTEGRATION_MNU.CB_AP_VCHR_RUN.GBL
-					</var.compound>
-				</param>
-			</psjob_runvals>
-			<psjob_extrunvals />
-			<longdescr>Builds vouchers from the Quick Invoice Panels and other
-				Interface sources, Validates, Calculates, and Pro-Rates Voucher
-				Data.
-			</longdescr>
-			<parmlist>-CT %%DBTYPE%% -CD %%DBNAME%% -CO "%%OPRID%%" -CP
-				%%OPRPSWD%% -R %%RUNCNTLID%% -I %%INSTANCE%% -AI %%PRCSNAME%% -OT
-				%%OUTDESTTYPE%% -FP "%%OUTDEST%%" -OF %%OUTDESTFORMAT%% -TRACE 3
-			</parmlist>
-			<rctable1 />
-			<rctable2>CB_AP_VCHR_RUN</rctable2>
-			<psjob_instance />
-			<psjob_runstatus />
-			<psjob_cmdline />
-			<psjob_runstart />
-			<psjob_runfinish />
-			<psjob_parmlist />
-		</step>
-	</steps>
-	<cmd>CBPURVCH (CB_INB_VCHR_PUR)</cmd>
-</jobdef>
-
-
-
-
-<jobdef>
-	<userid />
-	<username />
-	<userdomain />
-	<properties />
-	<parameters />
-	<steps>
-		<step psjob_step="1">
-			<distributions />
-			<psjob_procname>CB_TRECAP_OB</psjob_procname>
-			<descr>AP TRec Outbound Interface</descr>
-			<psjob_proctype>Application Engine</psjob_proctype>
-			<psjob_componentname>CB_APITRFC_RUN_CMP.GBL.AP TRec Outbound
-			</psjob_componentname>
-			<psjob_always>0</psjob_always>
-			<psjob_runcontrol>AP_OUT_TREC_EDI00</psjob_runcontrol>
-			<outputtype>Email</outputtype>
-			<psjob_output>5</psjob_output>
-			<outputformat>TXT</outputformat>
-			<psjob_outfmt>14</psjob_outfmt>
-			<psjob_outdest>kkane@crateandbarrel.com</psjob_outdest>
-			<psjob_userdistributionid />
-			<outdest_over>Y</outdest_over>
-			<psjob_server />
-			<psjob_saoutput />
-			<psjob_runmask />
-			<psjob_runvals>
-				<param name="MKT">
-					<var.compound>GBL</var.compound>
-				</param>
-				<param name="RID">
-					<var.compound>CB_I020_HD_RUN_RUN_CNTL_ID</var.compound>
-				</param>
-				<param name="URL">
-					<var.compound>http://pswebdev1.cb.crateandbarrel.com:8500/psp/fsuat/EMPLOYEE/ERP/c/CB_INTEGRATION_MNU.CB_APITRFC_RUN_CMP.GBL
-					</var.compound>
-				</param>
-				<param name="PNL">
-					<var.compound>APTRec Outbound Interface : AP TRec Outbound
-					</var.compound>
-				</param>
-				<param name="RCTL">
-					<var.compound>c/CB_INTEGRATION_MNU.CB_APITRFC_RUN_CMP.GBL
-					</var.compound>
-				</param>
-			</psjob_runvals>
-			<psjob_extrunvals />
-			<longdescr>AP TRec Payment Outbound Interface process</longdescr>
-			<parmlist>-TRACE 135 -TOOLSTRACEPC 4044 -TOOLSTRACESQL 31 -CT
-				%%DBTYPE%% -CD %%DBNAME%% -CO "%%OPRID%%" -CP %%OPRPSWD%% -R
-				%%RUNCNTLID%% -I %%INSTANCE%% -AI %%PRCSNAME%% -OT %%OUTDESTTYPE%%
-				-FP "%%OUTDEST%%" -OF %%OUTDESTFORMAT%%</parmlist>
-			<rctable1 />
-			<rctable2>CB_I020_HD_RUN</rctable2>
-			<psjob_instance />
-			<psjob_runstatus />
-			<psjob_cmdline />
-			<psjob_runstart />
-			<psjob_runfinish />
-			<psjob_parmlist />
-		</step>
-	</steps>
-	<cmd>CB_TRECAP_OB (AP_OUT_TREC_EDI00)</cmd>
-</jobdef>
-
-
-
-<jobdef>
-	<userid />
-	<username />
-	<userdomain />
-	<properties />
-	<parameters />
-	<steps>
-		<step psjob_step="1">
-			<distributions />
-			<psjob_procname>PTPDBTST</psjob_procname>
-			<descr>Simple COBOL test program.</descr>
-			<psjob_proctype>COBOL SQL</psjob_proctype>
-			<psjob_componentname>PRCSMULTI.GBL.Sample Processes
-			</psjob_componentname>
-			<psjob_always>0</psjob_always>
-			<psjob_runcontrol>DAN</psjob_runcontrol>
-			<outputtype>(None)</outputtype>
-			<psjob_output>1</psjob_output>
-			<outputformat>(None)</outputformat>
-			<psjob_outfmt>1</psjob_outfmt>
-			<psjob_outdest>%Log/Output Directory%</psjob_outdest>
-			<psjob_userdistributionid />
-			<outdest_over>Y</outdest_over>
-			<psjob_server />
-			<psjob_saoutput />
-			<psjob_runmask />
-			<psjob_runvals>
-				<param name="MKT">
-					<var.compound>GBL</var.compound>
-				</param>
-				<param name="RID">
-					<var.compound>PRCSRUNCNTL_RUN_CNTL_ID</var.compound>
-				</param>
-				<param name="URL">
-					<var.compound>http://pswebdev1.cb.crateandbarrel.com:8500/psp/fsuat/EMPLOYEE/ERP/c/PROCESS_SCHEDULER.PRCSMULTI.GBL
-					</var.compound>
-				</param>
-				<param name="PNL">
-					<var.compound>Sample Processes</var.compound>
-				</param>
-				<param name="RCTL">
-					<var.compound>c/PROCESS_SCHEDULER.PRCSMULTI.GBL</var.compound>
-				</param>
-			</psjob_runvals>
-			<psjob_extrunvals />
-			<longdescr>Test DB connect and Process Scheduler Updates</longdescr>
-			<parmlist> %%PRCSNAME%%
-				%%DBTYPE%%/%%DBNAME%%/%%OPRID%%/%%OPRPSWD%%/%%RUNCNTLID%%/%%INSTANCE%%//%%DBFLAG%%
-			</parmlist>
-			<rctable1 />
-			<rctable2>PRCSRUNCNTL</rctable2>
-			<psjob_instance />
-			<psjob_runstatus />
-			<psjob_cmdline />
-			<psjob_runstart />
-			<psjob_runfinish />
-			<psjob_parmlist />
-		</step>
-	</steps>
-	<cmd>PTPDBTST (DAN)</cmd>
-</jobdef>
+<?xml version="1.0"?>
+<atom:entry xmlns="" xmlns:atom="http://purl.org/atom/ns#"
+	xmlns:tes="http://www.tidalsoftware.com/client/tesservlet">
+	<FileWatcherJob.create>
+		<FileWatcherJob>
+			<tes:active>N</tes:active>
+			<tes:agentid>169</tes:agentid>
+			<tes:allowrerun>Y</tes:allowrerun>
+			<tes:allowunscheduled>Y</tes:allowunscheduled>
+			<tes:calendarid>23149</tes:calendarid>
+			<tes:calendarname>CTS.Daily_OffSet</tes:calendarname>
+			<tes:dependencylogic>1</tes:dependencylogic>
+			<tes:directory>\\n07.cishoc.com\dfs\GSPRD\PUBLIC\PROD\QNXT\5x\Region_3\Dropoff\INTERFACES\\
+			</tes:directory>
+			<tes:existence>T</tes:existence>
+			<tes:filemask></tes:filemask>
+			<tes:filematchall>F</tes:filematchall>
+			<tes:fullpath>\TESTING_AUTOSYS\PCH_QNXT\PCH_QNXT_0220_010.ETS_ChangeHealth_AutoAdjust_IN.FT00
+			</tes:fullpath>
+			<tes:inheritagent>N</tes:inheritagent>
+			<tes:inheritcalendar>N</tes:inheritcalendar>
+			<tes:inheritoptions>N</tes:inheritoptions>
+			<tes:inheritrepeat>N</tes:inheritrepeat>
+			<tes:inherittimewindow>N</tes:inherittimewindow>
+			<tes:jobclassid>446</tes:jobclassid>
+			<tes:name>PCH_QNXT_0220_010.ETS_ChangeHealth_AutoAdjust_IN.FT00
+			</tes:name>
+			<tes:ownerid>13633</tes:ownerid>
+			<tes:ownername>Cognizant_WRKG</tes:ownername>
+			<tes:parentid>1251981</tes:parentid>
+			<tes:pollinterval>60</tes:pollinterval>
+			<tes:pollintervalunit>second</tes:pollintervalunit>
+			<tes:polllifetime>86700</tes:polllifetime>
+			<tes:polllifetimeunit>second</tes:polllifetimeunit>
+			<tes:runtimeusername>n07prodbatch</tes:runtimeusername>
+			<tes:runuserid>13646</tes:runuserid>
+			<tes:searchrecursive>F</tes:searchrecursive>
+			<tes:timewindowfromtime>2023-05-12T01:35:00-0400
+			</tes:timewindowfromtime>
+			<tes:timewindowfromtimeasstring>20230512013500
+			</tes:timewindowfromtimeasstring>
+			<tes:timewindowoption>4</tes:timewindowoption>
+			<tes:type>18</tes:type>
+		</FileWatcherJob>
+	</FileWatcherJob.create>
+	<atom:id>xxx</atom:id>
+	<atom:title>HTTP</atom:title>
+</atom:entry>

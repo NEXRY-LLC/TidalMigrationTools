@@ -93,8 +93,7 @@ public class JobCompoundDepExecutor extends AbstractAPIExecutor {
 
 				if (destdep !=null && destdep.equals(sourcedep)) {
 					// Do nothing , we are already setup?
-					log.debug("doProcessCompoundDependency Skipping Job [" + source.getFullPath() + "] Type["
-							+ source.getClass().getSimpleName() + "] Compound Dependency already setup.");
+					log.debug("doProcessCompoundDependency Skipping Job [" + source.getFullPath() + "] Type["+source.getClass().getSimpleName() + "] Compound Dependency already setup.");
 				} else {
 					destination.setCompounddependencies(sourcedep);
 
@@ -119,7 +118,7 @@ public class JobCompoundDepExecutor extends AbstractAPIExecutor {
 
 		} catch (Exception e) {
 			log.error(e);
-			throw new TidalException(e);
+			//throw new TidalException(e);
 		} finally {
 			bar.step();
 		}

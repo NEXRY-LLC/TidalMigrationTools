@@ -25,10 +25,13 @@ public abstract class BaseJobOrGroupObject {
 	protected List<? super BaseJobOrGroupObject> children = new LinkedList<>();
 
 	@Include
+	@EqualsAndHashCode.Include
 	@CsvBindByName
 	protected Integer id;
 
+
 	@Include
+	@EqualsAndHashCode.Include
 	@CsvBindByName
 	protected String name;
 

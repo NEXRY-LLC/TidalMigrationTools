@@ -5,6 +5,6 @@ import java.util.List;
 public interface AutosysJob {
 
 	// It is mandatory to pass in `parents` as param to keep track of parent-child relationship
-	void accept(AutosysJobVisitor autosysJobVisitor, List<String> lines, List<AutosysAbstractJob> parents);
+	void accept(AutosysJobVisitor autosysJobVisitor, List<String> lines);
 
 }

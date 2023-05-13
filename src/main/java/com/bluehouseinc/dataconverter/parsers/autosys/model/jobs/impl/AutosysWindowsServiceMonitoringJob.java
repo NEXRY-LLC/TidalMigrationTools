@@ -21,8 +21,8 @@ public class AutosysWindowsServiceMonitoringJob extends AutosysAbstractJob {
 	}
 
 	@Override
-	public void accept(AutosysJobVisitor autosysJobVisitor, List<String> lines, List<AutosysAbstractJob> parents) {
-		autosysJobVisitor.visit(this, lines, parents);
+	public void accept(AutosysJobVisitor autosysJobVisitor, List<String> lines) {
+		autosysJobVisitor.visit(this, lines);
 	}
 
 	// https://techdocs.broadcom.com/us/en/ca-enterprise-software/intelligent-automation/autosys-workload-automation/12-0-01/reference/ae-job-information-language/jil-job-definitions/win-service-status-attribute-specify-the-status-of-the-windows-service-to-be-monitored.html

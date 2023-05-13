@@ -196,10 +196,10 @@ public class TidalImporter {
 
 		new DependencyExecutor(tidal, model, cp).execute();
 
-		new JobCompoundDepExecutor(tidal, model, cp).execute();
-
 		new JobResourceJoinExecutor(tidal, model, cp).execute();
-
+		
+		//  the last thing as its causing issues
+		new JobCompoundDepExecutor(tidal, model, cp).execute();
 
 		// sw.prettyPrint();
 

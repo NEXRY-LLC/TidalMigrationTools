@@ -115,58 +115,60 @@ public abstract class BaseParserDataModel<E extends BaseJobOrGroupObject, P exte
 		}
 	}
 
-	// synchronized private void dupNameCheck(String name) {
-	// this.dataObjects.stream().forEach(f -> dupNameCheck(name.toLowerCase(), f));
-	// }
-	//
-	// synchronized private void dupNameCheck(String name, BaseJobOrGroupObject object) {
-	//
-	// if (object.getName().toLowerCase().equals(name)) {
-	// throw new RuntimeException("Duplicate Job/Group[" + object.getFullPath() + "] detected");
-	// }
-	//
-	// object.getChildren().forEach(c -> dupNameCheck(name, c));
-	//
-	// }
+	public List<E> getBaseObjectsNameBeginsWith(String name) {
+		List<E> objs = ObjectUtils.toFlatStream(this.getDataObjects()).filter(f -> f.getName().toLowerCase().trim().startsWith(name.toLowerCase().trim())).collect(Collectors.toList());
 
-	private Map<String, E> cacheJobByName = null;
-	
-	private Map<String, E> getLoadedJobCache() {
-		if (cacheJobByName == null) {
-			this.cacheJobByName = new HashMap<>();
-			ObjectUtils.toFlatStream(this.getDataObjects()).forEach(jobOrGroup -> {
-				if (this.cacheJobByName.containsKey(jobOrGroup.getFullPath())) {
-					log.debug("already contains key: " + jobOrGroup.getFullPath());
-				}
-				this.cacheJobByName.put(jobOrGroup.getName(), jobOrGroup);
-			});
+		return objs;
+	}
+
+	private boolean nameMatches(E obj,String name) {
+		String jobname  = obj.getName();
+		//log.info("Check job {} match name {}",jobname, name);
+		
+		if(jobname.equals("DHP_EDM_PROD_6100_010.ETS_837_ENC_OUT.FT00")) {
+			name.getBytes();
+		}
+
+		if(jobname.toLowerCase().trim().equals(name.toLowerCase().trim())) {
+			return true;
 		}
 		
-		return cacheJobByName;
+		return false;
 	}
 	
-	
-	public List<E> getBaseObjectsNameBeginsWith(String name) {
-		List<E> data = new ArrayList<>();
+	@SuppressWarnings("unchecked")
+	private E getJobByName(String name, E job) {
 		
-		getLoadedJobCache().keySet().forEach( f -> {
-			
-			if(f.startsWith(name)) {
-				data.add(getLoadedJobCache().get(f));
+		if(nameMatches(job, name)) {
+			return job;
+		}else {
+			for(BaseJobOrGroupObject obj : job.getChildren()) {
+				return getJobByName(name,(E) obj);
 			}
-		});
+			//job.getChildren().forEach(f -> getJobByName(name,(E) f));
+		}
 		
-		return data;
+		return null;
+	}
+	
+	public E getJobByName(String name) {
+		if(name.equals("DHP_EDM_PROD_6100_010.ETS_837_ENC_OUT.FT00")) {
+			name.getBytes();
+		}
+
+		for(E obj : getDataObjects()) {
+			E found =  getJobByName(name, obj);
+			
+			if(found != null) {
+				return found;
+			}
+		}
+
+		return null;
 	}
 	
 	public E getBaseObjectByName(String name) {
-		
-		if (getLoadedJobCache().containsKey(name)) {
-			return getLoadedJobCache().get(name);
-		}
-
-
-		List<E> objs = ObjectUtils.toFlatStream(this.getDataObjects()).filter(f -> f.getName().trim().equalsIgnoreCase(name.trim())).collect(Collectors.toList());
+		List<E> objs = ObjectUtils.toFlatStream(this.getDataObjects()).filter(f -> f.getName().toLowerCase().trim().equalsIgnoreCase(name.toLowerCase().trim())).collect(Collectors.toList());
 
 		if (objs.isEmpty()) {
 			return null;
@@ -196,4 +198,5 @@ public abstract class BaseParserDataModel<E extends BaseJobOrGroupObject, P exte
 		return ObjectUtils.toFlatStream(this.getDataObjects()).filter(f -> type.isInstance(f)).collect(Collectors.toList());
 	}
 
+	
 }
