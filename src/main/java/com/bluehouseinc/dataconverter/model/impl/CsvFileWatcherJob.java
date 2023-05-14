@@ -37,6 +37,13 @@ public class CsvFileWatcherJob extends BaseCsvJobObject {
 	@CsvBindByName
 	TrueFalse fileExist = TrueFalse.YES; // Default
 
+	@CsvBindByName
+	TrueFalse recursive = TrueFalse.NO; // Default
+
+	@CsvBindByName
+	TrueFalse pollContinuously = TrueFalse.NO; // Default
+
+	
 	@Override
 	public JobType getType() {
 		return JobType.FILEWATCHER;

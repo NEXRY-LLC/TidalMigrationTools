@@ -41,7 +41,7 @@
             <Policies>
                 <SizeBasedTriggeringPolicy size="500 MB" />
             </Policies>
-            <DefaultRolloverStrategy max="10" />
+            <DefaultRolloverStrategy max="3" />
         </RollingFile>
         
 		<RollingFile name="ConsoleLogAppender" fileName="${LOG_CONSOLE_FILE}" filePattern="${LOG_CONSOLE_FILE_PATTERN}" append="true">
@@ -50,7 +50,7 @@
             <Policies>
                 <SizeBasedTriggeringPolicy size="500 MB" />
             </Policies>
-            <DefaultRolloverStrategy max="10" />
+            <DefaultRolloverStrategy max="3" />
         </RollingFile>
 
         <RollingFile name="ErrorLogAppender" fileName="${LOG_ERROR_FILE}" filePattern="${LOG_ERROR_FILE_PATTERN}" append="true">
@@ -59,7 +59,7 @@
             <Policies>
                 <SizeBasedTriggeringPolicy size="500 MB" />
             </Policies>
-            <DefaultRolloverStrategy max="10" />
+            <DefaultRolloverStrategy max="3" />
         </RollingFile>
 
         <RollingFile name="DebugLogAppender" fileName="${LOG_DEBUG_FILE}" filePattern="${LOG_DEBUG_FILE_PATTERN}" append="true">
@@ -68,7 +68,7 @@
             <Policies>
                 <SizeBasedTriggeringPolicy size="500 MB" />
             </Policies>
-            <DefaultRolloverStrategy max="10" />
+            <DefaultRolloverStrategy max="3" />
         </RollingFile>
 
         <RollingFile name="InfoLogAppender" fileName="${LOG_INFO_FILE}" filePattern="${LOG_INFO_FILE_PATTERN}" append="true">
@@ -77,7 +77,7 @@
             <Policies>
                 <SizeBasedTriggeringPolicy size="500 MB" />
             </Policies>
-            <DefaultRolloverStrategy max="10" />
+            <DefaultRolloverStrategy max="3" />
         </RollingFile>
 
         <RollingFile name="APIDebugLogAppender" fileName="${LOG_API_DEBUG_FILE}" filePattern="${LOG_DEBUG_FILE_PATTERN}" append="true">
@@ -86,7 +86,7 @@
             <Policies>
                 <SizeBasedTriggeringPolicy size="500 MB" />
             </Policies>
-            <DefaultRolloverStrategy max="10" />
+            <DefaultRolloverStrategy max="3" />
         </RollingFile>
 	</Appenders>
 

@@ -20,8 +20,10 @@ import com.bluehouseinc.dataconverter.parsers.autosys.model.jobs.impl.AutosysFil
 import com.bluehouseinc.dataconverter.parsers.autosys.model.jobs.impl.AutosysFileWatcherJob;
 import com.bluehouseinc.dataconverter.parsers.autosys.model.jobs.impl.AutosysSqlAgentJob;
 import com.bluehouseinc.dataconverter.parsers.autosys.model.jobs.impl.AutosysWindowsServiceMonitoringJob;
+import com.bluehouseinc.dataconverter.parsers.autosys.model.jobs.util.AutosysYesNoType;
 import com.bluehouseinc.dataconverter.parsers.autosys.model.statements.AutosysResourceStatement;
 import com.bluehouseinc.tidal.api.exceptions.TidalException;
+import com.bluehouseinc.tidal.api.model.TrueFalse;
 import com.bluehouseinc.tidal.utils.DateParser;
 import com.bluehouseinc.tidal.utils.StringUtils;
 import com.bluehouseinc.toolkit.CommandLine;
@@ -52,9 +54,9 @@ public class AutosysToTidalTransformer implements ITransformer<List<AutosysAbstr
 	}
 
 	public void doProcessObjects(AutosysAbstractJob autosysAbstractJob, CsvJobGroup parent) {
-		
+
 		log.debug("doProcessObjects() AutosysAbstractJob Name[{}]", autosysAbstractJob.getFullPath());
-		
+
 		if (autosysAbstractJob.isGroup()) {
 
 			CsvJobGroup group = (CsvJobGroup) processBaseJobOrGroupObject(autosysAbstractJob, parent);
@@ -146,18 +148,6 @@ public class AutosysToTidalTransformer implements ITransformer<List<AutosysAbstr
 		return csvOSJob;
 	}
 
-	private BaseCsvJobObject processAutosysFileTriggerJob(AutosysFileTriggerJob autosysFileTriggerJob) {
-
-		//autosysFileTriggerJob.setName(autosysFileTriggerJob.getName() + "-XXXX-FILETRIGGER");
-
-		CsvOSJob csvOSJob = new CsvOSJob();
-		String cmd = "UNSET";
-
-		APIJobUtils.setJobCommandDetail(csvOSJob, cmd);
-
-		return csvOSJob;
-	}
-
 	private BaseCsvJobObject processAutosysFileWatcherJob(AutosysFileWatcherJob autosysFileWatcherJob) {
 		CsvFileWatcherJob csvFileWatcherJob = new CsvFileWatcherJob();
 		int interval = Integer.parseInt(autosysFileWatcherJob.getWatchInterval());
@@ -189,17 +179,61 @@ public class AutosysToTidalTransformer implements ITransformer<List<AutosysAbstr
 			csvFileWatcherJob.setEnvironmentFile(autosysFileWatcherJob.getProfile());
 		}
 
-		log.debug("DIR[{}] FILEMASK[{}]", dir, filemask);
+		// log.debug("DIR[{}] FILEMASK[{}]", dir, filemask);
 		return csvFileWatcherJob;
 	}
 
-	private BaseCsvJobObject processAutosysSqlAgentJob(AutosysSqlAgentJob autosysSqlAgentJob) {
-		// TODO: Implement processAutosysSqlAgentJob as a job placeholder just like in ESP!!!
-		CsvMsSqlJob csvMsSqlJob = new CsvMsSqlJob();
-		csvMsSqlJob.setId(autosysSqlAgentJob.getId());
-		csvMsSqlJob.setAgentName(autosysSqlAgentJob.getSqlAgentJobname());
+	private BaseCsvJobObject processAutosysFileTriggerJob(AutosysFileTriggerJob filetrigger) {
+		CsvFileWatcherJob csv = new CsvFileWatcherJob();
 
-		return csvMsSqlJob;
+		AutosysYesNoType recursive = filetrigger.getWatchFileRecursive();
+
+		if (recursive == AutosysYesNoType.YES) {
+			csv.setRecursive(TrueFalse.YES);
+		}
+
+		AutosysYesNoType continually = filetrigger.getContinuous();
+
+		if (continually == AutosysYesNoType.YES) {
+			csv.setPollContinuously(TrueFalse.YES);
+		}
+
+		String nochange = filetrigger.getWatchNoChange();
+
+		if (!StringUtils.isBlank(nochange)) {
+			boolean isminutes = false;
+			if(nochange.contains("m")) {
+				isminutes = true;
+				nochange = nochange.replace("m", "");
+			}
+			
+			int interval = Integer.parseInt(nochange);
+			
+			if(isminutes) {
+				interval = interval * 60;
+			}
+			
+			csv.setPollInterval(interval);
+		}
+
+		String file = filetrigger.getWatchFile();
+		String dir = "UNSET";
+		String filemask = "UNSET";
+
+		if (file.contains("/")) {
+			filemask = file.substring(file.lastIndexOf("/") + 1);
+			dir = file.substring(0, file.lastIndexOf("/") + 1);
+		} else if (file.contains("\\")) {
+			filemask = file.substring(file.lastIndexOf("\\") + 1);
+			dir = file.substring(0, file.lastIndexOf("\\") + 1);
+		}
+
+		// Remove quotes from our path.. Not needed in TIDAL.
+		csv.setDirectory(dir.replace("\"", ""));
+		csv.setFilemask(filemask.replace("\"", ""));
+
+		// log.debug("DIR[{}] FILEMASK[{}]", dir, filemask);
+		return csv;
 	}
 
 	private BaseCsvJobObject processPlaceHolderJob(AutosysAbstractJob autosysAbstractJob) {
@@ -225,7 +259,7 @@ public class AutosysToTidalTransformer implements ITransformer<List<AutosysAbstr
 			currentJobNotes = null;
 		}
 
-		//csvOSJob.setName(autosysAbstractJob.getName() + "-PLACEHOLDER-" + jobType);
+		// csvOSJob.setName(autosysAbstractJob.getName() + "-PLACEHOLDER-" + jobType);
 		csvOSJob.setCommandLine("PLACEHOLDER");
 		csvOSJob.setNotes(currentJobNotes);
 

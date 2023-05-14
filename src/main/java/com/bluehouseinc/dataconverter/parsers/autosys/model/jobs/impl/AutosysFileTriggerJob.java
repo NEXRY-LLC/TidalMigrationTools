@@ -13,7 +13,7 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = true)
 public class AutosysFileTriggerJob extends AutosysAbstractJob {
 
-	String continuous;
+	AutosysYesNoType continuous;
 	WatchFileType watchFileType; //watch_file_type
 	AutosysYesNoType watchFileRecursive; //watch_file_recursive: Y|N
 	WatchFileChangeType watchFileChangeType;

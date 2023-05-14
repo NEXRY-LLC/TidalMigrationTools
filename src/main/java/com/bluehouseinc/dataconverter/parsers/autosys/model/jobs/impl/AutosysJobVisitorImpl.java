@@ -177,7 +177,11 @@ public class AutosysJobVisitorImpl implements AutosysJobVisitor {
 		this.visitCommon(autosysFileTriggerJob, lines, (key, value) -> {
 			switch (key) {
 			case "continuous":
-				autosysFileTriggerJob.setContinuous(value);
+				if (!StringUtils.isBlank(value)) {
+					autosysFileTriggerJob.setContinuous(AutosysYesNoType.getAutosysYesNoType(value.toUpperCase()));
+				} else {
+					autosysFileTriggerJob.setContinuous(null);
+				}
 				break;
 			case "watch_file_recursive":
 				if (!StringUtils.isBlank(value)) {

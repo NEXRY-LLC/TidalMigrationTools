@@ -44,6 +44,13 @@ public class FileWatcherJobTransformer implements ITransformer<CsvFileWatcherJob
 			this.base.setPolllifetimeunit(TimeUnit.SECOND);
 		}
 
+		if(in.getRecursive()==TrueFalse.YES) {
+			this.base.doSetSearchSubDirectories();
+		}
+		
+		if(in.getPollContinuously()== TrueFalse.YES) {
+			this.base.doSetPollAwlays(null, null);
+		}
 		this.base.setCommand("//$FileWatcher");
 		
 		return this.base;

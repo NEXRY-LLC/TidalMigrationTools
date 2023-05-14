@@ -7,7 +7,7 @@ NAME,NEWNAME
 ".*(\\$\\$BATCH_DATE).*",<ProdDate.mmddyyyy>
 ".*(\\$\\$Run_period).*",$${Run_period}
 ".*(\\$\\$\\{TODAY\\}).*",<SysDate.mmdd>
-\\$\\${TODAY},<SysDate.mmdd>
+\\$\\$\\{TODAY\\},<SysDate.mmdd>
 \\$\\$TODAY,<SysDate.mmdd>
 
 
