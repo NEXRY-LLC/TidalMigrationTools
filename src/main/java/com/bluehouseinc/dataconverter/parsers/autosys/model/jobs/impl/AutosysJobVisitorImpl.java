@@ -348,7 +348,7 @@ public class AutosysJobVisitorImpl implements AutosysJobVisitor {
 			
 			break;
 		case "condition":
-			job.setCondition(AutosysDependencyParserUtil.processJobExpresionData(job, value));
+			job.setCondition(AutosysDependencyParserUtil.doProcessExpresionData(job, value));
 			break;
 		case "machine":
 			job.setMachine(value);

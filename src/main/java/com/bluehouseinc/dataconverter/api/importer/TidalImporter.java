@@ -29,10 +29,12 @@ import com.bluehouseinc.dataconverter.model.impl.CsvJobGroup;
 import com.bluehouseinc.dataconverter.providers.ConfigurationProvider;
 import com.bluehouseinc.tidal.api.exceptions.TidalException;
 import com.bluehouseinc.tidal.api.impl.Tidal;
+import com.bluehouseinc.tidal.api.impl.atom.response.TesResult;
 import com.bluehouseinc.tidal.api.impl.services.session.Credentials;
 import com.bluehouseinc.tidal.api.impl.services.session.TidalSession;
 import com.bluehouseinc.tidal.api.model.agentlist.AgentList;
 import com.bluehouseinc.tidal.api.model.node.Node;
+import com.bluehouseinc.tidal.api.model.node.unix.UnixNode;
 import com.bluehouseinc.tidal.utils.StringUtils;
 
 import lombok.extern.log4j.Log4j2;
@@ -48,7 +50,7 @@ public class TidalImporter {
 
 
 	static final StopWatch sw = new StopWatch();
-	static final ProgressBarBuilder pbb = new ProgressBarBuilder();
+	//static final ProgressBarBuilder pbb = new ProgressBarBuilder();
 	private TidalAPI tidal;
 
 	public TidalImporter() {
@@ -84,12 +86,9 @@ public class TidalImporter {
 	}
 
 	public void testLogin() {
-
 		initAPI();
 		this.tidal.getSession().login();
-
 		log.info("Logged in as " + this.tidal.getLoginUser().getFullname());
-
 	}
 
 	/**
@@ -107,17 +106,51 @@ public class TidalImporter {
 		return this.tidal;
 	}
 
+	public void installAgents(TidalDataModel model) {
+		initAPI();
+		this.tidal.getSession().login();
+		this.tidal.getApiExecutor().doProcessAgents(this.tidal.apiExecutor.getPbb().build());
+		
+		if(model == null) {
+			log.info("Missing Node data, load data first then call this method");
+			return;
+		}else if(model.getNodes().isEmpty()) {
+			log.info("Missing Node data, load data first then call this method");
+			return;
+		}
+		
+		model.getNodes().stream().sorted().forEach(node -> {
+
+			String nodename = node;
+			if (!validateNodeExist(nodename)) {
+				// Doesn't mater for now we want the system to add the connections
+				//TODO: Fix this to be based on a type but our importer tool does not have a type, so all unix in our labs
+				
+				UnixNode unx = new UnixNode();
+				unx.setName(nodename);
+				unx.setPort("5912");
+				unx.setMachine(nodename);
+				TesResult res = tidal.getSf().unixNode().create(unx);
+				int id = res.getResult().getTesObjectid();
+				unx.setId(id);
+				tidal.getNodes().add(unx);
+
+				log.info("Installing Unix Agent - {}", nodename);
+			}
+
+		});
+	}
+
 	private boolean validateNodeExist(String name) {
 
 		for (Node node : tidal.getNodes()) {
 			if (node.getName().equalsIgnoreCase(name)) {
 				return true;
+
 			}
 		}
 
 		return false;
-		// throw new TidalException("Node missing ["+name+"] please add to your TIDAL
-		// environment and try again");
 	}
 
 	private boolean validateAgentListExist(String name) {

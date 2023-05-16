@@ -1,19 +1,33 @@
 package com.bluehouseinc.dataconverter.parsers.autosys.model.job_dependencies.util;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.springframework.stereotype.Component;
 
+import com.bluehouseinc.dataconverter.model.BaseJobOrGroupObject;
+import com.bluehouseinc.dataconverter.model.TidalDataModel;
+import com.bluehouseinc.dataconverter.model.impl.BaseCsvJobObject;
+import com.bluehouseinc.dataconverter.model.impl.CvsDependencyJob;
+import com.bluehouseinc.dataconverter.parsers.autosys.model.AutosysDataModel;
 import com.bluehouseinc.dataconverter.parsers.autosys.model.job_dependencies.AutosysBaseDependency;
 import com.bluehouseinc.dataconverter.parsers.autosys.model.job_dependencies.types.AutosysExitCodeDependency;
 import com.bluehouseinc.dataconverter.parsers.autosys.model.job_dependencies.types.AutosysJobStatusDependency;
 import com.bluehouseinc.dataconverter.parsers.autosys.model.job_dependencies.types.AutosysVariableDependency;
 import com.bluehouseinc.dataconverter.parsers.autosys.model.jobs.AutosysAbstractJob;
+import com.bluehouseinc.expressions.ExpressionType;
+import com.bluehouseinc.expressions.ExpressionUtil;
 import com.bluehouseinc.tidal.api.exceptions.TidalException;
+import com.bluehouseinc.tidal.api.model.dependency.job.DepLogic;
+import com.bluehouseinc.tidal.api.model.dependency.job.DependentJobStatus;
+import com.bluehouseinc.tidal.api.model.dependency.job.ExitCodeOperator;
+import com.bluehouseinc.tidal.api.model.dependency.job.Operator;
+import com.bluehouseinc.tidal.utils.DependencyBuilder;
 import com.bluehouseinc.tidal.utils.StringUtils;
 
 import lombok.Data;
@@ -38,19 +52,6 @@ import lombok.extern.log4j.Log4j2;
 @Component
 public class AutosysDependencyParserUtil {
 
-	// @Getter(AccessLevel.PRIVATE)
-	// @Setter(AccessLevel.PRIVATE)
-	// private static HashMap<Integer, AutosysBaseDependency>
-	// autosysBaseDependencyMap; // used for sanitizing expression for easier
-	// processing of dependencies
-
-	// TODO: Replace key value to be of String type (to hold jobName value) instead
-	// of AutosysAbstractJob type
-	// public static Map<AutosysAbstractJob, String> conditionExpressionMap; //
-	// s(#1) | (e(#2) | d(#3))
-	// Keeps correct order of dependency expressions in `condition` string and uses
-	// current AUTOSYS job as reference
-
 	// Using `jobDependencyMap` to reference value for all AUTOSYS Dependency types.
 	// Used later for look up of AUTOSYS jobs when performing conversion of
 	// AUTOSYS jobs into TIDAL jobs
@@ -66,15 +67,12 @@ public class AutosysDependencyParserUtil {
 	private final static String DEPENDENCY_REGEX = DEPENDENCY_STATUS_REGEX + "(\\((?>[^()]+|(\\?1))*\\))";
 	private final static Pattern DEPENDENCY_PATTERN = Pattern.compile(DEPENDENCY_REGEX);
 
-	public static HashMap<Integer, Map<Integer, AutosysBaseDependency>> getMapByJobType(AutosysAbstractJob job) {
+	private static HashMap<Integer, Map<Integer, AutosysBaseDependency>> getMapByJobType(AutosysAbstractJob job) {
 		if (job.isGroup()) {
 			return jobBoxSuccessMapData;
 		}
 		return jobDependencyMapData;
 	}
-
-	// TODO-IMPORTANT: Probably will need to create instance of TidalDataModel in
-	// order to store values of CsvDependencyJob objects.
 
 	AutosysDependencyParserUtil() {
 	}
@@ -86,27 +84,20 @@ public class AutosysDependencyParserUtil {
 	 * @param job
 	 * @param conditionValue
 	 */
-	public static String processJobExpresionData(AutosysAbstractJob job, String conditionValue) {
+	public static String doProcessExpresionData(AutosysAbstractJob job, String conditionValue) {
 
-		if(StringUtils.isBlank(conditionValue)) {
-			return conditionValue;
-		}
-
-		String cleanedExpresionData = parserCondition(job, conditionValue);
-		// conditionExpressionMap.put(job, cleanedExpresionData);
-		return cleanedExpresionData;
-	}
-
-	static String parserCondition(AutosysAbstractJob job, String fullExpression) {
-		String sanitizedExpressionString = sanitizeExpression(job, fullExpression);
-
-		if(StringUtils.isBlank(sanitizedExpressionString)) {
+		if (StringUtils.isBlank(conditionValue)) {
 			return null;
 		}
 
-		log.debug("sanitizedExpressionString=[{}] for job[{}]", sanitizedExpressionString, job.getFullPath());
+		String cleanedExpresionData = sanitizeExpression(job, conditionValue);
+		log.debug("sanitizedExpressionString=[{}] for job[{}]", cleanedExpresionData, job.getFullPath());
 
-		return sanitizedExpressionString;
+		if (StringUtils.isBlank(cleanedExpresionData)) {
+			return null;
+		}
+
+		return cleanedExpresionData;
 	}
 
 	/*
@@ -134,7 +125,7 @@ public class AutosysDependencyParserUtil {
 	 */
 	private static String sanitizeExpression(AutosysAbstractJob job, String fullExpression) {
 
-		if (job.getName().equals("CPL_QNXT_6280_020.ETS_EDI_834_837_ALL_IN")) {
+		if (job.getName().equals("MMM_QNXT_0180_05.ETS_IN_Script_for_Provider_Sync.FT00")) {
 			job.getName();
 		}
 
@@ -151,16 +142,21 @@ public class AutosysDependencyParserUtil {
 			return null;
 		}
 
+		if (finalExpressionFullyReplaced.trim().equals("(") || finalExpressionFullyReplaced.trim().equals(")")) {
+			// We had some type of issue, likely loop , AKA job A dep on Job A, not possible.
+			return null;
+		}
+
 		return finalExpressionFullyReplaced;
 	}
 
-	private static String sanitizeJobExpression(final String expression, AutosysAbstractJob job) {
+	private static String sanitizeJobExpression(String expression, AutosysAbstractJob job) {
 		final StringBuffer sb = new StringBuffer();
 		Map<Integer, AutosysBaseDependency> currentJobDependencyMap = new HashMap<>();
 
 		Matcher matcher = DEPENDENCY_PATTERN.matcher(expression);
 
-		if (job.getName().equals("EMB_FACE_0456_070.XmsRunFileIntake_CNY_NYCAPS_Retiree_MA")) {
+		if (job.getName().equals("MMM_QNXT_0180_05.ETS_IN_Script_for_Provider_Sync.FT00")) {
 			job.getName();
 		}
 
@@ -170,7 +166,6 @@ public class AutosysDependencyParserUtil {
 		 * ... into: s(#1) & (e(#2) | t(#3)) | v(#4)
 		 */
 		while (matcher.find()) {
-			String raw = matcher.group();
 			String depTypeString = matcher.group(1);
 			/*
 			 * `depJobNameRaw` variable needs to keep its parenthesis pair `()` so
@@ -183,21 +178,11 @@ public class AutosysDependencyParserUtil {
 
 			AutosysBaseDependency autosysBaseDependency = createAdequateDependencyType(jobStatus, depJobNameRaw, job);
 
-			String jobname = job.getName();
-			String targetname = autosysBaseDependency.getDependencyName();
-
-			if (jobname.equals(targetname)) {
-				log.error("Job Dependency would result in a loop, skipping target job[{}] dependency for job[{}]", targetname, job.getFullPath());
-				matcher.replaceAll(raw);
-				//matcher.appendReplacement(sb, "");
-			} else {
-				currentJobDependencyMap.put(autosysBaseDependency.getId(), autosysBaseDependency);
-				// AutosysJobStatus foundAutosysJobStatus =
-				// AutosysJobStatus.getStatus(depTypeString);
-				// String replacement = foundAutosysJobStatus.getCode() + "(#" + i + ")";
-				matcher.appendReplacement(sb, Integer.toString(autosysBaseDependency.getId()));
-
-			}
+			currentJobDependencyMap.put(autosysBaseDependency.getId(), autosysBaseDependency);
+			// AutosysJobStatus foundAutosysJobStatus =
+			// AutosysJobStatus.getStatus(depTypeString);
+			// String replacement = foundAutosysJobStatus.getCode() + "(#" + i + ")";
+			matcher.appendReplacement(sb, Integer.toString(autosysBaseDependency.getId()));
 
 		}
 
@@ -226,7 +211,7 @@ public class AutosysDependencyParserUtil {
 		// its implementation MUST be of LinkedList type to preserve the order because of placeholders
 
 		while (matcher.find()) {
-			
+
 			String rawVariableName = matcher.group(2);
 			// extracting dependency name nested in parentheses pair
 			String variableName = rawVariableName.substring(rawVariableName.indexOf("(") + 1, rawVariableName.indexOf(")"));
@@ -259,7 +244,6 @@ public class AutosysDependencyParserUtil {
 		Map<Integer, AutosysBaseDependency> exitCodeDependencyValueMap = new LinkedHashMap<>();
 
 		while (matcher.find()) {
-			String raw = matcher.group();
 			String rawExitCodeDependencyName = matcher.group(2);
 			// extracting dependency name nested in parentheses pair...
 			String exitCodeDependencyName = rawExitCodeDependencyName.substring(rawExitCodeDependencyName.indexOf("(") + 1, rawExitCodeDependencyName.indexOf(")"));
@@ -270,16 +254,9 @@ public class AutosysDependencyParserUtil {
 
 			AutosysExitCodeDependency exitCodeDependency = new AutosysExitCodeDependency(exitCodeDependencyName, relationalOperator, value);
 
-			String jobname = job.getName();
-			String targetname = exitCodeDependency.getDependencyName();
+			exitCodeDependencyValueMap.put(exitCodeDependency.getId(), exitCodeDependency);
+			matcher.appendReplacement(sb, Integer.toString(exitCodeDependency.getId()));
 
-			if (jobname.equals(targetname)) {
-				log.error("Job Dependency would result in a loop, skipping target job[{}] dependency for job[{}]", targetname, job.getFullPath());
-				matcher.replaceAll(raw);
-			} else {
-				exitCodeDependencyValueMap.put(exitCodeDependency.getId(), exitCodeDependency);
-				matcher.appendReplacement(sb, Integer.toString(exitCodeDependency.getId()));
-			}
 		}
 
 		if (!exitCodeDependencyValueMap.isEmpty()) {
@@ -288,15 +265,6 @@ public class AutosysDependencyParserUtil {
 
 		matcher.appendTail(sb);
 		return sb.toString();
-	}
-
-	/**
-	 * Extracting dependency index from sanitized `condition` expression, e.g., for
-	 * following expression: s(JOB_NAME1) | e(#1) & e(#2) ... returned values will
-	 * be `1` and `2` respectively.
-	 */
-	static int extractDependencyIndex(String dependencyName) {
-		return Integer.parseInt(dependencyName.substring(dependencyName.indexOf("#") + 1, dependencyName.indexOf(")")));
 	}
 
 	/**
@@ -341,4 +309,255 @@ public class AutosysDependencyParserUtil {
 		return autosysBaseDependency;
 	}
 
+	// From here or the other places we deal with dependency we should be able to detect a FileTrigger type
+	// add use that data to build a new file dependency to my targetJob.
+	public static void doProcessJob(final AutosysAbstractJob sourceJob, BaseCsvJobObject targetJob, TidalDataModel model, AutosysDataModel autosys) {
+
+		if (sourceJob.getName().equals("ABS_SMT_6110_010.Master_smt_m_post_batch_stat_hist_load.FW01")) {
+			targetJob.getName();
+		}
+
+		// final String expresiondata = sourceJob.getCondition();
+
+		if (StringUtils.isBlank(sourceJob.getCondition())) {
+			return; // Nothing to process we dont have any expresions to process, aka no dependency data.
+		}
+
+		targetJob.setCompoundDependency(sourceJob.getCondition());
+
+		/*
+		 * `autosysConditionExpressionMap` holds reference to parsed
+		 * compound-dependencies expression as String which is referenced by
+		 * AutosysAbstractJob. Holds String value: s(#0) & (e(#1) | t(#2)) | v(#3)
+		 * ...which was parsed from following original expression (AUTOSYS `condition`
+		 * job property): s(jobName1) & (e(job_name2) <= 1542 | t(jobName3)) |
+		 * v(variable_name) = "some_value"
+		 */
+		HashMap<Integer, Map<Integer, AutosysBaseDependency>> localMap = AutosysDependencyParserUtil.getMapByJobType(sourceJob);
+
+		// This is the current job list of dependencies. From Local Map for reading, we
+		// MUST have data if we have expression data.
+		Map<Integer, AutosysBaseDependency> mapOfJobDep = localMap.get(sourceJob.getId());
+
+		if (targetJob.getName().equals("EMB_FACE")) {
+			targetJob.getName();
+		}
+
+		if (mapOfJobDep != null) {
+
+			if (!mapOfJobDep.isEmpty()) {
+				// log.info(sourceJob.getFullPath());
+				// targetJob.setCompoundDependency(expresiondata); // Set me to this so we can replace with real data later.
+
+				// We have depenencies to work with.
+				// Contains Autosys dependency ID's and we need to lookup the csv job, create
+				// new dependency object and replace iD's
+
+				// We better have an expression to work with containing ALL the ID's of our map
+				// of deps.
+
+				mapOfJobDep.entrySet().forEach(f -> {
+
+					AutosysBaseDependency autoSysBaseDepObject = f.getValue();
+
+					String sourcejobname = sourceJob.getName();
+					String dependsOnThisJobObjectName = autoSysBaseDepObject.getDependencyName();
+
+					if (sourcejobname.equalsIgnoreCase(dependsOnThisJobObjectName)) {
+						log.error("doProcessJob -> Dependency is a loop, source[{}] and target[{}] are the same object.", targetJob.getName(), dependsOnThisJobObjectName);
+						String tempdata = targetJob.getCompoundDependency();
+
+						tempdata = tempdata.replace(Integer.toString(autoSysBaseDepObject.getId()), "").trim();
+
+						targetJob.setCompoundDependency(tempdata);
+
+					} else {
+
+						// String expressiondata = targetJob.getCompoundDependency();
+						// log.debug("[doProcessJobDeps] looking for our dependent job=[{}] ", dependsOnThisJobObjectName);
+						BaseJobOrGroupObject dependsOnThisAutoSysJob = autosys.getBaseObjectByName(dependsOnThisJobObjectName);
+
+						if (dependsOnThisAutoSysJob == null) {
+							log.info("[doProcessJobDeps] missing job in our AutoSys Data, looking for a job with this name[" + dependsOnThisJobObjectName + "]");
+
+							return;
+							// throw new TidalException("[doProcessJobDeps] missing job in our AutoSys Data, looking for a job with this name["+dependsOnThisJobObjectName+"]");
+						} else {
+							BaseCsvJobObject dependsOnThisRealCsvJob = model.findFirstJobByFullPath(dependsOnThisAutoSysJob.getFullPath());
+
+							if (dependsOnThisRealCsvJob == null) {
+								// Major issues, we should always find a job matching by name for Autosys.
+								log.info("[doProcessJobDeps] missing dependenct job[" + dependsOnThisAutoSysJob.getFullPath() + "] in TIDAL");
+								throw new TidalException("[doProcessJobDeps] missing dependenct job[" + dependsOnThisAutoSysJob.getFullPath() + "] in TIDAL");
+
+							} else {
+
+								if (autoSysBaseDepObject instanceof AutosysJobStatusDependency) {
+
+									AutosysJobStatusDependency jdep = (AutosysJobStatusDependency) autoSysBaseDepObject;
+
+									DependentJobStatus usestatus = null;
+									Operator oper = Operator.EQUAL;
+
+									if (jdep.getStatus() == AutosysJobStatus.SUCCESS) {
+										usestatus = DependentJobStatus.COMPLETED_NORMAL;
+									} else if (jdep.getStatus() == AutosysJobStatus.DONE) {
+										usestatus = DependentJobStatus.COMPLETED;
+									} else if (jdep.getStatus() == AutosysJobStatus.FAILURE) {
+										usestatus = DependentJobStatus.COMPLETED_ABNORMAL;
+									} else if (jdep.getStatus() == AutosysJobStatus.TERMINATED) {
+										usestatus = DependentJobStatus.TERMINATED;
+									} else if (jdep.getStatus() == AutosysJobStatus.NOTRUNNING) {
+										usestatus = DependentJobStatus.RUNNING;
+										oper = Operator.NOT_EQUAL;
+									}
+
+									// jdep.getStatus().DONE ;
+									CvsDependencyJob csvjobdep = model.addJobDependencyForJob(targetJob, dependsOnThisRealCsvJob, DepLogic.MATCH, oper, usestatus, null);
+
+									// CvsDependencyJob csvjobdep = getTidal().addJobDependencyForJobCompletedNormal(targetJob,dependsOnThisRealCsvJob,null);
+
+									String tempdata = targetJob.getCompoundDependency();
+
+									tempdata = tempdata.replace(Integer.toString(autoSysBaseDepObject.getId()), Integer.toString(csvjobdep.getId())).trim();
+
+									targetJob.setCompoundDependency(tempdata);
+
+								} else if (autoSysBaseDepObject instanceof AutosysVariableDependency) {
+
+									AutosysVariableDependency vdep = (AutosysVariableDependency) autoSysBaseDepObject;
+
+									String variableName = vdep.getDependencyName(); // Think this is a variable
+
+									// TODO: Code not completed for variables.
+
+								} else if (autoSysBaseDepObject instanceof AutosysExitCodeDependency) {
+
+									AutosysExitCodeDependency edep = (AutosysExitCodeDependency) autoSysBaseDepObject;
+
+									CvsDependencyJob csvjobdep = model.addJobDependencyForJobCompletedNormal(targetJob, dependsOnThisRealCsvJob, null);
+
+									csvjobdep.setExitCodeOperator(ExitCodeOperator.EQ);
+									csvjobdep.setExitcodeStart(edep.getExitCode());
+									csvjobdep.setExitcodeEnd(edep.getExitCode());
+
+									String tempdata = targetJob.getCompoundDependency();
+
+									tempdata = tempdata.replace(Integer.toString(autoSysBaseDepObject.getId()), Integer.toString(csvjobdep.getId())).trim();
+
+									targetJob.setCompoundDependency(tempdata);
+								}
+
+							}
+
+						}
+					}
+				});
+
+				String data = targetJob.getCompoundDependency();
+				// Setup and register the compound deps if needed.
+				if (!StringUtils.isBlank(data)) {
+	
+					registerCompoundDep(targetJob, model);
+				}
+
+			} else {
+				if (!StringUtils.isBlank(sourceJob.getCondition())) {
+					// We have an issue.. We do not have any data matching but do have an expression of data.
+					// TODO: Throw exception here.
+					log.error("[doProcessJobDeps] job{} missing map data but has this condition={}", sourceJob.getFullPath(), sourceJob.getCondition());
+				}
+			}
+		} else {
+			// This job has no dependency?
+			// TODO: Throw exception here.
+			log.error("[doProcessJobDeps] missing job in our map but has this condition={}", sourceJob.getCondition());
+		}
+
+	}
+
+	private static String cleanupExpresion(String tempdata) {
+		tempdata = tempdata.trim();
+
+			if (tempdata.startsWith("|") | tempdata.startsWith("&")) {
+				tempdata = tempdata.substring(1, tempdata.length()).trim();
+			}
+
+			if (tempdata.endsWith("|") | tempdata.endsWith("&")) {
+				tempdata = tempdata.substring(0, tempdata.length() - 1).trim();
+			}
+
+		return tempdata;
+	}
+
+	private static void registerCompoundDep(BaseCsvJobObject targetJob, TidalDataModel model) {
+
+		if (targetJob.getName().equals("EMB_FACE_7290_030.FHGInbound_837_ENC")) {
+			targetJob.getName();
+		}
+
+		String expresiondata = targetJob.getCompoundDependency();
+
+		if (StringUtils.isBlank(expresiondata)) {
+			return; // Nothing to process we dont have any expresions to process.
+		}
+
+		if (expresiondata.trim().equals("|") || expresiondata.trim().equals("&")) {
+			targetJob.setCompoundDependency(null);
+			return;
+		}
+		
+		if (expresiondata.contains("&") | expresiondata.contains("|")) {
+			List<String> deplistdata = new ArrayList<>();
+
+			// ugg ugly but lets try to capture all styles of data.
+			expresiondata = expresiondata.replace("& &", "&").replace("&  &", "&");
+			expresiondata = expresiondata.replace("& )", ")");
+			expresiondata = cleanupExpresion(expresiondata);
+			
+			if (StringUtils.isBlank(expresiondata)) {
+				return; 
+			}
+			
+			try {
+
+				deplistdata = targetJob.getCompoundDependencyBuilder().build(expresiondata).getExpressionList();
+
+			} catch (RuntimeException e) {
+				log.info("registerCompoundDep ERROR in Job{} unable to process expression{}", targetJob.getFullPath(), expresiondata);
+				log.error("registerCompoundDep ERROR in Job{} unable to process expression{}", targetJob.getFullPath(), expresiondata);
+
+			}
+
+			int datalen = deplistdata.size();
+
+			if (datalen == 1 || deplistdata.isEmpty()) {
+				// Single depedency in the expression data.
+				targetJob.setDependencyOrlogic(false);
+			} else {
+
+				boolean isAllAnds = ExpressionUtil.isExpressionOfType(ExpressionType.and, targetJob.getCompoundDependencyBuilder().getExpression());
+				boolean isAllOrs = ExpressionUtil.isExpressionOfType(ExpressionType.or, targetJob.getCompoundDependencyBuilder().getExpression());
+
+				if (isAllAnds) { // single sized elements, no need to go any deeper
+					// TODO: Look at refactoring this code but for now it works.
+					// if the deps are all ands, then ignore it and just set the Or logic to false
+					targetJob.setDependencyOrlogic(false);
+				} else if (isAllOrs) {
+					// if all or's then just set the Or logic to true.
+					targetJob.setDependencyOrlogic(true);
+				} else {
+					// BUT IF WE ARE Setting up a compound dep, then lets process correctly
+					// mainjob.setCompoundDependency(depbuilder.toString());
+
+					// If we set this we ignore the two above as we are a complex type.
+					targetJob.setCompoundDependency(targetJob.getCompoundDependencyBuilder().toString());
+					// Register the job has having compound dependencies. OR addJob to model AFTER you setup your compound dependencies.
+					model.registerCompoundDependencyJob(targetJob);
+				}
+			}
+		} else {
+			targetJob.setDependencyOrlogic(false);
+		}
+	}
 }

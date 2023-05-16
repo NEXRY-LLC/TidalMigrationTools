@@ -208,7 +208,7 @@ public class TidalApiExecutor extends AbstractAPIExecutor {
 		}
 	}
 
-	private void doProcessAgents(ProgressBar bar) {
+	void doProcessAgents(ProgressBar bar) {
 		try {
 			bar.setExtraMessage("doProcessAgents");
 			getTidalApi().nodes = getTidalApi().getSf().node().getList();

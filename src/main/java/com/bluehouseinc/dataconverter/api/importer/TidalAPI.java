@@ -70,17 +70,20 @@ public class TidalAPI {
 	public static String TIDALDefaultOwner = "TIDAL.DefaultOwner";
 	
 	ConfigurationProvider cfgProvider;
-
+	
+	TidalApiExecutor apiExecutor;
+	
 	public TidalAPI(TidalSession session, ConfigurationProvider cfgProvider) {
 		this.session = session;
 		this.sf = session.getServiceFactory();
 		this.cfgProvider = cfgProvider;
+		this.apiExecutor = new TidalApiExecutor(this, cfgProvider);
 
 	}
 
 	void initdata() {
 
-		new TidalApiExecutor(this, cfgProvider).execute();
+		apiExecutor.execute();
 
 		log.debug("Processing Job Map");
 		sw.start();

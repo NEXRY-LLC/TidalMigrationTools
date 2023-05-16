@@ -10,6 +10,7 @@ import com.bluehouseinc.dataconverter.providers.ConfigurationProvider;
 import com.bluehouseinc.expressions.ExpressionType;
 import com.bluehouseinc.expressions.ExpressionUtil;
 import com.bluehouseinc.tidal.api.model.dependency.job.ExitCodeOperator;
+import com.bluehouseinc.tidal.utils.DependencyBuilder;
 
 public class TestingParser extends AbstractParser<TestingDataModel> {
 	TidalDataModel model;
@@ -53,11 +54,13 @@ public class TestingParser extends AbstractParser<TestingDataModel> {
 		// Build a dependency using not equal completed normal for now.
 
 		//mainjob.setCompoundDependency(null); // Use this method for Autosys after cleaned up.
+		DependencyBuilder compoundDependencyBuilder = new DependencyBuilder();
+		//compoundDependencyBuilder.build(expresiondata);
 
-		mainjob.getCompoundDependencyBuilder().or(depone.getIdString()).and(deptwo.getIdString()).or(depthree.getIdString());
+		compoundDependencyBuilder.or(depone.getIdString()).and(deptwo.getIdString()).or(depthree.getIdString());
 
-		boolean isAllAnds = ExpressionUtil.isExpressionOfType(ExpressionType.and, mainjob.getCompoundDependencyBuilder().getExpression());
-		boolean isAllOrs = ExpressionUtil.isExpressionOfType(ExpressionType.or, mainjob.getCompoundDependencyBuilder().getExpression());
+		boolean isAllAnds = ExpressionUtil.isExpressionOfType(ExpressionType.and, compoundDependencyBuilder.getExpression());
+		boolean isAllOrs = ExpressionUtil.isExpressionOfType(ExpressionType.or, compoundDependencyBuilder.getExpression());
 
 		if (isAllAnds) {
 			// TODO: Look at refactoring this code but for now it works.
@@ -71,7 +74,7 @@ public class TestingParser extends AbstractParser<TestingDataModel> {
 			//mainjob.setCompoundDependency(depbuilder.toString());
 
 			// If we set this we ignore the two above as we are a complex type.
-			mainjob.setCompoundDependencyStringFromBuilder();
+			//mainjob.setCompoundDependencyStringFromBuilder();
 			// Register the job has having compound dependencies. OR addJob to model AFTER you setup your compound dependencies.
 			model.registerCompoundDependencyJob(mainjob);
 		}

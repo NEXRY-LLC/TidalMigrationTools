@@ -95,6 +95,10 @@ public class MainImport {
 				stopExecution();
 				break;
 
+			case IMPORTAGENT:
+				importer.installAgents(datamodel);
+				break;
+				
 			default:
 				cmdPrompt.printOutputLine("Command Not Supported");
 			}

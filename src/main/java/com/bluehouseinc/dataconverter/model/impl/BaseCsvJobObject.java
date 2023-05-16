@@ -113,16 +113,11 @@ public abstract class BaseCsvJobObject extends BaseJobOrGroupObject {
 
 	public void setCompoundDependency(String data) {
 		if (StringUtils.isBlank(data)) {
-			this.compoundDependencyBuilder = null;
 			this.compoundDependency = null;
 		} else {
-			this.compoundDependencyBuilder.expression = ExpressionParser.parse(data);
+			//this.compoundDependencyBuilder.expression = ExpressionParser.parse(data);
 			this.compoundDependency = data;
 		}
-	}
-
-	public void setCompoundDependencyStringFromBuilder() {
-		this.compoundDependency = this.compoundDependencyBuilder.toString();
 	}
 
 	public CsvJobRerunLogic getRerunLogic() {

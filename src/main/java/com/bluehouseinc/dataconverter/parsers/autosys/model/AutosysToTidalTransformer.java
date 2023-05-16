@@ -200,7 +200,11 @@ public class AutosysToTidalTransformer implements ITransformer<List<AutosysAbstr
 
 		String nochange = filetrigger.getWatchNoChange();
 
+
+		
 		if (!StringUtils.isBlank(nochange)) {
+			nochange = nochange.replace("s", "");
+			
 			boolean isminutes = false;
 			if(nochange.contains("m")) {
 				isminutes = true;

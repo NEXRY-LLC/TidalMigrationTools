@@ -75,28 +75,23 @@ public class JobCompoundDepExecutor extends AbstractAPIExecutor {
 			if (destination == null) {
 				// Major issue!!!!!!
 
-				log.debug("doProcessCompoundDependency Missing Job [" + source.getFullPath() + "] Type["
-						+ source.getClass().getSimpleName() + "]");
-				throw new TidalException("doProcessCompoundDependency Missing Job [" + source.getFullPath() + "] Type["
-						+ source.getClass().getSimpleName() + "]");
+				log.debug("doProcessCompoundDependency Missing Job [" + source.getFullPath() + "] Type[" + source.getClass().getSimpleName() + "]");
+				throw new TidalException("doProcessCompoundDependency Missing Job [" + source.getFullPath() + "] Type[" + source.getClass().getSimpleName() + "]");
 			} else {
 				int jobid = destination.getId();
 
-				log.info("doProcessCompoundDependency Processing Compound Dependency for Job [{}] Type[{}]\n", destination.getFullpath(),
-						destination.getClass().getSimpleName());
+				log.debug("doProcessCompoundDependency Processing Compound Dependency for Job [{}] Type[{}]", destination.getFullpath(), destination.getClass().getSimpleName());
 				// builder should have been updated so just call this to be safe
 
-				source.setCompoundDependencyStringFromBuilder();
+				//source.setCompoundDependencyStringFromBuilder();
 				String sourcedep = source.getCompoundDependency();
 				String destdep = destination.getCompounddependencies();
 
-
-				if (destdep !=null && destdep.equals(sourcedep)) {
+				if (destdep != null && destdep.equals(sourcedep)) {
 					// Do nothing , we are already setup?
-					log.debug("doProcessCompoundDependency Skipping Job [" + source.getFullPath() + "] Type["+source.getClass().getSimpleName() + "] Compound Dependency already setup.");
+					log.debug("doProcessCompoundDependency Skipping Job [" + source.getFullPath() + "] Type[" + source.getClass().getSimpleName() + "] Compound Dependency already setup.");
 				} else {
 					destination.setCompounddependencies(sourcedep);
-
 
 					Job updatejob = new Job();
 					updatejob.setId(jobid);
@@ -108,7 +103,6 @@ public class JobCompoundDepExecutor extends AbstractAPIExecutor {
 					updatejob.setAgentid(destination.getAgentid());
 					updatejob.setInheritagent(destination.getInheritagent());
 
-
 					getTidalApi().getSession().getServiceFactory().job().update(updatejob);
 
 				}
@@ -118,7 +112,7 @@ public class JobCompoundDepExecutor extends AbstractAPIExecutor {
 
 		} catch (Exception e) {
 			log.error(e);
-			//throw new TidalException(e);
+			// throw new TidalException(e);
 		} finally {
 			bar.step();
 		}

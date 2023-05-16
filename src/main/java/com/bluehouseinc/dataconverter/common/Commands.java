@@ -11,7 +11,9 @@ public enum Commands {
 
 	LOAD, EXPORT, IMPORT,
 
-	TESTCM;
+	TESTCM,
+	IMPORTAGENT;
+	
 
-	public static final EnumSet<Commands> helpCommands = EnumSet.of(HELP, QUIT, CONFIG, LOAD, STOP, EXPORT, TESTCM, IMPORT);
+	public static final EnumSet<Commands> helpCommands = EnumSet.of(HELP, QUIT, CONFIG, LOAD, STOP, EXPORT, TESTCM, IMPORT, IMPORTAGENT);
 }
