@@ -29,6 +29,10 @@ public class SAPJobTransformer implements ITransformer<CsvSAPJob, ServiceJob> {
 	@Override
 	public ServiceJob transform(CsvSAPJob in) throws TransformationException {
 
+		if (in.getName().contains("ZRV60SBAT_FINAL_2355")) {
+			in.getName();
+		}
+		
 		this.base.setType(JobType.SAPJOB);
 		// String ext = getRunCopy();
 
@@ -56,7 +60,7 @@ public class SAPJobTransformer implements ITransformer<CsvSAPJob, ServiceJob> {
 			String variant = in.getVariant() == null ? "ZBADRUN1" : in.getVariant();
 
 			String extJobrun = getRunCopyNew().replace("$$RTEID$$", Integer.toString(rte.getId())).replace("$$JOBCLASS$$", in.getJobSAPClass() == null ? "" : in.getJobSAPClass()).replace("$$JOBNAME$$", in.getJobName().toUpperCase())
-					.replace("$$VARIANT$$", programName).replace("$$PROGNAME$$", variant).replace("$$PDEST$$", in.getPdest() == null ? "" : in.getPdest()).replace("$$PRCOP$$", in.getPrcop() == null ? "1" : "1")
+					.replace("$$VARIANT$$", variant).replace("$$PROGNAME$$", programName).replace("$$PDEST$$", in.getPdest() == null ? "" : in.getPdest()).replace("$$PRCOP$$", in.getPrcop() == null ? "1" : "1")
 					.replace("$$PLIST$$", in.getPlist() == null ? "" : in.getPlist()).replace("$$PRTXT$$", in.getPrtxt() == null ? "" : in.getPrtxt()).replace("$$PRBER$$", in.getPrber() == null ? "" : in.getPrber())
 					.replace("$$RTENAME$$", in.getRuntimeUser().getRunTimeUserName());
 

@@ -175,8 +175,8 @@ public abstract class BaseParserDataModel<E extends BaseJobOrGroupObject, P exte
 		}
 
 		if (objs.size() > 1) {
-			log.info("MULTIPLE[{}] JOBS WITH NAME[{}] returning last in the list", objs.size(), name);
-			objs.forEach(baseJobOrGroupObject -> log.info("{}", baseJobOrGroupObject.getFullPath()));
+			//log.info("MULTIPLE[{}] JOBS WITH NAME[{}] returning last in the list", objs.size(), name);
+			//objs.forEach(baseJobOrGroupObject -> log.info("{}", baseJobOrGroupObject.getFullPath()));
 			long count = objs.size();
 
 			return objs.stream().skip(count - 1).findFirst().get();

@@ -133,6 +133,12 @@ public class EspParser extends AbstractParser<EspDataModel> {
 				continue;
 			}
 
+			if(line.toUpperCase().contains("!USER")) {
+				line = line.replace("!USER", "USER");
+				line = line.replace("!user", "user");
+				line = line.replace("!", "");
+			}
+			
 			lines.add(line.trim());
 		}
 

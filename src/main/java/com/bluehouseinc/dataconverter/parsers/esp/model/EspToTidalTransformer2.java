@@ -231,7 +231,7 @@ public class EspToTidalTransformer2 implements ITransformer<List<EspAbstractJob>
 
 	private void processJob(EspSapJob in, CsvSAPJob out) {
 
-		if (in.getName().contains("RBDAPP01_DR_ORDERS_DCR_1")) {
+		if (in.getName().contains("ZRV60SBAT_FINAL_2355")) {
 			in.getName();
 		}
 		String uppername = in.getName().toUpperCase();
@@ -283,6 +283,10 @@ public class EspToTidalTransformer2 implements ITransformer<List<EspAbstractJob>
 		String varname = in.getVariant();
 
 		if (!StringUtils.isBlank(varname)) {
+			
+			if(varname.contains("&")) {
+				varname = varname.replace("&", "");
+			}
 			out.setVariant(varname);
 		}
 

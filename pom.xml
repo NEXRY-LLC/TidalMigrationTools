@@ -9,7 +9,7 @@
 	</parent>
 	<groupId>com.bluehouseinc</groupId>
 	<artifactId>TidalMigrationTools</artifactId>
-	<version>1.0.16</version>
+	<version>1.0.18</version>
 	<name>Tidal Scheduler Migration</name>
 	<description>Converting data and importing into TIDAL system</description>
 	<properties>
