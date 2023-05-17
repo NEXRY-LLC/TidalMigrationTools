@@ -199,10 +199,6 @@ public class EspParser extends AbstractParser<EspDataModel> {
 
 				while ((line = readLine(reader)) != null) {
 
-					if (line.contains("ZFI_BYCUSTOMER_PC")) {
-						line.toCharArray();
-					}
-
 					line = EspFileReaderUtils.readLineMerged(reader, line, '-');
 					line = EspFileReaderUtils.readLineMerged(reader, line, '+');
 
@@ -244,8 +240,13 @@ public class EspParser extends AbstractParser<EspDataModel> {
 							String jobName = jobdata[1];
 							String jobTypeString = jobdata[0];
 
-							if (jobName.contains("PAYMENT")) {
-								jobName.getBytes();
+
+							if (line.contains("FSBP_ZFIGLI19")) {
+								line.toCharArray();
+							}
+
+							if (jobName.contains("!")) { // cant have jobs with variables in the name
+								jobName = jobName.replace("!", "");
 							}
 
 							EspJobType jobType = extractJobType(jobTypeString);
