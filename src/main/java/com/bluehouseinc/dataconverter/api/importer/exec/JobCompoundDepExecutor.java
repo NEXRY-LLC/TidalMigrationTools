@@ -52,7 +52,7 @@ public class JobCompoundDepExecutor extends AbstractAPIExecutor {
 
 	@Override
 	public int getProgressBarTotal() {
-		return getDataModel().getTotalJobGroupCount().intValue();
+		return getDataModel().getCompoundDependnecyJobs().size();
 	}
 
 	protected void doProcessJobThreads(BaseCsvJobObject ajob, ProgressBar bar) {
