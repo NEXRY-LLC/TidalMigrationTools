@@ -57,7 +57,7 @@ public class BMCToTIDALTransformer implements ITransformer<List<BaseBMCJobOrFold
 	// Map<String, List<BaseBMCJobOrFolder>> OutStringToFullPathList = new HashedMap<>();
 
 	private Set<String> duplicateJobNameValidation = new HashSet<>();
-	DependencyGraphMapper depgraph;
+	DependencyGraphMapper depgraphmap;
 
 	// Integer containerLen;
 
@@ -65,7 +65,7 @@ public class BMCToTIDALTransformer implements ITransformer<List<BaseBMCJobOrFold
 		this.bmcDataModel = bmcdatamodel;
 		this.tidalDataModel = datamodel;
 		trans400 = new BMCOS400JobTransformer(datamodel);
-		this.depgraph = depgraph;
+		this.depgraphmap = depgraph;
 		this.SAPImporter = new SapDataImporter(bmcdatamodel.getConfigeProvider().getProvider());
 		// USENEWDEPCODE = Boolean.valueOf(this.cfgProvider.getConfiguration().getOrDefault("tidal.dep.newcode", "false"));
 	}
@@ -98,19 +98,6 @@ public class BMCToTIDALTransformer implements ITransformer<List<BaseBMCJobOrFold
 		// in.forEach(f -> VariableFixUtil.doSetVariableNames(f)); //
 
 		in.forEach(f -> doProcessJobs(f, null));
-
-
-
-		if (this.getBmcDataModel().getConfigeProvider().includeConditions()) {
-
-			// if (USENEWDEPCODE) {
-			// // this.depthread.execute();
-			// // DependencyGraph.processDependencyMap(getDatamodel());
-			in.forEach(f -> this.depgraph.doProcessJobDeps(f));
-			// } else {
-			// in.forEach(f -> doProcessJobDeps(f));
-			// }
-		}
 
 		return getTidalDataModel();
 	}
@@ -148,7 +135,7 @@ public class BMCToTIDALTransformer implements ITransformer<List<BaseBMCJobOrFold
 
 				// if (USENEWDEPCODE) {
 				// // this.depthread.doRegisterJobDepGraph(group, base);
-				this.depgraph.doProcessJobDepGraph(group, base);
+				this.depgraphmap.doProcessJobDepGraph(group, base);
 				// // DependencyGraph.registerJobDepGraph(base, group);
 				// } else {
 				// doProcessJobDepGraph(group, base);
@@ -194,7 +181,7 @@ public class BMCToTIDALTransformer implements ITransformer<List<BaseBMCJobOrFold
 			// if (USENEWDEPCODE) {
 			// // DependencyGraph.registerJobDepGraph(base, newjob);
 			// // this.depthread.doRegisterJobDepGraph(newjob, base);
-			this.depgraph.doProcessJobDepGraph(newjob, base);
+			this.depgraphmap.doProcessJobDepGraph(newjob, base);
 			// } else {
 			// doProcessJobDepGraph(newjob, base);
 			// }

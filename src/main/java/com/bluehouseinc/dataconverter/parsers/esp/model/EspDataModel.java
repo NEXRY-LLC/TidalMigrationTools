@@ -19,10 +19,10 @@ public class EspDataModel extends BaseParserDataModel<EspAbstractJob, EspConfigP
 
 	private DependencyGraphMapper depgraph;
 	private ScheduleEventDataProcessor schedDataProcessor;
-	
+
 	public EspDataModel(ConfigurationProvider cfgProvider, ScheduleEventDataProcessor schedDataProcessor) {
 		super(new EspConfigProvider(cfgProvider));
-		this.depgraph = new DependencyGraphMapper(getConfigeProvider(), getTidal(),this);
+		this.depgraph = new DependencyGraphMapper(getConfigeProvider(), getTidal(), this);
 		this.schedDataProcessor = schedDataProcessor;
 	}
 
@@ -37,11 +37,14 @@ public class EspDataModel extends BaseParserDataModel<EspAbstractJob, EspConfigP
 	}
 
 	@Override
-	public void doProcessData(List<EspAbstractJob> dataObjects) {
+	public void doPostTransformJobObjects(List<EspAbstractJob> jobs) {
+		jobs.forEach(jobGroupObject -> buildEmailActions(jobGroupObject));
 
-		dataObjects.forEach(jobGroupObject -> doProcessJobDeps(jobGroupObject));
+	}
 
-		dataObjects.forEach(jobGroupObject -> buildEmailActions(jobGroupObject));
+	@Override
+	public void doProcessJobDependency(List<EspAbstractJob> jobs) {
+		jobs.forEach(jobGroupObject -> doProcessJobDeps(jobGroupObject));
 
 	}
 
@@ -102,7 +105,7 @@ public class EspDataModel extends BaseParserDataModel<EspAbstractJob, EspConfigP
 
 							if (notify.contains("SUBJECT")) {
 								String subject = mailBoxString.substring(mailBoxString.lastIndexOf("(") + 1, mailBoxString.lastIndexOf(")"));
-								//csvActionEmailName += subject;
+								// csvActionEmailName += subject;
 								csvActionEmail.setSubject(subject);
 							}
 							csvActionEmail.setName(csvActionEmailName);
@@ -115,7 +118,7 @@ public class EspDataModel extends BaseParserDataModel<EspAbstractJob, EspConfigP
 			}
 
 		} catch (Exception e) {
-			//e.printStackTrace();
+			// e.printStackTrace();
 		}
 	}
 

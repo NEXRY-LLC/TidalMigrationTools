@@ -21,6 +21,7 @@ import com.bluehouseinc.dataconverter.api.importer.exec.ResourceExecutor;
 import com.bluehouseinc.dataconverter.api.importer.exec.RunTimeUserExecutor;
 import com.bluehouseinc.dataconverter.api.importer.exec.TimeZoneExecutor;
 import com.bluehouseinc.dataconverter.api.importer.exec.VariableExecutor;
+import com.bluehouseinc.dataconverter.api.importer.exec.WorkGroupRunUserExecutor;
 import com.bluehouseinc.dataconverter.api.reporters.TidalModelReporterData;
 import com.bluehouseinc.dataconverter.model.TidalDataModel;
 import com.bluehouseinc.dataconverter.model.impl.BaseCsvJobObject;
@@ -40,17 +41,14 @@ import com.bluehouseinc.tidal.utils.StringUtils;
 import lombok.extern.log4j.Log4j2;
 import me.tongfei.progressbar.ProgressBarBuilder;
 
-
 @Log4j2
 @Component
 public class TidalImporter {
 
-
-	private static final String  TIDAL_USE_CONTAINER = "TIDAL.UseContainer";
-
+	private static final String TIDAL_USE_CONTAINER = "TIDAL.UseContainer";
 
 	static final StopWatch sw = new StopWatch();
-	//static final ProgressBarBuilder pbb = new ProgressBarBuilder();
+	// static final ProgressBarBuilder pbb = new ProgressBarBuilder();
 	private TidalAPI tidal;
 
 	public TidalImporter() {
@@ -108,24 +106,24 @@ public class TidalImporter {
 
 	public void installAgents(TidalDataModel model) {
 		initAPI();
-		this.tidal.getSession().login();
+		// this.tidal.getSession().login();
 		this.tidal.getApiExecutor().doProcessAgents(this.tidal.apiExecutor.getPbb().build());
-		
-		if(model == null) {
+
+		if (model == null) {
 			log.info("Missing Node data, load data first then call this method");
 			return;
-		}else if(model.getNodes().isEmpty()) {
+		} else if (model.getNodes().isEmpty()) {
 			log.info("Missing Node data, load data first then call this method");
 			return;
 		}
-		
+
 		model.getNodes().stream().sorted().forEach(node -> {
 
 			String nodename = node;
 			if (!validateNodeExist(nodename)) {
 				// Doesn't mater for now we want the system to add the connections
-				//TODO: Fix this to be based on a type but our importer tool does not have a type, so all unix in our labs
-				
+				// TODO: Fix this to be based on a type but our importer tool does not have a type, so all unix in our labs
+
 				UnixNode unx = new UnixNode();
 				unx.setName(nodename);
 				unx.setPort("5912");
@@ -139,6 +137,8 @@ public class TidalImporter {
 			}
 
 		});
+
+		this.tidal.nodes.clear();// reset for ??
 	}
 
 	private boolean validateNodeExist(String name) {
@@ -182,7 +182,6 @@ public class TidalImporter {
 		log.debug("Checking Agents are present in TIDAL");
 		StringBuilder b = new StringBuilder();
 
-
 		model.getNodes().stream().sorted().forEach(n -> {
 
 			if (!validateNodeExist(n)) {
@@ -199,20 +198,20 @@ public class TidalImporter {
 		});
 
 		if (!StringUtils.isBlank(b.toString())) {
-			throw new TidalException("The following nodes or agentlist must be added prior to running this migration process" + b.toString() );
+			throw new TidalException("The following nodes or agentlist must be added prior to running this migration process" + b.toString());
 		}
 
 		log.debug("Checking Agents and Agent List are present in TIDAL - Completed");
 
 		new TimeZoneExecutor(tidal, model, cp).execute();
 
-		new ResourceExecutor(tidal, model, cp).execute();
-
 		new RunTimeUserExecutor(tidal, model, cp).execute();
+
+		new OwnerExecutor(tidal, model, cp).execute();
 
 		new CalendarExecutor(tidal, model, cp).execute();
 
-		new OwnerExecutor(tidal, model, cp).execute();
+		new WorkGroupRunUserExecutor(tidal, model, cp).execute();
 
 		new VariableExecutor(tidal, model, cp).execute();
 
@@ -224,15 +223,21 @@ public class TidalImporter {
 
 		model.getModelJobs().forEach(j -> VariableUtil.doProcessVariables(j, tidal.getVariables()));
 
-
 		new JobGroupExecutor(tidal, model, cp).execute();
 
 		new DependencyExecutor(tidal, model, cp).execute();
 
-		new JobResourceJoinExecutor(tidal, model, cp).execute();
+		try {
+			// the last thing as its causing issues
+			new JobCompoundDepExecutor(tidal, model, cp).execute();
+
+		} catch (Exception e) {
+			log.error(e.getMessage());
+		}
 		
-		//  the last thing as its causing issues
-		new JobCompoundDepExecutor(tidal, model, cp).execute();
+		new ResourceExecutor(tidal, model, cp).execute();
+
+		new JobResourceJoinExecutor(tidal, model, cp).execute();
 
 		// sw.prettyPrint();
 
@@ -266,7 +271,7 @@ public class TidalImporter {
 					} else {
 						CsvJobGroup c = new CsvJobGroup();
 						c.setName(key);
-						 model.addCalendarToJobOrGroup(c, new CsvCalendar("Daily"));
+						model.addCalendarToJobOrGroup(c, new CsvCalendar("Daily"));
 						c.addChild(f);
 						datamap.put(key, c);
 					}
@@ -305,6 +310,7 @@ public class TidalImporter {
 		log.info("TimeZone Objects To Process [" + model.getTimeZones().size() + "]");
 		log.info("Resource Objects To Process [" + model.getResource().size() + "]");
 		log.info("Runtime User Objects To Process [" + model.getRuntimeusers().size() + "]");
+		log.info("Workgroup RunUsers Objects To Process [" + model.getRuntimeusers().size() + "]");
 		log.info("Calendar Objects To Process [" + model.getCalendars().size() + "]");
 		log.info("Owner Objects To Process [" + model.getOwners().size() + "]");
 		log.info("Variable Objects To Process [" + model.getVariables().size() + "]");
@@ -317,17 +323,14 @@ public class TidalImporter {
 
 		TidalModelReporterData.getReporters().forEach(f -> {
 
-
-			log.trace("#####################################" + f.getClass().getSimpleName() +"#####################################");
+			log.trace("#####################################" + f.getClass().getSimpleName() + "#####################################");
 
 			f.doReport(model);
 
-			log.trace("#####################################" + f.getClass().getSimpleName() +"#####################################");
-
+			log.trace("#####################################" + f.getClass().getSimpleName() + "#####################################");
 
 		});
 	}
-
 
 	private boolean isStringInt(String s) {
 		try {

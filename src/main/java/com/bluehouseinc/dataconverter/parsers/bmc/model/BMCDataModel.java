@@ -29,8 +29,12 @@ import lombok.EqualsAndHashCode;
 public class BMCDataModel extends BaseParserDataModel<BaseBMCJobOrFolder,BMCConfigProvider> implements IParserModel {
 	private Map<String, DoMailData> uniqueEmails = new HashMap<>();
 
+	DependencyGraphMapper depgraph;
+	
 	public BMCDataModel(ConfigurationProvider cfgProvider) {
 		super(new BMCConfigProvider(cfgProvider));
+		
+		depgraph = new DependencyGraphMapper(this);
 	}
 
 	@Override
@@ -40,17 +44,16 @@ public class BMCDataModel extends BaseParserDataModel<BaseBMCJobOrFolder,BMCConf
 
 	@Override
 	public ITransformer<List<BaseBMCJobOrFolder>, TidalDataModel> getJobTransformer(TidalDataModel model) {
-		return new BMCToTIDALTransformer(model, this, new DependencyGraphMapper(model));
+		return new BMCToTIDALTransformer(model, this, depgraph);
 	}
 
 	private Map<BMCJobTypes, List<BaseBMCJobOrFolder>> jobtypes = new Hashtable<>();
 
+
 	@Override
-	public void doProcessData(List<BaseBMCJobOrFolder> data) {
-
-
+	public void doPostTransformJobObjects(List<BaseBMCJobOrFolder> jobs) {
 		if (this.getConfigeProvider().includeEmailActions()) {
-			data.forEach(d -> doProcessBuildEmailAction(d));
+			jobs.forEach(d -> doProcessBuildEmailAction(d));
 		}
 
 		String dosetreporting = this.getConfigeProvider().reportDoSetVarDataLocation();
@@ -60,7 +63,7 @@ public class BMCDataModel extends BaseParserDataModel<BaseBMCJobOrFolder,BMCConf
 			try {
 				writer = new BufferedWriter(new FileWriter(dosetreporting, true));
 				Map<String, String> mydata = new HashMap<>();
-				data.forEach(d -> doProcessReportDoSetData(d, mydata));
+				jobs.forEach(d -> doProcessReportDoSetData(d, mydata));
 
 				for (String key : mydata.keySet()) {
 					String value = mydata.get(key);
@@ -78,6 +81,15 @@ public class BMCDataModel extends BaseParserDataModel<BaseBMCJobOrFolder,BMCConf
 
 		}
 	}
+	
+	@Override
+	public void doProcessJobDependency(List<BaseBMCJobOrFolder> jobs) {
+		
+		if (getConfigeProvider().includeConditions()) {
+			jobs.forEach(f -> this.depgraph.doProcessJobDeps(f));
+		}
+	}
+
 
 	public void addJobByType(BMCJobTypes type, BaseBMCJobOrFolder base) {
 

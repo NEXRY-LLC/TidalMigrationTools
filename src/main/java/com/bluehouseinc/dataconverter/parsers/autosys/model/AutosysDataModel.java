@@ -62,20 +62,14 @@ public class AutosysDataModel extends BaseParserDataModel<AutosysAbstractJob, Au
 	}
 
 	@Override
-	public void doProcessData(List<AutosysAbstractJob> dataObjects) {
+	public void doPostTransformJobObjects(List<AutosysAbstractJob> jobs) {
+		// Nothing to do here. 
 
-		long startTime = System.currentTimeMillis(); // debugging
-		dataObjects.forEach(this::doProcessJobDeps);
-		long endTime = System.currentTimeMillis(); // debugging
-		long jobDependencyProcessingTime = (endTime - startTime) / 1000; // debugging
-		log.info("jobDependencyProcessingTime={} seconds", jobDependencyProcessingTime); // debugging
+	}
 
-		startTime = System.currentTimeMillis(); // debugging
-		// processAutosysBoxSuccessJobDependencies(dataObjects); // FIXME: Modify this
-		// method logic for faster processing
-		endTime = System.currentTimeMillis(); // debugging
-		long boxJobSuccessDependencyProcessingTime = (endTime - startTime) / 1000; // debugging
-		log.info("boxJobSuccessDependencyProcessingTime={} seconds", boxJobSuccessDependencyProcessingTime); // debugging
+	@Override
+	public void doProcessJobDependency(List<AutosysAbstractJob> jobs) {
+		jobs.forEach(this::doProcessJobDeps);
 	}
 
 	public void processAutosysBoxSuccessJobDependencies(List<AutosysAbstractJob> dataObjects) {
@@ -99,20 +93,18 @@ public class AutosysDataModel extends BaseParserDataModel<AutosysAbstractJob, Au
 			throw new TidalException("Unable to Locate Job[{" + sourcejob.getFullPath() + "}] by Path");
 		}
 
-		log.debug("[doProcessJobDeps] me={}", targetjob.getFullPath());
+		log.debug("[doProcessJobDeps] Job={}", targetjob.getFullPath());
 
-		if(targetjob.getName().equals("MMM_QNXT_0180_05.ETS_IN_Script_for_Provider_Sync.FT00")) {
+		if (targetjob.getName().equals("MMM_QNXT_0180_05.ETS_IN_Script_for_Provider_Sync.FT00")) {
 			targetjob.getName();
 		}
 		AutosysDependencyParserUtil.doProcessJob(sourcejob, targetjob, getTidal(), this);
 
 		sourcejob.getChildren().forEach(job -> {
-			log.debug("[doProcessJobDeps] child={}", job.getFullPath());
+			log.debug("[doProcessJobDeps] Child Job={}", job.getFullPath());
 			doProcessJobDeps((AutosysAbstractJob) job);
 
 		});
 	}
-
-	
 
 }

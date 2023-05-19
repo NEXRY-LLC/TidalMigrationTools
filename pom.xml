@@ -58,9 +58,9 @@
 		<dependency>
 			<groupId>com.bluehouseinc.tidal</groupId>
 			<artifactId>tidal.api</artifactId>
-			<version>1.1.11</version>
+			<version>1.1.12</version>
 			<scope>system</scope>
-			<systemPath>${project.basedir}/lib/tidal-1.1.11-TIDAL.API-GA.jar</systemPath>
+			<systemPath>${project.basedir}/lib/tidal-1.1.12-TIDAL.API-GA.jar</systemPath>
 		</dependency>
 		<dependency>
 			<groupId>com.bluehouseinc.toolkit</groupId>

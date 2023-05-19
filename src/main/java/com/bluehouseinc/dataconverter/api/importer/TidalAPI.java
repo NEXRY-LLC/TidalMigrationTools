@@ -12,6 +12,7 @@ import org.springframework.util.StopWatch;
 
 import com.bluehouseinc.dataconverter.providers.ConfigurationProvider;
 import com.bluehouseinc.tidal.api.ServiceFactory;
+import com.bluehouseinc.tidal.api.exceptions.TidalException;
 import com.bluehouseinc.tidal.api.impl.services.session.TidalSession;
 import com.bluehouseinc.tidal.api.model.actions.email.EmailAction;
 import com.bluehouseinc.tidal.api.model.agentlist.AgentList;
@@ -30,6 +31,7 @@ import com.bluehouseinc.tidal.api.model.users.Users;
 import com.bluehouseinc.tidal.api.model.users.adapter.UserService;
 import com.bluehouseinc.tidal.api.model.variable.Variable;
 import com.bluehouseinc.tidal.api.model.workgroup.WorkGroup;
+import com.bluehouseinc.tidal.api.model.workgroup.runuser.WorkGroupRunUser;
 import com.bluehouseinc.tidal.utils.StringUtils;
 
 import lombok.AccessLevel;
@@ -62,6 +64,8 @@ public class TidalAPI {
 	protected Collection<BusinessUnit> businessUnits;
 	protected Collection<AgentList> agentList;
 	protected Collection<JobClass> jobClass;
+	protected Collection<WorkGroupRunUser> workRunUsers;
+	
 	private Map<String, BaseJob> pathJobMap;
 
 	protected Owner defaultOwner;
@@ -97,7 +101,7 @@ public class TidalAPI {
 		
 		log.info("\nSetting Default Owner [" + defuser + "]");
 		
-		this.defaultOwner = owners.stream().filter(f -> f.getName().equalsIgnoreCase(defuser)).findFirst().get();
+		this.defaultOwner = owners.stream().filter(f -> f.getName().equalsIgnoreCase(defuser)).findFirst().orElseThrow(null);
 
 	}
 
@@ -219,5 +223,9 @@ public class TidalAPI {
 
 	public JobClass getJobClassByName(String name) {
 		return getJobClass().stream().filter(f -> f.getName().equalsIgnoreCase(name)).findAny().orElse(null);
+	}
+	
+	public WorkGroupRunUser getWorkGroupRunUserById(int id) {
+		return getWorkRunUsers().stream().filter(f -> f.getId() == id).findAny().orElse(null);
 	}
 }

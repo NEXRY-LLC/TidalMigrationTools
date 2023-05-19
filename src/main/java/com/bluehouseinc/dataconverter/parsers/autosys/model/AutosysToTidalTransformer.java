@@ -307,7 +307,7 @@ public class AutosysToTidalTransformer implements ITransformer<List<AutosysAbstr
 		baseCsvJobObject.setName(autosysAbstractJob.getName());
 		baseCsvJobObject.setNotes(autosysAbstractJob.getDescription());
 
-		if (baseCsvJobObject.getName().equalsIgnoreCase("CPL_QNXT_6280_020.ETS_EDI_834_837_ALL_IN")) {
+		if (baseCsvJobObject.getName().equalsIgnoreCase("CVS_FACE_9915_010.Batch_Metrics")) {
 			baseCsvJobObject.getName();
 		}
 

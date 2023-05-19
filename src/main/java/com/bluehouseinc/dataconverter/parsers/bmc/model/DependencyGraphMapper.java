@@ -19,11 +19,11 @@ public class DependencyGraphMapper {
 	private Map<String, List<BaseCsvJobObject>> OutConditionDataMap = new ConcurrentHashMap<>();
 	private Map<String, BaseCsvJobObject> JobDepMapping = new ConcurrentHashMap<>();
 
-	private TidalDataModel datamodel;
+	private BMCDataModel bmcmodel;
 
 
-	public DependencyGraphMapper(TidalDataModel datamodel) {
-		this.datamodel = datamodel;
+	public DependencyGraphMapper(BMCDataModel bmcmodel) {
+		this.bmcmodel = bmcmodel;
 	}
 
 	/**
@@ -72,7 +72,8 @@ public class DependencyGraphMapper {
 		if (!base.getInConditionData().isEmpty()) {
 
 			// Way too slow
-			BaseCsvJobObject me = getDatamodel().findFirstJobByFullPath(base.getFullPath());
+			
+			BaseCsvJobObject me = getBmcmodel().getTidal().findFirstJobByFullPath(base.getFullPath());
 
 			if (me == null) {
 				// Ignore group with no children or parents.. We know we did not process them.
@@ -111,7 +112,7 @@ public class DependencyGraphMapper {
 
 						} else {
 							log.debug("doProcessJobDeps Registering Dependency for Job[" + me.getFullPath() + "] that depends on [" + dep.getFullPath() + "]");
-							getDatamodel().addJobDependencyForJobCompletedNormal(me, dep, dateOffset);
+							getBmcmodel().getTidal().addJobDependencyForJobCompletedNormal(me, dep, dateOffset);
 						}
 
 					});

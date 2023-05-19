@@ -56,7 +56,7 @@ public class BMCConfigProvider extends AbstractConfigProvider {
 
 
 	public boolean includeConditions() {
-		String tf = this.getProvider().getConfigurations().getOrDefault(BMC_INCLUDECONDITIONS, "false");
+		String tf = this.getProvider().getConfigurations().getOrDefault(BMC_INCLUDECONDITIONS, "true");
 		return Boolean.valueOf(tf);
 	}
 

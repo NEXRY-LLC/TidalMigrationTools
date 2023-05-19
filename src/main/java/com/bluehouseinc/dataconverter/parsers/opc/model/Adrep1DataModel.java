@@ -72,6 +72,16 @@ public class Adrep1DataModel extends BaseParserDataModel<OPCOSJob, OPCConfigProv
 	}
 
 	@Override
+	public void doPostTransformJobObjects(List<OPCOSJob> jobs) {
+		doProcessData(jobs);
+		
+	}
+	
+	@Override
+	public void doProcessJobDependency(List<OPCOSJob> jobs) {
+
+	}
+	
 	public void doProcessData(List<OPCOSJob> dataObjects) {
 		OPCCalendar ERRORCALENDAR = new OPCCalendar("ERROR_MULTIPLE_ADRULES_WITH_TIMES");
 		OPCCalendar ERRORRERUNCAL = new OPCCalendar("TO_MANY_RERUN_OPTIONS");

@@ -86,6 +86,9 @@ public class TidalApiExecutor extends AbstractAPIExecutor {
 			doProcessJobClass(bar);
 		});
 
+		executor.submit(() -> {
+			doProcessWorkGroupRunUsers(bar);
+		});
 	}
 
 	@Override
@@ -123,6 +126,7 @@ public class TidalApiExecutor extends AbstractAPIExecutor {
 
 		doProcessJobClass(bar);
 
+		doProcessWorkGroupRunUsers(bar);
 	}
 
 	@Override
@@ -328,6 +332,17 @@ public class TidalApiExecutor extends AbstractAPIExecutor {
 		try {
 			bar.setExtraMessage("doProcessJobClass");
 			getTidalApi().jobClass = getTidalApi().getSf().jobClass().getList();
+		} catch (Exception e) {
+			throw new TidalException(e);
+		} finally {
+			bar.step();
+		}
+	}
+	
+	private void doProcessWorkGroupRunUsers(ProgressBar bar) {
+		try {
+			bar.setExtraMessage("doProcessWorkGroupRunUsers");
+			getTidalApi().workRunUsers = getTidalApi().getSf().workGroupRunUser().getList();
 		} catch (Exception e) {
 			throw new TidalException(e);
 		} finally {

@@ -15,9 +15,6 @@ public class TestingDataModel extends BaseParserDataModel<TestingBaseObject,Test
 		super(new TestingConfigProvider(cfgProvider));
 	}
 
-	@Override
-	public void doProcessData(List<TestingBaseObject> dataObjects) {
-	}
 
 	@Override
 	public BaseVariableProcessor<TestingBaseObject> getVariableProcessor(TidalDataModel model) {
@@ -27,6 +24,20 @@ public class TestingDataModel extends BaseParserDataModel<TestingBaseObject,Test
 	@Override
 	public ITransformer<List<TestingBaseObject>, TidalDataModel> getJobTransformer(TidalDataModel model) {
 		return null;
+	}
+
+
+	@Override
+	public void doPostTransformJobObjects(List<TestingBaseObject> jobs) {
+		// TODO Auto-generated method stub
+		
+	}
+
+
+	@Override
+	public void doProcessJobDependency(List<TestingBaseObject> jobs) {
+		// TODO Auto-generated method stub
+		
 	}
 
 

@@ -11,7 +11,7 @@ import com.bluehouseinc.dataconverter.parsers.orsyp.OrsypConfigProvider;
 import com.bluehouseinc.dataconverter.providers.ConfigurationProvider;
 import com.bluehouseinc.transform.ITransformer;
 
-public class ExportObjects extends BaseParserDataModel<BaseJobOrGroupObject,OrsypConfigProvider> {
+public class ExportObjects extends BaseParserDataModel<BaseJobOrGroupObject, OrsypConfigProvider> {
 	LinkedList<Sessions> sessions;
 	LinkedList<Triggers> triggers;
 	LinkedList<Runbooks> runbooks;
@@ -113,8 +113,14 @@ public class ExportObjects extends BaseParserDataModel<BaseJobOrGroupObject,Orsy
 	}
 
 	@Override
-	public void doProcessData(List<BaseJobOrGroupObject> dataObjects) {
+	public void doPostTransformJobObjects(List<BaseJobOrGroupObject> jobs) {
+		// TODO Auto-generated method stub
 
 	}
 
+	@Override
+	public void doProcessJobDependency(List<BaseJobOrGroupObject> jobs) {
+		// TODO Auto-generated method stub
+
+	}
 }

@@ -28,17 +28,23 @@ public class TivoliDataModel extends BaseParserDataModel<TivoliObject,TivoliConf
 		return null;
 	}
 
-	/**
-	 * Process the concret object that is bound
-	 */
-	@Override
-	public void doProcessData(List<TivoliObject> dataObjects) {
 
-	}
 
 	@Override
 	public ITransformer<List<TivoliObject>, TidalDataModel> getJobTransformer(TidalDataModel model) {
 		return null;
+	}
+
+	@Override
+	public void doPostTransformJobObjects(List<TivoliObject> jobs) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void doProcessJobDependency(List<TivoliObject> jobs) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

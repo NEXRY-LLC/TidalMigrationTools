@@ -9,7 +9,8 @@ import lombok.Data;
 public abstract class AbstractConfigProvider {
 
 	private ConfigurationProvider provider;
-
+	private String SKIPDEPS = "tidal.skipdeps";
+	
 	public AbstractConfigProvider(ConfigurationProvider provider) {
 		this.provider = provider;
 
@@ -19,4 +20,8 @@ public abstract class AbstractConfigProvider {
 
 	public abstract void checkAndThrowEarly() throws TidalException;
 
+	public boolean skipDependencyProcessing() {
+		String tf = this.getProvider().getConfigurations().getOrDefault(SKIPDEPS, "false");
+		return Boolean.valueOf(tf);
+	}
 }

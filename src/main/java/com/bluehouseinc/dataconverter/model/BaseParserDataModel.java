@@ -25,13 +25,13 @@ public abstract class BaseParserDataModel<E extends BaseJobOrGroupObject, P exte
 	@Getter(value = AccessLevel.PUBLIC)
 	private P configeProvider;
 
-	List<E> dataObjects = new ArrayList<>();
-	List<String> dupCheck = new ArrayList<>();
+	private List<E> dataObjects = new ArrayList<>();
+	private List<String> dupCheck = new ArrayList<>();
 
-	BaseVariableProcessor<E> variableProcessor;
+	private BaseVariableProcessor<E> variableProcessor;
 
 	@Getter(value = AccessLevel.PUBLIC)
-	ITransformer<List<E>, TidalDataModel> jobTransformer;
+	private ITransformer<List<E>, TidalDataModel> jobTransformer;
 
 	public BaseParserDataModel(P configeProvider) {
 		this.configeProvider = configeProvider;
@@ -44,10 +44,9 @@ public abstract class BaseParserDataModel<E extends BaseJobOrGroupObject, P exte
 
 		if (this.variableProcessor != null) {
 
+			log.info("convertToDomainDataModel.getVariableProcessor={} Starting."); // debugging
 			long startTime = System.currentTimeMillis(); // debugging
-
 			this.getDataObjects().stream().forEach(getVariableProcessor()::processJob);
-
 			long endTime = System.currentTimeMillis(); // debugging
 			long finishtime = (endTime - startTime) / 1000; // debugging
 			log.info("convertToDomainDataModel.getVariableProcessor={} seconds", finishtime); // debugging
@@ -57,10 +56,9 @@ public abstract class BaseParserDataModel<E extends BaseJobOrGroupObject, P exte
 		if (this.jobTransformer != null) {
 			try {
 
+				log.info("convertToDomainDataModel.getTransformer Starting."); // debugging
 				long startTime = System.currentTimeMillis(); // debugging
-
 				this.getJobTransformer().transform(dataObjects);
-
 				long endTime = System.currentTimeMillis(); // debugging
 				long finishtime = (endTime - startTime) / 1000; // debugging
 				log.info("convertToDomainDataModel.getTransformer={} seconds", finishtime); // debugging
@@ -70,8 +68,24 @@ public abstract class BaseParserDataModel<E extends BaseJobOrGroupObject, P exte
 			}
 		}
 
-		doProcessData(this.dataObjects);
+		log.info("doPostTransformJobObject Starting."); // debugging
+		long startTimej = System.currentTimeMillis(); // debugging
+		doPostTransformJobObjects(this.dataObjects);
+		long endTimej = System.currentTimeMillis(); // debugging
+		long jobDependencyProcessingTimej = (endTimej - startTimej) / 1000; // debugging
+		log.info("doPostTransformJobObject Time={} seconds", jobDependencyProcessingTimej); // debugging
 
+		if (getConfigeProvider().skipDependencyProcessing()) {
+			log.info("doProcessJobDependency Skipping. skipDependencyProcessing() == true"); // debugging
+		} else {
+			log.info("doProcessJobDependency Starting."); // debugging
+			long startTime = System.currentTimeMillis(); // debugging
+			doProcessJobDependency(this.dataObjects);
+			long endTime = System.currentTimeMillis(); // debugging
+			long jobDependencyProcessingTime = (endTime - startTime) / 1000; // debugging
+			log.info("doProcessJobDependency Time={} seconds", jobDependencyProcessingTime); // debugging
+		}
+		
 		return this.getTidal();
 	}
 
@@ -79,7 +93,9 @@ public abstract class BaseParserDataModel<E extends BaseJobOrGroupObject, P exte
 		return TidalDataModel.instance(getConfigeProvider());
 	}
 
-	public abstract void doProcessData(List<E> dataObjects);
+	public abstract void doPostTransformJobObjects(List<E> jobs);
+
+	public abstract void doProcessJobDependency(List<E> jobs);
 
 	public abstract BaseVariableProcessor<E> getVariableProcessor(TidalDataModel model);
 
@@ -121,52 +137,52 @@ public abstract class BaseParserDataModel<E extends BaseJobOrGroupObject, P exte
 		return objs;
 	}
 
-	private boolean nameMatches(E obj,String name) {
-		String jobname  = obj.getName();
-		//log.info("Check job {} match name {}",jobname, name);
-		
-		if(jobname.equals("DHP_EDM_PROD_6100_010.ETS_837_ENC_OUT.FT00")) {
+	private boolean nameMatches(E obj, String name) {
+		String jobname = obj.getName();
+		// log.info("Check job {} match name {}",jobname, name);
+
+		if (jobname.equals("DHP_EDM_PROD_6100_010.ETS_837_ENC_OUT.FT00")) {
 			name.getBytes();
 		}
 
-		if(jobname.toLowerCase().trim().equals(name.toLowerCase().trim())) {
+		if (jobname.toLowerCase().trim().equals(name.toLowerCase().trim())) {
 			return true;
 		}
-		
+
 		return false;
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	private E getJobByName(String name, E job) {
-		
-		if(nameMatches(job, name)) {
+
+		if (nameMatches(job, name)) {
 			return job;
-		}else {
-			for(BaseJobOrGroupObject obj : job.getChildren()) {
-				return getJobByName(name,(E) obj);
+		} else {
+			for (BaseJobOrGroupObject obj : job.getChildren()) {
+				return getJobByName(name, (E) obj);
 			}
-			//job.getChildren().forEach(f -> getJobByName(name,(E) f));
+			// job.getChildren().forEach(f -> getJobByName(name,(E) f));
 		}
-		
+
 		return null;
 	}
-	
+
 	public E getJobByName(String name) {
-		if(name.equals("DHP_EDM_PROD_6100_010.ETS_837_ENC_OUT.FT00")) {
+		if (name.equals("DHP_EDM_PROD_6100_010.ETS_837_ENC_OUT.FT00")) {
 			name.getBytes();
 		}
 
-		for(E obj : getDataObjects()) {
-			E found =  getJobByName(name, obj);
-			
-			if(found != null) {
+		for (E obj : getDataObjects()) {
+			E found = getJobByName(name, obj);
+
+			if (found != null) {
 				return found;
 			}
 		}
 
 		return null;
 	}
-	
+
 	public E getBaseObjectByName(String name) {
 		List<E> objs = ObjectUtils.toFlatStream(this.getDataObjects()).filter(f -> f.getName().toLowerCase().trim().equalsIgnoreCase(name.toLowerCase().trim())).collect(Collectors.toList());
 
@@ -175,8 +191,8 @@ public abstract class BaseParserDataModel<E extends BaseJobOrGroupObject, P exte
 		}
 
 		if (objs.size() > 1) {
-			//log.info("MULTIPLE[{}] JOBS WITH NAME[{}] returning last in the list", objs.size(), name);
-			//objs.forEach(baseJobOrGroupObject -> log.info("{}", baseJobOrGroupObject.getFullPath()));
+			// log.info("MULTIPLE[{}] JOBS WITH NAME[{}] returning last in the list", objs.size(), name);
+			// objs.forEach(baseJobOrGroupObject -> log.info("{}", baseJobOrGroupObject.getFullPath()));
 			long count = objs.size();
 
 			return objs.stream().skip(count - 1).findFirst().get();
@@ -198,5 +214,4 @@ public abstract class BaseParserDataModel<E extends BaseJobOrGroupObject, P exte
 		return ObjectUtils.toFlatStream(this.getDataObjects()).filter(f -> type.isInstance(f)).collect(Collectors.toList());
 	}
 
-	
 }
