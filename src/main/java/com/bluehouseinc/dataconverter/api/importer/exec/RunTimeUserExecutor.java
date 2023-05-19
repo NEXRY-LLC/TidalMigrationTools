@@ -61,14 +61,16 @@ public class RunTimeUserExecutor extends AbstractAPIExecutor {
 	protected void doProcessRunTimeUser(CsvRuntimeUser rte, ProgressBar bar) {
 
 		try {
-			Optional<Users> existing = getTidalApi().getUsers().stream().filter(f -> f.getName().equalsIgnoreCase(rte.getRunTimeUserName())).findFirst();
+			Users existing = getTidalApi().getFirstRunTimeUserByNameAndDomain(rte.getRunTimeUserName(),rte.getRunTimeUserDomain());
+			
+
 			Collection<UserService> adapterpass = new ArrayList<>();
 
 			Users usr = null;
 
-			if (existing.isPresent()) {
-				usr = existing.get();
-				adapterpass = getTidalApi().getUserAdapterServices(usr);
+			if (existing!= null) {
+				usr = existing;
+				adapterpass = getTidalApi().getUserAdapterServices(existing);
 
 				log.debug("doProcessRunTimeUser[" + usr.getName() + "] Skipping Already Exist");
 			} else {

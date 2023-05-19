@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 import org.springframework.util.StopWatch;
 
 import com.bluehouseinc.dataconverter.providers.ConfigurationProvider;
+import com.bluehouseinc.dataconverter.util.ObjectUtils;
 import com.bluehouseinc.tidal.api.ServiceFactory;
 import com.bluehouseinc.tidal.api.exceptions.TidalException;
 import com.bluehouseinc.tidal.api.impl.services.session.TidalSession;
@@ -21,6 +22,7 @@ import com.bluehouseinc.tidal.api.model.calendar.Calendar;
 import com.bluehouseinc.tidal.api.model.dependency.job.JobDependency;
 import com.bluehouseinc.tidal.api.model.job.BaseJob;
 import com.bluehouseinc.tidal.api.model.job.group.JobGroup;
+import com.bluehouseinc.tidal.api.model.job.service.jde.User;
 import com.bluehouseinc.tidal.api.model.jobclass.JobClass;
 import com.bluehouseinc.tidal.api.model.node.Node;
 import com.bluehouseinc.tidal.api.model.owners.Owner;
@@ -225,7 +227,41 @@ public class TidalAPI {
 		return getJobClass().stream().filter(f -> f.getName().equalsIgnoreCase(name)).findAny().orElse(null);
 	}
 	
-	public WorkGroupRunUser getWorkGroupRunUserById(int id) {
-		return getWorkRunUsers().stream().filter(f -> f.getId() == id).findAny().orElse(null);
+	public WorkGroupRunUser getWorkGroupRunUserById(int groupid, int userid) {
+		return getWorkRunUsers().stream().filter(f -> f.getWorkgroupid() == groupid  && f.getUsertableid()==userid).findAny().orElse(null);
+	}
+	
+	
+	/**
+	 * 
+	 * @param name
+	 * @param domain - Can be null but only returns the first name in the list. 
+	 * @return
+	 */
+	public Users getFirstRunTimeUserByNameAndDomain(String name, String domain) {
+		
+		final List<Users> found = new ArrayList<>();
+		
+		getUsers().forEach(u ->{
+			if(u.getName().equalsIgnoreCase(name)) {
+				found.add(u);
+			}
+		});
+		
+		// If we have a domain match, return that. 
+		if(!StringUtils.isBlank(domain)) {
+			for(Users d: found) {
+				if(d.getDomain().equalsIgnoreCase(domain)) {
+					return d;
+				}
+			}
+		}else {
+			// Did we find any?
+			if(!found.isEmpty()) {
+				return found.get(0); // Just return the first on in the list
+			}
+		}
+		
+		return null;
 	}
 }

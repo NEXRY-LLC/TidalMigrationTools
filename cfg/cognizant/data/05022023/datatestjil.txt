@@ -12,7 +12,22 @@ priority: 50
 alarm_if_terminated: 1
 group: CP
 
+ /* ----------------- CVS_FACE_9915_020.Batch_Metrics_Email ----------------- */ 
 
+ insert_job: CVS_FACE_9915_020.Batch_Metrics_Email   job_type: CMD 
+ command: C\:\Automation\Email\CVS_EmailMetricsFACE.bat
+ machine: CVS_FACE.B70PRODBAT0006
+ owner: batchprod.service@B70
+ permission: 
+ date_conditions: 0
+ std_out_file: "$${CVS_FACE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.out"
+ std_err_file: "$${CVS_FACE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.err"
+ alarm_if_fail: 1
+ job_load: 2
+ priority: 50
+ alarm_if_terminated: 1
+ group: CP
+ success_codes: 0,8
 
 /* ----------------- CTS_UTIL_PRD_0220_010.Job_Test_Communication-two ----------------- */ 
 

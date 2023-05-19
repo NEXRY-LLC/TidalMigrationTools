@@ -68,27 +68,28 @@ public class WorkGroupRunUserExecutor extends AbstractAPIExecutor {
 			// We can assume that our default owner is a workgroup at all times or force failure by design.
 			Owner workgroup = getTidalApi().getDefaultOwner();
 
-			Optional<Users> existing = getTidalApi().getUsers().stream().filter(f -> f.getName().equalsIgnoreCase(rte.getRunTimeUserName())).findFirst();
+			Users existing = getTidalApi().getFirstRunTimeUserByNameAndDomain(rte.getRunTimeUserName(),rte.getRunTimeUserDomain());
+			
 
-			Users usr = null;
+			if (existing != null) {
 
-			if (existing.isPresent()) {
-				usr = existing.get();
-
-				WorkGroupRunUser wrkuser = getTidalApi().getWorkGroupRunUserById(workgroup.getId());
+				int groupid = workgroup.getId();
+				int usrid = existing.getId();
+				WorkGroupRunUser wrkuser = getTidalApi().getWorkGroupRunUserById(groupid,usrid);
 
 				if (wrkuser == null) {
 					WorkGroupRunUser wu = new WorkGroupRunUser();
 
 					WorkGroup hack = new WorkGroup();
 					hack.setId(workgroup.getId()); // Just set this real quick.
-					wu.addUserToWorkGroup(usr, hack);
+					wu.addUserToWorkGroup(existing, hack);
 
 					log.debug("doProcessWorkGroupRunUser Adding[" + rte.getRunTimeUserName() + "][" + workgroup.getName() + "]");
 
 					TesResult res = getTidalApi().getSf().workGroupRunUser().create(wu);
 					int newid = res.getResult().getTesObjectid();
 					wu.setId(newid);
+					getTidalApi().getWorkRunUsers().add(wu);
 
 				} else {
 					log.debug("doProcessWorkGroupRunUser[" + rte.getRunTimeUserName() + "][" + workgroup.getName() + "] Skipping Already Exist");
