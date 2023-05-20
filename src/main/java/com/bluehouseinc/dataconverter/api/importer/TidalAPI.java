@@ -67,18 +67,18 @@ public class TidalAPI {
 	protected Collection<AgentList> agentList;
 	protected Collection<JobClass> jobClass;
 	protected Collection<WorkGroupRunUser> workRunUsers;
-	
+
 	private Map<String, BaseJob> pathJobMap;
 
 	protected Owner defaultOwner;
 
 	public static String DEFOWNDERNAME = "Schedulers";
 	public static String TIDALDefaultOwner = "TIDAL.DefaultOwner";
-	
+
 	ConfigurationProvider cfgProvider;
-	
+
 	TidalApiExecutor apiExecutor;
-	
+
 	public TidalAPI(TidalSession session, ConfigurationProvider cfgProvider) {
 		this.session = session;
 		this.sf = session.getServiceFactory();
@@ -100,9 +100,9 @@ public class TidalAPI {
 		log.debug("Processing Job Map Completed in [" + sw.getTotalTimeSeconds() + "]");
 
 		String defuser = getCfgProvider().getConfigurations().getOrDefault(TIDALDefaultOwner, DEFOWNDERNAME);
-		
+
 		log.info("\nSetting Default Owner [" + defuser + "]");
-		
+
 		this.defaultOwner = owners.stream().filter(f -> f.getName().equalsIgnoreCase(defuser)).findFirst().orElseThrow(null);
 
 	}
@@ -149,7 +149,7 @@ public class TidalAPI {
 	}
 
 	public Calendar getCalenderByName(String name) {
-		return getCalendars().stream().filter(f -> f.getName().equalsIgnoreCase(name)).findFirst().orElse(null);
+		return getCalendars().stream().filter(f -> f.getName().trim().equalsIgnoreCase(name.trim())).findFirst().orElse(null);
 
 	}
 
@@ -226,42 +226,47 @@ public class TidalAPI {
 	public JobClass getJobClassByName(String name) {
 		return getJobClass().stream().filter(f -> f.getName().equalsIgnoreCase(name)).findAny().orElse(null);
 	}
-	
+
 	public WorkGroupRunUser getWorkGroupRunUserById(int groupid, int userid) {
-		return getWorkRunUsers().stream().filter(f -> f.getWorkgroupid() == groupid  && f.getUsertableid()==userid).findAny().orElse(null);
+		return getWorkRunUsers().stream().filter(f -> f.getWorkgroupid() == groupid && f.getUsertableid() == userid).findAny().orElse(null);
 	}
-	
-	
+
 	/**
 	 * 
 	 * @param name
-	 * @param domain - Can be null but only returns the first name in the list. 
+	 * @param domain - Can be null but only returns the first name in the list.
 	 * @return
 	 */
 	public Users getFirstRunTimeUserByNameAndDomain(String name, String domain) {
-		
+
+		if (StringUtils.isBlank(name)) {
+			return null;
+		}
+
 		final List<Users> found = new ArrayList<>();
-		
-		getUsers().forEach(u ->{
-			if(u.getName().equalsIgnoreCase(name)) {
+
+		getUsers().forEach(u -> {
+			if (u.getName().equalsIgnoreCase(name)) {
 				found.add(u);
 			}
 		});
-		
-		// If we have a domain match, return that. 
-		if(!StringUtils.isBlank(domain)) {
-			for(Users d: found) {
-				if(d.getDomain().equalsIgnoreCase(domain)) {
-					return d;
+
+		// If we have a domain match, return that.
+		if (!StringUtils.isBlank(domain)) {
+			for (Users d : found) {
+				if (!StringUtils.isBlank(d.getDomain())) {
+					if (d.getDomain().equalsIgnoreCase(domain)) {
+						return d;
+					}
 				}
 			}
-		}else {
+		} else {
 			// Did we find any?
-			if(!found.isEmpty()) {
+			if (!found.isEmpty()) {
 				return found.get(0); // Just return the first on in the list
 			}
 		}
-		
+
 		return null;
 	}
 }

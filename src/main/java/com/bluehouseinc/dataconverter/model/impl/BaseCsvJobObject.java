@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.bluehouseinc.dataconverter.model.BaseJobOrGroupObject;
-import com.bluehouseinc.expressions.parsers.ExpressionParser;
 import com.bluehouseinc.tidal.api.model.job.JobType;
 import com.bluehouseinc.tidal.utils.DependencyBuilder;
 import com.bluehouseinc.tidal.utils.StringUtils;
@@ -18,7 +17,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Setter;
 
 /**
- * Abstract to forces implimenation to set the type of job we are. Decided to use the api objects for this
+ * Abstract to forces implementation to set the type of job we are. Decided to use the api objects for this
  *
  * @author Brian Hayes
  */

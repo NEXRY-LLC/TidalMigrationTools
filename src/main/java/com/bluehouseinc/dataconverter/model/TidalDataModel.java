@@ -35,6 +35,7 @@ import com.bluehouseinc.tidal.api.exceptions.TidalException;
 import com.bluehouseinc.tidal.api.model.dependency.job.DepLogic;
 import com.bluehouseinc.tidal.api.model.dependency.job.DependentJobStatus;
 import com.bluehouseinc.tidal.api.model.dependency.job.Operator;
+import com.bluehouseinc.tidal.api.model.job.JobType;
 import com.bluehouseinc.tidal.utils.StringUtils;
 
 import lombok.AccessLevel;
@@ -48,8 +49,6 @@ import lombok.extern.log4j.Log4j2;
 public class TidalDataModel {
 
 	private static final String MAP_RTE = "TIDAL.MapRunTimeUsers";
-	//TODO: Fix the logic to these defaults for everyone. 
-	private static final String MAP_DEFOWN = "TIDAL.DefaultOwner";
 	private static final String MAP_AGT = "TIDAL.MapAgents";
 	private static final String TIDALMapAgentDataFile = "TIDAL.MapAgentDataFile";
 	private static final String TIDALMapAgentListDataFile = "TIDAL.MapAgentListDataFile";
@@ -114,12 +113,13 @@ public class TidalDataModel {
 
 	/**
 	 * Singlton of our data model so we can get it from everywhere.. New Concept??
+	 * 
 	 * @param cfgProvider
 	 * @return
 	 */
 	public static TidalDataModel instance(AbstractConfigProvider cfgProvider) {
 
-		if(model == null) {
+		if (model == null) {
 			model = new TidalDataModel(cfgProvider);
 		}
 
@@ -133,23 +133,22 @@ public class TidalDataModel {
 
 			File file = new File(vardatafile);
 
-			log.debug("Loading Variable Data File for Processing["+vardatafile+ "]");
+			log.debug("Loading Variable Data File for Processing[" + vardatafile + "]");
 
-			AbstractCsvImporter.fromFile(file, NameValuePairCsvMapping.class).forEach(f ->{
+			AbstractCsvImporter.fromFile(file, NameValuePairCsvMapping.class).forEach(f -> {
 				CsvVariable var = new CsvVariable(f.getName());
 				var.setVarValue(f.getValue());
 
-				log.debug("Adding Variable to Data model ["+var.getVarName()+ "]");
+				log.debug("Adding Variable to Data model [" + var.getVarName() + "]");
 				this.addVariable(var);
 			});
-
 
 		} else {
 			throw new TidalException("Property Missing: " + TidalVariableDataFile);
 		}
 
-
 	}
+
 	/*
 	 * Helper method to add a variable to our model if not existing.
 	 *
@@ -194,14 +193,13 @@ public class TidalDataModel {
 
 		if (calname.length() > 64) {
 			calname = calname.substring(0, 64);
-			log.debug(
-					"addCalendarToJobOrGroup Renaming Calendar STUB to 64 characters plus counter [" + calname + "]\n");
+			log.debug("addCalendarToJobOrGroup Renaming Calendar STUB to 64 characters plus counter [" + calname + "]\n");
 		}
 
 		cal.setCalendarName(calname);
 
-		String mapcal =  this.cfgProvider.getProvider().getConfigurations().getOrDefault(MAP_CALNAME, null);
-		String calmapping =  this.cfgProvider.getProvider().getConfigurations().getOrDefault(TIDALMapCalendarDataFile, null);
+		String mapcal = this.cfgProvider.getProvider().getConfigurations().getOrDefault(MAP_CALNAME, null);
+		String calmapping = this.cfgProvider.getProvider().getConfigurations().getOrDefault(TIDALMapCalendarDataFile, null);
 
 		if (calmapping != null) {
 
@@ -213,12 +211,10 @@ public class TidalDataModel {
 
 			if (!calendarmappingdata.isEmpty()) {
 				final String whyfinalagent = cal.getCalendarName().trim();
-				NameNewNamePairCsvMapping mapping = calendarmappingdata.stream()
-						.filter(f -> f.getName().trim().equalsIgnoreCase(whyfinalagent)).findAny().orElse(null);
+				NameNewNamePairCsvMapping mapping = calendarmappingdata.stream().filter(f -> f.getName().trim().equalsIgnoreCase(whyfinalagent)).findAny().orElse(null);
 
 				if (mapping != null) {
-					log.debug("addCalendarToJobOrGroup Mapping[" + whyfinalagent + "] to Value[" + mapping.getNewName()
-							+ "]");
+					log.debug("addCalendarToJobOrGroup Mapping[" + whyfinalagent + "] to Value[" + mapping.getNewName() + "]");
 					cal.setCalendarName(mapping.getNewName());
 				}
 			}
@@ -247,9 +243,47 @@ public class TidalDataModel {
 			return;
 		}
 
+		if (this.getCfgProvider().appendJobTypeToAgentName()) {
+			JobType type = ajob.getType();
+
+			switch (type) {
+			case FILEWATCHER:
+			case GROUP:
+			case OSJOB:
+			case TERMINATOR:
+			case DATAMOVERJOB:
+			case FTPJOB:
+			case OVMCOMMAND:
+			case OVMJOB:
+			case MPEJOB:
+				agentname = agentname + "-OS";
+				break;
+			case SAPJOB:
+				agentname = agentname + "-SAP";
+				break;
+			case PSJOB:
+				agentname = agentname + "-PS";
+				break;
+			case OS400JOB:
+				agentname = agentname + "-AS400";
+				break;
+			case ADAPTER:
+				agentname = agentname + "-ADAPTER";
+				break;
+			case ORACLEJOB:
+				agentname = agentname + "-ORACLE";
+				break;
+			case OVMBATCH:
+				agentname = agentname + "-OVMBATCH";
+				break;
+			default:
+				break;
+			}
+
+		}
 		agentname = doHandleAgentDataMapping(ajob, agentname);
 
-		String mapagt =  this.cfgProvider.getProvider().getConfigurations().getOrDefault(MAP_AGT, null);
+		String mapagt = this.cfgProvider.getProvider().getConfigurations().getOrDefault(MAP_AGT, null);
 
 		if (mapagt != null) {
 			agentname = doReplace(agentname, mapagt);
@@ -274,7 +308,7 @@ public class TidalDataModel {
 	}
 
 	private String doHandleAgentDataMapping(BaseCsvJobObject ajob, String agentname) {
-		String agentmapping =  this.cfgProvider.getProvider().getConfigurations().getOrDefault(TIDALMapAgentDataFile, null);
+		String agentmapping = this.cfgProvider.getProvider().getConfigurations().getOrDefault(TIDALMapAgentDataFile, null);
 
 		if (agentmapping != null) {
 			File file = new File(agentmapping);
@@ -285,12 +319,10 @@ public class TidalDataModel {
 			if (!agentmappingdata.isEmpty()) {
 				final String whyfinalagent = agentname.trim();
 
-				NameNewNamePairCsvMapping mapping = agentmappingdata.stream()
-						.filter(f -> f.getName().trim().equalsIgnoreCase(whyfinalagent)).findAny().orElse(null);
+				NameNewNamePairCsvMapping mapping = agentmappingdata.stream().filter(f -> f.getName().trim().equalsIgnoreCase(whyfinalagent)).findAny().orElse(null);
 
 				if (mapping != null) {
-					log.debug("doHandleAgentDataMapping Mapping[" + agentname + "] to Value[" + mapping.getNewName()
-							+ "]");
+					log.debug("doHandleAgentDataMapping Mapping[" + agentname + "] to Value[" + mapping.getNewName() + "]");
 					agentname = mapping.getNewName().trim();
 				}
 			}
@@ -304,8 +336,7 @@ public class TidalDataModel {
 
 	private String doHandleAgentListDataMapping(BaseCsvJobObject ajob, String agentname) {
 
-		String agentlistmapping =  this.cfgProvider.getProvider().getConfigurations().getOrDefault(TIDALMapAgentListDataFile,
-				null);
+		String agentlistmapping = this.cfgProvider.getProvider().getConfigurations().getOrDefault(TIDALMapAgentListDataFile, null);
 
 		if (agentlistmapping != null) {
 			File file = new File(agentlistmapping);
@@ -316,12 +347,10 @@ public class TidalDataModel {
 			if (!agentlistmappingdata.isEmpty()) {
 				final String whyfinalagent = agentname.trim();
 
-				NameNewNamePairCsvMapping mapping = agentlistmappingdata.stream()
-						.filter(f -> f.getName().trim().equalsIgnoreCase(whyfinalagent)).findAny().orElse(null);
+				NameNewNamePairCsvMapping mapping = agentlistmappingdata.stream().filter(f -> f.getName().trim().equalsIgnoreCase(whyfinalagent)).findAny().orElse(null);
 
 				if (mapping != null) {
-					log.debug("addNodeToJobOrGroup Agent List Mapping[" + agentname + "] to Value["
-							+ mapping.getNewName() + "]");
+					log.debug("addNodeToJobOrGroup Agent List Mapping[" + agentname + "] to Value[" + mapping.getNewName() + "]");
 					agentname = mapping.getNewName().trim();
 					return agentname;
 				}
@@ -381,7 +410,7 @@ public class TidalDataModel {
 
 	public void registerCompoundDependencyJob(BaseCsvJobObject job) {
 
-		if(job.getCompoundDependency() == null) {
+		if (job.getCompoundDependency() == null) {
 			return;
 		}
 
@@ -394,13 +423,10 @@ public class TidalDataModel {
 		return this.addJobDependencyForJob(myjob, depensonme, DepLogic.MATCH, Operator.EQUAL, DependentJobStatus.COMPLETED_NORMAL, dateOffset);
 	}
 
-	public CvsDependencyJob addJobDependencyForJob(BaseCsvJobObject myjob, BaseCsvJobObject depensonme, DepLogic logic, Operator operator,
-			DependentJobStatus status, Integer dateOffset) {
+	public CvsDependencyJob addJobDependencyForJob(BaseCsvJobObject myjob, BaseCsvJobObject depensonme, DepLogic logic, Operator operator, DependentJobStatus status, Integer dateOffset) {
 
 		// Do we not do it this way?
-		List<BaseCvsDependency> deps = this.dependencies.stream()
-				.filter(dep -> Objects.equals(dep.getJobObject().getId(), myjob.getId()))
-				.collect(Collectors.toList());
+		List<BaseCvsDependency> deps = this.dependencies.stream().filter(dep -> Objects.equals(dep.getJobObject().getId(), myjob.getId())).collect(Collectors.toList());
 
 		// this.dependencies.add(dep);
 		// I have existing dependency objects so add to my existing
@@ -441,7 +467,7 @@ public class TidalDataModel {
 
 	public CsvOwner getDefaultOwner() {
 		if (this.defaultOwner == null) {
-			String name =  this.getCfgProvider().getProvider().getConfigurations().getOrDefault(TidalAPI.TIDALDefaultOwner, TidalAPI.DEFOWNDERNAME);
+			String name = this.getCfgProvider().getProvider().getConfigurations().getOrDefault(TidalAPI.TIDALDefaultOwner, TidalAPI.DEFOWNDERNAME);
 			this.defaultOwner = new CsvOwner(name);
 		}
 
@@ -462,22 +488,20 @@ public class TidalDataModel {
 			return;
 		}
 
-
 		if (StringUtils.isBlank(rt.getRunTimeUserName())) {
 			log.error("Runtime User is blank for JOB[]" + ajob.getFullPath() + "");
 			return;
 		}
 
 		// Handle what we can for domain name splits. This is
-		if( rt.getRunTimeUserName().contains("\\")) {
+		if (rt.getRunTimeUserName().contains("\\")) {
 			String temp = rt.getRunTimeUserName().replace("\\", "/");
 			String[] d = temp.split("/");
 			rt.setRunTimeUserDomain(d[0]);
 			rt.setRunTimeUserName(d[1]);
 		}
 
-
-		String maprte =  this.cfgProvider.getProvider().getConfigurations().getOrDefault(MAP_RTE, null);
+		String maprte = this.cfgProvider.getProvider().getConfigurations().getOrDefault(MAP_RTE, null);
 
 		if (maprte != null) {
 			// Changed this to support user@domain for mappings
@@ -584,8 +608,7 @@ public class TidalDataModel {
 		// Look for dependy refs.
 
 		if (getDependencies() != null) {
-			log.debug("updateBaseCsvJobObjectID OLDID[" + oldid + "] NEW ID[" + newid + "]  BaseDependency COUNT["
-					+ getDependencies().size() + "] starting ");
+			log.debug("updateBaseCsvJobObjectID OLDID[" + oldid + "] NEW ID[" + newid + "]  BaseDependency COUNT[" + getDependencies().size() + "] starting ");
 
 			// List<BaseCvsDependency> mydeps = getDependencies().stream().filter(f ->
 			// f.getJobObject().getId() == oldid).collect(Collectors.toList());
@@ -594,8 +617,7 @@ public class TidalDataModel {
 				// hmm. need id and depjob id
 				int jobdepid = dep.getJobObject().getId();
 				if (jobdepid == oldid) {
-					log.debug("updateBaseCsvJobObjectID getJobObject[" + oldid + "] NEW ID[" + newid + "] for Job["
-							+ path + "]");
+					log.debug("updateBaseCsvJobObjectID getJobObject[" + oldid + "] NEW ID[" + newid + "] for Job[" + path + "]");
 					dep.getJobObject().setId(newid); // set to new id
 				}
 
@@ -603,18 +625,15 @@ public class TidalDataModel {
 					CvsDependencyJob jd = (CvsDependencyJob) dep;
 					int depjobid = jd.getDependsOnJob().getId();
 					if (depjobid == oldid) {
-						log.debug("updateBaseCsvJobObjectID getDependsOnJob[" + oldid + "] NEW ID[" + newid
-								+ "] for Job[" + path + "]");
+						log.debug("updateBaseCsvJobObjectID getDependsOnJob[" + oldid + "] NEW ID[" + newid + "] for Job[" + path + "]");
 						jd.getDependsOnJob().setId(newid);
 					}
 				} else {
-					log.debug("UNKNOWN updateBaseCsvJobObjectID getDependsOnJob[" + oldid + "] NEW ID[" + newid
-							+ "] for Job[" + path + "]");
+					log.debug("UNKNOWN updateBaseCsvJobObjectID getDependsOnJob[" + oldid + "] NEW ID[" + newid + "] for Job[" + path + "]");
 				}
 			}
 
-			log.debug("updateBaseCsvJobObjectID  OLDID[" + oldid + "] NEW ID[" + newid + "]  BaseDependency COUNT["
-					+ getDependencies().size() + "] Completed ");
+			log.debug("updateBaseCsvJobObjectID  OLDID[" + oldid + "] NEW ID[" + newid + "]  BaseDependency COUNT[" + getDependencies().size() + "] Completed ");
 
 		} else {
 			log.debug("updateBaseCsvJobObjectID DEP Data is missing.");
@@ -622,15 +641,13 @@ public class TidalDataModel {
 
 		log.debug("updateBaseCsvJobObjectID OLDID[" + oldid + "] NEWID[" + newid + "] for Job[" + path + "]");
 		job.setId(newid);
-		log.debug("updateBaseCsvJobObjectID OLDID[" + oldid + "] NEWID[" + newid + "] for Job[" + path
-				+ "] Updating Parent");
+		log.debug("updateBaseCsvJobObjectID OLDID[" + oldid + "] NEWID[" + newid + "] for Job[" + path + "] Updating Parent");
 
 		if (!job.getChildren().isEmpty()) {
 			job.getChildren().forEach(c -> c.setParentId(newid));
 		}
 
-		log.debug("updateBaseCsvJobObjectID OLDID[" + oldid + "] NEWID[" + newid + "] for Job[" + path
-				+ "] Updating Parent Complete");
+		log.debug("updateBaseCsvJobObjectID OLDID[" + oldid + "] NEWID[" + newid + "] for Job[" + path + "] Updating Parent Complete");
 	}
 
 	/**
@@ -678,10 +695,8 @@ public class TidalDataModel {
 	 * @param type
 	 * @return
 	 */
-	private <J extends BaseCsvJobObject> List<J> toFlatListFiltered(Collection<BaseCsvJobObject> collection,
-			Class<J> clazz) {
-		return ObjectUtils.toFlatStream(collection).filter(clazz::isInstance).map(clazz::cast)
-				.collect(Collectors.toList());
+	private <J extends BaseCsvJobObject> List<J> toFlatListFiltered(Collection<BaseCsvJobObject> collection, Class<J> clazz) {
+		return ObjectUtils.toFlatStream(collection).filter(clazz::isInstance).map(clazz::cast).collect(Collectors.toList());
 	}
 
 	// /**
@@ -725,11 +740,11 @@ public class TidalDataModel {
 
 		// Not we did not get a supplied zone id , lets setup our default
 		if (StringUtils.isBlank(zone.getTimezoneId())) {
-			String zoneid =  this.cfgProvider.getProvider().getConfigurations().getOrDefault(MAP_DEFZONEID, "America/New_York");
+			String zoneid = this.cfgProvider.getProvider().getConfigurations().getOrDefault(MAP_DEFZONEID, "America/New_York");
 			zone.setTimezoneId(zoneid);
 		}
 
-		String mapzone =  this.cfgProvider.getProvider().getConfigurations().getOrDefault(MAP_TIMZONE, null);
+		String mapzone = this.cfgProvider.getProvider().getConfigurations().getOrDefault(MAP_TIMZONE, null);
 
 		if (mapzone != null) {
 			String zoneidname = doReplace(zone.getName(), mapzone);

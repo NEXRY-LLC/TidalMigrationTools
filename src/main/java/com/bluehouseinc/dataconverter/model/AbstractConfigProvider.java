@@ -10,6 +10,7 @@ public abstract class AbstractConfigProvider {
 
 	private ConfigurationProvider provider;
 	private String SKIPDEPS = "tidal.skipdeps";
+	private String APPEND_JOB_TYPE = "tidal.agent.appendjobtype";
 	
 	public AbstractConfigProvider(ConfigurationProvider provider) {
 		this.provider = provider;
@@ -24,4 +25,10 @@ public abstract class AbstractConfigProvider {
 		String tf = this.getProvider().getConfigurations().getOrDefault(SKIPDEPS, "false");
 		return Boolean.valueOf(tf);
 	}
+	
+	public boolean appendJobTypeToAgentName() {
+		String tf = this.getProvider().getConfigurations().getOrDefault(APPEND_JOB_TYPE, "false");
+		return Boolean.valueOf(tf);
+	}
+	
 }

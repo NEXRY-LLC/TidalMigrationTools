@@ -187,11 +187,13 @@ public class EspToTidalTransformer2 implements ITransformer<List<EspAbstractJob>
 	}
 
 	private void processJob(EspZosJob in, CsvOSJob out) {
-		out.setCommandLine(in.getName());
-
-		// TODO: We need to figure out the default connections for all the ZOS Jobs
-		in.setAgent("AgentZOS");
-
+		out.setCommandLine("PATH/TO/JCL/"+in.getName());
+		
+		if(StringUtils.isBlank(in.getAgent())) {
+			in.setAgent("NOTSET-Z");
+		}else {
+			in.setAgent(in.getAgent() + "-Z");
+		}
 	}
 
 	private void processJob(EspOSJOb in, CsvOSJob out) {
@@ -283,8 +285,8 @@ public class EspToTidalTransformer2 implements ITransformer<List<EspAbstractJob>
 		String varname = in.getVariant();
 
 		if (!StringUtils.isBlank(varname)) {
-			
-			if(varname.contains("&")) {
+
+			if (varname.contains("&")) {
 				varname = varname.replace("&", "");
 			}
 			out.setVariant(varname);
@@ -339,11 +341,10 @@ public class EspToTidalTransformer2 implements ITransformer<List<EspAbstractJob>
 
 		if (switchback) {
 			directory = directory.replace("/", "\\");
-		} 
-		
+		}
+
 		out.setDirectory(directory);
 		out.setFilemask(mask);
-	
 
 		int interval = 1;
 
@@ -383,8 +384,7 @@ public class EspToTidalTransformer2 implements ITransformer<List<EspAbstractJob>
 		out.setName(in.getName());
 
 		if (StringUtils.isBlank(in.getAgent())) {
-			// FIXME: This should only be set for ZoS Job type.
-			in.setAgent("AgentZOS");
+			in.setAgent("NOTSET-CONNECTION");
 		}
 
 		this.datamodel.addNodeToJobOrGroup(out, in.getAgent());

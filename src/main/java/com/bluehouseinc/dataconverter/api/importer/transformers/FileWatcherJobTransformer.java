@@ -6,6 +6,7 @@ import com.bluehouseinc.tidal.api.model.TrueFalse;
 import com.bluehouseinc.tidal.api.model.job.JobType;
 import com.bluehouseinc.tidal.api.model.job.filewatcher.FileWatcherJob;
 import com.bluehouseinc.tidal.api.model.job.filewatcher.TimeUnit;
+import com.bluehouseinc.tidal.utils.StringUtils;
 import com.bluehouseinc.transform.ITransformer;
 import com.bluehouseinc.transform.TransformationException;
 
@@ -24,6 +25,10 @@ public class FileWatcherJobTransformer implements ITransformer<CsvFileWatcherJob
 
 		this.base.setType(JobType.FILEWATCHER);
 
+		if(StringUtils.isBlank(in.getFilemask())){
+			in.setFilemask("*");
+		}
+		
 		if(in.getFileExist() == TrueFalse.YES) {
 			this.base.doSetFileExist(in.getDirectory(), in.getFilemask());
 		}else {

@@ -391,7 +391,7 @@ public class EspJobVisitorImpl implements EspJobVisitor {
 		try {
 			switch (EspStatementType.valueOf(statementType)) {
 			case AGENT:
-				espJob.setAgent(statementParameters+"-"+espJob.getJobType().name());
+				espJob.setAgent(statementParameters);
 				break;
 			case DELAYSUB:
 				espJob.setDelaySubmission(statementParameters);
