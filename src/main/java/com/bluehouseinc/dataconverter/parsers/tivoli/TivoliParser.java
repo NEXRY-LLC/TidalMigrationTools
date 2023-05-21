@@ -11,6 +11,9 @@ import java.util.Objects;
 import com.bluehouseinc.dataconverter.common.utils.RegexHelper;
 import com.bluehouseinc.dataconverter.model.IModelReport;
 import com.bluehouseinc.dataconverter.parsers.AbstractParser;
+import com.bluehouseinc.dataconverter.parsers.tivoli.data.cpu.TivoliCPUProcessor;
+import com.bluehouseinc.dataconverter.parsers.tivoli.data.resource.TivoliResourceProcessor;
+import com.bluehouseinc.dataconverter.parsers.tivoli.data.variable.TivoliVariableProcessor;
 import com.bluehouseinc.dataconverter.parsers.tivoli.model.TivoliDataModel;
 import com.bluehouseinc.dataconverter.parsers.tivoli.model.TivoliObject;
 import com.bluehouseinc.dataconverter.parsers.tivoli.model.TivoliObject.TaskType;
@@ -32,9 +35,31 @@ public class TivoliParser extends AbstractParser<TivoliDataModel> {
 	public void parseFile() throws Exception {
 		// I guess we can move away from passing a single file path,
 		// and instead define path key(s) inside each parser
-		Map<String, String> params = this.parseParams();
-		this.parseJobs();
-
+		//Map<String, String> params = this.parseParams();
+		//this.parseJobs();
+		
+		
+		File cpu = getParserDataModel().getConfigeProvider().getCPUFile();
+		File cal = getParserDataModel().getConfigeProvider().getCalendarFile();
+		File job = getParserDataModel().getConfigeProvider().getJobFile();
+		File par = getParserDataModel().getConfigeProvider().getParamsFile();
+		File res = getParserDataModel().getConfigeProvider().getResourceFile();
+		File sch = getParserDataModel().getConfigeProvider().getScheduleFile();
+		File var = getParserDataModel().getConfigeProvider().getVariableFile();
+		
+		TivoliCPUProcessor cpu_processor = new TivoliCPUProcessor();
+		cpu_processor.doProcessFile(cpu);
+		cpu_processor.getData().forEach(System.out::println);
+		
+		TivoliVariableProcessor var_processor = new TivoliVariableProcessor();
+		var_processor.doProcessFile(var);
+		var_processor.getData().forEach(System.out::println);
+		
+		
+		TivoliResourceProcessor res_processor = new TivoliResourceProcessor();
+		res_processor.doProcessFile(res);
+		
+		
 	}
 
 	private void parseJobs() throws IOException {

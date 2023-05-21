@@ -20,7 +20,7 @@ import lombok.extern.log4j.Log4j2;
 
 @Log4j2
 @Data
-public abstract class AbstractParser<E extends BaseParserDataModel<?,?>> implements IParser {
+public abstract class AbstractParser<E extends BaseParserDataModel<?, ?>> implements IParser {
 
 	private E parserDataModel;
 
@@ -28,38 +28,37 @@ public abstract class AbstractParser<E extends BaseParserDataModel<?,?>> impleme
 		this.parserDataModel = parserDataModel;
 	}
 
-	protected void parseFile() throws Exception{
+	protected void parseFile() throws Exception {
 		throw new RuntimeException("Need to override");
 	}
 
 	@Override
 	public TidalDataModel processDataModel() throws Exception {
 
-
 		parseFile(); // Parse our source data.
 
 		// Finally convert from our parser data model into our Tidal Data Model
-		TidalDataModel model =  getParserDataModel().convertToDomainDataModel();
+		TidalDataModel model = getParserDataModel().convertToDomainDataModel();
 
 		List<IReporter> reporters = new LinkedList<>();
 		reporters.add(new GenericJobTypeReporter());
 
-		reporters.addAll(getModelReporter().getReporters());
+		if (getModelReporter() != null) {
+			reporters.addAll(getModelReporter().getReporters());
+		}
 		// Do some printing if we can on our parser data model.
-		reporters.forEach(
-				r ->{
-					log.trace("#######################################{}#######################################", r.getClass().getSimpleName());
+		reporters.forEach(r -> {
+			log.trace("#######################################{}#######################################", r.getClass().getSimpleName());
 
-					r.doPrint(getParserDataModel());
+			r.doPrint(getParserDataModel());
 
-					log.trace("#######################################{}#######################################", r.getClass().getSimpleName());
+			log.trace("#######################################{}#######################################", r.getClass().getSimpleName());
 
-				});
+		});
 
 		return model;
 
 	}
-
 
 	protected void skipNextLines(BufferedReader reader, int linesCount) throws IOException {
 		if (linesCount > 0) {
@@ -69,9 +68,9 @@ public abstract class AbstractParser<E extends BaseParserDataModel<?,?>> impleme
 		}
 	}
 
-	//public E getParserDataModel() {
-	//	return this.parserDataModel;
-	//}
+	// public E getParserDataModel() {
+	// return this.parserDataModel;
+	// }
 
 	protected Map.Entry<Integer, Integer> getValuePosition(Integer columnGroupPos, Integer columnPos, List<List<String>> columns) {
 		int startPos = 1;

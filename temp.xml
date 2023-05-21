@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <entry xmlns="http://purl.org/atom/ns#">
-	<id>2332</id>
-	<title>ZMMIMI04_F141_RM_GI</title>
+	<id>2364</id>
+	<title>BRMDLYMNT_AKNDEV</title>
 	<author>
 		<name>Schedulers</name>
 		<uri></uri>
@@ -10,7 +10,7 @@
 	<category term="0" scheme="level" label="" />
 	<category term="111111111111111111111111"
 		scheme="securitypolicy" label="" />
-	<category term="111111111111111111111111"
+	<category term="000000000000000000000000"
 		scheme="customsecuritypolicy" label="" />
 	<category term="111111111111111111111111"
 		scheme="sharedowersecurity" label="" />
@@ -21,71 +21,116 @@
 	<category term="" scheme="groupNameRecordPosition" label="" />
 	<category term="0" scheme="jobOrJobRunRecordPosition" label="" />
 	<link
-		href="https://tidapp03daws.bfusa.com:8443/api/tes-dev/Job.get/2332"
-		rel="alternate" type="text/html" title="ZMMIMI04_F141_RM_GI"
-		length="0" />
+		href="https://tidapp03daws.bfusa.com:8443/api/tes-dev/Job.get/2364"
+		rel="alternate" type="text/html" title="BRMDLYMNT_AKNDEV" length="0" />
 	<source>com.tidalsoft.webclient.tes.dsp.api.model.JobView</source>
-	<modified>2023-04-20T13:57:05-04:00</modified>
+	<modified>2023-05-09T14:49:21-04:00</modified>
 	<tes:job
 		xmlns:tes="http://www.tidalsoftware.com/client/tesservlet">
-		<tes:id>2332</tes:id>
-		<tes:type>8</tes:type>
-		<tes:name>ZMMIMI04_F141_RM_GI</tes:name>
+		<tes:id>2364</tes:id>
+		<tes:type>7</tes:type>
+		<tes:typename>OS400JOB</tes:typename>
+		<tes:name>BRMDLYMNT_AKNDEV</tes:name>
 		<tes:active>Y</tes:active>
 		<tes:effectivecalendarid>0</tes:effectivecalendarid>
 		<tes:ownerid>2</tes:ownerid>
 		<tes:ownername>Schedulers</tes:ownername>
-		<tes:lastusermodifiedtime>2023-04-20T13:57:05-0400</tes:lastusermodifiedtime>
-		<tes:lastusermodifiedtimeasstring>20230420135705</tes:lastusermodifiedtimeasstring>
-		<tes:alias>2332</tes:alias>
+		<tes:lastusermodifiedtime>2023-05-09T14:49:21-0400
+		</tes:lastusermodifiedtime>
+		<tes:lastusermodifiedtimeasstring>20230509144921
+		</tes:lastusermodifiedtimeasstring>
+		<tes:alias>2364</tes:alias>
 		<tes:dirty>
 		</tes:dirty>
-		<tes:extendedinfo>&lt;sstps&gt;&lt;connusr&gt;&lt;var.username&gt;86&lt;/var.username&gt;&lt;var.value/&gt;&lt;/connusr&gt;&lt;password&gt;&lt;var.password&gt;86&lt;/var.password&gt;&lt;var.value/&gt;&lt;/password&gt;&lt;conndomain&gt;&lt;var.conndomain&gt;86&lt;/var.conndomain&gt;&lt;var.value/&gt;&lt;/conndomain&gt;&lt;principal&gt;&lt;var.principal&gt;86&lt;/var.principal&gt;&lt;var.value/&gt;&lt;/principal&gt;&lt;keytab&gt;&lt;var.keytab&gt;86&lt;/var.keytab&gt;&lt;var.value/&gt;&lt;/keytab&gt;&lt;job&gt;&lt;jname&gt;ZMMIMI04_F141_RM_GI&lt;/jname&gt;&lt;jobcount/&gt;&lt;/job&gt;&lt;jobnamealias/&gt;&lt;clonetag&gt;N&lt;/clonetag&gt;&lt;externuid/&gt;&lt;spoollistrecipient&gt;&lt;recipient/&gt;&lt;rectype/&gt;&lt;copy&gt;
-			&lt;/copy&gt;&lt;blindcopy&gt; &lt;/blindcopy&gt;&lt;express&gt;
-			&lt;/express&gt;&lt;noforwarding&gt;
-			&lt;/noforwarding&gt;&lt;noprint&gt;
-			&lt;/noprint&gt;&lt;deliver/&gt;&lt;mailstatus/&gt;&lt;/spoollistrecipient&gt;&lt;trkchild&gt;Y&lt;/trkchild&gt;&lt;cst&gt;1&lt;/cst&gt;&lt;jobclass/&gt;&lt;linktype/&gt;&lt;type&gt;1&lt;/type&gt;&lt;incranjob&gt;N&lt;/incranjob&gt;&lt;isearliest/&gt;&lt;usefirstrun&gt;N&lt;/usefirstrun&gt;&lt;sstep1&gt;1&lt;/sstep1&gt;&lt;stype1&gt;2&lt;/stype1&gt;&lt;ovar1&gt;VARIANT
-			F141&lt;/ovar1&gt;&lt;abap1&gt;ZMMIMI04&lt;/abap1&gt;&lt;svarm1&gt;&lt;var.compound/&gt;&lt;/svarm1&gt;&lt;vvals1&gt;&lt;var.compound/&gt;&lt;/vvals1&gt;&lt;tempvar1/&gt;&lt;lang1/&gt;&lt;print1&gt;&amp;lt;print&amp;gt;&amp;lt;new/&amp;gt;&amp;lt;spoolname&amp;gt;ZMMIMI04_SAP&amp;lt;/spoolname&amp;gt;&amp;lt;pri&amp;gt;5&amp;lt;/pri&amp;gt;&amp;lt;retain&amp;gt;8&amp;lt;/retain&amp;gt;&amp;lt;rows&amp;gt;-60&amp;lt;/rows&amp;gt;&amp;lt;cols&amp;gt;-132&amp;lt;/cols&amp;gt;&amp;lt;format&amp;gt;X_65_132&amp;lt;/format&amp;gt;&amp;lt;sapcover&amp;gt;X&amp;lt;/sapcover&amp;gt;&amp;lt;oscover&amp;gt;D&amp;lt;/oscover&amp;gt;&amp;lt;selcover/&amp;gt;&amp;lt;recip&amp;gt;ATKINWINONA&amp;lt;/recip&amp;gt;&amp;lt;dept/&amp;gt;&amp;lt;/print&amp;gt;&lt;/print1&gt;&lt;printcheck1&gt;LV20&lt;/printcheck1&gt;&lt;des1&gt;LV20&lt;/des1&gt;&lt;cop1&gt;1&lt;/cop1&gt;&lt;pas1/&gt;&lt;runt1/&gt;&lt;rel1&gt;
-			&lt;/rel1&gt;&lt;pi1&gt;
-			&lt;/pi1&gt;&lt;archivecheck1&gt;1&lt;/archivecheck1&gt;&lt;sobj1/&gt;&lt;objn1/&gt;&lt;inf1/&gt;&lt;pm1&gt;1&lt;/pm1&gt;&lt;cmd&gt;ZMMIMI04(VARIANT
-			F141)&lt;/cmd&gt;&lt;/sstps&gt;</tes:extendedinfo>
-		<tes:serviceid>6</tes:serviceid>
-		<tes:servicename>SAP</tes:servicename>
-		<tes:successorsvalue>Y</tes:successorsvalue>
+		<tes:extendedinfo>
+			<XMLSBMJOB>
+				<JN>BRMDLYMNT</JN>
+				<JQ>QCTL</JQ>
+				<JQLIB>QSYS</JQLIB>
+				<CMD>STRMNTBRM
+					EXPSETMED(*YES) RMVMEDI(*EXP) MOVMED(*YES) RMVLOGE(*NONE)
+					RUNCLNUP(*NO) RTVVOLSTAT(*YES) CHGJRN(*NO) PRTVSNRPT(*EXPMED)
+					PRTBKUACT(*NO) PRTRCYRPT(*NONE)
+					RGZBRMDB(*NO)
+				</CMD>
+				<USR>TIDALDEV</USR>
+				<PREPROCESSCOMMANDS>
+					<COMMAND>
+						<NAME>VRYCFG
+							CFGOBJ(TAPMLB01) CFGTYPE(*DEV)
+							STATUS(*OFF)
+						</NAME>
+						<TRKMETH></TRKMETH>
+						<CDEOPP></CDEOPP>
+						<FROM>0</FROM>
+						<TO>0</TO>
+					</COMMAND>
+					<COMMAND>
+						<NAME>DLYJOB
+							DLY(45)
+						</NAME>
+						<TRKMETH></TRKMETH>
+						<CDEOPP></CDEOPP>
+						<FROM>0</FROM>
+						<TO>0</TO>
+					</COMMAND>
+					<COMMAND>
+						<NAME>VRYCFG
+							CFGOBJ(TAPMLB01) CFGTYPE(*DEV)
+							STATUS(*ON)
+						</NAME>
+						<TRKMETH></TRKMETH>
+						<CDEOPP></CDEOPP>
+						<FROM>0</FROM>
+						<TO>0</TO>
+					</COMMAND>
+					<COMMAND>
+						<NAME>WRKSAVFBRM
+							OUTPUT(*PRINT)
+						</NAME>
+						<TRKMETH></TRKMETH>
+						<CDEOPP></CDEOPP>
+						<FROM>0</FROM>
+						<TO>0</TO>
+					</COMMAND>
+				</PREPROCESSCOMMANDS>
+				<POSTPROCESSCOMMANDS></POSTPROCESSCOMMANDS>
+			</XMLSBMJOB>
+		</tes:extendedinfo>
+		<tes:successorsvalue>N</tes:successorsvalue>
 		<tes:predecessorsvalue>N</tes:predecessorsvalue>
-		<tes:runtimeusername>CYBERM</tes:runtimeusername>
+		<tes:runtimeusername>TIDALDEV</tes:runtimeusername>
 		<tes:critical>N</tes:critical>
-		<tes:agentid>854</tes:agentid>
-		<tes:effectiveagentid>854</tes:effectiveagentid>
+		<tes:agentid>821</tes:agentid>
+		<tes:effectiveagentid>821</tes:effectiveagentid>
 		<tes:effectiveagentlistid>0</tes:effectiveagentlistid>
-		<tes:agentname>sap_bft</tes:agentname>
-		<tes:agenttype>11</tes:agenttype>
-		<tes:agentostype>12</tes:agentostype>
-		<tes:agentserviceid>6</tes:agentserviceid>
+		<tes:agentname>AKNDEV</tes:agentname>
+		<tes:agenttype>8</tes:agenttype>
+		<tes:agentostype>7</tes:agentostype>
+		<tes:agentserviceid>0</tes:agentserviceid>
 		<tes:allowunscheduled>Y</tes:allowunscheduled>
 		<tes:inheritcalendar>N</tes:inheritcalendar>
 		<tes:inheritagent>N</tes:inheritagent>
 		<tes:inherittimewindow>N</tes:inherittimewindow>
-		<tes:command>ZMMIMI04[VARIANT F141]</tes:command>
 		<tes:allowrerun>Y</tes:allowrerun>
 		<tes:concurrency>1</tes:concurrency>
-		<tes:createtime>2023-04-20T13:57:05-0400</tes:createtime>
+		<tes:createtime>2023-04-26T07:58:47-0400</tes:createtime>
 		<tes:dependencylogic>1</tes:dependencylogic>
 		<tes:disablecarryover>0</tes:disablecarryover>
-		<tes:durationestimated>18</tes:durationestimated>
+		<tes:durationestimated>68</tes:durationestimated>
 		<tes:durationmaximum>60</tes:durationmaximum>
 		<tes:durationminimum>60</tes:durationminimum>
 		<tes:estimatedmethod>1</tes:estimatedmethod>
 		<tes:excludeabnormalduration>4</tes:excludeabnormalduration>
 		<tes:exitcodenormaloperator>1</tes:exitcodenormaloperator>
-		<tes:fullpath>\ZMMIMI04_F141_RM_GI</tes:fullpath>
+		<tes:fullpath>\BRMDLYMNT_AKNDEV</tes:fullpath>
 		<tes:historyretention>45</tes:historyretention>
 		<tes:inheritoptions>N</tes:inheritoptions>
 		<tes:inheritrepeat>N</tes:inheritrepeat>
 		<tes:isnotes>false</tes:isnotes>
 		<tes:isrunbook>false</tes:isrunbook>
-		<tes:jobdetailid>2332</tes:jobdetailid>
-		<tes:lastchangetime>2023-04-20T13:57:05-0400</tes:lastchangetime>
+		<tes:jobdetailid>2364</tes:jobdetailid>
+		<tes:lastchangetime>2023-05-09T14:49:21-0400</tes:lastchangetime>
 		<tes:nearoutage>3</tes:nearoutage>
 		<tes:normalexitfromrange>0</tes:normalexitfromrange>
 		<tes:normalexittorange>0</tes:normalexittorange>
@@ -94,14 +139,21 @@
 		<tes:rerundependency>N</tes:rerundependency>
 		<tes:forcererun>N</tes:forcererun>
 		<tes:saveoutputoption>R</tes:saveoutputoption>
-		<tes:savelogonly>Y</tes:savelogonly>
 		<tes:trackingmethod>1</tes:trackingmethod>
 		<tes:waitOperator>N</tes:waitOperator>
 		<tes:waitoperator>N</tes:waitoperator>
-		<tes:runuserid>86</tes:runuserid>
+		<tes:runuserid>103</tes:runuserid>
 		<tes:tags />
 		<tes:unixprofile>0</tes:unixprofile>
 		<tes:transactionid>0</tes:transactionid>
-		<tes:data>&lt;lastrun&gt;&lt;duration&gt;5&lt;/duration&gt;&lt;exitcode&gt;0&lt;/exitcode&gt;&lt;id&gt;3622512&lt;/id&gt;&lt;status&gt;101&lt;/status&gt;&lt;timestamp&gt;20230421111126&lt;/timestamp&gt;&lt;/lastrun&gt;</tes:data>
+		<tes:data>
+			<lastrun>
+				<duration>1</duration>
+				<exitcode>0</exitcode>
+				<id>3623505</id>
+				<status>66</status>
+				<timestamp>20230509142358</timestamp>
+			</lastrun>
+		</tes:data>
 	</tes:job>
 </entry>
