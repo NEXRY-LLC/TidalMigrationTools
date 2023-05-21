@@ -48,6 +48,10 @@ public abstract class EspFileReaderUtils {
 		return line;
 	}
 
+	public static List<String> parseJobLines(BufferedReader reader, String endofdata, Character newline) throws IOException {
+		return parseJobLines(reader, endofdata, newline, true);
+	}
+
 	/**
 	 * Reads all lines until the end of our data and merges the line if the line ends with the newline character. Skips empty lines and comment lines.
 	 *
@@ -57,15 +61,17 @@ public abstract class EspFileReaderUtils {
 	 * @return List of lines
 	 * @throws IOException
 	 */
-	public static List<String> parseJobLines(BufferedReader reader, String endofdata, Character newline) throws IOException {
+	public static List<String> parseJobLines(BufferedReader reader, String endofdata, Character newline, boolean checkskip) throws IOException {
 		List<String> lines = new ArrayList<>();
 		String line;
 		while (!Objects.equals(line = readLineTrimmed(reader), endofdata)) {
 
-			if (skippedLine(line)) {
-				continue;
+			if (checkskip) {
+				if (skippedLine(line)) {
+					continue;
+				}
 			}
-
+			
 			line = readLineMerged(reader, line, newline);
 			lines.add(line.trim());
 		}

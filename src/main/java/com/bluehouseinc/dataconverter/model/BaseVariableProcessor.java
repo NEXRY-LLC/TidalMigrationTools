@@ -24,14 +24,11 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public abstract class BaseVariableProcessor<E extends BaseJobOrGroupObject> {
 
-	static final String TIDALMapVariableDataFile = "TIDAL.MapVariableDataFile";
-
 	@Getter(value = AccessLevel.PRIVATE)
 	@Setter(value = AccessLevel.PRIVATE)
 	private List<NameNewNamePairCsvMapping> variableReplacements;
 
 	TidalDataModel model;
-
 
 	public BaseVariableProcessor(TidalDataModel model) {
 		this.model = model;
@@ -101,46 +98,40 @@ public abstract class BaseVariableProcessor<E extends BaseJobOrGroupObject> {
 			return input;
 		}
 
-		String variablefile =  this.getModel().getCfgProvider().getProvider().getConfigurations().getOrDefault(TIDALMapVariableDataFile, null);
+		String variablefile = this.getModel().getVariableMappingDataFile();
 
-		if (variablefile != null) {
+		if (variableReplacements == null) {
+			File file = new File(variablefile);
+			variableReplacements = AbstractCsvImporter.fromFile(file, NameNewNamePairCsvMapping.class);
+		}
 
-			if (variableReplacements == null) {
-				File file = new File(variablefile);
-				variableReplacements = AbstractCsvImporter.fromFile(file, NameNewNamePairCsvMapping.class);
-			}
+		if (!variableReplacements.isEmpty()) {
 
-			if (!variableReplacements.isEmpty()) {
+			// old school
+			for (NameNewNamePairCsvMapping data : variableReplacements) {
+				String lookfor = data.getName();
+				String replacewith = data.getNewName();
 
-				// old school
-				for (NameNewNamePairCsvMapping data : variableReplacements) {
-					String lookfor = data.getName();
-					String replacewith = data.getNewName();
+				Pattern pattern = Pattern.compile(lookfor);
+				Matcher matcher = pattern.matcher(input);
 
-					Pattern pattern = Pattern.compile(lookfor);
-					Matcher matcher = pattern.matcher(input);
+				if (matcher.matches()) {
 
-					if (matcher.matches()) {
+					int cnt = matcher.groupCount();
 
-						int cnt = matcher.groupCount();
+					if (cnt > 0) {
+						String replace = matcher.group(1);
+						log.debug("fromString INPUT[" + input + "] CONTAINS [" + replace + "] replacing with [" + replacewith + "]");
+						input = input.replace(replace, replacewith);
+						input.chars();
 
-						if (cnt > 0) {
-							String replace = matcher.group(1);
-							log.debug("fromString INPUT[" + input + "] CONTAINS [" + replace + "] replacing with [" + replacewith + "]");
-							input = input.replace(replace, replacewith);
-							input.chars();
-
-						} else {
-							// Literal replace.
-							input = input.replace(lookfor, replacewith);
-							input.chars();
-						}
+					} else {
+						// Literal replace.
+						input = input.replace(lookfor, replacewith);
+						input.chars();
 					}
 				}
 			}
-
-		} else {
-			throw new TidalException("Missing Property:" + TIDALMapVariableDataFile);
 		}
 
 		return input;

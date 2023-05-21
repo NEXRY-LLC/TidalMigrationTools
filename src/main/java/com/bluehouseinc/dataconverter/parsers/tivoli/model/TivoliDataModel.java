@@ -24,27 +24,22 @@ public class TivoliDataModel extends BaseParserDataModel<TivoliObject,TivoliConf
 
 	@Override
 	public BaseVariableProcessor<TivoliObject> getVariableProcessor(TidalDataModel model) {
-		// TODO Auto-generated method stub
-		return null;
+		return new TivoliVariableProcessor(model);
 	}
-
-
 
 	@Override
 	public ITransformer<List<TivoliObject>, TidalDataModel> getJobTransformer(TidalDataModel model) {
-		return null;
+		return new TivoliTransformer(model);
 	}
 
 	@Override
 	public void doPostTransformJobObjects(List<TivoliObject> jobs) {
-		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void doProcessJobDependency(List<TivoliObject> jobs) {
-		// TODO Auto-generated method stub
-		
+
 	}
 
 }

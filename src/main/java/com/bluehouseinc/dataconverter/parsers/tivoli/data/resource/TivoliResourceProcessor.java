@@ -86,4 +86,13 @@ public class TivoliResourceProcessor {
 		return RegexHelper.matchesRegexPattern(line, RES_PATTERN);
 	}
 
+	public ResourceData getResourceByGroupName(String group, String name) {
+		
+		List<ResourceData> resdata = this.data.get(group);
+		
+		if(resdata == null) {
+			return null;
+		}
+		return resdata.stream().filter(f -> f.getName().trim().equalsIgnoreCase(name.trim())).findFirst().orElse(null);
+	}
 }

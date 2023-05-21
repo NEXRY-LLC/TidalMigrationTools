@@ -1,6 +1,8 @@
 package com.bluehouseinc.dataconverter.parsers.tivoli.model;
 
 import com.bluehouseinc.dataconverter.model.BaseJobOrGroupObject;
+import com.bluehouseinc.dataconverter.parsers.tivoli.data.cpu.CpuData;
+import com.bluehouseinc.dataconverter.parsers.tivoli.data.resource.ResourceData;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -9,12 +11,20 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper = true)
 public class TivoliObject extends BaseJobOrGroupObject {
 	private boolean isGroupFlag = false;
+	
+	private CpuData cpuData;
+	private ResourceData resourceData;
+	
 	private String doCommand;
 	private String streamLogon;
 	private String description;
 	private TaskType taskType;
 	private String recovery;
-
+	private String returnCodeSucess;
+	private String scriptName;
+	private String afterJob;
+	private String abendPrompt;
+	
 	@Override
 	public boolean isGroup() {
 		if (!this.getChildren().isEmpty()) {
@@ -24,6 +34,6 @@ public class TivoliObject extends BaseJobOrGroupObject {
 	}
 
 	public enum TaskType {
-		UNIX, WINDOWS
+		UNIX, WINDOWS, UNIT
 	}
 }

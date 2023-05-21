@@ -53,6 +53,7 @@ public class TidalDataModel {
 	private static final String TIDALMapAgentDataFile = "TIDAL.MapAgentDataFile";
 	private static final String TIDALMapAgentListDataFile = "TIDAL.MapAgentListDataFile";
 	private static final String TIDALMapCalendarDataFile = "TIDAL.MapCalendarDataFile";
+	private static final String TIDALMapVariableDataFile = "TIDAL.MapVariableDataFile";
 	private static final String TidalVariableDataFile = "TIDAL.VariableDataFile";
 
 	private static final String MAP_CALNAME = "TIDAL.MapCalendarName";
@@ -776,4 +777,17 @@ public class TidalDataModel {
 		}
 	}
 
+	
+	public String getVariableMappingDataFile() {
+		String vardatafile = this.cfgProvider.getProvider().getConfigurations().getOrDefault(TIDALMapVariableDataFile, null);
+
+		if (vardatafile != null) {
+
+			return vardatafile;
+			
+		} else {
+			throw new TidalException("Property Missing: " + TidalVariableDataFile);
+		}
+
+	}
 }
