@@ -56,6 +56,7 @@ public class TivoliResourceProcessor {
 					ResourceData resource = new ResourceData();
 					resource.setName(name);
 					resource.setValue(resdata[0].trim());
+					resource.setGroupName(group);
 					
 					if (resdata.length > 1) {
 						resource.setDescription(resdata[1]);

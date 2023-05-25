@@ -3,6 +3,7 @@ package com.bluehouseinc.dataconverter.parsers.tivoli.model;
 import com.bluehouseinc.dataconverter.model.BaseJobOrGroupObject;
 import com.bluehouseinc.dataconverter.parsers.tivoli.data.cpu.CpuData;
 import com.bluehouseinc.dataconverter.parsers.tivoli.data.resource.ResourceData;
+import com.bluehouseinc.dataconverter.parsers.tivoli.data.schedule.SchedualData;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -14,6 +15,7 @@ public class TivoliObject extends BaseJobOrGroupObject {
 	
 	private CpuData cpuData;
 	private ResourceData resourceData;
+	private SchedualData scheduleData;
 	
 	private String doCommand;
 	private String streamLogon;

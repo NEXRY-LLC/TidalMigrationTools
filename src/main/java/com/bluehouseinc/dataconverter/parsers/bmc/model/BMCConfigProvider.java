@@ -42,7 +42,7 @@ public class BMCConfigProvider extends AbstractConfigProvider {
 	}
 
 	public File getBMCFilePath() {
-		return new File(getProvider().getOrThrow("bmc.path"));
+		return new File(getProvider().get("bmc.path"));
 
 	}
 

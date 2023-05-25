@@ -64,16 +64,29 @@ public class ConfigurationProvider {
 		return configuration;
 	}
 
-	public String getOrThrow(String obj) {
+	public String get(String obj) {
+		return getConfigurations().getOrDefault(obj, null);
+	}
 
-		String res = getConfigurations().getOrDefault(obj, null);
+	public String getOr(String obj, String or) {
 
-		if(res == null) {
-			//throw new TidalException("Data Not Present in Config File using Key["+obj+"]");
+		String res = get(obj);
+
+		if (res == null) {
+			return or;
 		}
 
 		return res;
 	}
 
+	public String getOrThrow(String obj) {
 
+		String res = get(obj);
+
+		if (res == null) {
+			throw new TidalException("Data Not Present in Config File using Key[" + obj + "]");
+		}
+
+		return res;
+	}
 }

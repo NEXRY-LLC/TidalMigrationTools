@@ -17,6 +17,6 @@ public class OPCConfigProvider extends AbstractConfigProvider {
 	}
 
 	public String getOPCPath() {
-		return getProvider().getOrThrow("opc.path");
+		return getProvider().get("opc.path");
 	}
 }

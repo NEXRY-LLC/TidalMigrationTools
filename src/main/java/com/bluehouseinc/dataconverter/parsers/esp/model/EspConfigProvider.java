@@ -20,14 +20,14 @@ public class EspConfigProvider extends AbstractConfigProvider {
 	}
 
 	public String getEspDataPath() {
-		return getProvider().getOrThrow("esp.path");
+		return getProvider().get("esp.path");
 	}
 
 	public String getEspEventDataFile() {
-		return getProvider().getOrThrow(DATAFILE);
+		return getProvider().get(DATAFILE);
 	}
 
 	public String getFilesToSkip() {
-		return getProvider().getOrThrow("esp.skipfiles");
+		return getProvider().get("esp.skipfiles");
 	}
 }

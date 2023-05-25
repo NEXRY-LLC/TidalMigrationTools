@@ -16,7 +16,7 @@ public class AutoSysConfProvider extends AbstractConfigProvider {
 	}
 
 	public Path getAutoSysPath() {
-		String filePath = getProvider().getOrThrow("autosys.path");
+		String filePath = getProvider().get("autosys.path");
 
 		if(filePath == null) {
 			return null;

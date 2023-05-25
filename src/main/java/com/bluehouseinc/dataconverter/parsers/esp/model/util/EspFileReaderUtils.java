@@ -11,7 +11,7 @@ import com.bluehouseinc.tidal.utils.StringUtils;
 
 import lombok.extern.log4j.Log4j2;
 
-@Log4j2
+
 public abstract class EspFileReaderUtils {
 	private final static String EMPTY_LINE_PATTERN = "^\\s*$";
 	private final static String COMMENT_PATTERN = "^\\/*(.*) *\\/$";
@@ -91,7 +91,7 @@ public abstract class EspFileReaderUtils {
 	}
 
 	private static boolean isCommentLine(String line) {
-		return RegexHelper.matchesRegexPattern(line, COMMENT_PATTERN) || line.startsWith("/*");
+		return RegexHelper.matchesRegexPattern(line, COMMENT_PATTERN) || line.startsWith("/*") || line.startsWith("#") || line.startsWith("//");
 	}
 
 }

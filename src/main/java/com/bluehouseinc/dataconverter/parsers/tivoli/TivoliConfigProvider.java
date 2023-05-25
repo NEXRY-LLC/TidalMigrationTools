@@ -7,6 +7,7 @@ import com.bluehouseinc.dataconverter.model.AbstractConfigProvider;
 import com.bluehouseinc.dataconverter.providers.ConfigurationProvider;
 import com.bluehouseinc.tidal.api.exceptions.TidalException;
 
+
 public class TivoliConfigProvider extends AbstractConfigProvider {
 	private static String JOB_FILE = "tivoli.job.file";
 	private static String VAR_FILE = "tivoli.var.file";
@@ -15,6 +16,8 @@ public class TivoliConfigProvider extends AbstractConfigProvider {
 	private static String CAL_FILE = "tivoli.ca.file";
 	private static String PAR_FILE = "tivoli.params.file";
 	private static String CPU_FILE = "tivoli.cpu.file";
+	
+	private static String GET_FOLDER = "tivoli.folder";
 
 	public TivoliConfigProvider(ConfigurationProvider provider) {
 		super(provider);
@@ -26,32 +29,36 @@ public class TivoliConfigProvider extends AbstractConfigProvider {
 
 	}
 
+	public File getFolderName() {
+		return doGetFile(getProvider().get(GET_FOLDER));
+	}
+	
 	public File getJobFile() {
-		return doGetFile(getProvider().getOrThrow(JOB_FILE));
+		return doGetFile(getProvider().get(JOB_FILE));
 	}
 
 	public File getVariableFile() {
-		return doGetFile(getProvider().getOrThrow(VAR_FILE));
+		return doGetFile(getProvider().get(VAR_FILE));
 	}
 
 	public File getScheduleFile() {
-		return doGetFile(getProvider().getOrThrow(SCD_FILE));
+		return doGetFile(getProvider().get(SCD_FILE));
 	}
 
 	public File getResourceFile() {
-		return doGetFile(getProvider().getOrThrow(RES_FILE));
+		return doGetFile(getProvider().get(RES_FILE));
 	}
 
 	public File getCalendarFile() {
-		return doGetFile(getProvider().getOrThrow(CAL_FILE));
+		return doGetFile(getProvider().get(CAL_FILE));
 	}
 
 	public File getParamsFile() {
-		return doGetFile(getProvider().getOrThrow(PAR_FILE));
+		return doGetFile(getProvider().get(PAR_FILE));
 	}
 
 	public File getCPUFile() {
-		return doGetFile(getProvider().getOrThrow(CPU_FILE));
+		return doGetFile(getProvider().get(CPU_FILE));
 	}
 
 	private File doGetFile(String filename) {
@@ -61,7 +68,7 @@ public class TivoliConfigProvider extends AbstractConfigProvider {
 		if (file.exists()) {
 			return file;
 		}
-
-		throw new TidalException("doGetFile() -> Unable to locate file[" + filename + "]");
+		
+		return null;
 	}
 }

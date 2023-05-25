@@ -16,6 +16,6 @@ public class OrsypConfigProvider extends AbstractConfigProvider {
 	}
 
 	public String getOrsypPath() {
-		return getProvider().getOrThrow("orsyp.path");
+		return getProvider().get("orsyp.path");
 	}
 }
