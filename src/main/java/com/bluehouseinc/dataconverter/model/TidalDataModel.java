@@ -583,6 +583,7 @@ public class TidalDataModel {
 		return found;
 	}
 
+	
 	public void updateBaseCsvDependencyID(BaseCvsDependency dep, int newId) {
 		final String oldId = Integer.toString(dep.getId());
 		final String newIds = Integer.toString(newId);
@@ -790,4 +791,28 @@ public class TidalDataModel {
 		}
 
 	}
+	
+	
+	public BaseCsvJobObject findFirstJobByName(String name) {
+		if (jobOrGroupsMap == null) {
+			this.jobOrGroupsMap = new HashMap<>();
+			ObjectUtils.toFlatStream(this.jobOrGroups).forEach(jobOrGroup -> {
+				if (this.jobOrGroupsMap.containsKey(jobOrGroup.getFullPath())) {
+					log.debug("already contains key: " + jobOrGroup.getFullPath());
+				}
+				this.jobOrGroupsMap.put(jobOrGroup.getFullPath(), jobOrGroup);
+			});
+		}
+		// if we find an object that matches the end of the path, we found our object.
+		String fullpath = jobOrGroupsMap.keySet().stream().filter(f -> f.toLowerCase().endsWith(name.toLowerCase())).findFirst().orElse(null);
+		
+		if(!StringUtils.isBlank(fullpath)) {
+			return jobOrGroupsMap.get(fullpath);
+		}
+
+		return null;
+		// return toFlatStream(this.jobOrGroups).filter(f ->
+		// f.getFullPath().equals(path)).findFirst().orElse(null);
+	}
+	
 }

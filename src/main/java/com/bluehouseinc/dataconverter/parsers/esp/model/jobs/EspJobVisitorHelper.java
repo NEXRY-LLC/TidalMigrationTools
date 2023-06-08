@@ -1,5 +1,11 @@
 package com.bluehouseinc.dataconverter.parsers.esp.model.jobs;
 
+import com.bluehouseinc.dataconverter.parsers.esp.model.EspDataModel;
+import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.data.EspAppEndData;
+import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.data.EspExternalApplicationData;
+import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.data.EspLIEData;
+import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.data.EspLISData;
+import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.data.EspLinkProcessData;
 import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.impl.EspAgentMonitorJob;
 import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.impl.EspAixJob;
 import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.impl.EspAs400Job;
@@ -21,8 +27,15 @@ import com.bluehouseinc.dataconverter.parsers.esp.model.statements.EspEnvVarStat
 
 import io.vavr.Function2;
 
+
 public class EspJobVisitorHelper {
 
+	EspDataModel datamodel;
+	
+	EspJobVisitorHelper(EspDataModel datamodel){
+		this.datamodel = datamodel;
+	}
+	
 	Function2<String, String, Boolean> visitJob(EspAgentMonitorJob job) {
 		return (statementType, statementParameters) -> {
 			switch (statementType) {
@@ -161,6 +174,8 @@ public class EspJobVisitorHelper {
 		return (statementType, statementParameters) -> {
 			switch (statementType) {
 
+			case "CCCHK":
+				break;
 			default:
 				try {
 					job.getOptionalStatements().putIfAbsent(EspLinkProcessData.EspLISOptionalStatements.valueOf(statementType), statementParameters);
@@ -194,6 +209,7 @@ public class EspJobVisitorHelper {
 			case "COMMAND":
 				job.setCommand(statementParameters);
 				break;
+
 			default:
 				// no statement hit
 				return false;
@@ -211,15 +227,30 @@ public class EspJobVisitorHelper {
 	 */
 	Function2<String, String, Boolean> visitJob(EspZosJob job) {
 
+		String command = datamodel.getConfigeProvider().getZosLibPath();
+		
+		// Per customer , any job name with a dot in it , the dot and all data to the right is not used.
+		// Display only
+		String cliname = job.getName();
+		if(cliname.contains(".")) {
+			cliname = cliname.substring(0, cliname.indexOf("."));
+		}
+		command = command+"("+cliname+")";
+		
+		
+		job.setCommandLine(command);
+		
+		String runtime = datamodel.getConfigeProvider().getZosLibDefaultRuntimeUser();
+		job.setUser(runtime);
+		
+		String agent = datamodel.getConfigeProvider().getZosLibDefaultAgent();
+		job.setAgent(agent);
+		
 		return (statementType, statementParameters) -> {
 
-			if(statementType.contains("ESP_RECIPIENT_")
-					|| statementType.contains("ESP_MESSAGE_")
-					|| statementType.contains("ESP_HEADER")
-					|| statementType.contains("REM_"))  {
+			if (statementType.contains("ESP_RECIPIENT_") || statementType.contains("ESP_MESSAGE_") || statementType.contains("ESP_HEADER") || statementType.contains("REM_")) {
 				return true; // Just say yes, not working with this data.
 			}
-
 			switch (statementType) {
 			case "DEQUEUE":
 				job.setDeQueue(statementParameters);
@@ -245,6 +276,9 @@ public class EspJobVisitorHelper {
 			case "encparm":
 			case "ENCPARM":
 				job.setEncParam(statementParameters);
+				break;
+			case "CCCHK":
+				job.getCcchk().add(statementParameters);
 				break;
 			case "ESP_SUBJECT":
 			case "ESP_BG_COLOR":
@@ -468,6 +502,8 @@ public class EspJobVisitorHelper {
 			case "ENVAR":
 				job.setEnvironmentVariable(extractEnvVarStatement(statementParameters));
 				break;
+			case "CCCHK":
+				break;
 			default:
 				return false;
 			}
@@ -481,7 +517,6 @@ public class EspJobVisitorHelper {
 		String environmentVariableValue = statementParametersElements[1];
 		return new EspEnvVarStatement(environmentVariableName, environmentVariableValue);
 	}
-
 
 	Function2<String, String, Boolean> visitJob(EspAppEndData job) {
 		return (statementType, statementParameters) -> {
@@ -497,6 +532,51 @@ public class EspJobVisitorHelper {
 			}
 
 			return true;
+		};
+	}
+
+	Function2<String, String, Boolean> visitJob(EspLIEData job) {
+		return (statementType, statementParameters) -> {
+			switch (statementType) {
+			case "ARGS":
+			case "COMMAND":
+				break;
+			default:
+				// no statement hit
+				return false;
+
+			}
+
+			return true;
+		};
+	}
+
+	Function2<String, String, Boolean> visitJob(EspLISData job) {
+		return (statementType, statementParameters) -> {
+			switch (statementType) {
+			case "ARGS":
+			case "COMMAND":
+				break;
+			default:
+				// no statement hit
+				return false;
+
+			}
+
+			return true;
+		};
+	}
+
+	Function2<String, String, Boolean> visitJob(EspExternalApplicationData job) {
+		return (statementType, statementParameters) -> {
+			switch (statementType) {
+
+			default:
+				// no statement hit
+				return false;
+
+			}
+
 		};
 	}
 }

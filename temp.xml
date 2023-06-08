@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <entry xmlns="http://purl.org/atom/ns#">
-	<id>2364</id>
-	<title>BRMDLYMNT_AKNDEV</title>
+	<id>18823</id>
+	<title>TIDALSTP</title>
 	<author>
 		<name>Schedulers</name>
 		<uri></uri>
@@ -21,119 +21,68 @@
 	<category term="" scheme="groupNameRecordPosition" label="" />
 	<category term="0" scheme="jobOrJobRunRecordPosition" label="" />
 	<link
-		href="https://tidapp03daws.bfusa.com:8443/api/tes-dev/Job.get/2364"
-		rel="alternate" type="text/html" title="BRMDLYMNT_AKNDEV" length="0" />
+		href="https://tidapp03daws.bfusa.com:8443/api/tes-dev/Job.get/18823"
+		rel="alternate" type="text/html" title="TIDALSTP" length="0" />
 	<source>com.tidalsoft.webclient.tes.dsp.api.model.JobView</source>
-	<modified>2023-05-09T14:49:21-04:00</modified>
+	<modified>2023-06-07T15:28:20-04:00</modified>
 	<tes:job
 		xmlns:tes="http://www.tidalsoftware.com/client/tesservlet">
-		<tes:id>2364</tes:id>
-		<tes:type>7</tes:type>
-		<tes:typename>OS400JOB</tes:typename>
-		<tes:name>BRMDLYMNT_AKNDEV</tes:name>
+		<tes:id>18823</tes:id>
+		<tes:type>2</tes:type>
+		<tes:typename>JOB</tes:typename>
+		<tes:name>TIDALSTP</tes:name>
+		<tes:parentid>18815</tes:parentid>
+		<tes:parentname>\Copy of TIDAL_TST9_Testing</tes:parentname>
 		<tes:active>Y</tes:active>
 		<tes:effectivecalendarid>0</tes:effectivecalendarid>
 		<tes:ownerid>2</tes:ownerid>
 		<tes:ownername>Schedulers</tes:ownername>
-		<tes:lastusermodifiedtime>2023-05-09T14:49:21-0400
+		<tes:lastusermodifiedtime>2023-06-07T15:28:20-0400
 		</tes:lastusermodifiedtime>
-		<tes:lastusermodifiedtimeasstring>20230509144921
+		<tes:lastusermodifiedtimeasstring>20230607152820
 		</tes:lastusermodifiedtimeasstring>
-		<tes:alias>2364</tes:alias>
+		<tes:alias>18823</tes:alias>
 		<tes:dirty>
 		</tes:dirty>
-		<tes:extendedinfo>
-			<XMLSBMJOB>
-				<JN>BRMDLYMNT</JN>
-				<JQ>QCTL</JQ>
-				<JQLIB>QSYS</JQLIB>
-				<CMD>STRMNTBRM
-					EXPSETMED(*YES) RMVMEDI(*EXP) MOVMED(*YES) RMVLOGE(*NONE)
-					RUNCLNUP(*NO) RTVVOLSTAT(*YES) CHGJRN(*NO) PRTVSNRPT(*EXPMED)
-					PRTBKUACT(*NO) PRTRCYRPT(*NONE)
-					RGZBRMDB(*NO)
-				</CMD>
-				<USR>TIDALDEV</USR>
-				<PREPROCESSCOMMANDS>
-					<COMMAND>
-						<NAME>VRYCFG
-							CFGOBJ(TAPMLB01) CFGTYPE(*DEV)
-							STATUS(*OFF)
-						</NAME>
-						<TRKMETH></TRKMETH>
-						<CDEOPP></CDEOPP>
-						<FROM>0</FROM>
-						<TO>0</TO>
-					</COMMAND>
-					<COMMAND>
-						<NAME>DLYJOB
-							DLY(45)
-						</NAME>
-						<TRKMETH></TRKMETH>
-						<CDEOPP></CDEOPP>
-						<FROM>0</FROM>
-						<TO>0</TO>
-					</COMMAND>
-					<COMMAND>
-						<NAME>VRYCFG
-							CFGOBJ(TAPMLB01) CFGTYPE(*DEV)
-							STATUS(*ON)
-						</NAME>
-						<TRKMETH></TRKMETH>
-						<CDEOPP></CDEOPP>
-						<FROM>0</FROM>
-						<TO>0</TO>
-					</COMMAND>
-					<COMMAND>
-						<NAME>WRKSAVFBRM
-							OUTPUT(*PRINT)
-						</NAME>
-						<TRKMETH></TRKMETH>
-						<CDEOPP></CDEOPP>
-						<FROM>0</FROM>
-						<TO>0</TO>
-					</COMMAND>
-				</PREPROCESSCOMMANDS>
-				<POSTPROCESSCOMMANDS></POSTPROCESSCOMMANDS>
-			</XMLSBMJOB>
+		<tes:extendedinfo>&lt;agent&gt;&lt;UsePasswordWinJob&gt;SC&lt;/UsePasswordWinJob&gt;&lt;/agent&gt;
 		</tes:extendedinfo>
 		<tes:successorsvalue>N</tes:successorsvalue>
 		<tes:predecessorsvalue>N</tes:predecessorsvalue>
-		<tes:runtimeusername>TIDALDEV</tes:runtimeusername>
-		<tes:critical>N</tes:critical>
-		<tes:agentid>821</tes:agentid>
-		<tes:effectiveagentid>821</tes:effectiveagentid>
+		<tes:breachoffset>0</tes:breachoffset>
+		<tes:riskoffset>0</tes:riskoffset>
+		<tes:effectiveagentid>975</tes:effectiveagentid>
 		<tes:effectiveagentlistid>0</tes:effectiveagentlistid>
-		<tes:agentname>AKNDEV</tes:agentname>
-		<tes:agenttype>8</tes:agenttype>
-		<tes:agentostype>7</tes:agentostype>
-		<tes:agentserviceid>0</tes:agentserviceid>
 		<tes:allowunscheduled>Y</tes:allowunscheduled>
-		<tes:inheritcalendar>N</tes:inheritcalendar>
-		<tes:inheritagent>N</tes:inheritagent>
-		<tes:inherittimewindow>N</tes:inherittimewindow>
+		<tes:inheritcalendar>Y</tes:inheritcalendar>
+		<tes:inheritagent>Y</tes:inheritagent>
+		<tes:inherittimewindow>Y</tes:inherittimewindow>
+		<tes:parentactive>Y</tes:parentactive>
+		<tes:timewindowoption>0</tes:timewindowoption>
+		<tes:command>//FTRF.TSTJOBS(TIDALSTP)</tes:command>
 		<tes:allowrerun>Y</tes:allowrerun>
+		<tes:calendaroffset>0</tes:calendaroffset>
 		<tes:concurrency>1</tes:concurrency>
-		<tes:createtime>2023-04-26T07:58:47-0400</tes:createtime>
+		<tes:createtime>2023-05-23T11:50:28-0400</tes:createtime>
 		<tes:dependencylogic>1</tes:dependencylogic>
 		<tes:disablecarryover>0</tes:disablecarryover>
-		<tes:durationestimated>68</tes:durationestimated>
+		<tes:durationestimated>14</tes:durationestimated>
 		<tes:durationmaximum>60</tes:durationmaximum>
 		<tes:durationminimum>60</tes:durationminimum>
 		<tes:estimatedmethod>1</tes:estimatedmethod>
 		<tes:excludeabnormalduration>4</tes:excludeabnormalduration>
 		<tes:exitcodenormaloperator>1</tes:exitcodenormaloperator>
-		<tes:fullpath>\BRMDLYMNT_AKNDEV</tes:fullpath>
+		<tes:fullpath>\Copy of TIDAL_TST9_Testing\TIDALSTP</tes:fullpath>
 		<tes:historyretention>45</tes:historyretention>
-		<tes:inheritoptions>N</tes:inheritoptions>
-		<tes:inheritrepeat>N</tes:inheritrepeat>
+		<tes:inheritoptions>Y</tes:inheritoptions>
+		<tes:inheritrepeat>Y</tes:inheritrepeat>
 		<tes:isnotes>false</tes:isnotes>
 		<tes:isrunbook>false</tes:isrunbook>
-		<tes:jobdetailid>2364</tes:jobdetailid>
-		<tes:lastchangetime>2023-05-09T14:49:21-0400</tes:lastchangetime>
+		<tes:jobdetailid>18823</tes:jobdetailid>
+		<tes:lastchangetime>2023-06-07T15:28:20-0400</tes:lastchangetime>
 		<tes:nearoutage>3</tes:nearoutage>
 		<tes:normalexitfromrange>0</tes:normalexitfromrange>
-		<tes:normalexittorange>0</tes:normalexittorange>
+		<tes:normalexittorange>4095</tes:normalexittorange>
+		<tes:parameters />
 		<tes:priority>50</tes:priority>
 		<tes:repeat />
 		<tes:rerundependency>N</tes:rerundependency>
@@ -142,18 +91,11 @@
 		<tes:trackingmethod>1</tes:trackingmethod>
 		<tes:waitOperator>N</tes:waitOperator>
 		<tes:waitoperator>N</tes:waitoperator>
-		<tes:runuserid>103</tes:runuserid>
 		<tes:tags />
 		<tes:unixprofile>0</tes:unixprofile>
 		<tes:transactionid>0</tes:transactionid>
-		<tes:data>
-			<lastrun>
-				<duration>1</duration>
-				<exitcode>0</exitcode>
-				<id>3623505</id>
-				<status>66</status>
-				<timestamp>20230509142358</timestamp>
-			</lastrun>
+		<tes:data>&lt;lastrun&gt;&lt;duration&gt;29&lt;/duration&gt;&lt;exitcode&gt;9999&lt;/exitcode&gt;&lt;id&gt;3625169&lt;/id&gt;&lt;status&gt;103&lt;/status&gt;&lt;timestamp&gt;20230607153407&lt;/timestamp&gt;&lt;/lastrun&gt;
 		</tes:data>
 	</tes:job>
 </entry>
+F

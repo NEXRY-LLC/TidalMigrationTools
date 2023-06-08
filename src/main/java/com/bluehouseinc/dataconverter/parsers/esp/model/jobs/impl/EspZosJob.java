@@ -25,7 +25,10 @@ public class EspZosJob extends EspAbstractJob {
 	String member;
 	String send;
 	String deQueue;
+	List<String> ccchk = new ArrayList<>(); // Specify the action taken if a job, step, procstep or program produces a specified condition code.
 
+	String commandLine;
+	
 	Map<EspZoSOptionalStatements, String> optionalStatements = new HashMap<>();
 
 	public EspZosJob(String name) {

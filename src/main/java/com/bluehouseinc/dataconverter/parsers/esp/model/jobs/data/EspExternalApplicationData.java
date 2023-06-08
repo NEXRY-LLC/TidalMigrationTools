@@ -1,9 +1,6 @@
-package com.bluehouseinc.dataconverter.parsers.esp.model.jobs;
-
-import java.util.List;
+package com.bluehouseinc.dataconverter.parsers.esp.model.jobs.data;
 
 import com.bluehouseinc.dataconverter.parsers.esp.model.EspAbstractJob;
-import com.bluehouseinc.dataconverter.parsers.esp.model.statements.EspSetVarStatement;
 import com.bluehouseinc.dataconverter.parsers.esp.model.util.EspJobType;
 
 import lombok.Data;
@@ -11,17 +8,19 @@ import lombok.EqualsAndHashCode;
 
 @Data
 @EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = true)
-public class EspDataObjectJob extends EspAbstractJob {
+public class EspExternalApplicationData extends EspAbstractJob {
 
-	List<EspSetVarStatement> variables;
+	private String externJobName;
+	private String externAppID;
+	
 
-	public EspDataObjectJob(String name) {
+	public EspExternalApplicationData(String name) {
 		super(name);
 	}
 
+	
 	@Override
 	public EspJobType getJobType() {
-
-		return EspJobType.DATA_OBJECT;
+		return EspJobType.EXTERNAL;
 	}
 }

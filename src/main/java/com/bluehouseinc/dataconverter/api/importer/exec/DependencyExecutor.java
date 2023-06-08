@@ -59,6 +59,11 @@ public class DependencyExecutor extends AbstractAPIExecutor {
 			int me = adep.getJobObject().getId();
 			Integer depson;
 			String mepath = adep.getJobObject().getFullPath();
+			
+			if (mepath.toUpperCase().contains("AIPPD040")) {
+				mepath.getBytes();
+			}
+			
 			String deppath;
 			if (adep instanceof CvsDependencyJob) {
 				CvsDependencyJob jdep = ((CvsDependencyJob) adep);

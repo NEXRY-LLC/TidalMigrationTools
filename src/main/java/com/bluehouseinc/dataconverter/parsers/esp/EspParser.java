@@ -26,11 +26,14 @@ import com.bluehouseinc.dataconverter.parsers.AbstractParser;
 import com.bluehouseinc.dataconverter.parsers.esp.model.EspAbstractJob;
 import com.bluehouseinc.dataconverter.parsers.esp.model.EspDataModel;
 import com.bluehouseinc.dataconverter.parsers.esp.model.ScheduleEventDataProcessor;
-import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.EspAppEndData;
-import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.EspDataObjectJob;
 import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.EspJobVisitor;
 import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.EspJobVisitorImpl;
-import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.EspLinkProcessData;
+import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.data.EspAppEndData;
+import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.data.EspDataObjectJob;
+import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.data.EspExternalApplicationData;
+import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.data.EspLIEData;
+import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.data.EspLISData;
+import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.data.EspLinkProcessData;
 import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.impl.EspAgentMonitorJob;
 import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.impl.EspAixJob;
 import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.impl.EspAs400Job;
@@ -56,6 +59,7 @@ import com.bluehouseinc.dataconverter.parsers.esp.model.statements.EspRunStateme
 import com.bluehouseinc.dataconverter.parsers.esp.model.util.EspFileReaderUtils;
 import com.bluehouseinc.dataconverter.parsers.esp.model.util.EspJobType;
 import com.bluehouseinc.dataconverter.providers.ConfigurationProvider;
+import com.bluehouseinc.dataconverter.util.ObjectUtils;
 import com.bluehouseinc.tidal.api.exceptions.TidalException;
 import com.bluehouseinc.tidal.utils.StringUtils;
 
@@ -83,23 +87,48 @@ public class EspParser extends AbstractParser<EspDataModel> {
 	private final static String ENDING_WITH_8_DIGITS_PATTERN = "\\s{1,}([0-9]{8})$";
 
 	EspJobVisitor espJobVisitor;
-	//private ScheduleEventDataProcessor scheduleDataProcessor;
+	// private ScheduleEventDataProcessor scheduleDataProcessor;
 
 	public EspParser(ConfigurationProvider cfgProvider) {
-		super(new EspDataModel(cfgProvider,new ScheduleEventDataProcessor()));
+		super(new EspDataModel(cfgProvider, new ScheduleEventDataProcessor()));
 		this.espJobVisitor = new EspJobVisitorImpl(getParserDataModel());
 	}
 
 	private DirectoryStream<Path> getFilteredDirectories(String pathToFiles) throws IOException {
-		return Files.newDirectoryStream(Paths.get(pathToFiles), path -> {
-			String fileName = path.getFileName().toString();
+		final List<String> filesToSkip = Arrays.asList(getParserDataModel().getConfigeProvider().getFilesToSkip().toLowerCase().split("\\s*,\\s*"));
+		final List<String> filesToInclude = Arrays.asList(getParserDataModel().getConfigeProvider().getFilesToInclude().toLowerCase().split("\\s*,\\s*"));
 
-			Set<String> filesToSkip = Arrays.asList(getParserDataModel().getConfigeProvider().getFilesToSkip().split(",")).stream().collect(Collectors.toCollection(HashSet::new));
-			// Set<String> filesToSkip = Stream.of("CF01", "CF02", "CF03", "CF04", "CF05").collect(Collectors.toCollection(HashSet::new));
-			boolean containsFileToSkip = filesToSkip.contains(fileName);
-			boolean containsMonkey = Pattern.matches("@(.*?)", fileName);
-			boolean containsHashtag = Pattern.matches("#(.*?)", fileName);
-			return !containsMonkey && !containsHashtag && !containsFileToSkip;
+		return Files.newDirectoryStream(Paths.get(pathToFiles), path -> {
+			String fileName = path.getFileName().toString().toLowerCase();
+
+			if (Pattern.matches("@(.*?)", fileName)) {
+				return false; // Not wanting this file monkey file
+			}
+
+			if (Pattern.matches("#(.*?)", fileName)) {
+				return false; // Not wanting this file Hashtag file
+			}
+
+			List<String> localskip = filesToSkip;
+			// If we have skip file data and exclude from future processing.
+			boolean doskipfile = localskip.contains(fileName);
+
+			if (doskipfile) {
+				return false; // Its in our skip list to return false
+			} else {
+				if (filesToInclude.isEmpty()) {
+					return true; // If not data then always true.
+				} else {
+					List<String> localinclude = filesToInclude;
+					boolean doincludefile = localinclude.contains(fileName);
+
+					if (doincludefile) {
+						return true;
+					}
+					return doincludefile;
+				}
+			}
+
 		});
 	}
 
@@ -133,12 +162,17 @@ public class EspParser extends AbstractParser<EspDataModel> {
 				continue;
 			}
 
-			if(line.toUpperCase().contains("!USER")) {
+			if (line.toUpperCase().contains("!USER")) {
 				line = line.replace("!USER", "USER");
 				line = line.replace("!user", "user");
 				line = line.replace("!", "");
 			}
-			
+
+			// Just remove all single quotes vs trying to figure out where they all are.
+			if (line.contains("'")) {
+				line = line.replace("'", "");
+			}
+
 			lines.add(line.trim());
 		}
 
@@ -158,7 +192,7 @@ public class EspParser extends AbstractParser<EspDataModel> {
 	public void parseFile() throws Exception {
 
 		String eventdatafile = getParserDataModel().getConfigeProvider().getEspEventDataFile();
-		
+
 		this.getParserDataModel().getScheduleEventDataProcessor().doProcessScheduleData(eventdatafile);
 
 		String pathToFiles = this.getParserDataModel().getConfigeProvider().getEspDataPath();
@@ -205,6 +239,10 @@ public class EspParser extends AbstractParser<EspDataModel> {
 
 				while ((line = readLine(reader)) != null) {
 
+					if (line.contains("SUNMAINT")) {
+						line.toCharArray();
+					}
+
 					line = EspFileReaderUtils.readLineMerged(reader, line, '-');
 					line = EspFileReaderUtils.readLineMerged(reader, line, '+');
 
@@ -218,10 +256,10 @@ public class EspParser extends AbstractParser<EspDataModel> {
 					}
 
 					if (isCommentLine(line)) {
-						if (currentJobGroup.getNoteData() == null) {
-							currentJobGroup.setNoteData(new ArrayList<>());
+						if (currentJobGroup.getNotesData() == null) {
+							currentJobGroup.setNotesData(new ArrayList<>());
 						}
-						currentJobGroup.getNoteData().add(line);
+						currentJobGroup.getNotesData().add(line);
 						continue;
 					}
 
@@ -246,28 +284,26 @@ public class EspParser extends AbstractParser<EspDataModel> {
 							String jobName = jobdata[1];
 							String jobTypeString = jobdata[0];
 
-
-							if (line.contains("FSBP_ZFIGLI19")) {
-								line.toCharArray();
-							}
-
 							if (jobName.contains("!")) { // cant have jobs with variables in the name
 								jobName = jobName.replace("!", "");
 							}
 
-							EspJobType jobType = extractJobType(jobTypeString);
+							if (jobName.contains("BBPRODSAP.DUMMY")) {
+								line.toLowerCase();
+							}
+							EspJobType jobType = extractJobType(jobTypeString, line);
 
 							if (StringUtils.isBlank(jobName) || jobType == null) {
 								log.error("Job Name is Blank or Job Type is null, ESP data related at line " + line);
 								continue;
 							}
 
-							if (jobName.contains("USCA1OFF")) {
-								jobName.getBytes();
+							currentJob = this.extractJob(reader, jobName, jobType, currentJobGroup, line);
+
+							if(currentJob == null) {
+								continue;
 							}
-
-							currentJob = this.extractJob(reader, jobName, jobType, currentJobGroup);
-
+							
 							if (currentJob instanceof EspDataObjectJob) {
 								if (currentJobGroup.getVariables() == null) {
 									currentJobGroup.setVariables(new HashMap<>());
@@ -281,6 +317,16 @@ public class EspParser extends AbstractParser<EspDataModel> {
 								continue;
 							}
 
+							if (currentJob instanceof EspLIEData) {
+								doProcessEspLIEData(currentJobGroup, (EspLIEData) currentJob);
+								continue;
+							}
+
+							if (currentJob instanceof EspLISData) {
+								doProcessEspLISData(currentJobGroup, (EspLISData) currentJob);
+								continue;
+							}
+
 							if (currentJob instanceof EspLinkProcessData) {
 								doProcessLinkedListData(currentJobGroup, (EspLinkProcessData) currentJob);
 								continue;
@@ -291,17 +337,37 @@ public class EspParser extends AbstractParser<EspDataModel> {
 								continue;
 							}
 
-							if (line.contains("EXTERNAL APPLID(")) {
-								if (jobdata.length >= 3) {
-									String appid = jobdata[3];
-									appid = appid.replace("APPLID(", "").replace(")", "");
-									currentJob.setExternalAppID(appid);
+							if (currentJob instanceof EspExternalApplicationData) {
+
+								if (currentJob.getName().contains("YMIMBDC_PLAN_ORDER_LD_CONSUMER_6")) {
+									line.toCharArray();
 								}
+								// Per Customer , do not process any of the other elements. 
+								//doProcessGenericData(currentJobGroup, currentJob);
+
+								EspExternalApplicationData exj = (EspExternalApplicationData) currentJob;
+								if (line.contains("EXTERNAL APPLID(")) {
+									if (jobdata.length >= 3) {
+										String appid = jobdata[3];
+										appid = appid.replace("APPLID(", "").replace(")", "");
+										exj.setExternAppID(appid);
+
+									}
+								}
+
+								if (line.contains("LIE.") || line.contains("LIS.")) {
+									line.chars();
+								} else {
+									// use the object name for the dependency.
+									exj.setExternJobName(jobName);
+								}
+
+								currentJobGroup.getExternalApplicationDep().add(exj);
+								continue;
 							}
 
 						} catch (Exception e) {
 							throw new TidalException(e);
-							// log.error("FATAL EXCEPTION! More info:\n {}", Arrays.toString(e.getStackTrace()));
 						}
 					}
 
@@ -335,7 +401,7 @@ public class EspParser extends AbstractParser<EspDataModel> {
 		}
 	}
 
-	private EspAbstractJob extractJob(final BufferedReader reader, String jobName, EspJobType jobType, EspJobGroup parent) throws Exception {
+	private EspAbstractJob extractJob(final BufferedReader reader, String jobName, EspJobType jobType, EspJobGroup parent, String rawdata) throws Exception {
 
 		if (jobName.contains("PAYMENT")) {
 			jobName.getBytes();
@@ -348,11 +414,9 @@ public class EspParser extends AbstractParser<EspDataModel> {
 		}
 
 		EspAbstractJob job = null;
+		boolean addasjob = true;
 
 		switch (jobType) {
-		case AGENT_MONITOR:
-			job = new EspAgentMonitorJob(jobName);
-			break;
 		case AIX:
 			job = new EspAixJob(jobName);
 			break;
@@ -361,9 +425,6 @@ public class EspParser extends AbstractParser<EspDataModel> {
 			break;
 		case BWPC:
 			job = new EspSAPBwpcJob(jobName);
-			break;
-		case DATA_OBJECT:
-			job = new EspDataObjectJob(jobName);
 			break;
 		case DSTRIG:
 			job = new EspDStrigJob(jobName);
@@ -398,53 +459,99 @@ public class EspParser extends AbstractParser<EspDataModel> {
 		case NT:
 			job = new EspWindowsJob(jobName);
 			break;
+		case ZOS:
+			job = new EspZosJob(jobName);
+			break;
 		case LINK_PROCESS:
 			job = new EspLinkProcessData(jobName);
+			addasjob = false;
 			break;
 		case APPLEND:
 			job = new EspAppEndData(jobName);
+			addasjob = false;
 			break;
-		case ZOS:
-			job = new EspZosJob(jobName);
+		case EXTERNAL:
+			job = new EspExternalApplicationData(jobName);
+			addasjob = false;
+			break;
+		case LIE:
+			job = new EspLIEData(jobName);
+			addasjob = false;
+			break;
+		case LIS:
+			job = new EspLISData(jobName);
+			addasjob = false;
+			break;
+		case DATA_OBJECT:
+			job = new EspDataObjectJob(jobName);
+			addasjob = false;
+			break;
+		case AGENT_MONITOR: // Do Nothing with these.
+			job = new EspAgentMonitorJob(jobName);
+			addasjob = false;
 			break;
 		default:
 			throw new TidalException("Unknown Job Type[" + jobType.name() + "]");
 		}
 
-		// Add our job to our parent early
-		if (parent != null) {
-			parent.addChild(job);
+		if (addasjob) {
+			// Add our job to our parent early
+			if (parent != null) {
+				parent.addChild(job);
+			}
 		}
 
 		// Go and do this visitor pattern stuff :) I rewrote this to work with my mind.
 		job.processData(espJobVisitor, lines);
 
+		// Second check here because we need to process data to make this call.. If the job has no run statement
+		// and is a job , not data.. then remove and return null
+		if(addasjob) {
+			// No run statements on a job type, then we are not scheduled, customer asked to have these removed.
+			if (job.getStatementObject().getEspRunStatements().isEmpty()) {
+				//parent.getChildren().remove(job); // Remove and returbn.
+				//return null;
+			}
+			
+		}
+		
 		return job;
 
 	}
 
 	/**
 	 *
-	 * @param line
+	 * @param jobType
 	 * @return
 	 */
-	private EspJobType extractJobType(String line) {
+	private EspJobType extractJobType(String jobType, String rawdata) {
 
-		if (line.endsWith("LINK PROCESS")) {
+		if (rawdata.contains("LINK PROCESS")) {
 			return EspJobType.LINK_PROCESS;
 		}
 
-		if (line.startsWith("APPLEND")) {
+		if (rawdata.startsWith("APPLEND")) {
 			return EspJobType.APPLEND;
 		}
-		String jobType = "";
+
+		if (rawdata.contains("EXTERNAL")) {
+			return EspJobType.EXTERNAL;
+		}
+
+		if (rawdata.contains("JOB LIE.")) {
+			return EspJobType.LIE;
+		}
+
+		if (rawdata.contains("JOB LIS.")) {
+			return EspJobType.LIS;
+		}
 
 		try {
-			if (line.contains("_JOB")) {
-				jobType = line.split("_JOB")[0];
+			if (jobType.contains("_JOB")) {
+				jobType = jobType.split("_JOB")[0];
 
 			} else {
-				jobType = line.split(" ")[0];
+				jobType = jobType.split(" ")[0];
 			}
 
 			if (jobType.equals("JOB")) {
@@ -510,12 +617,12 @@ public class EspParser extends AbstractParser<EspDataModel> {
 		}
 
 		if (line.startsWith("RESOURCE")) {
-			if (currentGroup.getResources() == null) {
-				currentGroup.setResources(new ArrayList<>());
+			if (currentGroup.getStatementObject().getResources() == null) {
+				currentGroup.getStatementObject().setResources(new ArrayList<>());
 			}
 
 			String jobResource = line.split(" ", 2)[1];
-			currentGroup.getResources().add(extractJobResource(jobResource));
+			currentGroup.getStatementObject().getResources().add(extractJobResource(jobResource));
 		}
 
 		String trimmedLine = line.trim();
@@ -548,22 +655,6 @@ public class EspParser extends AbstractParser<EspDataModel> {
 		return new EspReporter();
 	}
 
-	private void doProcessLinkedListData(EspJobGroup in, EspLinkProcessData data) {
-		if (data != null) {
-			in.getLinkProcessDataList().add(data);
-
-			String desub = data.getDelaySubmission();
-			String duout = data.getDueout();
-			//String norun = data.noru
-			// TODO: review all options
-			
-			in.setDueout(duout);
-			in.setDelaySubmission(desub);
-
-			in.getEspRunStatements().addAll(data.getEspRunStatements());
-		}
-	}
-
 	/*
 	 * As we progress we are discovering more we can do with this data. Do that work here.
 	 */
@@ -584,7 +675,7 @@ public class EspParser extends AbstractParser<EspDataModel> {
 					runstm.setCriteria(eventCal);
 					runstm.setJobName(in.getName());
 
-					in.getEspRunStatements().add(runstm);
+					in.getStatementObject().getEspRunStatements().add(runstm);
 				}
 
 				// Attempt to process this and set data on the group object per requirement.
@@ -631,7 +722,7 @@ public class EspParser extends AbstractParser<EspDataModel> {
 							EspRunStatement runstm = new EspRunStatement();
 							runstm.setCriteria(cals.get(0));
 							runstm.setJobName(in.getName());
-							in.getEspRunStatements().add(runstm);
+							in.getStatementObject().getEspRunStatements().add(runstm);
 
 						} else {
 							// add all our start times.
@@ -652,5 +743,44 @@ public class EspParser extends AbstractParser<EspDataModel> {
 			}
 		}
 
+	}
+
+	private void doProcessLinkedListData(EspJobGroup in, EspLinkProcessData data) {
+		in.getLinkProcessDataList().add(data);
+		doProcessGenericData(in, data);
+	}
+
+	private void doProcessEspLIEData(EspJobGroup in, EspLIEData data) {
+		doProcessGenericData(in, data);
+	}
+
+	private void doProcessEspLISData(EspJobGroup in, EspLISData data) {
+		doProcessGenericData(in, data);
+	}
+
+	private void doProcessGenericData(EspJobGroup in, EspAbstractJob data) {
+		if (data != null) {
+
+			String desub = data.getDelaySubmission();
+			String duout = data.getDueout();
+
+			if (!StringUtils.isBlank(duout)) {
+				if (StringUtils.isBlank(in.getDueout())) {
+					in.setDueout(duout);
+				} else {
+					in.getName();
+				}
+			}
+
+			if (!StringUtils.isBlank(desub)) {
+				if (StringUtils.isBlank(in.getDelaySubmission())) {
+					in.setDelaySubmission(desub);
+				} else {
+					in.getName();
+				}
+
+			}
+			in.addEspStatementObject(data.getStatementObject());
+		}
 	}
 }

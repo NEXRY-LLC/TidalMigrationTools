@@ -1,4 +1,4 @@
-package com.bluehouseinc.dataconverter.parsers.esp.model.jobs;
+package com.bluehouseinc.dataconverter.parsers.esp.model.jobs.data;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -11,22 +11,21 @@ import lombok.EqualsAndHashCode;
 
 @Data
 @EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = true)
-public class EspAppEndData extends EspAbstractJob {
+public class EspLinkProcessData extends EspAbstractJob {
 
 
-	Map<EspOptionalStatements, String> optionalStatements = new HashMap<>();
+	Map<EspLISOptionalStatements, String> optionalStatements = new HashMap<>();
 
-	public EspAppEndData(String name) {
+	public EspLinkProcessData(String name) {
 		super(name);
 	}
 
-	public enum EspOptionalStatements {
-		ESPNOMSG
+	public enum EspLISOptionalStatements {
+		ECHO, MEMBER, ESP, VINCR, VGET, ESPNOMSG,VS
 	}
 
 	@Override
 	public EspJobType getJobType() {
-		return EspJobType.APPLEND;
+		return EspJobType.LINK_PROCESS;
 	}
-
 }

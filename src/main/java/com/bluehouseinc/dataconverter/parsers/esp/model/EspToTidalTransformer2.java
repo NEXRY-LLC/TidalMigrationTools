@@ -92,6 +92,10 @@ public class EspToTidalTransformer2 implements ITransformer<List<EspAbstractJob>
 
 	private void doProcessObjects(EspAbstractJob job, CsvJobGroup parent) {
 
+		if (job.getName().contains("SUNMAINT")) {
+			job.getName().toLowerCase();
+		}
+		
 		if (job instanceof EspJobGroup) {
 
 			CsvJobGroup jobgroup = (CsvJobGroup) processJobObject(job);
@@ -187,8 +191,9 @@ public class EspToTidalTransformer2 implements ITransformer<List<EspAbstractJob>
 	}
 
 	private void processJob(EspZosJob in, CsvOSJob out) {
-		out.setCommandLine("PATH/TO/JCL/"+in.getName());
-		
+
+		out.setCommandLine(in.getCommandLine());
+		//out.setRuntimeUser(in.getUser());
 		if(StringUtils.isBlank(in.getAgent())) {
 			in.setAgent("NOTSET-Z");
 		}else {
@@ -381,6 +386,10 @@ public class EspToTidalTransformer2 implements ITransformer<List<EspAbstractJob>
 
 	private void doSetGenericData(EspAbstractJob in, BaseCsvJobObject out) {
 
+		if (in.getName().contains("SUNMAINT")) {
+			in.getName().toCharArray();
+		}
+		
 		out.setName(in.getName());
 
 		if (StringUtils.isBlank(in.getAgent())) {
@@ -414,7 +423,7 @@ public class EspToTidalTransformer2 implements ITransformer<List<EspAbstractJob>
 		}
 
 		// Set our notes information on our job.
-		out.setNotes(String.join("\n", in.getNoteData()));
+		out.setNotes(String.join("\n", in.getNotesData()));
 
 		if (in.getDueout() != null) {
 			String endtime = in.getDueout().replace("EXEC ", "").replace(".", "").replace(":", "");
@@ -442,10 +451,10 @@ public class EspToTidalTransformer2 implements ITransformer<List<EspAbstractJob>
 		// TODO-2: Set RUN REF to look for Job definition by jobName if SAME jobGroup!
 		StringBuffer stringBuffer = new StringBuffer();
 
-		List<EspRunStatement> runStatements = in.getEspRunStatements();
-		List<EspNoRunStatement> noRunStatements = in.getEspNoRunStatements();
+		List<EspRunStatement> runStatements = in.getStatementObject().getEspRunStatements();
+		List<EspNoRunStatement> noRunStatements = in.getStatementObject().getEspNoRunStatements();
 
-		if (runStatements != null && !in.getEspRunStatements().isEmpty()) {
+		if (runStatements != null && !in.getStatementObject().getEspRunStatements().isEmpty()) {
 			runStatements.forEach(runStatement -> {
 				String criteria = runStatement.getCriteria();
 				if (criteria != null) {
@@ -462,7 +471,7 @@ public class EspToTidalTransformer2 implements ITransformer<List<EspAbstractJob>
 		 * RUN DAILY NORUN 1st JAN DAILY EXCEPT 1st JAN
 		 */
 
-		if (noRunStatements != null && !in.getEspNoRunStatements().isEmpty()) {
+		if (noRunStatements != null && !in.getStatementObject().getEspNoRunStatements().isEmpty()) {
 			noRunStatements.forEach(noRunStatement -> {
 				String criteria = noRunStatement.getCriteria();
 				if (criteria != null) {
@@ -490,7 +499,7 @@ public class EspToTidalTransformer2 implements ITransformer<List<EspAbstractJob>
 	}
 
 	private void doProcessJobResources(EspAbstractJob espAbstractJob, BaseCsvJobObject tidalNewJob) {
-		List<EspJobResourceStatement> jobResources = espAbstractJob.getResources();
+		List<EspJobResourceStatement> jobResources = espAbstractJob.getStatementObject().getResources();
 		if (jobResources != null) {
 			jobResources.forEach(resource -> {
 				CsvResource csvResource = new CsvResource(resource.getResourceName(), this.datamodel.getDefaultOwner());

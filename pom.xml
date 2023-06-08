@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>org.springframework.boot</groupId>
@@ -67,7 +69,8 @@
 			<artifactId>tidal.toolkit</artifactId>
 			<version>1.0.1</version>
 			<scope>system</scope>
-			<systemPath>${project.basedir}/lib/tidaltoolkit_jobexecution.1.0.1.jar</systemPath>
+			<systemPath>
+				${project.basedir}/lib/tidaltoolkit_jobexecution.1.0.1.jar</systemPath>
 		</dependency>
 		<dependency>
 			<groupId>com.opencsv</groupId>
@@ -95,7 +98,8 @@
 			<artifactId>commons-beanutils</artifactId>
 			<version>1.9.4</version>
 		</dependency>
-		<!-- https://mvnrepository.com/artifact/commons-beanutils/commons-beanutils -->
+		<!--
+		https://mvnrepository.com/artifact/commons-beanutils/commons-beanutils -->
 		<dependency>
 			<groupId>com.thoughtworks.xstream</groupId>
 			<artifactId>xstream</artifactId>
@@ -140,13 +144,17 @@
 			<artifactId>antlr-runtime</artifactId>
 			<version>3.5.2</version>
 		</dependency>
+		<dependency>
+			<groupId>org.apache.xmlbeans</groupId>
+			<artifactId>xmlbeans</artifactId>
+			<version>5.1.0</version>
+		</dependency>
 	</dependencies>
 	<build>
 		<plugins>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
-				<version>${project.parent.version}</version>
 				<configuration>
 					<includeSystemScope>true</includeSystemScope>
 				</configuration>
@@ -166,7 +174,8 @@
 						<endWithNewline />
 						<eclipse>
 							<version>${eclipse-jdt.version}</version>
-							<file>${project.basedir}/TidalDataConverter-formatter.xml</file>
+							<file>
+								${project.basedir}/TidalDataConverter-formatter.xml</file>
 						</eclipse>
 						<formatAnnotations />
 					</java>

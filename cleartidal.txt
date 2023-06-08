@@ -1,0 +1,19 @@
+delete from resjob
+delete from resnod
+delete from resmst
+
+
+delete from usreqv
+delete from jobcls
+delete from jobdep 
+delete from jobdtl
+delete from jobmst 
+delete from usrmst where usrmst_suser = 'R'
+delete from evntmst where evntmst_id <> 39
+
+delete from owneragt
+delete from owneragtlst
+delete from nodlstdt 
+delete from varmst 
+delete from owner where owner_id  not in (select usrmst_id from usrmst) and owner_type <> 2
+delete from workrunusr where owner_id  not in ( select owner_id from owner)

@@ -28,6 +28,24 @@ public class EspConfigProvider extends AbstractConfigProvider {
 	}
 
 	public String getFilesToSkip() {
-		return getProvider().get("esp.skipfiles");
+		return getProvider().getOr("esp.skipfiles","");
 	}
+	
+	public String getFilesToInclude() {
+		return getProvider().getOr("esp.includefiles","");
+	}
+	
+	public String getZosLibPath() {
+		return getProvider().get("ESP.LIB.PATH");
+	}
+	
+	public String getZosLibDefaultAgent() {
+		return getProvider().get("ESP.AGENT.NAME");
+	}
+	
+	
+	public String getZosLibDefaultRuntimeUser() {
+		return getProvider().get("ESP.RUNTIME.USER");
+	}
+	
 }

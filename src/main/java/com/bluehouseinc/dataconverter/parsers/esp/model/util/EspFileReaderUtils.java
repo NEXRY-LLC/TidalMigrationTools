@@ -41,7 +41,7 @@ public abstract class EspFileReaderUtils {
 				String nextLine = readLineTrimmed(reader);
 				String substringline = line.substring(0, line.length() - 1);
 				String nextlinedata = nextLine.trim();
-				line = String.join("", substringline, nextlinedata);
+				line = String.join(" ", substringline, nextlinedata);
 			}
 
 		}

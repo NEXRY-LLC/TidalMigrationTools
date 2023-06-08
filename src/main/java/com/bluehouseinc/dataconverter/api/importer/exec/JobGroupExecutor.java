@@ -122,7 +122,7 @@ public class JobGroupExecutor extends AbstractAPIExecutor {
 
 			destination.setName(source.getName());
 
-			if (destination.getName().contains("AHW_QNXT_0300__CreateMemberRelation")) {
+			if (destination.getName().contains("JDAOP001") || destination.getName().contains("BFUSA_ESP")) {
 				source.getName();
 			}
 
@@ -193,10 +193,14 @@ public class JobGroupExecutor extends AbstractAPIExecutor {
 				destination.setOwner(owner);
 			}
 
-			if (source.getParentId() == null) {
-				destination.setInheritcalendar(YesNoType.NO); // No top level can ever inher
-			} else if (source.getInheritCalendar()) {
-				destination.setInheritcalendar(YesNoType.YES);
+			if (source.getInheritCalendar()) {
+				
+				if (source.getParentId() == null) {
+					destination.setInheritcalendar(YesNoType.NO); // No top level can ever inher
+				}else {
+					destination.setInheritcalendar(YesNoType.YES);
+				}
+				
 			} else {
 				destination.setInheritcalendar(YesNoType.NO);
 

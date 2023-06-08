@@ -44,7 +44,7 @@ public class EspDataModel extends BaseParserDataModel<EspAbstractJob, EspConfigP
 
 	@Override
 	public void doProcessJobDependency(List<EspAbstractJob> jobs) {
-		jobs.forEach(jobGroupObject -> doProcessJobDeps(jobGroupObject));
+		jobs.forEach(jobGroupObject -> doProcessJobDepsForJob(jobGroupObject));
 
 	}
 
@@ -125,10 +125,13 @@ public class EspDataModel extends BaseParserDataModel<EspAbstractJob, EspConfigP
 	/**
 	 * Helper method to loop over all the jobs that we registered within the system and set up the dependency objects
 	 */
-	public void doProcessJobDeps(BaseJobOrGroupObject jobGroupObject) {
+	public void doProcessJobDepsForJob(BaseJobOrGroupObject jobGroupObject) {
+		
+		this.depgraph.doProcessJobDepsForJob((EspAbstractJob) jobGroupObject);
+		
 		if (jobGroupObject instanceof EspJobGroup) { // This is why everything should be from single abstract object
 			if (!jobGroupObject.getChildren().isEmpty()) {
-				jobGroupObject.getChildren().forEach(f -> this.depgraph.doProcessJobDeps((EspAbstractJob) f));
+				jobGroupObject.getChildren().forEach(f -> doProcessJobDepsForJob((EspAbstractJob) f));
 			}
 		}
 	}

@@ -46,12 +46,15 @@ import me.tongfei.progressbar.ProgressBarBuilder;
 public class TidalImporter {
 
 	private static final String TIDAL_USE_CONTAINER = "TIDAL.UseContainer";
-
+	private static final String TIDAL_USE_CONTAINER_AGENT = "TIDAL.UseContainer.DefaultAgent";
+	private static final String TIDAL_USE_CONTAINER_CALENDAR = "TIDAL.UseContainer.DefaultCalendar";
+	
 	static final StopWatch sw = new StopWatch();
 	// static final ProgressBarBuilder pbb = new ProgressBarBuilder();
 	private TidalAPI tidal;
 
 	public TidalImporter() {
+		
 	}
 
 	private static TidalSession tidalSession = null;
@@ -63,13 +66,12 @@ public class TidalImporter {
 	}
 
 	private void initAPI() {
-
 		if (tidal == null) {
 			cp.readConfigurationFile();
 			Credentials access = createCredentials();
 			tidalSession = Tidal.gi(access).getTidalSession();
 			this.tidal = new TidalAPI(tidalSession, cp);
-
+			
 		}
 	}
 
@@ -245,20 +247,22 @@ public class TidalImporter {
 
 	protected void doProcessContainer(TidalDataModel model) {
 
-		String concount = model.getCfgProvider().getProvider().getConfigurations().getOrDefault(TIDAL_USE_CONTAINER, null);
+		String CONTAINTER = cp.getConfigurations().getOrDefault(TIDAL_USE_CONTAINER, null);
+		String CONTAINTER_DEFAULT_AGENT = cp.getConfigurations().getOrDefault(TIDAL_USE_CONTAINER_AGENT, "NOTSET-CONNECTION-OS");
+		String CONTAINTER_DEFAULT_CALENDAR = cp.getConfigurations().getOrDefault(TIDAL_USE_CONTAINER_CALENDAR, "Daily");
 
 		Map<String, CsvJobGroup> datamap = new HashMap<>();
 
-		boolean processcontainer = !StringUtils.isBlank(concount);
+		boolean processcontainer = !StringUtils.isBlank(CONTAINTER);
 
 		if (processcontainer) {
-			boolean isnumber = isStringInt(concount);
+			boolean isnumber = isStringInt(CONTAINTER);
 
 			if (isnumber) {
 				model.getJobOrGroups().forEach(f -> {
 
 					String name = f.getName();
-					int le = Integer.valueOf(concount);
+					int le = Integer.valueOf(CONTAINTER);
 
 					if (name.length() < le) {
 						le = name.length();
@@ -271,7 +275,9 @@ public class TidalImporter {
 					} else {
 						CsvJobGroup c = new CsvJobGroup();
 						c.setName(key);
-						model.addCalendarToJobOrGroup(c, new CsvCalendar("Daily"));
+						model.addCalendarToJobOrGroup(c, new CsvCalendar(CONTAINTER_DEFAULT_CALENDAR));
+						c.setInheritCalendar(false);
+						c.setAgentName(CONTAINTER_DEFAULT_AGENT);
 						c.addChild(f);
 						datamap.put(key, c);
 					}
@@ -279,11 +285,13 @@ public class TidalImporter {
 
 			} else {
 				// Is a forced single parent object
-				String containername = concount;
+				String containername = CONTAINTER;
 				CsvJobGroup c = new CsvJobGroup();
 				c.setName(containername);
-				model.addCalendarToJobOrGroup(c, new CsvCalendar("Daily"));
-
+				model.addCalendarToJobOrGroup(c, new CsvCalendar(CONTAINTER_DEFAULT_CALENDAR));
+				c.setInheritCalendar(false);
+				c.setAgentName(CONTAINTER_DEFAULT_AGENT);
+				
 				model.getJobOrGroups().forEach(f -> {
 					c.addChild(f);
 				});

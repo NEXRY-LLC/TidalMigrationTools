@@ -10,6 +10,12 @@ import org.springframework.stereotype.Component;
 
 import com.bluehouseinc.dataconverter.parsers.esp.model.EspAbstractJob;
 import com.bluehouseinc.dataconverter.parsers.esp.model.EspDataModel;
+import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.data.EspAppEndData;
+import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.data.EspDataObjectJob;
+import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.data.EspExternalApplicationData;
+import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.data.EspLIEData;
+import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.data.EspLISData;
+import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.data.EspLinkProcessData;
 import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.impl.EspAgentMonitorJob;
 import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.impl.EspAixJob;
 import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.impl.EspAs400Job;
@@ -53,9 +59,8 @@ public class EspJobVisitorImpl implements EspJobVisitor {
 
 	public EspJobVisitorImpl(EspDataModel model) {
 		this.model = model;
-		this.helper = new EspJobVisitorHelper();
+		this.helper = new EspJobVisitorHelper(model);
 	}
-
 
 	private boolean containsIfLogic(String line) {
 		if (line.trim().startsWith("if") || line.trim().startsWith("IF") || line.trim().startsWith("THEN") || line.trim().startsWith("ELSE")) {
@@ -64,17 +69,15 @@ public class EspJobVisitorImpl implements EspJobVisitor {
 		return false;
 	}
 
-
-
 	@Override
 	public <E extends EspAbstractJob> void doProcess(final E job, List<String> lines) {
 
 		List<String> cleaned = new ArrayList<>();
 
-		lines.forEach(f ->{
+		lines.forEach(f -> {
 			if (containsIfLogic(f)) {
 				job.setContainsIfLogic(true);
-			}else {
+			} else {
 				cleaned.add(f);
 			}
 		});
@@ -82,7 +85,7 @@ public class EspJobVisitorImpl implements EspJobVisitor {
 		lines.clear();
 		lines.addAll(cleaned);
 
-		if(job.isContainsIfLogic()) {
+		if (job.isContainsIfLogic()) {
 			log.debug("EspJobVisitorImpl doProcess Job{} contains if logic", job.getFullPath());
 		}
 
@@ -126,6 +129,12 @@ public class EspJobVisitorImpl implements EspJobVisitor {
 			this.visitCommon(job, lines, this.helper.visitJob((EspZosJob) job));
 		} else if (job instanceof EspAppEndData) {
 			this.visitCommon(job, lines, this.helper.visitJob((EspAppEndData) job));
+		} else if (job instanceof EspLIEData) {
+			this.visitCommon(job, lines, this.helper.visitJob((EspLIEData) job));
+		} else if (job instanceof EspLISData) {
+			this.visitCommon(job, lines, this.helper.visitJob((EspLISData) job));
+		} else if (job instanceof EspExternalApplicationData) {
+			this.visitCommon(job, lines, this.helper.visitJob((EspExternalApplicationData) job));
 		} else {
 			throw new TidalException("Unknown Job Type[" + job.getClass().getSimpleName() + "] Job[" + job.getFullPath() + "]");
 		}
@@ -164,20 +173,20 @@ public class EspJobVisitorImpl implements EspJobVisitor {
 	// whether a second invoked switch hit a statement or not
 	private void visitCommon(EspAbstractJob job, List<String> lines, Function2<String, String, Boolean> lambdaFunction) {
 
-
-
 		for (String line : lines) {
 			if (line.startsWith("/*")) {
-				job.getNoteData().add(line.substring(line.indexOf("/*") + 2));
+				//job.getNoteData().add(line.substring(line.indexOf("/*") + 2));
 				continue;
 			}
 
 			// Replace with our parent blindly
-			if(line.contains("!ESPAPPL")) {
-				line = line.replace("!ESPAPPL", job.getParent().getName());
+			if (line.contains("!ESPAPPL")) {
+				if (job.getParent() != null) {
+					line = line.replace("!ESPAPPL", job.getParent().getName());
+				}
 			}
 
-			if(job.getName().contains("ZFI_BYCUSTOMER_PC")) {
+			if (job.getName().contains("ZFI_BYCUSTOMER_PC")) {
 				job.getName();
 			}
 			String[] statementParts;
@@ -185,7 +194,7 @@ public class EspJobVisitorImpl implements EspJobVisitor {
 			// line<=>STMPTM= WOBDATA('PARMSET.!ESPAPPL','STMPTM')
 			// line<=>ARGS --env=stg --service STATEMENT_XML_FILE_GENERATION--host ...
 			if (line.contains("WOBDATA")) {
-				//statementParts = line.split("=", 2); // This will result: statementParts[0]=ARGS --env
+				// statementParts = line.split("=", 2); // This will result: statementParts[0]=ARGS --env
 				log.debug("Job[{}] variable detection, skiping, not supported {}", job.getFullPath(), line);
 				continue;
 			} else {
@@ -209,33 +218,30 @@ public class EspJobVisitorImpl implements EspJobVisitor {
 			if (!filledinbyjob) {
 				switch (statementType) {
 				case "AFTER":
-					job.getEspAfterStatements().add(extractAfterStatement(statementParameters));
+					job.getStatementObject().getEspAfterStatements().add(extractAfterStatement(statementParameters));
 					continue;
 				case "EXITCODE":
-					job.getExitCodeStatements().add(extractExitCodeStatement(statementParameters));
+					job.getStatementObject().getExitCodeStatements().add(extractExitCodeStatement(statementParameters));
 					continue;
 				case "NOTIFY":
 					job.getNotifyList().add(statementParameters);
 					continue;
 				case "NOTWITH":
-					job.getEspNotWithStatements().add(extractNotWithStatement(statementParameters));
+					job.getStatementObject().getEspNotWithStatements().add(extractNotWithStatement(statementParameters));
 					continue;
 				case "NORUN":
-					job.getEspNoRunStatements().add(new EspNoRunStatement(statementParameters));
+					job.getStatementObject().getEspNoRunStatements().add(new EspNoRunStatement(statementParameters));
 					continue;
 				case "RELEASE":
-					job.getEspReleasedJobDependencies().add(extractReleaseJobDependencies(statementParameters));
+					job.getStatementObject().getEspReleasedJobDependencies().add(extractReleaseJobDependencies(statementParameters));
 					continue;
 				case "RESOURCE":
-					job.getResources().add(extractJobResource(statementParameters));
+					job.getStatementObject().getResources().add(extractJobResource(statementParameters));
 					continue;
 				case "run":
 				case "RUN":
-					job.getEspRunStatements().add(extractEspRunStatement(statementParameters));
+					job.getStatementObject().getEspRunStatements().add(extractEspRunStatement(statementParameters));
 					continue;
-				case "CCCHK":
-					job.getCcchk().add(statementParameters);
-					break;
 				default:
 					setCommon(job, statementType, statementParameters);
 					continue;
@@ -251,7 +257,11 @@ public class EspJobVisitorImpl implements EspJobVisitor {
 	private EspSetVarStatement extractVariable(String statementParameters) {
 		// E.g. statementParameters<=>TMSTMP='!ESPSHH.:!ESPSMN.,!ESPSMM./!ESPSDD./!ESPSYY'
 		String[] variableParStrings = statementParameters.split("=");
-		return new EspSetVarStatement(variableParStrings[0], variableParStrings[1]);
+		if (variableParStrings.length > 1) {
+			return new EspSetVarStatement(variableParStrings[0], variableParStrings[1]);
+		} else {
+			return new EspSetVarStatement(variableParStrings[0], "");
+		}
 	}
 
 	private EspJobResourceStatement extractJobResource(String jobResource) {
@@ -302,9 +312,9 @@ public class EspJobVisitorImpl implements EspJobVisitor {
 
 	private EspNotWithStatement extractNotWithStatement(String statementParameters) {
 		statementParameters = statementParameters.replace("(", "").replace(")", "");
-//		if (statementParameters.contains("(") && statementParameters.contains(".")) {
-//			return new EspNotWithStatement(statementParameters.substring(statementParameters.indexOf("(") + 1, statementParameters.indexOf(".")));
-//		}
+		// if (statementParameters.contains("(") && statementParameters.contains(".")) {
+		// return new EspNotWithStatement(statementParameters.substring(statementParameters.indexOf("(") + 1, statementParameters.indexOf(".")));
+		// }
 		return new EspNotWithStatement(statementParameters);
 	}
 
@@ -321,15 +331,15 @@ public class EspJobVisitorImpl implements EspJobVisitor {
 		return runStatement;
 	}
 
-//	private EspIfStatement extractIfStatement(String statementParameters) {
-//		EspIfStatement runStatement = null;
-//		// new EspIfStatement();
-//		if (statementParameters.contains("IF")) {
-//			String data = statementParameters.substring(statementParameters.indexOf("IF ") + 1);
-//			runStatement = new EspIfStatement(data);
-//		}
-//		return runStatement;
-//	}
+	// private EspIfStatement extractIfStatement(String statementParameters) {
+	// EspIfStatement runStatement = null;
+	// // new EspIfStatement();
+	// if (statementParameters.contains("IF")) {
+	// String data = statementParameters.substring(statementParameters.indexOf("IF ") + 1);
+	// runStatement = new EspIfStatement(data);
+	// }
+	// return runStatement;
+	// }
 
 	private EspExitCodeStatement extractExitCodeStatement(String statementParameters) {
 		// EXITCODE 2 SUCCESS
@@ -344,11 +354,17 @@ public class EspJobVisitorImpl implements EspJobVisitor {
 
 	private String extractVariableValue(String criteria, EspJobGroup espJobGroup) {
 		// First check does jobGroup contain any variable
-		if (espJobGroup.getVariables() == null)
-			return null;
-		Set<String> variableNames = espJobGroup.getVariables().keySet();
-		String key = variableNames.stream().filter(criteria::equals).findFirst().orElse(null);
-		return key != null ? espJobGroup.getVariables().get(key) : null;
+
+		if (espJobGroup != null) {
+			if (espJobGroup.getVariables() == null) {
+				return null;
+			}
+			Set<String> variableNames = espJobGroup.getVariables().keySet();
+			String key = variableNames.stream().filter(criteria::equals).findFirst().orElse(null);
+			return key != null ? espJobGroup.getVariables().get(key) : null;
+		}
+
+		return null;
 	}
 
 	private String replaceInlineVariablesWithValues(String statementType, String statementParameters, EspJobGroup espJobGroup) {
@@ -409,7 +425,7 @@ public class EspJobVisitorImpl implements EspJobVisitor {
 				espJob.setPid(statementParameters);
 				break;
 			case PREREQ:
-				espJob.setPrerequisite(extractPrereqJobDependencies(statementParameters));
+				espJob.getStatementObject().setPrerequisite(extractPrereqJobDependencies(statementParameters));
 				break;
 			case RELDELAY:
 				espJob.setRelDelay(Integer.parseInt(statementParameters));
