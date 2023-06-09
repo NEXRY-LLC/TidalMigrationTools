@@ -30,6 +30,7 @@ import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.impl.EspSapJob;
 import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.impl.EspSecureCopyJob;
 import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.impl.EspServiceMonitorJob;
 import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.impl.EspSftpJob;
+import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.impl.EspTaskProcessJob;
 import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.impl.EspTextMonJob;
 import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.impl.EspUnixJob;
 import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.impl.EspWindowsJob;
@@ -135,6 +136,8 @@ public class EspJobVisitorImpl implements EspJobVisitor {
 			this.visitCommon(job, lines, this.helper.visitJob((EspLISData) job));
 		} else if (job instanceof EspExternalApplicationData) {
 			this.visitCommon(job, lines, this.helper.visitJob((EspExternalApplicationData) job));
+		} else if (job instanceof EspTaskProcessJob) {
+			this.visitCommon(job, lines, this.helper.visitJob((EspTaskProcessJob) job));
 		} else {
 			throw new TidalException("Unknown Job Type[" + job.getClass().getSimpleName() + "] Job[" + job.getFullPath() + "]");
 		}

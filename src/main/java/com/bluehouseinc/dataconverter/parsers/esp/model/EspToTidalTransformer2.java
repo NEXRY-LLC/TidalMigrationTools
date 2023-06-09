@@ -13,6 +13,7 @@ import com.bluehouseinc.dataconverter.model.impl.BaseCsvJobObject;
 import com.bluehouseinc.dataconverter.model.impl.CsvCalendar;
 import com.bluehouseinc.dataconverter.model.impl.CsvFileWatcherJob;
 import com.bluehouseinc.dataconverter.model.impl.CsvJobGroup;
+import com.bluehouseinc.dataconverter.model.impl.CsvMilestoneJob;
 import com.bluehouseinc.dataconverter.model.impl.CsvOS400;
 import com.bluehouseinc.dataconverter.model.impl.CsvOSJob;
 import com.bluehouseinc.dataconverter.model.impl.CsvResource;
@@ -25,6 +26,7 @@ import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.impl.EspJobGroup;
 import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.impl.EspOSJOb;
 import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.impl.EspSAPBwpcJob;
 import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.impl.EspSapJob;
+import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.impl.EspTaskProcessJob;
 import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.impl.EspZosJob;
 import com.bluehouseinc.dataconverter.parsers.esp.model.statements.EspJobResourceStatement;
 import com.bluehouseinc.dataconverter.parsers.esp.model.statements.EspNoRunStatement;
@@ -153,7 +155,10 @@ public class EspToTidalTransformer2 implements ITransformer<List<EspAbstractJob>
 		} else if (job instanceof EspFileTriggerJob) {
 			newjob = new CsvFileWatcherJob();
 			processJob((EspFileTriggerJob) job, (CsvFileWatcherJob) newjob);
-		} else {
+		}  else if (job instanceof EspTaskProcessJob) {
+			newjob = new CsvMilestoneJob();
+			processJob((EspTaskProcessJob) job, (CsvMilestoneJob) newjob);
+		}else {
 			newjob = new CsvOSJob();
 
 			// Covers all our OS based Jobs
@@ -180,6 +185,15 @@ public class EspToTidalTransformer2 implements ITransformer<List<EspAbstractJob>
 		out.setCommandLine("PLACEHOLDER DATA");
 	}
 
+	/**
+	 * Per Customer, this job type must be manually set.
+	 * @param in
+	 * @param out
+	 */
+	private void processJob(EspTaskProcessJob in, CsvMilestoneJob out) {
+		out.setRequireOperatorRelease(true);
+	}
+	
 	private void processJob(EspJobGroup in, CsvJobGroup out) {
 
 		// Set our rerun times if we have any data.

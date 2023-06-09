@@ -48,6 +48,7 @@ import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.impl.EspSapEventJob
 import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.impl.EspSapJob;
 import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.impl.EspSecureCopyJob;
 import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.impl.EspServiceMonitorJob;
+import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.impl.EspTaskProcessJob;
 import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.impl.EspTextMonJob;
 import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.impl.EspUnixJob;
 import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.impl.EspWindowsJob;
@@ -467,6 +468,9 @@ public class EspParser extends AbstractParser<EspDataModel> {
 		case ZOS:
 			job = new EspZosJob(jobName);
 			break;
+		case TASK:
+			job = new EspTaskProcessJob(jobName);
+			break;
 		case LINK_PROCESS:
 			job = new EspLinkProcessData(jobName);
 			addasjob = false;
@@ -531,6 +535,10 @@ public class EspParser extends AbstractParser<EspDataModel> {
 	 */
 	private EspJobType extractJobType(String jobType, String rawdata) {
 
+		if (rawdata.contains("TASK PROCESS")) {
+			return EspJobType.TASK;
+		}
+		
 		if (rawdata.contains("LINK PROCESS")) {
 			return EspJobType.LINK_PROCESS;
 		}

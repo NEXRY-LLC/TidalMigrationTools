@@ -19,6 +19,7 @@ import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.impl.EspSapJob;
 import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.impl.EspSecureCopyJob;
 import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.impl.EspServiceMonitorJob;
 import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.impl.EspSftpJob;
+import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.impl.EspTaskProcessJob;
 import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.impl.EspTextMonJob;
 import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.impl.EspUnixJob;
 import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.impl.EspWindowsJob;
@@ -598,6 +599,20 @@ public class EspJobVisitorHelper {
 
 			}
 
+		};
+	}
+	
+	Function2<String, String, Boolean> visitJob(EspTaskProcessJob job) {
+		return (statementType, statementParameters) -> {
+			switch (statementType) {
+			case "SEND":
+				break;
+			default:
+				// no statement hit
+				return false;
+
+			}
+			return true;
 		};
 	}
 }

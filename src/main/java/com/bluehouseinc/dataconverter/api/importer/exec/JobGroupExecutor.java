@@ -7,6 +7,7 @@ import com.bluehouseinc.dataconverter.api.importer.APIJobUtils;
 import com.bluehouseinc.dataconverter.api.importer.TidalAPI;
 import com.bluehouseinc.dataconverter.api.importer.transformers.FTPJobTransformer;
 import com.bluehouseinc.dataconverter.api.importer.transformers.FileWatcherJobTransformer;
+import com.bluehouseinc.dataconverter.api.importer.transformers.MilestoneJobTransformer;
 import com.bluehouseinc.dataconverter.api.importer.transformers.OS400JobTransformer;
 import com.bluehouseinc.dataconverter.api.importer.transformers.OSJobTransformer;
 import com.bluehouseinc.dataconverter.api.importer.transformers.PeopleSoftJobTransformer;
@@ -17,6 +18,7 @@ import com.bluehouseinc.dataconverter.model.impl.CsvCalendar;
 import com.bluehouseinc.dataconverter.model.impl.CsvFileWatcherJob;
 import com.bluehouseinc.dataconverter.model.impl.CsvFtpJob;
 import com.bluehouseinc.dataconverter.model.impl.CsvJobGroup;
+import com.bluehouseinc.dataconverter.model.impl.CsvMilestoneJob;
 import com.bluehouseinc.dataconverter.model.impl.CsvOS400;
 import com.bluehouseinc.dataconverter.model.impl.CsvOSJob;
 import com.bluehouseinc.dataconverter.model.impl.CsvOwner;
@@ -38,6 +40,7 @@ import com.bluehouseinc.tidal.api.model.job.JobType;
 import com.bluehouseinc.tidal.api.model.job.filewatcher.FileWatcherJob;
 import com.bluehouseinc.tidal.api.model.job.ftp.FTPJob;
 import com.bluehouseinc.tidal.api.model.job.group.JobGroup;
+import com.bluehouseinc.tidal.api.model.job.milestone.MilestoneJob;
 import com.bluehouseinc.tidal.api.model.job.os.OSJob;
 import com.bluehouseinc.tidal.api.model.job.os400.OS400Job;
 import com.bluehouseinc.tidal.api.model.job.service.ServiceJob;
@@ -465,6 +468,26 @@ public class JobGroupExecutor extends AbstractAPIExecutor {
 					doCreate(osj, source, getDataModel());
 				}
 			}
+			
+			if (source instanceof CsvMilestoneJob) {
+				if (update) {
+
+				} else {
+					MilestoneJob osj = (MilestoneJob) destination.toJob(new MilestoneJob());
+
+					MilestoneJobTransformer t = new MilestoneJobTransformer(osj, getTidalApi());
+
+					try {
+						osj = t.transform((CsvMilestoneJob) source);
+
+					} catch (TransformationException e) {
+						log.error(e);
+						throw new TidalException(e);
+					}
+
+					doCreate(osj, source, getDataModel());
+				}
+			}
 		} catch (IllegalAccessException | InvocationTargetException e) {
 			log.error(e);
 		} finally {
@@ -504,6 +527,10 @@ public class JobGroupExecutor extends AbstractAPIExecutor {
 			tesresponse = res.getTesMessage();
 		} else if (destination instanceof TerminatorJob) {
 			TesResult res = getTidalApi().getSession().getServiceFactory().terminatorJob().create((TerminatorJob) destination);
+			newid = res.getResult().getTesObjectid();
+			tesresponse = res.getTesMessage();
+		} else if (destination instanceof MilestoneJob) {
+			TesResult res = getTidalApi().getSession().getServiceFactory().milestoneJob().create((MilestoneJob) destination);
 			newid = res.getResult().getTesObjectid();
 			tesresponse = res.getTesMessage();
 		} else {
