@@ -63,7 +63,22 @@ public class CsvSAPJob extends BaseCsvJobObject {
 	String prtxt;
 	@CsvBindByName
 	String prber;
-
+	@CsvBindByName
+	Integer printColumns;
+	@CsvBindByName
+	String printRecipient;
+	@CsvBindByName
+	String printDept;
+	@CsvBindByName
+	Integer printExpire;
+	@CsvBindByName
+	Integer printCopies;
+	@CsvBindByName
+	Integer printRows;
+	@CsvBindByName
+	String printFormat;
+	@CsvBindByName
+	String printSpoolName;
 	/*
 	 * %%SAPR3-GROUP_ORDID=<JobID>
 	 * %%SAPR3-DETECT_CHILD_TABLE=<Group.SCHEDTAB>

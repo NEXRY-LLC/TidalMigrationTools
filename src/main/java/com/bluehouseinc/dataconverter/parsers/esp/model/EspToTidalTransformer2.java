@@ -271,6 +271,13 @@ public class EspToTidalTransformer2 implements ITransformer<List<EspAbstractJob>
 			out.setPlist(in.getSapData().getPlist());
 			out.setPrtxt(in.getSapData().getPrtxt());
 			out.setPrber(in.getSapData().getPrber());
+			out.setPrintDept(in.getPrintDept());
+			out.setPrintExpire(in.getPrintExpire());
+			out.setPrintRecipient(in.getPrintRecipient());
+			out.setPrintRows(in.getPrintRows());
+			out.setPrintColumns(in.getPrintColumns());
+			out.setPrintSpoolName(in.getPrintSpoolName());
+			
 			out.setJobMode("RUN_COPY"); // Force to this job type
 			log.debug("doHandleSAP Processing data for Job[" + in.getFullPath() + "]");
 		} else {

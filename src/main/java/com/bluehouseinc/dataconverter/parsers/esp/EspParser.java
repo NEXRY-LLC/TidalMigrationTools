@@ -25,6 +25,7 @@ import com.bluehouseinc.dataconverter.model.IModelReport;
 import com.bluehouseinc.dataconverter.parsers.AbstractParser;
 import com.bluehouseinc.dataconverter.parsers.esp.model.EspAbstractJob;
 import com.bluehouseinc.dataconverter.parsers.esp.model.EspDataModel;
+import com.bluehouseinc.dataconverter.parsers.esp.model.MailListDataProcessor;
 import com.bluehouseinc.dataconverter.parsers.esp.model.ScheduleEventDataProcessor;
 import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.EspJobVisitor;
 import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.EspJobVisitorImpl;
@@ -90,7 +91,7 @@ public class EspParser extends AbstractParser<EspDataModel> {
 	// private ScheduleEventDataProcessor scheduleDataProcessor;
 
 	public EspParser(ConfigurationProvider cfgProvider) {
-		super(new EspDataModel(cfgProvider, new ScheduleEventDataProcessor()));
+		super(new EspDataModel(cfgProvider, new ScheduleEventDataProcessor(), new MailListDataProcessor()));
 		this.espJobVisitor = new EspJobVisitorImpl(getParserDataModel());
 	}
 
@@ -194,6 +195,10 @@ public class EspParser extends AbstractParser<EspDataModel> {
 		String eventdatafile = getParserDataModel().getConfigeProvider().getEspEventDataFile();
 
 		this.getParserDataModel().getScheduleEventDataProcessor().doProcessScheduleData(eventdatafile);
+		
+		String maildata = getParserDataModel().getConfigeProvider().getEspMailListDataPath();
+		
+		this.getParserDataModel().getMailListDataProcessor().doProcessMailListData(maildata);
 
 		String pathToFiles = this.getParserDataModel().getConfigeProvider().getEspDataPath();
 
@@ -603,10 +608,7 @@ public class EspParser extends AbstractParser<EspDataModel> {
 
 	private void doProcessGroupData(EspJobGroup currentGroup, String line) {
 		if (line.startsWith("NOTIFY")) {
-			if (currentGroup.getEspJobGroupNotifyList() == null) {
-				currentGroup.setEspJobGroupNotifyList(new ArrayList<>());
-			}
-			currentGroup.getEspJobGroupNotifyList().add(line.split(" ", 2)[1]);
+			currentGroup.getNotifyList().add(line.split(" ", 2)[1]);
 		}
 
 		if (line.startsWith("TAG")) {

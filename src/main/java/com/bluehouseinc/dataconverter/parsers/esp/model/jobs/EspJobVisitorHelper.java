@@ -360,6 +360,27 @@ public class EspJobVisitorHelper {
 			case "STARTMODE":
 				job.setStartMode(statementParameters);
 				break;
+			case "COLUMNS":
+				job.setPrintColumns(Integer.valueOf(statementParameters));
+				break;
+			case "RECIPIENT":
+				job.setPrintRecipient(statementParameters);
+				break;
+			case "PRINTDEPARTMENT":
+				job.setPrintDept(statementParameters);
+				break;	
+			case "EXPIRATION":
+				job.setPrintExpire(Integer.valueOf(statementParameters));
+				break;	
+			case "LINES":
+				job.setPrintRows(Integer.valueOf(statementParameters));
+				break;
+			case "PRINTFORMAT":
+				job.setPrintFormat(statementParameters);
+				break;
+			case "PRINTSPOOLNAME":
+				job.setPrintSpoolName(statementParameters);
+				break;	
 			default:
 				try {
 					job.getOptionalStatements().putIfAbsent(EspSapJob.EspSapJobOptionalStatement.valueOf(statementType), statementParameters);

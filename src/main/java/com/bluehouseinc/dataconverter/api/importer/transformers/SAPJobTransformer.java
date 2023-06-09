@@ -56,13 +56,25 @@ public class SAPJobTransformer implements ITransformer<CsvSAPJob, ServiceJob> {
 			Users rte = tidal.getUserByAccountNameAndDomain(in.getRuntimeUser().getRunTimeUserName(),null);
 			log.debug("SAPJobTransformer transform -> processing(" + in.getFullPath() + ")");
 
-			String programName = in.getProgramName() == null ? "ZBNCHMK1" : in.getProgramName();
-			String variant = in.getVariant() == null ? "ZBADRUN1" : in.getVariant();
+			String plist = in.getPlist() == null ? "" : in.getPlist();
+			String programName = in.getProgramName() == null ? "BLUEHOUSE-PROGRAMNAME" : in.getProgramName();
+			String variant = in.getVariant() == null ? "BLUEHOUSE-VARIANT" : in.getVariant();
+			String columns = in.getPrintColumns() == null ? "1" : in.getPrintColumns().toString();
+			String recipient = in.getPrintRecipient() == null ? "BLUEHOUSE" : in.getPrintRecipient();
+			String departement = in.getPrintDept() == null ? "" : in.getPrintDept();
+			String expire = in.getPrintExpire() == null ? "8" : in.getPrintExpire().toString();
+			String printcopies = in.getPrintCopies() == null ? "1" : in.getPrintCopies().toString();
+			String printrows = in.getPrintRows() == null ? "65" : in.getPrintRows().toString();
+			String printspoolname = in.getPrintSpoolName() == null ? plist : in.getPrintSpoolName();;
+			
 
 			String extJobrun = getRunCopyNew().replace("$$RTEID$$", Integer.toString(rte.getId())).replace("$$JOBCLASS$$", in.getJobSAPClass() == null ? "" : in.getJobSAPClass()).replace("$$JOBNAME$$", in.getJobName().toUpperCase())
 					.replace("$$VARIANT$$", variant).replace("$$PROGNAME$$", programName).replace("$$PDEST$$", in.getPdest() == null ? "" : in.getPdest()).replace("$$PRCOP$$", in.getPrcop() == null ? "1" : "1")
-					.replace("$$PLIST$$", in.getPlist() == null ? "" : in.getPlist()).replace("$$PRTXT$$", in.getPrtxt() == null ? "" : in.getPrtxt()).replace("$$PRBER$$", in.getPrber() == null ? "" : in.getPrber())
-					.replace("$$RTENAME$$", in.getRuntimeUser().getRunTimeUserName());
+					.replace("$$PLIST$$", plist).replace("$$PRTXT$$", in.getPrtxt() == null ? "" : in.getPrtxt()).replace("$$PRBER$$", in.getPrber() == null ? "" : in.getPrber())
+					.replace("$$RTENAME$$", in.getRuntimeUser().getRunTimeUserName()).replace("$$RECIPIENT$$", recipient)
+					.replace("$$COLUMNS$$", columns).replace("$$DEPARTMENT$$", departement)
+					.replace("$$EXPIRE$$", expire).replace("$$PRINTCOPY$$", printcopies)
+					.replace("$$ROWS$$", printrows).replace("$$SPOOLNAME$$", printspoolname);
 
 			extJobrun = extJobrun.replaceAll("\\n", "");
 			extJobrun = extJobrun.replaceAll("\\r", "");
@@ -94,17 +106,93 @@ public class SAPJobTransformer implements ITransformer<CsvSAPJob, ServiceJob> {
 		return s.toString();
 	}
 
-	private String getRunCopyNew() {
-		return "<sstps>\n" + "	<connusr>\n" + "		<var.username>$$RTEID$$</var.username>\n" + "		<var.value />\n" + "	</connusr>\n" + "	<password>\n" + "		<var.password>$$RTEID$$</var.password>\n" + "		<var.value />\n"
-				+ "	</password>\n" + "	<conndomain>\n" + "		<var.conndomain>$$RTEID$$</var.conndomain>\n" + "		<var.value />\n" + "	</conndomain>\n" + "	<principal>\n" + "		<var.principal>$$RTEID$$</var.principal>\n"
-				+ "		<var.value />\n" + "	</principal>\n" + "	<keytab>\n" + "		<var.keytab>$$RTEID$$</var.keytab>\n" + "		<var.value />\n" + "	</keytab>\n" + "	<job>\n" + "		<jname>$$JOBNAME$$</jname>\n"
-				+ "		<jobcount />\n" + "	</job>\n" + "	<jobnamealias />\n" + "	<clonetag>N</clonetag>\n" + "	<externuid />\n" + "	<spoollistrecipient>\n" + "		<recipient />\n" + "		<rectype />\n" + "		<copy>\n"
-				+ "		</copy>\n" + "		<blindcopy>\n" + "		</blindcopy>\n" + "		<express>\n" + "		</express>\n" + "		<noforwarding>\n" + "		</noforwarding>\n" + "		<noprint>\n" + "		</noprint>\n"
-				+ "		<deliver />\n" + "		<mailstatus />\n" + "	</spoollistrecipient>\n" + "	<trkchild>Y</trkchild>\n" + "	<usesapname>Y</usesapname>\n" + "	<cst>1</cst>\n" + "	<jobclass />\n" + "	<linktype>L</linktype>\n"
-				+ "	<type>1</type>\n" + "	<incranjob>N</incranjob>\n" + "	<isearliest />\n" + "	<usefirstrun>N</usefirstrun>\n" + "	<sstep1>1</sstep1>\n" + "	<stype1>2</stype1>\n" + "	<ovar1>$$VARIANT$$</ovar1>\n"
-				+ "	<abap1>$$PROGNAME$$</abap1>\n" + "	<svarm1>\n" + "		<var.compound />\n" + "	</svarm1>\n" + "	<vvals1>\n" + "		<var.compound />\n" + "	</vvals1>\n" + "	<tempvar1 />\n" + "	<lang1 />\n"
-				+ "	<print1>&lt;print&gt;&lt;new&gt;X&lt;/new&gt;&lt;spoolname&gt;$$PLIST$$&lt;/spoolname&gt;&lt;pri&gt;1&lt;/pri&gt;&lt;retain&gt;8&lt;/retain&gt;&lt;rows&gt;65&lt;/rows&gt;&lt;cols&gt;132&lt;/cols&gt;&lt;format&gt;X_65_132&lt;/format&gt;&lt;sapcover&gt;D&lt;/sapcover&gt;&lt;oscover&gt;D&lt;/oscover&gt;&lt;selcover&gt;X&lt;/selcover&gt;&lt;recip&gt;JWANDER&lt;/recip&gt;&lt;dept&gt;341\n"
-				+ "		ic&lt;/dept&gt;&lt;/print&gt;</print1>\n" + "	<printcheck1>Y</printcheck1>\n" + "<des1>$$PDEST$$</des1>\n" + "<cop1>$$PRCOP$$</cop1>\n" + "<pas1>$$PRBER$$</pas1>\n" + "<runt1>$$PRTXT$$</runt1>\n" + "	<rel1>\n"
-				+ "	</rel1>\n" + "	<pi1>\n" + "	</pi1>\n" + "	<archivecheck1>1</archivecheck1>\n" + "	<sobj1 />\n" + "	<objn1 />\n" + "	<inf1 />\n" + "	<pm1>1</pm1>\n" + "	<cmd>$$PROGNAME$$($$VARIANT$$)</cmd>\n" + "</sstps>";
+	private static String getRunCopyNew() {
+		return "<sstps>\n"
+				+ "	<connusr>\n"
+				+ "		<var.username>$$RTEID$$</var.username>\n"
+				+ "		<var.value />\n"
+				+ "	</connusr>\n"
+				+ "	<password>\n"
+				+ "		<var.password>$$RTEID$$</var.password>\n"
+				+ "		<var.value />\n"
+				+ "	</password>\n"
+				+ "	<conndomain>\n"
+				+ "		<var.conndomain>$$RTEID$$</var.conndomain>\n"
+				+ "		<var.value />\n"
+				+ "	</conndomain>\n"
+				+ "	<principal>\n"
+				+ "		<var.principal>$$RTEID$$</var.principal>\n"
+				+ "		<var.value />\n"
+				+ "	</principal>\n"
+				+ "	<keytab>\n"
+				+ "		<var.keytab>$$RTEID$$</var.keytab>\n"
+				+ "		<var.value />\n"
+				+ "	</keytab>\n"
+				+ "	<job>\n"
+				+ "		<jname>$$JOBNAME$$</jname>\n"
+				+ "		<jobcount />\n"
+				+ "	</job>\n"
+				+ "	<jobnamealias />\n"
+				+ "	<clonetag>N</clonetag>\n"
+				+ "	<externuid />\n"
+				+ "	<spoollistrecipient>\n"
+				+ "		<recipient />\n"
+				+ "		<rectype />\n"
+				+ "		<copy>\n"
+				+ "		</copy>\n"
+				+ "		<blindcopy>\n"
+				+ "		</blindcopy>\n"
+				+ "		<express>\n"
+				+ "		</express>\n"
+				+ "		<noforwarding>\n"
+				+ "		</noforwarding>\n"
+				+ "		<noprint>\n"
+				+ "		</noprint>\n"
+				+ "		<deliver />\n"
+				+ "		<mailstatus />\n"
+				+ "	</spoollistrecipient>\n"
+				+ "	<trkchild>Y</trkchild>\n"
+				+ "	<usesapname>Y</usesapname>\n"
+				+ "	<cst>1</cst>\n"
+				+ "	<jobclass />\n"
+				+ "	<linktype>L</linktype>\n"
+				+ "	<type>1</type>\n"
+				+ "	<incranjob>N</incranjob>\n"
+				+ "	<isearliest />\n"
+				+ "	<usefirstrun>N</usefirstrun>\n"
+				+ "	<sstep1>1</sstep1>\n"
+				+ "	<stype1>2</stype1>\n"
+				+ "	<ovar1>$$VARIANT$$</ovar1>\n"
+				+ "	<abap1>$$PROGNAME$$</abap1>\n"
+				+ "	<svarm1>\n"
+				+ "		<var.compound />\n"
+				+ "	</svarm1>\n"
+				+ "	<vvals1>\n"
+				+ "		<var.compound />\n"
+				+ "	</vvals1>\n"
+				+ "	<tempvar1 />\n"
+				+ "	<lang1 />\n"
+				+ "	<print1>&lt;print&gt;&lt;new&gt;X&lt;/new&gt;&lt;spoolname&gt;$$SPOOLNAME$$&lt;/spoolname&gt;&lt;pri&gt;$$PRINTCOPY$$&lt;/pri&gt;&lt;retain&gt;$$EXPIRE$$&lt;/retain&gt;&lt;rows&gt;$$ROWS$$&lt;/rows&gt;&lt;cols&gt;$$COLUMNS$$&lt;/cols&gt;&lt;format&gt;X_65_132&lt;/format&gt;&lt;sapcover&gt;D&lt;/sapcover&gt;&lt;oscover&gt;D&lt;/oscover&gt;&lt;selcover&gt;X&lt;/selcover&gt;&lt;recip&gt;$$RECIPIENT$$&lt;/recip&gt;&lt;dept&gt;$$DEPARTMENT$$c&lt;/dept&gt;&lt;/print&gt;</print1>\n"
+				+ "	<printcheck1>Y</printcheck1>\n"
+				+ "	<des1>$$PDEST$$</des1>\n"
+				+ "	<cop1>$$PRCOP$$</cop1>\n"
+				+ "	<pas1>$$PRBER$$</pas1>\n"
+				+ "	<runt1>$$PRTXT$$</runt1>\n"
+				+ "	<rel1>\n"
+				+ "	</rel1>\n"
+				+ "	<pi1>\n"
+				+ "	</pi1>\n"
+				+ "	<archivecheck1>1</archivecheck1>\n"
+				+ "	<sobj1 />\n"
+				+ "	<objn1 />\n"
+				+ "	<inf1 />\n"
+				+ "	<pm1>1</pm1>\n"
+				+ "	<cmd>$$PROGNAME$$($$VARIANT$$)</cmd>\n"
+				+ "</sstps>\n";
 	}
+	
+	public static void main(String[] args) {
+		System.out.println( SAPJobTransformer.getRunCopyNew());
+	}
+
 }

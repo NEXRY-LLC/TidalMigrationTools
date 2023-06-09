@@ -48,4 +48,17 @@ public class EspConfigProvider extends AbstractConfigProvider {
 		return getProvider().get("ESP.RUNTIME.USER");
 	}
 	
+	
+	public String getEspMailListDataPath() {
+		return getProvider().get("esp.mail.datafile");
+	}
+	
+	public String getEspMailSubject() {
+		return getProvider().get("esp.mail.subject");
+	}
+
+	public String getEspMailBody() {
+		return getProvider().get("esp.mail.body");
+	}
+
 }
