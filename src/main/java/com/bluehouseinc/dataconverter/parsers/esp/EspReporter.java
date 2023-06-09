@@ -11,6 +11,7 @@ import com.bluehouseinc.dataconverter.parsers.esp.reporter.EspComplexSchedEventD
 import com.bluehouseinc.dataconverter.parsers.esp.reporter.EspJobsWithAdvancedDelaySubLogic;
 import com.bluehouseinc.dataconverter.parsers.esp.reporter.EspJobsWithAdvancedDueOutLogic;
 import com.bluehouseinc.dataconverter.parsers.esp.reporter.EspJobsWithIfLogic;
+import com.bluehouseinc.dataconverter.parsers.esp.reporter.EspJobsWithMultipleExitCodes;
 
 public class EspReporter implements IModelReport {
 
@@ -23,6 +24,7 @@ public class EspReporter implements IModelReport {
 		core.add(new EspJobsWithIfLogic());
 		core.add(new EspJobsWithAdvancedDelaySubLogic());
 		core.add(new EspJobsWithAdvancedDueOutLogic());
+		core.add(new EspJobsWithMultipleExitCodes());
 		core.add(new EspComplexSchedEventData());
 
 		return core;

@@ -5,8 +5,9 @@ import com.bluehouseinc.dataconverter.parsers.esp.model.util.EspJobType;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
-
+@ToString(callSuper = true, onlyExplicitlyIncluded = true)
 @Data
 @EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = true)
 public class EspOSJOb extends EspAbstractJob {

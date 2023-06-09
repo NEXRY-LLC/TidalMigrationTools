@@ -8,7 +8,9 @@ import com.opencsv.bean.CsvBindByName;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
+@ToString(callSuper = true, onlyExplicitlyIncluded = true)
 @Data
 @EqualsAndHashCode(callSuper = true, onlyExplicitlyIncluded = true, doNotUseGetters = true)
 public class CsvMilestoneJob extends BaseCsvJobObject {

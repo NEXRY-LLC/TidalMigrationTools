@@ -6,7 +6,9 @@ import com.opencsv.bean.CsvRecurse;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
+@ToString(callSuper = true, onlyExplicitlyIncluded = true)
 @Data
 @EqualsAndHashCode(callSuper = true, onlyExplicitlyIncluded = true, doNotUseGetters = true)
 public class CsvFtpJob extends BaseCsvJobObject {

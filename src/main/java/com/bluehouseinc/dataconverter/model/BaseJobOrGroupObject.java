@@ -15,7 +15,7 @@ import lombok.Setter;
 import lombok.ToString;
 import lombok.ToString.Include;
 
-@ToString
+@ToString(onlyExplicitlyIncluded = true)
 @Data
 @EqualsAndHashCode(callSuper = false, onlyExplicitlyIncluded = true, doNotUseGetters = false)
 public abstract class BaseJobOrGroupObject {
@@ -24,18 +24,18 @@ public abstract class BaseJobOrGroupObject {
 	@CsvIgnore
 	protected List<? super BaseJobOrGroupObject> children = new LinkedList<>();
 
-	@Include
+	@ToString.Include
 	@EqualsAndHashCode.Include
 	@CsvBindByName
 	protected Integer id;
 
 
-	@Include
+	@ToString.Include
 	@EqualsAndHashCode.Include
 	@CsvBindByName
 	protected String name;
 
-	@Include
+	@ToString.Include
 	@EqualsAndHashCode.Include
 	@CsvBindByName
 	protected String fullPath;

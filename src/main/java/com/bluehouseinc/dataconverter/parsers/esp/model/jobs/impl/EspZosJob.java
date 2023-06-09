@@ -18,6 +18,8 @@ public class EspZosJob extends EspAbstractJob {
 	boolean isLinkProcess; // contains LINK PROCESS clause as part of JOB Statement
 	boolean isHold; // contains HOLD keyword as part of JOB Statement
 	boolean isTask; // contains TASK keyword which indicates that JOB is a task
+	boolean isMultipleExitCodes;
+	
 	String abandon;
 	List<String> echos = new ArrayList<>();
 	String encParam;

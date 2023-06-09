@@ -15,6 +15,7 @@ import lombok.AccessLevel;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.Setter;
+import lombok.ToString;
 
 /**
  * Abstract to forces implementation to set the type of job we are. Decided to use the api objects for this
@@ -22,6 +23,7 @@ import lombok.Setter;
  * @author Brian Hayes
  */
 
+@ToString(callSuper = true, onlyExplicitlyIncluded = true)
 @Data
 @EqualsAndHashCode(callSuper = true, onlyExplicitlyIncluded = true, doNotUseGetters = true)
 public abstract class BaseCsvJobObject extends BaseJobOrGroupObject {

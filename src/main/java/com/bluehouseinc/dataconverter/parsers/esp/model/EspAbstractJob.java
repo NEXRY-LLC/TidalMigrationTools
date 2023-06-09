@@ -14,7 +14,9 @@ import com.bluehouseinc.dataconverter.parsers.esp.model.util.EspJobType;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
+@ToString(callSuper = true, onlyExplicitlyIncluded = true)
 @Data
 @EqualsAndHashCode(callSuper = false, onlyExplicitlyIncluded = true)
 public abstract class EspAbstractJob extends BaseJobOrGroupObject implements EspJob {
@@ -44,7 +46,7 @@ public abstract class EspAbstractJob extends BaseJobOrGroupObject implements Esp
 	String espStatement;
 	String espNoMsg;
 	String invokeObject;
-	String exitCode;
+	//String exitCode;
 	//CCCHK RC(1) OK CONTINUE
 
 	List<String> notesData = new ArrayList<>();

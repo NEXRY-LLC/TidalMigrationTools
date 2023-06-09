@@ -150,7 +150,8 @@ public class DependencyGraphMapper {
 			List<EspAbstractJob> mydeps = new ArrayList<>();
 
 			if (lookfor.contains(".-")) {
-				List<EspAbstractJob> founddeps = this.getEspmodel().getBaseObjectsNameBeginsWith(lookfor.replace(".-", ""));
+				lookfor = lookfor.replace(".-", "");
+				List<EspAbstractJob> founddeps = this.getEspmodel().getBaseObjectsNameBeginsWith(lookfor);
 
 				if (!founddeps.isEmpty()) {
 					mydeps.addAll(founddeps);

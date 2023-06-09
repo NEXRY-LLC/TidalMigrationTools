@@ -6,12 +6,15 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.math.NumberUtils;
 
+import com.bluehouseinc.dataconverter.common.utils.RegexHelper;
 import com.bluehouseinc.dataconverter.importers.SapDataImporter;
 import com.bluehouseinc.dataconverter.importers.csv.CsvSAPData;
 import com.bluehouseinc.dataconverter.model.TidalDataModel;
 import com.bluehouseinc.dataconverter.model.impl.BaseCsvJobObject;
 import com.bluehouseinc.dataconverter.model.impl.CsvCalendar;
 import com.bluehouseinc.dataconverter.model.impl.CsvFileWatcherJob;
+import com.bluehouseinc.dataconverter.model.impl.CsvJobExitCode;
+import com.bluehouseinc.dataconverter.model.impl.CsvJobExitCode.ExitLogic;
 import com.bluehouseinc.dataconverter.model.impl.CsvJobGroup;
 import com.bluehouseinc.dataconverter.model.impl.CsvMilestoneJob;
 import com.bluehouseinc.dataconverter.model.impl.CsvOS400;
@@ -213,6 +216,35 @@ public class EspToTidalTransformer2 implements ITransformer<List<EspAbstractJob>
 		}else {
 			in.setAgent(in.getAgent() + "-Z");
 		}
+		
+		
+		String extract = "RC\\((\\S+)\\).*";
+		
+		if(!in.getCcchk().isEmpty()) {
+		 List<String>	data = in.getCcchk();
+			if(data.size()==1) {
+				// Single can handle
+				String range = RegexHelper.extractFirstMatch(in.getCcchk().get(0), extract);
+				
+				CsvJobExitCode exitcode = new CsvJobExitCode();
+
+				if(range.contains(":")) {
+				exitcode.setExitStart(Integer.valueOf(range.split(":")[0]));
+				exitcode.setExitEnd(Integer.valueOf(range.split(":")[1]));
+				
+				}else {
+					exitcode.setExitStart(Integer.valueOf(range));
+				}
+				
+				exitcode.setExitLogic(ExitLogic.EQ);
+				
+				out.setExitcode(exitcode);
+				
+			}else {
+				in.setMultipleExitCodes(true);
+			}
+		}
+		
 	}
 
 	private void processJob(EspOSJOb in, CsvOSJob out) {
