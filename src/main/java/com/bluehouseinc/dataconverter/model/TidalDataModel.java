@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -24,6 +25,7 @@ import com.bluehouseinc.dataconverter.model.impl.CsvActionEmail;
 import com.bluehouseinc.dataconverter.model.impl.CsvCalendar;
 import com.bluehouseinc.dataconverter.model.impl.CsvJobClass;
 import com.bluehouseinc.dataconverter.model.impl.CsvJobGroup;
+import com.bluehouseinc.dataconverter.model.impl.CsvJobTag;
 import com.bluehouseinc.dataconverter.model.impl.CsvOwner;
 import com.bluehouseinc.dataconverter.model.impl.CsvResource;
 import com.bluehouseinc.dataconverter.model.impl.CsvRuntimeUser;
@@ -95,7 +97,10 @@ public class TidalDataModel {
 	private Set<CsvActionEmail> emailActions = new HashSet<>();
 	@Getter(value = AccessLevel.PUBLIC)
 	private Set<CsvTimeZone> timeZones = new HashSet<>();
-
+	@Getter(value = AccessLevel.PUBLIC)
+	private Map<CsvJobTag, List<BaseCsvJobObject>> jobTags = new HashedMap<>();
+	private int jobTagsMapCounter = 0;
+	
 	private Map<String, BaseCsvJobObject> jobOrGroupsMap = null;
 	// private Map<String, BaseCsvJobObject> registeredBaseJobs = new HashedMap<>();
 
@@ -825,6 +830,27 @@ public class TidalDataModel {
 		return null;
 		// return toFlatStream(this.jobOrGroups).filter(f ->
 		// f.getFullPath().equals(path)).findFirst().orElse(null);
+	}
+
+	public void addJobTagToJob(BaseCsvJobObject job, CsvJobTag tag) {
+
+		if (StringUtils.isBlank(tag.getName())) {
+			return;
+		}
+
+		job.setTag(tag);
+
+		if (!jobTags.containsKey(tag)) {
+			List<BaseCsvJobObject> jobs = new LinkedList<>();
+			jobs.add(job);
+			jobTagsMapCounter++;
+			jobTags.put(tag, jobs);
+		} else {
+			if (!jobTags.get(tag).contains(job)) {
+				jobTagsMapCounter++;
+				jobTags.get(tag).add(job);
+			}
+		}
 	}
 
 }

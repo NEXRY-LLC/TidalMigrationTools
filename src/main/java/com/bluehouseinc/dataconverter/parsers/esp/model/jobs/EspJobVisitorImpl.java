@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Component;
 
+import com.bluehouseinc.dataconverter.common.utils.RegexHelper;
 import com.bluehouseinc.dataconverter.parsers.esp.model.EspAbstractJob;
 import com.bluehouseinc.dataconverter.parsers.esp.model.EspDataModel;
 import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.data.EspAppEndData;
@@ -57,6 +58,7 @@ import lombok.extern.log4j.Log4j2;
 public class EspJobVisitorImpl implements EspJobVisitor {
 	EspDataModel model;
 	EspJobVisitorHelper helper;
+	private static final String IF_ELSE_ACTION_STATEMENT = "IF\\s(.*?)\\sTHEN\\s(\\S+)\\s(.*)";
 
 	public EspJobVisitorImpl(EspDataModel model) {
 		this.model = model;
@@ -71,13 +73,20 @@ public class EspJobVisitorImpl implements EspJobVisitor {
 	}
 
 	@Override
-	public <E extends EspAbstractJob> void doProcess(final E job, List<String> lines) {
+	public <E extends EspAbstractJob> void doProcess(final E job, final List<String> lines) {
 
 		List<String> cleaned = new ArrayList<>();
 
 		lines.forEach(f -> {
 			if (containsIfLogic(f)) {
-				job.setContainsIfLogic(true);
+
+				if (RegexHelper.matchesRegexPattern(f, IF_ELSE_ACTION_STATEMENT)) {
+					String action = RegexHelper.extractNthMatch(f, IF_ELSE_ACTION_STATEMENT, 1);
+					String rundal = RegexHelper.extractNthMatch(f, IF_ELSE_ACTION_STATEMENT, 2);
+					cleaned.add(action + " " + rundal);
+				} else {
+					job.setContainsIfLogic(true);
+				}
 			} else {
 				cleaned.add(f);
 			}
@@ -178,7 +187,7 @@ public class EspJobVisitorImpl implements EspJobVisitor {
 
 		for (String line : lines) {
 			if (line.startsWith("/*")) {
-				//job.getNoteData().add(line.substring(line.indexOf("/*") + 2));
+				// job.getNoteData().add(line.substring(line.indexOf("/*") + 2));
 				continue;
 			}
 
@@ -450,6 +459,9 @@ public class EspJobVisitorImpl implements EspJobVisitor {
 				break;
 			case LATESUB:
 				espJob.setLateSubmission(statementParameters); // TODO: Extract out the time
+				break;
+			case JOBATTR:
+				espJob.setJobAttributes(statementParameters);
 				break;
 			default:
 				// Must throw so prevent inpartial data.

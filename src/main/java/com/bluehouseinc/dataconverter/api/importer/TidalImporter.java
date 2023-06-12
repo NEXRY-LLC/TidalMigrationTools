@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -16,6 +17,8 @@ import com.bluehouseinc.dataconverter.api.importer.exec.JobClassExecutor;
 import com.bluehouseinc.dataconverter.api.importer.exec.JobCompoundDepExecutor;
 import com.bluehouseinc.dataconverter.api.importer.exec.JobGroupExecutor;
 import com.bluehouseinc.dataconverter.api.importer.exec.JobResourceJoinExecutor;
+import com.bluehouseinc.dataconverter.api.importer.exec.JobTagExecutor;
+import com.bluehouseinc.dataconverter.api.importer.exec.JobTagMapExecutor;
 import com.bluehouseinc.dataconverter.api.importer.exec.OwnerExecutor;
 import com.bluehouseinc.dataconverter.api.importer.exec.ResourceExecutor;
 import com.bluehouseinc.dataconverter.api.importer.exec.RunTimeUserExecutor;
@@ -48,13 +51,13 @@ public class TidalImporter {
 	private static final String TIDAL_USE_CONTAINER = "TIDAL.UseContainer";
 	private static final String TIDAL_USE_CONTAINER_AGENT = "TIDAL.UseContainer.DefaultAgent";
 	private static final String TIDAL_USE_CONTAINER_CALENDAR = "TIDAL.UseContainer.DefaultCalendar";
-	
+	private static final AtomicInteger jobtagcounter =  new AtomicInteger(0);
 	static final StopWatch sw = new StopWatch();
 	// static final ProgressBarBuilder pbb = new ProgressBarBuilder();
 	private TidalAPI tidal;
 
 	public TidalImporter() {
-		
+
 	}
 
 	private static TidalSession tidalSession = null;
@@ -71,7 +74,7 @@ public class TidalImporter {
 			Credentials access = createCredentials();
 			tidalSession = Tidal.gi(access).getTidalSession();
 			this.tidal = new TidalAPI(tidalSession, cp);
-			
+
 		}
 	}
 
@@ -236,11 +239,14 @@ public class TidalImporter {
 		} catch (Exception e) {
 			log.error(e.getMessage());
 		}
-		
+
 		new ResourceExecutor(tidal, model, cp).execute();
 
 		new JobResourceJoinExecutor(tidal, model, cp).execute();
 
+		new JobTagExecutor(tidal, model, cp).execute();
+
+		new JobTagMapExecutor(tidal, model, cp).execute();
 		// sw.prettyPrint();
 
 	}
@@ -291,7 +297,7 @@ public class TidalImporter {
 				model.addCalendarToJobOrGroup(c, new CsvCalendar(CONTAINTER_DEFAULT_CALENDAR));
 				c.setInheritCalendar(false);
 				c.setAgentName(CONTAINTER_DEFAULT_AGENT);
-				
+
 				model.getJobOrGroups().forEach(f -> {
 					c.addChild(f);
 				});
@@ -328,7 +334,10 @@ public class TidalImporter {
 		log.info("Compound Dependency Job Objects To Process [" + model.getCompoundDependnecyJobs().size() + "]");
 		log.info("Job Resource Objects To Process [" + model.getJobResourceJoinsCounter() + "]");
 		log.info("Job Class Objects To Process [" + model.getJobClasses().size() + "]");
+		log.info("Job Tag Objects To Process [" + model.getJobTags().size() + "]");
+		log.info("Job TagMap Objects To Process [" + model.getJobTagsMapCounter() + "]");
 
+		
 		TidalModelReporterData.getReporters().forEach(f -> {
 
 			log.trace("#####################################" + f.getClass().getSimpleName() + "#####################################");

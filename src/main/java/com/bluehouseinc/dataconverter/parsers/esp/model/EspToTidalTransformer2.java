@@ -16,6 +16,7 @@ import com.bluehouseinc.dataconverter.model.impl.CsvFileWatcherJob;
 import com.bluehouseinc.dataconverter.model.impl.CsvJobExitCode;
 import com.bluehouseinc.dataconverter.model.impl.CsvJobExitCode.ExitLogic;
 import com.bluehouseinc.dataconverter.model.impl.CsvJobGroup;
+import com.bluehouseinc.dataconverter.model.impl.CsvJobTag;
 import com.bluehouseinc.dataconverter.model.impl.CsvMilestoneJob;
 import com.bluehouseinc.dataconverter.model.impl.CsvOS400;
 import com.bluehouseinc.dataconverter.model.impl.CsvOSJob;
@@ -498,6 +499,9 @@ public class EspToTidalTransformer2 implements ITransformer<List<EspAbstractJob>
 			// out.setEndTime(endtime);
 		}
 
+		if(!StringUtils.isBlank(in.getTag())) {
+			datamodel.addJobTagToJob(out, new CsvJobTag(in.getTag()));
+		}
 	}
 
 	private void doSetCalendarPlaceHolder(EspAbstractJob in, BaseCsvJobObject out) {

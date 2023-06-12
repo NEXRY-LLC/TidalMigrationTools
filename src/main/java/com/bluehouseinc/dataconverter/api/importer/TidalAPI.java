@@ -30,6 +30,8 @@ import com.bluehouseinc.tidal.api.model.owners.Owner;
 import com.bluehouseinc.tidal.api.model.resource.jobjoin.ResourceJobJoin;
 import com.bluehouseinc.tidal.api.model.resource.virtual.VirtualResource;
 import com.bluehouseinc.tidal.api.model.service.Service;
+import com.bluehouseinc.tidal.api.model.tag.Tag;
+import com.bluehouseinc.tidal.api.model.tagmap.TagMap;
 import com.bluehouseinc.tidal.api.model.users.Users;
 import com.bluehouseinc.tidal.api.model.users.adapter.UserService;
 import com.bluehouseinc.tidal.api.model.variable.Variable;
@@ -69,6 +71,8 @@ public class TidalAPI {
 	protected Collection<AgentList> agentList;
 	protected Collection<JobClass> jobClass;
 	protected Collection<WorkGroupRunUser> workRunUsers;
+	protected Collection<Tag> tags;
+	protected Collection<TagMap> tagMap;
 
 	private Map<String, BaseJob> pathJobMap;
 
@@ -270,5 +274,9 @@ public class TidalAPI {
 		}
 
 		return null;
+	}
+	
+	public Tag getJobTagByName(String name) {
+		return getTags().stream().filter(f -> f.getName().trim().equalsIgnoreCase(name.trim())).findAny().orElse(null);
 	}
 }

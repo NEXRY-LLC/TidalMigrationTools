@@ -109,6 +109,9 @@ public abstract class BaseCsvJobObject extends BaseJobOrGroupObject {
 	@CsvBindByName
 	Integer calendarOffset;
 
+	@CsvRecurse
+	CsvJobTag tag;
+	
 	@Setter(value = AccessLevel.PRIVATE)
 	DependencyBuilder compoundDependencyBuilder = new DependencyBuilder();
 

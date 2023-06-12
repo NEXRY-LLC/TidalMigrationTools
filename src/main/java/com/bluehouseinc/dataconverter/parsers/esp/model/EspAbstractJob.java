@@ -60,7 +60,7 @@ public abstract class EspAbstractJob extends BaseJobOrGroupObject implements Esp
 	String user;
 	String tag;
 	List<String> notifyList = new ArrayList<>();
-
+	String jobAttributes;
 
 	public EspAbstractJob(String name) {
 		this.name = name;

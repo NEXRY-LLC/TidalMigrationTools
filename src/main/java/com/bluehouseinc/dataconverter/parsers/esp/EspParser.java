@@ -85,8 +85,9 @@ public class EspParser extends AbstractParser<EspDataModel> {
 	private final static String TEMPLATE_END_PATTERN = "^ENDTEMPL";
 
 	private final static String VARIABLE_PATTERN = "^(.*)=";
-	private final static String IF_THEN_STATEMENT_PATTERN = "^IF (.*) (THEN|EQ) (.*)";
+	private final static String IF_THEN_RUN_PATTERN = "IF\\s(.*?)\\sTHEN\\sRUN\\s(\\S+).*";
 	private final static String ENDING_WITH_8_DIGITS_PATTERN = "\\s{1,}([0-9]{8})$";
+	
 
 	EspJobVisitor espJobVisitor;
 	// private ScheduleEventDataProcessor scheduleDataProcessor;
@@ -518,8 +519,8 @@ public class EspParser extends AbstractParser<EspDataModel> {
 		if(addasjob) {
 			// No run statements on a job type, then we are not scheduled, customer asked to have these removed.
 			if (job.getStatementObject().getEspRunStatements().isEmpty()) {
-				//parent.getChildren().remove(job); // Remove and returbn.
-				//return null;
+				parent.getChildren().remove(job); // Remove and return.
+				return null;
 			}
 			
 		}
