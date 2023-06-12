@@ -229,9 +229,11 @@ public class TidalApiExecutor extends AbstractAPIExecutor {
 			String cnt = getTidalApi().getCfgProvider().getConfigurations().getOrDefault("tidal.batch.dependency", null);
 
 			if (cnt == null) {
-				getTidalApi().jobdep = getTidalApi().getSf().jobDependency().getList();
+				getTidalApi().jobdeps = getTidalApi().getSf().jobDependency().getList();
+				getTidalApi().filedeps = getTidalApi().getSf().fileDependency().getList();
 			} else {
-				getTidalApi().jobdep = getTidalApi().getSf().jobDependency().getList(Integer.valueOf(cnt));
+				getTidalApi().jobdeps = getTidalApi().getSf().jobDependency().getList(Integer.valueOf(cnt));
+				getTidalApi().filedeps = getTidalApi().getSf().fileDependency().getList(Integer.valueOf(cnt));
 			}
 		} catch (Exception e) {
 			throw new TidalException(e);

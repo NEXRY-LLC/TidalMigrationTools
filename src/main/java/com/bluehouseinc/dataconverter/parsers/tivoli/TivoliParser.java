@@ -92,7 +92,11 @@ public class TivoliParser extends AbstractParser<TivoliDataModel> {
 
 		var_processor = new TivoliVariableProcessor();
 		var_processor.doProcessFile(var);
+		var_processor.getData().stream().forEach(f ->{
+			getParserDataModel().getTidal().addVariable(new CsvVariable(f.getName(), f.getValue()));
+		});
 
+		
 		res_processor = new TivoliResourceProcessor();
 		res_processor.doProcessFile(res);
 		
@@ -129,6 +133,11 @@ public class TivoliParser extends AbstractParser<TivoliDataModel> {
 
 				currentGroup.addChild(job);
 
+				if(job.getName().contains("NANOTERM")) {
+					job.getName();
+				}
+				
+				
 				ResourceData resdata = res_processor.getResourceByGroupName(groupName, jobname);
 
 				SchedualData schedata = sch_processor.getSchedualDataByGroupName(groupName, jobname);
@@ -161,7 +170,8 @@ public class TivoliParser extends AbstractParser<TivoliDataModel> {
 						job.setDescription(value);
 						break;
 					case "STREAMLOGON":
-						job.setStreamLogon(value);
+						// Tidal does not support variables for runtime users so we will map them
+						job.setStreamLogon(value.replace("^", ""));
 						break;
 					case "TASKTYPE":
 						job.setTaskType(TaskType.valueOf(value));

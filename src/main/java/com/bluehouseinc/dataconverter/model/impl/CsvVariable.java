@@ -16,6 +16,11 @@ public class CsvVariable {
 		this.varValue = "";
 	}
 
+	public CsvVariable(String name, String value) {
+		this.varName = name;
+		this.varValue = value;
+	}
+	
 	@EqualsAndHashCode.Include
 	@CsvBindByName
 	String varName;

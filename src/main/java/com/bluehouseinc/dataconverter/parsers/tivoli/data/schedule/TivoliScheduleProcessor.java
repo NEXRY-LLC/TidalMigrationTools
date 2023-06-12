@@ -42,7 +42,7 @@ public class TivoliScheduleProcessor {
 
 		try {
 			if (datafile == null) {
-				throw new TidalException("Missing cpu file");
+				throw new TidalException("Missing Scheduler file");
 			}
 
 			reader = new BufferedReader(new FileReader(datafile));
@@ -53,6 +53,10 @@ public class TivoliScheduleProcessor {
 
 				line.trim();
 
+				if (line.toUpperCase().contains("NANOTERM")) {
+					line.getBytes();
+				}
+
 				if (EspFileReaderUtils.skippedLine(line)) {
 					continue;
 				}
@@ -62,7 +66,7 @@ public class TivoliScheduleProcessor {
 
 				if (isSchedulePattern(line)) {
 
-					processata(reader, line);
+					procesData(reader, line);
 
 				}
 			}
@@ -81,11 +85,14 @@ public class TivoliScheduleProcessor {
 		return RegexHelper.matchesRegexPattern(line, SCHED_PATTERN);
 	}
 
-	private void processata(final BufferedReader reader, String cpuline) throws IOException {
+	private void procesData(final BufferedReader reader, String cpuline) throws IOException {
 
-		String groupname = RegexHelper.extractNthMatch(cpuline, SCHED_PATTERN, 0);
-		String applytojobname = RegexHelper.extractNthMatch(cpuline, SCHED_PATTERN, 1);
+		String groupname = RegexHelper.extractNthMatch(cpuline, SCHED_PATTERN, 0).trim();
+		String applytojobname = RegexHelper.extractNthMatch(cpuline, SCHED_PATTERN, 1).trim();
 
+		if (applytojobname.toUpperCase().contains("HNANOTES")) {
+			applytojobname.getBytes();
+		}
 		SchedualData schedule = new SchedualData();
 
 		schedule.setGroupName(groupname);
@@ -110,6 +117,10 @@ public class TivoliScheduleProcessor {
 				String element = data[0];
 				String value = null;
 
+				if (line.toUpperCase().contains("NANOTERM")) {
+					line.getBytes();
+
+				}
 				if (data.length >= 2) {
 					value = data[1].trim();
 				}
@@ -141,19 +152,27 @@ public class TivoliScheduleProcessor {
 					schedule.getFollows().add(jobfollows);
 					break;
 				case "DESCRIPTION":
-					if(StringUtils.isBlank(schedule.getDescription())) {
+					if (StringUtils.isBlank(schedule.getDescription())) {
 						schedule.setDescription(value);
-					}else {
-						schedule.setDescription(schedule.getDescription() +"\n" + value);
+					} else {
+						schedule.setDescription(schedule.getDescription() + "\n" + value);
 					}
-					
+
 					break;
 				case "DRAFT":
+					break;
 				case "LIMIT":
+					break;
 				case "OPENS":
+					if (value.contains("#")) {
+						String filename = value.split("#", 2)[1];
+						schedule.getFiledeps().add(filename);
+					} else {
+						schedule.getFiledeps().add(value);
+					}
+					break;
 				case "PRIORITY":
 					break;
-					
 				case "CRITICAL":
 					schedule.setCritical(true);
 					break;
@@ -313,7 +332,7 @@ public class TivoliScheduleProcessor {
 					// AT time or AT Time unitl TIME
 					if (value.contains("UNTIL")) {
 						String tmpat = value.substring(0, value.indexOf("UNTIL"));
-						String tmpuntil = value.substring(value.indexOf("UNTIL")+6, value.length());
+						String tmpuntil = value.substring(value.indexOf("UNTIL") + 6, value.length());
 						jobdetail.setAtTime(tmpat);
 						jobdetail.setUntilTime(tmpuntil);
 					} else {
@@ -333,6 +352,11 @@ public class TivoliScheduleProcessor {
 					jobdetail.setCritical(true);
 					break;
 				case "OPENS":
+					if (value.contains("#")) {
+						jobdetail.setOpensFile(value.split("#",2)[1]);
+					} else {
+						jobdetail.setOpensFile(value);
+					}
 				case "PROMPT":
 					break;
 				default:
@@ -341,12 +365,12 @@ public class TivoliScheduleProcessor {
 			}
 		}
 	}
-	
+
 	public SchedualData getSchedualDataByGroupName(String group, String name) {
-		
+
 		List<SchedualData> resdata = this.data.get(group);
-		
-		if(resdata == null) {
+
+		if (resdata == null) {
 			return null;
 		}
 		return resdata.stream().filter(f -> f.getName().trim().equalsIgnoreCase(name.trim())).findFirst().orElse(null);

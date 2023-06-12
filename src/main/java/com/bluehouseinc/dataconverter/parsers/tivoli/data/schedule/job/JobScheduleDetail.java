@@ -19,5 +19,6 @@ public class JobScheduleDetail {
 	String priority;
 	String rerunEvery;
 	JobRunTime deadline;
+	String opensFile;
 	boolean critical = false;
 }

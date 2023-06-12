@@ -36,11 +36,13 @@ public class SchedualData {
 	
 	private List<JobScheduleDetail> jobScheduleDetail;
 	
-
+	private List<String> filedeps;
+	
 	public SchedualData(){
 		this.needs = new LinkedList<>();
 		this.runOn = new LinkedList<>();
 		this.follows = new LinkedList<>();
 		this.jobScheduleDetail = new LinkedList<>();
+		this.filedeps = new LinkedList<>();
 	}
 }

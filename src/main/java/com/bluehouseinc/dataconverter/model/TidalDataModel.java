@@ -29,6 +29,7 @@ import com.bluehouseinc.dataconverter.model.impl.CsvResource;
 import com.bluehouseinc.dataconverter.model.impl.CsvRuntimeUser;
 import com.bluehouseinc.dataconverter.model.impl.CsvTimeZone;
 import com.bluehouseinc.dataconverter.model.impl.CsvVariable;
+import com.bluehouseinc.dataconverter.model.impl.CvsDependencyFile;
 import com.bluehouseinc.dataconverter.model.impl.CvsDependencyJob;
 import com.bluehouseinc.dataconverter.util.ObjectUtils;
 import com.bluehouseinc.tidal.api.exceptions.TidalException;
@@ -449,12 +450,15 @@ public class TidalDataModel {
 		} else {
 
 			for (BaseCvsDependency f : deps) {
-				if (((CvsDependencyJob) f).getDependsOnJob().getId().equals(depensonme.getId())) {
-					// if (((DependencyJob)
-					// f).getDependsOnJob().getFullPath().equals(depensonme.getFullPath())) {
-					// TODO: Determine if I should throw an error here because this is a job dep loop.
-					duplicate = true; /// Cant depend on myself.
-					break;
+
+				if (f instanceof CvsDependencyJob) {
+					if (((CvsDependencyJob) f).getDependsOnJob().getId().equals(depensonme.getId())) {
+						// if (((DependencyJob)
+						// f).getDependsOnJob().getFullPath().equals(depensonme.getFullPath())) {
+						// TODO: Determine if I should throw an error here because this is a job dep loop.
+						duplicate = true; /// Cant depend on myself.
+						break;
+					}
 				}
 			}
 
@@ -464,6 +468,17 @@ public class TidalDataModel {
 		}
 
 		return dep;
+	}
+
+	public CvsDependencyFile addFileDependencyForJob(BaseCsvJobObject myjob, String filename) {
+
+		CvsDependencyFile filedep = new CvsDependencyFile();
+		filedep.setJobObject(myjob);
+		filedep.setFilename(filename);
+
+		this.dependencies.add(filedep);
+
+		return filedep;
 	}
 
 	public CsvOwner getDefaultOwner() {
@@ -583,7 +598,6 @@ public class TidalDataModel {
 		return found;
 	}
 
-	
 	public void updateBaseCsvDependencyID(BaseCvsDependency dep, int newId) {
 		final String oldId = Integer.toString(dep.getId());
 		final String newIds = Integer.toString(newId);
@@ -778,21 +792,19 @@ public class TidalDataModel {
 		}
 	}
 
-	
 	public String getVariableMappingDataFile() {
 		String vardatafile = this.cfgProvider.getProvider().getConfigurations().getOrDefault(TIDALMapVariableDataFile, null);
 
 		if (vardatafile != null) {
 
 			return vardatafile;
-			
+
 		} else {
 			throw new TidalException("Property Missing: " + TidalVariableDataFile);
 		}
 
 	}
-	
-	
+
 	public BaseCsvJobObject findFirstJobByName(String name) {
 		if (jobOrGroupsMap == null) {
 			this.jobOrGroupsMap = new HashMap<>();
@@ -805,8 +817,8 @@ public class TidalDataModel {
 		}
 		// if we find an object that matches the end of the path, we found our object.
 		String fullpath = jobOrGroupsMap.keySet().stream().filter(f -> f.toLowerCase().endsWith(name.toLowerCase())).findFirst().orElse(null);
-		
-		if(!StringUtils.isBlank(fullpath)) {
+
+		if (!StringUtils.isBlank(fullpath)) {
 			return jobOrGroupsMap.get(fullpath);
 		}
 
@@ -814,5 +826,5 @@ public class TidalDataModel {
 		// return toFlatStream(this.jobOrGroups).filter(f ->
 		// f.getFullPath().equals(path)).findFirst().orElse(null);
 	}
-	
+
 }

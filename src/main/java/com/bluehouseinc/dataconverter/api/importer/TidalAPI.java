@@ -19,6 +19,7 @@ import com.bluehouseinc.tidal.api.model.actions.email.EmailAction;
 import com.bluehouseinc.tidal.api.model.agentlist.AgentList;
 import com.bluehouseinc.tidal.api.model.businessunit.BusinessUnit;
 import com.bluehouseinc.tidal.api.model.calendar.Calendar;
+import com.bluehouseinc.tidal.api.model.dependency.file.FileDependency;
 import com.bluehouseinc.tidal.api.model.dependency.job.JobDependency;
 import com.bluehouseinc.tidal.api.model.job.BaseJob;
 import com.bluehouseinc.tidal.api.model.job.group.JobGroup;
@@ -57,7 +58,8 @@ public class TidalAPI {
 	protected Collection<Users> users;
 	protected Collection<WorkGroup> workgroups;
 	protected Collection<Node> nodes;
-	protected Collection<JobDependency> jobdep;
+	protected Collection<JobDependency> jobdeps;
+	protected Collection<FileDependency> filedeps;
 	protected Collection<UserService> userService;
 	protected Collection<Service> adapters;
 	protected Collection<VirtualResource> resources;
@@ -164,7 +166,7 @@ public class TidalAPI {
 	}
 
 	private List<JobDependency> findDependencyByJobId(int id) {
-		return this.getJobdep().stream().filter(f -> f.getJobid() == id).collect(Collectors.toList());
+		return this.getJobdeps().stream().filter(f -> f.getJobid() == id).collect(Collectors.toList());
 	}
 
 	public JobDependency findDependencyByJobId(int jobid, int depjobid) {

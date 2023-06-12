@@ -22,7 +22,7 @@ public class CpuData {
 	private String description;
 	private String operatingSystem;
 	private String nodeName;
-	private String forwhat;
+	private String forUser;
 	private String type;
 	private String autoLink;
 	private String behindFirewall;

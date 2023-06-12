@@ -5,10 +5,13 @@ import java.util.concurrent.ExecutorService;
 import com.bluehouseinc.dataconverter.api.importer.TidalAPI;
 import com.bluehouseinc.dataconverter.model.TidalDataModel;
 import com.bluehouseinc.dataconverter.model.impl.BaseCvsDependency;
+import com.bluehouseinc.dataconverter.model.impl.CvsDependencyFile;
 import com.bluehouseinc.dataconverter.model.impl.CvsDependencyJob;
 import com.bluehouseinc.dataconverter.providers.ConfigurationProvider;
 import com.bluehouseinc.tidal.api.impl.atom.response.TesResult;
 import com.bluehouseinc.tidal.api.model.YesNoType;
+import com.bluehouseinc.tidal.api.model.dependency.file.DepType;
+import com.bluehouseinc.tidal.api.model.dependency.file.FileDependency;
 import com.bluehouseinc.tidal.api.model.dependency.job.JobDependency;
 
 import lombok.extern.log4j.Log4j2;
@@ -105,7 +108,7 @@ public class DependencyExecutor extends AbstractAPIExecutor {
 					int id = res.getResult().getTesObjectid();
 					dep.setId(id);
 					getDataModel().updateBaseCsvDependencyID(jdep, id);
-					getTidalApi().getJobdep().add(dep);
+					getTidalApi().getJobdeps().add(dep);
 
 					log.debug("doProcessDep[" + mepath + "] depends on  [" + deppath + "] ID[" + id + "] Response[" + res.getTesMessage() + "]");
 				} catch (Exception e) {
@@ -118,6 +121,30 @@ public class DependencyExecutor extends AbstractAPIExecutor {
 						log.error("ERROR doProcessDep[" + mepath + "] depends on  [" + deppath + "]");
 						log.error(localmessage );
 					}
+				}
+			}else if (adep instanceof CvsDependencyFile) {
+				FileDependency filedep = new FileDependency();
+				CvsDependencyFile cdep = (CvsDependencyFile)adep;
+				
+				filedep.setFilename(cdep.getFilename());
+				filedep.setFiletype(DepType.EXISTS);
+				filedep.setInheritagent(YesNoType.YES);
+				
+				try {
+
+					log.debug("doProcessDep[" + mepath + "] depends on  File[" + cdep.getFilename() + "]");
+					TesResult res = getTidalApi().getSession().getServiceFactory().fileDependency().create(filedep);
+					int id = res.getResult().getTesObjectid();
+					filedep.setId(id);
+					getDataModel().updateBaseCsvDependencyID(cdep, id);
+					getTidalApi().getFiledeps().add(filedep);
+
+					log.debug("doProcessDep[" + mepath + "] depends on  File[" + cdep.getFilename() + "] ID[" + id + "] Response[" + res.getTesMessage() + "]");
+				} catch (Exception e) {
+					String localmessage = e.getLocalizedMessage();
+
+						log.error("ERROR doProcessDep[" + mepath + "] depends on  File[" + cdep.getFilename() + "]");
+						log.error(localmessage );
 				}
 			}
 		} finally {

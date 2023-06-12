@@ -108,7 +108,7 @@ public class TivoliCPUProcessor {
 				cpu.setDomain(value);
 				break;
 			case "FOR":
-				cpu.setForwhat(value);
+				cpu.setForUser(value);
 				break;
 			case "TYPE":
 				cpu.setType(value);
