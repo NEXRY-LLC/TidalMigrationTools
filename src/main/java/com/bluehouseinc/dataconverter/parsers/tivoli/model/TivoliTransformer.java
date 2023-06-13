@@ -1,40 +1,20 @@
 package com.bluehouseinc.dataconverter.parsers.tivoli.model;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import com.bluehouseinc.dataconverter.model.TidalDataModel;
 import com.bluehouseinc.dataconverter.model.impl.BaseCsvJobObject;
-import com.bluehouseinc.dataconverter.model.impl.CsvCalendar;
-import com.bluehouseinc.dataconverter.model.impl.CsvFileWatcherJob;
 import com.bluehouseinc.dataconverter.model.impl.CsvJobGroup;
-import com.bluehouseinc.dataconverter.model.impl.CsvMilestoneJob;
-import com.bluehouseinc.dataconverter.model.impl.CsvOS400;
 import com.bluehouseinc.dataconverter.model.impl.CsvOSJob;
-import com.bluehouseinc.dataconverter.model.impl.CsvOwner;
-import com.bluehouseinc.dataconverter.model.impl.CsvResource;
 import com.bluehouseinc.dataconverter.model.impl.CsvRuntimeUser;
-import com.bluehouseinc.dataconverter.model.impl.CsvSAPJob;
-import com.bluehouseinc.dataconverter.parsers.esp.model.EspAbstractJob;
-import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.impl.EspAgentMonitorJob;
-import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.impl.EspAs400Job;
-import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.impl.EspFileTriggerJob;
-import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.impl.EspJobGroup;
-import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.impl.EspOSJOb;
-import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.impl.EspSAPBwpcJob;
-import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.impl.EspSapJob;
-import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.impl.EspTaskProcessJob;
-import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.impl.EspZosJob;
 import com.bluehouseinc.dataconverter.parsers.tivoli.data.cpu.CpuData;
-import com.bluehouseinc.dataconverter.parsers.tivoli.data.schedule.JobRunTime;
-import com.bluehouseinc.dataconverter.parsers.tivoli.data.schedule.SchedualData;
+import com.bluehouseinc.dataconverter.parsers.tivoli.data.job.TivoliJobObject;
 import com.bluehouseinc.tidal.api.exceptions.TidalException;
 import com.bluehouseinc.tidal.utils.StringUtils;
 import com.bluehouseinc.transform.ITransformer;
 import com.bluehouseinc.transform.TransformationException;
-import com.bluehouseinc.util.APIDateUtils;
 
-public class TivoliTransformer implements ITransformer<List<TivoliObject>, TidalDataModel> {
+public class TivoliTransformer implements ITransformer<List<TivoliJobObject>, TidalDataModel> {
 
 	TidalDataModel datamodel;
 
@@ -43,14 +23,14 @@ public class TivoliTransformer implements ITransformer<List<TivoliObject>, Tidal
 	}
 
 	@Override
-	public TidalDataModel transform(List<TivoliObject> in) throws TransformationException {
+	public TidalDataModel transform(List<TivoliJobObject> in) throws TransformationException {
 
 		in.stream().forEach(f -> doProcessObjects(f, null));
 
 		return datamodel;
 	}
 
-	private void doProcessObjects(TivoliObject job, CsvJobGroup parent) {
+	private void doProcessObjects(TivoliJobObject job, CsvJobGroup parent) {
 
 		if (job.isGroup()) {
 
@@ -62,7 +42,7 @@ public class TivoliTransformer implements ITransformer<List<TivoliObject>, Tidal
 				parent.addChild(jobgroup);
 			}
 
-			job.getChildren().forEach(obj -> doProcessObjects((TivoliObject) obj, jobgroup));
+			job.getChildren().forEach(obj -> doProcessObjects((TivoliJobObject) obj, jobgroup));
 
 		} else {
 
@@ -79,7 +59,7 @@ public class TivoliTransformer implements ITransformer<List<TivoliObject>, Tidal
 
 	}
 
-	private BaseCsvJobObject processJobObject(TivoliObject job) {
+	private BaseCsvJobObject processJobObject(TivoliJobObject job) {
 
 		if (job == null) {
 			throw new TidalException("BaseJobOrGroupObject is null");
@@ -120,60 +100,60 @@ public class TivoliTransformer implements ITransformer<List<TivoliObject>, Tidal
 		
 		datamodel.addOwnerToJobOrGroup(out, datamodel.getDefaultOwner());
 
+//
+//		SchedualData schedata = job.getScheduleData();
+//
+//		if (schedata != null) {
+//
+//			JobRunTime runtime = job.getScheduleData().getAtTime();
+//
+//			if (runtime != null) {
+//				String runat = job.getScheduleData().getAtTime().getAtTime();
+//				if (!StringUtils.isBlank(runat)) {
+//					out.setStartTime(runat);
+//				}
+//			}
+//			
+//			JobRunTime dealine = job.getScheduleData().getDeadline();
+//
+//			if (dealine != null) {
+//				String runtill = job.getScheduleData().getDeadline().getAtTime();
+//				if (!StringUtils.isBlank(runtill)) {
+//					out.setStartTime(runtill);
+//				}
+//			}
+//
+//			job.getScheduleData().getNeeds().forEach(n -> {
+//
+//				Integer resneed = n.getAmount();
+//				CsvResource res = new CsvResource(n.getName(), datamodel.getDefaultOwner());
+//				res.setLimit(resneed);
+//				datamodel.addResourceToJob(out, res);
+//
+//			});
+//
+//			datamodel.addCalendarToJobOrGroup(out, new CsvCalendar("Daily"));
+//
+//			// Need to build some calendars using the schedule data.
+//			job.getScheduleData().getRunOn().forEach(r -> {
+//
+//				r.getType();
+//			});
 
-		SchedualData schedata = job.getScheduleData();
-
-		if (schedata != null) {
-
-			JobRunTime runtime = job.getScheduleData().getAtTime();
-
-			if (runtime != null) {
-				String runat = job.getScheduleData().getAtTime().getAtTime();
-				if (!StringUtils.isBlank(runat)) {
-					out.setStartTime(runat);
-				}
-			}
-			
-			JobRunTime dealine = job.getScheduleData().getDeadline();
-
-			if (dealine != null) {
-				String runtill = job.getScheduleData().getDeadline().getAtTime();
-				if (!StringUtils.isBlank(runtill)) {
-					out.setStartTime(runtill);
-				}
-			}
-
-			job.getScheduleData().getNeeds().forEach(n -> {
-
-				Integer resneed = n.getAmount();
-				CsvResource res = new CsvResource(n.getName(), datamodel.getDefaultOwner());
-				res.setLimit(resneed);
-				datamodel.addResourceToJob(out, res);
-
-			});
-
-			datamodel.addCalendarToJobOrGroup(out, new CsvCalendar("Daily"));
-
-			// Need to build some calendars using the schedule data.
-			job.getScheduleData().getRunOn().forEach(r -> {
-
-				r.getType();
-			});
-
-		} else {
-			// why are we missing data?
-			out.getFullPath();
-
-		}
+//		} else {
+//			// why are we missing data?
+//			out.getFullPath();
+//
+//		}
 
 		return out;
 	}
 
-	private void processJob(TivoliObject in, CsvJobGroup out) {
+	private void processJob(TivoliJobObject in, CsvJobGroup out) {
 
 	}
 
-	private void processJob(TivoliObject in, CsvOSJob out) {
+	private void processJob(TivoliJobObject in, CsvOSJob out) {
 
 		String cmddata = in.getDoCommand() == null ? in.getScriptName() : in.getDoCommand();
 

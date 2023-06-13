@@ -17,14 +17,14 @@ import com.bluehouseinc.dataconverter.parsers.AbstractParser;
 import com.bluehouseinc.dataconverter.parsers.esp.model.util.EspFileReaderUtils;
 import com.bluehouseinc.dataconverter.parsers.tivoli.data.cpu.CpuData;
 import com.bluehouseinc.dataconverter.parsers.tivoli.data.cpu.TivoliCPUProcessor;
+import com.bluehouseinc.dataconverter.parsers.tivoli.data.job.TivoliJobObject;
+import com.bluehouseinc.dataconverter.parsers.tivoli.data.job.TivoliJobObject.TaskType;
+import com.bluehouseinc.dataconverter.parsers.tivoli.data.job.TivoliJobProcessor;
 import com.bluehouseinc.dataconverter.parsers.tivoli.data.resource.ResourceData;
 import com.bluehouseinc.dataconverter.parsers.tivoli.data.resource.TivoliResourceProcessor;
 import com.bluehouseinc.dataconverter.parsers.tivoli.data.schedule.SchedualData;
 import com.bluehouseinc.dataconverter.parsers.tivoli.data.schedule.TivoliScheduleProcessor;
 import com.bluehouseinc.dataconverter.parsers.tivoli.data.variable.TivoliVariableProcessor;
-import com.bluehouseinc.dataconverter.parsers.tivoli.model.TivoliDataModel;
-import com.bluehouseinc.dataconverter.parsers.tivoli.model.TivoliObject;
-import com.bluehouseinc.dataconverter.parsers.tivoli.model.TivoliObject.TaskType;
 import com.bluehouseinc.dataconverter.providers.ConfigurationProvider;
 import com.bluehouseinc.tidal.api.exceptions.TidalException;
 import com.bluehouseinc.tidal.utils.StringUtils;
@@ -35,12 +35,11 @@ public class TivoliParser extends AbstractParser<TivoliDataModel> {
 		super(new TivoliDataModel(cfgProvider));
 	}
 
-	private String JOB_LINE_PATTERN = "^(\\w+)#(\\w+)";
-
 	TivoliCPUProcessor cpu_processor;
 	TivoliResourceProcessor res_processor;
 	TivoliVariableProcessor var_processor;
 	TivoliScheduleProcessor sch_processor;
+	TivoliJobProcessor job_processor;
 	
 	private File toFile(File foldername, String filename) {
 		if(foldername.isDirectory()) {
@@ -103,105 +102,13 @@ public class TivoliParser extends AbstractParser<TivoliDataModel> {
 		sch_processor = new TivoliScheduleProcessor();
 		sch_processor.doProcessFile(sch);
 
-		parseJobs(job);
+		job_processor = new TivoliJobProcessor(cpu_processor, res_processor);
+		job_processor.doProcessFile(job);
+		
+		
+		job_processor.getData().size();
 	}
 
-	private void parseJobs(File jobfile) throws IOException {
-
-		BufferedReader reader = new BufferedReader(new FileReader(jobfile));
-		String line;
-
-		// List<TivoliObject> data = new ArrayList<>();
-
-		TivoliObject currentGroup = null;
-		while ((line = reader.readLine()) != null) {
-			if (line.matches(JOB_LINE_PATTERN)) {
-				String groupName = RegexHelper.extractNthMatch(line, JOB_LINE_PATTERN, 0);
-				String jobname = RegexHelper.extractNthMatch(line, JOB_LINE_PATTERN, 1);
-
-				if (currentGroup == null || !Objects.equals(groupName, currentGroup.getName())) {
-					currentGroup = new TivoliObject();
-					currentGroup.setName(groupName);
-					currentGroup.setGroupFlag(true);
-					CpuData cpu = cpu_processor.getCPUByName(groupName);
-					currentGroup.setCpuData(cpu);
-					this.getParserDataModel().addDataDuplicateLevelCheck(currentGroup);
-				}
-
-				TivoliObject job = new TivoliObject();
-				job.setName(jobname);
-
-				currentGroup.addChild(job);
-
-				if(job.getName().contains("NANOTERM")) {
-					job.getName();
-				}
-				
-				
-				ResourceData resdata = res_processor.getResourceByGroupName(groupName, jobname);
-
-				SchedualData schedata = sch_processor.getSchedualDataByGroupName(groupName, jobname);
-				
-				if (schedata != null) {
-					job.setScheduleData(schedata);
-				}
-				
-				if (resdata != null) {
-					job.setResourceData(resdata);
-				}
-				
-				List<String> lines = EspFileReaderUtils.parseJobLines(reader, "", null, false);
-
-				for (String dataline : lines) {
-
-					String data[] = dataline.split(" ", 2);
-					String element = data[0];
-					String value = null;
-
-					if (data.length >= 2) {
-						value = data[1].trim();
-					}
-
-					switch (element) {
-					case "DOCOMMAND":
-						job.setDoCommand(value);
-						break;
-					case "DESCRIPTION":
-						job.setDescription(value);
-						break;
-					case "STREAMLOGON":
-						// Tidal does not support variables for runtime users so we will map them
-						job.setStreamLogon(value.replace("^", ""));
-						break;
-					case "TASKTYPE":
-						job.setTaskType(TaskType.valueOf(value));
-						break;
-					case "RECOVERY":
-						job.setRecovery(value);
-						break;
-					case "RCCONDSUCC":
-						job.setReturnCodeSucess(value);
-						break;
-					case "SCRIPTNAME":
-						job.setScriptName(value);
-						break;
-					case "AFTER":
-						job.setAfterJob(value);
-						break;
-					case "ABENDPROMPT":
-						job.setAbendPrompt(value);
-						break;
-					default:
-						throw new TidalException("Unknown Data Element: " + dataline);
-					}
-
-				}
-
-			}
-		}
-
-		reader.close();
-	}
 
 	@Override
 	public IModelReport getModelReporter() {

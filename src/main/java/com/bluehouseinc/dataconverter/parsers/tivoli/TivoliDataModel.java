@@ -1,4 +1,4 @@
-package com.bluehouseinc.dataconverter.parsers.tivoli.model;
+package com.bluehouseinc.dataconverter.parsers.tivoli;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,9 +12,11 @@ import com.bluehouseinc.dataconverter.model.TidalDataModel;
 import com.bluehouseinc.dataconverter.model.impl.BaseCsvJobObject;
 import com.bluehouseinc.dataconverter.model.impl.CsvJobGroup;
 import com.bluehouseinc.dataconverter.parsers.IParserModel;
-import com.bluehouseinc.dataconverter.parsers.tivoli.TivoliConfigProvider;
+import com.bluehouseinc.dataconverter.parsers.tivoli.data.job.TivoliJobObject;
 import com.bluehouseinc.dataconverter.parsers.tivoli.data.schedule.JobFollows;
 import com.bluehouseinc.dataconverter.parsers.tivoli.data.schedule.SchedualData;
+import com.bluehouseinc.dataconverter.parsers.tivoli.model.TivoliTransformer;
+import com.bluehouseinc.dataconverter.parsers.tivoli.model.TivoliVariableProcessor;
 import com.bluehouseinc.dataconverter.providers.ConfigurationProvider;
 import com.bluehouseinc.tidal.utils.StringUtils;
 import com.bluehouseinc.transform.ITransformer;
@@ -24,39 +26,39 @@ import lombok.EqualsAndHashCode;
 
 @Data
 @EqualsAndHashCode(callSuper = false)
-public class TivoliDataModel extends BaseParserDataModel<TivoliObject, TivoliConfigProvider> implements IParserModel {
+public class TivoliDataModel extends BaseParserDataModel<TivoliJobObject, TivoliConfigProvider> implements IParserModel {
 
 	public TivoliDataModel(ConfigurationProvider cfgProvider) {
 		super(new TivoliConfigProvider(cfgProvider));
 	}
 
 	@Override
-	public BaseVariableProcessor<TivoliObject> getVariableProcessor(TidalDataModel model) {
+	public BaseVariableProcessor<TivoliJobObject> getVariableProcessor(TidalDataModel model) {
 		return new TivoliVariableProcessor(model);
 	}
 
 	@Override
-	public ITransformer<List<TivoliObject>, TidalDataModel> getJobTransformer(TidalDataModel model) {
+	public ITransformer<List<TivoliJobObject>, TidalDataModel> getJobTransformer(TidalDataModel model) {
 		return new TivoliTransformer(model);
 	}
 
 	@Override
-	public void doPostTransformJobObjects(List<TivoliObject> jobs) {
+	public void doPostTransformJobObjects(List<TivoliJobObject> jobs) {
 
 	}
 
 	@Override
-	public void doProcessJobDependency(List<TivoliObject> jobs) {
+	public void doProcessJobDependency(List<TivoliJobObject> jobs) {
 		jobs.forEach(this::doProcessJobDependency);
 	}
 
-	public void doProcessJobDependency(TivoliObject job) {
+	public void doProcessJobDependency(TivoliJobObject job) {
 
 		if(job.getName().contains("NANOTERM")) {
 			job.getName();
 		}
 		
-		SchedualData data = job.getScheduleData();
+		SchedualData data = null; //job.getScheduleData();
 
 		if (data != null) {
 			String fullpath = job.getFullPath();
@@ -165,7 +167,7 @@ public class TivoliDataModel extends BaseParserDataModel<TivoliObject, TivoliCon
 
 		}
 
-		job.getChildren().forEach(c -> doProcessJobDependency((TivoliObject) c));
+		job.getChildren().forEach(c -> doProcessJobDependency((TivoliJobObject) c));
 	}
 
 }

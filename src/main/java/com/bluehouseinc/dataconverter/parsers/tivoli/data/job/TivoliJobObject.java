@@ -1,4 +1,4 @@
-package com.bluehouseinc.dataconverter.parsers.tivoli.model;
+package com.bluehouseinc.dataconverter.parsers.tivoli.data.job;
 
 import com.bluehouseinc.dataconverter.model.BaseJobOrGroupObject;
 import com.bluehouseinc.dataconverter.parsers.tivoli.data.cpu.CpuData;
@@ -10,12 +10,11 @@ import lombok.EqualsAndHashCode;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class TivoliObject extends BaseJobOrGroupObject {
+public class TivoliJobObject extends BaseJobOrGroupObject {
 	private boolean isGroupFlag = false;
 	
 	private CpuData cpuData;
 	private ResourceData resourceData;
-	private SchedualData scheduleData;
 	
 	private String doCommand;
 	private String streamLogon;

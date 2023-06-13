@@ -10,12 +10,13 @@ import java.util.stream.Collectors;
 import com.bluehouseinc.dataconverter.model.BaseVariableProcessor;
 import com.bluehouseinc.dataconverter.model.TidalDataModel;
 import com.bluehouseinc.dataconverter.parsers.esp.model.EspAbstractJob;
+import com.bluehouseinc.dataconverter.parsers.tivoli.data.job.TivoliJobObject;
 import com.bluehouseinc.dataconverter.util.ObjectUtils;
 
 import lombok.extern.log4j.Log4j2;
 
 @Log4j2
-public class TivoliVariableProcessor extends BaseVariableProcessor<TivoliObject> {
+public class TivoliVariableProcessor extends BaseVariableProcessor<TivoliJobObject> {
 	final private static String VAR_PATTERN = ".*?(\\^.*?\\^).*?";
 	private static final Pattern PATTERN = Pattern.compile(VAR_PATTERN);
 
@@ -24,7 +25,7 @@ public class TivoliVariableProcessor extends BaseVariableProcessor<TivoliObject>
 	}
 
 	@Override
-	public void processJobVariables(TivoliObject job) {
+	public void processJobVariables(TivoliJobObject job) {
 
 	// This will do all in a generic / reflection way vs individual getters.. This also covers any changes to the classes!!!
 		List<Field> rawfields = ObjectUtils.getAllKnownFields(job).stream().filter(f -> f.getType().isInstance(new String())).collect(Collectors.toList());
@@ -32,7 +33,7 @@ public class TivoliVariableProcessor extends BaseVariableProcessor<TivoliObject>
 		convertReplaceVariblesToTidal(job, rawfields);
 	}
 
-	protected void convertReplaceVariblesToTidal(TivoliObject job, List<Field> fields) {
+	protected void convertReplaceVariblesToTidal(TivoliJobObject job, List<Field> fields) {
 
 		// Now lets process these fields to change over the global variables into TIDAL variables!!!
 		fields.forEach(f -> {
@@ -61,7 +62,7 @@ public class TivoliVariableProcessor extends BaseVariableProcessor<TivoliObject>
 		});
 	}
 
-	private String convertReplaceVariblesToTidal(String rawValue, TivoliObject job) {
+	private String convertReplaceVariblesToTidal(String rawValue, TivoliJobObject job) {
 		String newValue = rawValue;
 		if (newValue != null) {
 			if (newValue.contains("^")) {
