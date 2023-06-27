@@ -1,0 +1,69 @@
+JOB SWNOTIFY
+
+ESP_BG_COLOR    = '#FFFF00'
+/* Background color choices are : '#FF0000'  (red)       */
+/*                                '#FF8800'  (orange)    */
+/*                                '#FFFF00'  (yellow)    */
+ESP_RECIPIENT_1 = ' '
+ESP_RECIPIENT_2 = ' '
+ESP_RECIPIENT_3 = ' '
+ESP_RECIPIENT_4 = ' '
+ESP_RECIPIENT_5 = ' '
+ESP_RECIPIENT_6 = ' '
+ESP_RECIPIENT_7 = ' '
+ESP_RECIPIENT_8 = ' '
+ESP_RECIPIENT_9 = ' '
+ESP_RECIPIENT_10 = ' '
+ESP_MESSAGE_1   = ' '
+ESP_MESSAGE_2   = ' '
+ESP_MESSAGE_3   = ' '
+ESP_MESSAGE_4   = ' '
+ESP_MESSAGE_5   = ' '
+ESP_MESSAGE_6   = ' '
+ESP_MESSAGE_7   = ' '
+ESP_MESSAGE_8   = ' '
+ESP_MESSAGE_9   = ' '
+ESP_MESSAGE_10  = ' '
+ESP_MESSAGE_11  = ' '
+ESP_MESSAGE_12  = ' '
+ESP_MESSAGE_13  = ' '
+ESP_MESSAGE_14  = ' '
+ESP_MESSAGE_15  = ' '
+ESP_MESSAGE_16  = ' '
+ESP_MESSAGE_17  = ' '
+ESP_MESSAGE_18  = ' '
+ESP_MESSAGE_19  = ' '
+ESP_MESSAGE_20  = ' '
+ESP_MESSAGE_21  = ' '
+ESP_MESSAGE_22  = ' '
+ESP_MESSAGE_23  = ' '
+ESP_MESSAGE_24  = ' '
+ESP_MESSAGE_25  = ' '
+ESP_SUBJECT     = ' '
+
+/*    Message lines may be continued as shown here, where the   */
+/*    plus sign says continue on the next line and ignore the   */
+/*    leading spaces.                                           */
+/*                                                              */
+/*    ESP_MESSAGE_1  = 'Job !MNJOB has ended with a maximum +   */
+/*                      RC of !MNMXRC..'                        */
+/*                                                              */
+/*    Note that a line can be from 40 to 70 characters without  */
+/*    wrapping in the resulting email.  This is dependent on    */
+/*    the width of the various characters used in the text.     */
+
+  ESP_BG_COLOR    = '#FFFF00'
+
+  ESP_RECIPIENT_1 = 'rcpt to:<POWELLDOUGLAS@bfusa.com>'
+  ESP_RECIPIENT_2 = 'rcpt to:<MARZICKMICKEY@bfusa.com>'
+
+  ESP_MESSAGE_1   = 'ARD003 - COST SHIPMENT HAS COMPLETED.'
+  ESP_MESSAGE_2   = ' '
+  ESP_MESSAGE_3   = ' '
+  ESP_MESSAGE_4   = ' '
+  ESP_MESSAGE_5   = ' '
+  ESP_MESSAGE_7   = ' '
+  ESP_SUBJECT     = 'COMPLETION OF APPL ARD003'
+  RUN DAILY
+ENDJOB
+

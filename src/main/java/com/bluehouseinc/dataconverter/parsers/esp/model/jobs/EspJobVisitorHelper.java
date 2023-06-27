@@ -283,6 +283,8 @@ public class EspJobVisitorHelper {
 				break;
 			case "ESP_SUBJECT":
 			case "ESP_BG_COLOR":
+			case "GENTIME":
+			case "REEXEC":
 				break;
 			default:
 				try {
@@ -561,7 +563,9 @@ public class EspJobVisitorHelper {
 		return (statementType, statementParameters) -> {
 			switch (statementType) {
 			case "ARGS":
+			case "CMDNAME":
 			case "COMMAND":
+			case "MEMBER":
 				break;
 			default:
 				// no statement hit

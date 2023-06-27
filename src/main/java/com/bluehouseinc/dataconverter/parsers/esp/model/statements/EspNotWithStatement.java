@@ -8,8 +8,10 @@ import lombok.EqualsAndHashCode;
 public class EspNotWithStatement {
 
 	String jobName;
-
-	public EspNotWithStatement(String jobName) {
+	String jobGroupName;
+	
+	public EspNotWithStatement(String jobName, String jobgroupname) {
 		this.jobName = jobName;
+		this.jobGroupName = jobgroupname;
 	}
 }

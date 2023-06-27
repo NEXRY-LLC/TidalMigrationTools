@@ -1,0 +1,26 @@
+APPL JCUSRSUB WAIT
+
+/**********************************************************************/
+/*4/26/2017 -JFC- NEW APPL FOR TESTING RUNNING A JOB FROM  */
+/*                BHQSXXX.USER.JCLLIB                                */
+/**********************************************************************/
+/*THIS APPL WILL SUBMIT A JOB FROM A MEMBER IN A BHQSXXX.USER.JCLLIB,
+/*     INSTEAD OF THE NORMAL BANDAG.JCLLIB
+/**********************************************************************/
+/**********************************************************************/
+/* WHEN YOU DEMAND IN THE EVENT:                                    */
+/* 1 - ENTER THE BHQSXXX ID OF THE USER IN "PARAMETER 1" FIELD
+/* 2 - ENTER THE DATASET MEMBER NAME ONLY IN "PARAMETER 2" FIELD
+/**********************************************************************/
+/**********************************************************************/
+
+JOB !USER2..USRJCLLB
+  DATASET '!USER1..USER.JCLLIB'
+  ECHO !USER1
+  ECHO !USER2
+  ECHO !USER3
+  ECHO !USER4
+  RUN WEEKDAYS
+  NOTIFY JOBEND FAILURE ABEND USERS(!USER1)
+ENDJOB
+

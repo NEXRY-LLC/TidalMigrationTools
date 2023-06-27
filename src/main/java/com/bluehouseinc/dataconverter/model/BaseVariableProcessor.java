@@ -42,6 +42,10 @@ public abstract class BaseVariableProcessor<E extends BaseJobOrGroupObject> {
 	@SuppressWarnings("unchecked")
 	public void processJob(E job) {
 
+		if(job.getName().contains("DB0469A.MON")) {
+			job.getName();
+		}
+		
 		List<Field> rawfields = ObjectUtils.getAllKnownFields(job).stream().filter(f -> f.getType().isInstance(new String())).collect(Collectors.toList());
 
 		doProcessStringFields(job, rawfields);

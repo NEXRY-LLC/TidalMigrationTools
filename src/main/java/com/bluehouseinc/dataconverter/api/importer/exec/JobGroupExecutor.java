@@ -99,6 +99,10 @@ public class JobGroupExecutor extends AbstractAPIExecutor {
 
 	protected void doProcessJobThreads(BaseCsvJobObject ajob, ProgressBar bar) {
 
+		if(ajob.getFullPath().contains("DB0469A.MON")) {
+			// This is me.
+			ajob.getName();
+		}
 		doProcessJob(ajob, bar);
 
 		if (!ajob.getChildren().isEmpty()) {
@@ -125,7 +129,7 @@ public class JobGroupExecutor extends AbstractAPIExecutor {
 
 			destination.setName(source.getName());
 
-			if (destination.getName().contains("JDAOP001") || destination.getName().contains("BFUSA_ESP")) {
+			if (destination.getName().contains("DB0469A.MON") || destination.getName().contains("BFUSA_ESP")) {
 				source.getName();
 			}
 

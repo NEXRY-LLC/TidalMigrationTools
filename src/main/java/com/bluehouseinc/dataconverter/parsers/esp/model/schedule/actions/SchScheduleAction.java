@@ -1,5 +1,7 @@
 package com.bluehouseinc.dataconverter.parsers.esp.model.schedule.actions;
 
+import com.bluehouseinc.dataconverter.common.utils.RegexHelper;
+
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -7,6 +9,7 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper=true)
 public class SchScheduleAction extends SchAction {
 
+	static final String SCHED_TIME_STARTING = "^(\\d{2}.\\d{2})\\s(.*)\\sSTARTING.*";
 	private boolean isAtTime = false;
 	private String time;
 	private String calendarData;
@@ -18,7 +21,7 @@ public class SchScheduleAction extends SchAction {
 
 
 	private void  init() {
-		String data = this.data;
+		String data = this.data.trim();
 
 		//SCHEDULE AT 21.00 ON LAST WORKDAY OF EACH MONTH STARTING FRI 31ST MAR 2023
 		if(data.startsWith("AT")) {
@@ -35,6 +38,14 @@ public class SchScheduleAction extends SchAction {
 			time = elements[0]; // First one.
 
 			calendarData = elements[1]; // Rest of it.
+		}else if (RegexHelper.matchesRegexPattern(data, SCHED_TIME_STARTING)) {
+			isAtTime = true;
+			//SCHEDULE 08.10 DAILY STARTING FRI 17TH MAR 2023
+			this.time =  RegexHelper.extractNthMatch(data, SCHED_TIME_STARTING, 0);
+			this.calendarData =  RegexHelper.extractNthMatch(data, SCHED_TIME_STARTING, 1);
 		}
+		
+
+		
 	}
 }

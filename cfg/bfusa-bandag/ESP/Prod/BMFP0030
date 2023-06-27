@@ -1,0 +1,15 @@
+APPL BMFP0030 JOB_ANCESTOR_WAIT
+
+INVOKE 'BANDAG.ESP.APPL.PROCLIB(#DISTRIB)'
+NOTIFY FAILURE ABEND ALERT(REMD)
+
+/******************************************************************
+/* CREATED APPL NEW JOB PER JERRY HICKS - DSG - INC00000XXXXXX
+/******************************************************************
+
+JOB BMFP0030
+  RESOURCE ADD(1,BANDAG)
+  CCCHK RC(1:4095) FAIL CONTINUE
+  RUN TODAY
+ENDJOB
+

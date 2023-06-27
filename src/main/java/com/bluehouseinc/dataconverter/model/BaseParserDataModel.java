@@ -210,8 +210,8 @@ public abstract class BaseParserDataModel<E extends BaseJobOrGroupObject, P exte
 		return ObjectUtils.toFlatStream(this.getDataObjects()).filter(f -> f.getId() == id).findAny().orElse(null);
 	}
 
-	public List<E> getObjectsByType(Class<E> type) {
-		return ObjectUtils.toFlatStream(this.getDataObjects()).filter(f -> type.isInstance(f)).collect(Collectors.toList());
+	public <T extends E> List<T> getObjectsByType(Class<T> type) {
+		return (List<T>) ObjectUtils.toFlatStream(this.getDataObjects()).filter(f -> type.isInstance(f)).collect(Collectors.toList());
 	}
 
 }

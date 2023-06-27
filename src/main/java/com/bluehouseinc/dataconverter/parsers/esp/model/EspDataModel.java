@@ -36,7 +36,7 @@ public class EspDataModel extends BaseParserDataModel<EspAbstractJob, EspConfigP
 
 	@Override
 	public ITransformer<List<EspAbstractJob>, TidalDataModel> getJobTransformer(TidalDataModel model) {
-		return new EspToTidalTransformer2(model);
+		return new EspToTidalTransformer2(model,this);
 	}
 
 	@Override

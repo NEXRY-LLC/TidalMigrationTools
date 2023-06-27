@@ -1,0 +1,16 @@
+APPL BSCP0350 WAIT
+
+INVOKE 'BANDAG.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/**********************************************************************/
+/*VMD 04/06/2018  CREATED NEW APPLICATION                             */
+/**********************************************************************/
+
+NOTIFY FAILURE ABEND ALERT(REMD)
+TAG 'BANDAG'
+
+JOB BSCP0350
+  CCCHK RC(1:4095) FAIL CONTINUE
+  RUN TODAY
+ENDJOB
+

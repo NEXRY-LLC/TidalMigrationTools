@@ -1,5 +1,6 @@
 package com.bluehouseinc.dataconverter.model;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -22,7 +23,7 @@ public abstract class BaseJobOrGroupObject {
 
 
 	@CsvIgnore
-	protected List<? super BaseJobOrGroupObject> children = new LinkedList<>();
+	protected List<? super BaseJobOrGroupObject> children = new ArrayList<>();
 
 	@ToString.Include
 	@EqualsAndHashCode.Include
@@ -81,6 +82,7 @@ public abstract class BaseJobOrGroupObject {
 	public <E extends BaseJobOrGroupObject> void addChild(E child) {
 		child.setParent(this);
 		this.children.add(child);
+		child.getFullPath(); // DO I NEED THIS?
 	}
 
 	void setParent(BaseJobOrGroupObject parent) {

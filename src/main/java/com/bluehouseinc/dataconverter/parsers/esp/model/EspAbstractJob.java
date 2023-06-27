@@ -22,6 +22,7 @@ import lombok.ToString;
 public abstract class EspAbstractJob extends BaseJobOrGroupObject implements EspJob {
 
 	boolean containsIfLogic = false;
+	boolean containsIfLogicCleaned = false;
 	boolean containsAdvancedDelaySubLogic = false;
 	boolean containsAdvancedDueOutLogic = false;
 

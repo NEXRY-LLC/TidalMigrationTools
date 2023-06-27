@@ -1,6 +1,5 @@
 package com.bluehouseinc.dataconverter.parsers.esp.model;
 
-import java.nio.file.Paths;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -53,53 +52,30 @@ public class EspToTidalTransformer2 implements ITransformer<List<EspAbstractJob>
 	SapDataImporter SAPImporter;
 
 	TidalDataModel datamodel;
-
-	public EspToTidalTransformer2(TidalDataModel datamodel) {
+	EspDataModel espdatamodel;
+	
+	public EspToTidalTransformer2(TidalDataModel datamodel,EspDataModel espdatamodel) {
 		this.datamodel = datamodel;
+		this.espdatamodel = espdatamodel;
 		this.SAPImporter = new SapDataImporter(datamodel.getCfgProvider().getProvider());
 	}
 
 	@Override
 	public TidalDataModel transform(List<EspAbstractJob> in) throws TransformationException {
 		in.forEach(f -> doProcessObjects(f, null));
-
-		// List<String> programNames = SAPImporter.getJobNames();
-		//
-		// String dosetreporting = "bfusa/SAPActualData.txt";
-		//
-		// File file = new File(SAPImporter.getSapDataFile());
-		//
-		// CsvToBean<CsvSAPData> saplargedata = SAPImporter.fromFile(file, CsvSAPData.class);
-		//
-		// List<CsvSAPData> actualSAP = new ArrayList<>();
-		//
-		// saplargedata.forEach(f -> {
-		//
-		// if (programNames.contains(f.getJobName())) {
-		//
-		// if (!actualSAP.contains(f)) {
-		// actualSAP.add(f);
-		// log.info("Found SAP Program Name[{}]", f);
-		// }
-		//
-		// }
-		// });
-		//
-		// try {
-		//
-		// CsvExporter.WriteToFile(dosetreporting, actualSAP);
-		//
-		// } catch (Exception e) {
-		// e.printStackTrace();
-		// }
-
 		return datamodel;
 	}
 
 	private void doProcessObjects(EspAbstractJob job, CsvJobGroup parent) {
 
-		if (job.getName().contains("SUNMAINT")) {
-			job.getName().toLowerCase();
+		if (job.getFullPath().startsWith("\\DB0469A")) {
+			if(job.getName().contains("DB0469A.MON")) {
+				job.getName().toLowerCase();
+			}
+			
+			if(job.getFullPath().endsWith("DB0469A.MON")) {
+				job.getName();
+			}
 		}
 		
 		if (job instanceof EspJobGroup) {
@@ -277,6 +253,14 @@ public class EspToTidalTransformer2 implements ITransformer<List<EspAbstractJob>
 			}
 		}
 
+		String agent = in.getAgent();
+	
+		String mapuser = espdatamodel.getConfigeProvider().getAS400RuntimeUserByAgentName(agent);
+		
+		CsvRuntimeUser rte = new CsvRuntimeUser(mapuser);
+		rte.setPasswordForFtpOrAS400("tidal");
+		this.datamodel.addRunTimeUserToJobOrGroup(out, rte);
+		
 	}
 
 	private void processJob(EspSAPBwpcJob in, CsvSAPJob out) {
@@ -502,6 +486,7 @@ public class EspToTidalTransformer2 implements ITransformer<List<EspAbstractJob>
 		if(!StringUtils.isBlank(in.getTag())) {
 			datamodel.addJobTagToJob(out, new CsvJobTag(in.getTag()));
 		}
+		
 	}
 
 	private void doSetCalendarPlaceHolder(EspAbstractJob in, BaseCsvJobObject out) {

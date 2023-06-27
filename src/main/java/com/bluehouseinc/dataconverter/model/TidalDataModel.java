@@ -231,7 +231,7 @@ public class TidalDataModel {
 		}
 
 		if (mapcal != null) {
-			calname = doReplace(cal.getCalendarName(), mapcal);
+			calname = ObjectUtils.replaceWithData(cal.getCalendarName(), mapcal);
 			cal.setCalendarName(calname);
 		}
 
@@ -293,7 +293,7 @@ public class TidalDataModel {
 		String mapagt = this.cfgProvider.getProvider().getConfigurations().getOrDefault(MAP_AGT, null);
 
 		if (mapagt != null) {
-			agentname = doReplace(agentname, mapagt);
+			agentname = ObjectUtils.replaceWithData(agentname, mapagt);
 		}
 
 		String agentlistname = doHandleAgentListDataMapping(ajob, agentname);
@@ -527,10 +527,10 @@ public class TidalDataModel {
 		if (maprte != null) {
 			// Changed this to support user@domain for mappings
 			if (StringUtils.isBlank(rt.getRunTimeUserDomain())) {
-				rt.setRunTimeUserName(doReplace(rt.getRunTimeUserName(), maprte));
+				rt.setRunTimeUserName(ObjectUtils.replaceWithData(rt.getRunTimeUserName(), maprte));
 			} else {
 				// Do domain version mapping
-				String newData = doReplace(rt.getUserAndDomainName(), maprte);
+				String newData = ObjectUtils.replaceWithData(rt.getUserAndDomainName(), maprte);
 
 				if (newData.contains("@")) {
 					String[] d = newData.split("@");
@@ -550,27 +550,7 @@ public class TidalDataModel {
 
 	}
 
-	private String doReplace(String name, String mapdata) {
-		if (mapdata == null || name == null) {
-			return name;
-		}
 
-		List<String> data = new ArrayList<>();
-
-		data = Arrays.asList(mapdata.split("\\s*,\\s*"));
-
-		for (String f : data) {
-			String[] nv = f.split("=");
-			if (nv.length == 2) {
-				if (nv[0].equalsIgnoreCase(name)) {
-					log.debug("doReplace [" + name + "] to Value[" + nv[1] + "]");
-					return nv[1];
-
-				}
-			}
-		}
-		return name;
-	}
 
 	public CsvJobGroup findGroupByName(String name) {
 		return findGroupByName(name, this.jobOrGroups);
@@ -768,7 +748,7 @@ public class TidalDataModel {
 		String mapzone = this.cfgProvider.getProvider().getConfigurations().getOrDefault(MAP_TIMZONE, null);
 
 		if (mapzone != null) {
-			String zoneidname = doReplace(zone.getName(), mapzone);
+			String zoneidname = ObjectUtils.replaceWithData(zone.getName(), mapzone);
 			zone.setTimezoneId(zoneidname);
 		}
 

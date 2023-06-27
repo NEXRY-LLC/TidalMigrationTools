@@ -8,6 +8,7 @@ delete from jobcls
 delete from jobdep 
 delete from jobdtl
 delete from jobmst 
+delete from workrunusr where usrmst_equivalent  in ( select usrmst_id  from usrmst n where usrmst_suser = 'R')
 delete from usrmst where usrmst_suser = 'R'
 delete from evntmst where evntmst_id <> 39
 
@@ -15,5 +16,3 @@ delete from owneragt
 delete from owneragtlst
 delete from nodlstdt 
 delete from varmst 
-delete from owner where owner_id  not in (select usrmst_id from usrmst) and owner_type <> 2
-delete from workrunusr where owner_id  not in ( select owner_id from owner)

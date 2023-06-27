@@ -3,6 +3,7 @@ package com.bluehouseinc.dataconverter.util;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -126,5 +127,36 @@ public abstract class ObjectUtils {
 			}
 		}
 		return fields;
+	}
+	
+	public static String replaceWithData(String name, String mapdata) {
+		return replaceWithData(name,mapdata,false);
+	}
+	
+	public static String replaceWithData(String name, String mapdata, boolean nullifnotfound) {
+		if (mapdata == null || name == null) {
+			return name;
+		}
+
+		List<String> data = new ArrayList<>();
+
+		data = Arrays.asList(mapdata.split("\\s*,\\s*"));
+
+		for (String f : data) {
+			String[] nv = f.split("=");
+			if (nv.length == 2) {
+				if (nv[0].equalsIgnoreCase(name)) {
+					//log.debug("doReplace [" + name + "] to Value[" + nv[1] + "]");
+					return nv[1];
+
+				}
+			}
+		}
+		
+		if(nullifnotfound) {
+			return null;
+		}
+		
+		return name;
 	}
 }

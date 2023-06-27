@@ -87,7 +87,6 @@ public class TivoliParser extends AbstractParser<TivoliDataModel> {
 
 		cpu_processor = new TivoliCPUProcessor();
 		cpu_processor.doProcessFile(cpu);
-		// cpu_processor.getData().forEach(System.out::println);
 
 		var_processor = new TivoliVariableProcessor();
 		var_processor.doProcessFile(var);
@@ -99,14 +98,13 @@ public class TivoliParser extends AbstractParser<TivoliDataModel> {
 		res_processor = new TivoliResourceProcessor();
 		res_processor.doProcessFile(res);
 		
-		sch_processor = new TivoliScheduleProcessor();
-		sch_processor.doProcessFile(sch);
 
 		job_processor = new TivoliJobProcessor(cpu_processor, res_processor);
 		job_processor.doProcessFile(job);
 		
-		
-		job_processor.getData().size();
+		sch_processor = new TivoliScheduleProcessor(job_processor);
+		sch_processor.doProcessFile(sch);
+
 	}
 
 

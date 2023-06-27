@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.bluehouseinc.dataconverter.common.utils.RegexHelper;
 import com.bluehouseinc.dataconverter.model.BaseJobOrGroupObject;
 import com.bluehouseinc.dataconverter.model.TidalDataModel;
 import com.bluehouseinc.dataconverter.model.impl.BaseCsvJobObject;
@@ -38,13 +39,9 @@ public class DependencyGraphMapper {
 
 	public void doProcessJobDepsForJob(EspAbstractJob esp) {
 
-		if (esp.getName().contains("ZOP_RE_BRU_ZASP_ORDER_LIST_CREATE")) {
+		if (esp.getFullPath().startsWith("\\JOBOSS01\\MTIC_LOADBAT")) {
 			esp.getName();
 		}
-		if (esp.getName().contains("SUNMAINT")) {
-			esp.getName();
-		}
-
 
 		BaseCsvJobObject me = this.getDatamodel().findFirstJobByFullPath(esp.getFullPath());
 
@@ -103,16 +100,16 @@ public class DependencyGraphMapper {
 					List<String> releasedJobNames = espReleaseStatement.getReleaseJobs();
 
 					List<BaseJobOrGroupObject> childjobs = new ArrayList<>();
-					
+
 					// Find jobs in our group that I have set a release add statement.. E.G these
 					// must wait on me to complete
-					if(esp instanceof EspJobGroup) {
+					if (esp instanceof EspJobGroup) {
 						// Now that we put deps on groups, we need to check if we are a group vs job.
 						childjobs = esp.getChildren();
-					}else {
+					} else {
 						childjobs = esp.getParent().getChildren();
 					}
-					
+
 					List<BaseJobOrGroupObject> jobsToBeReleased = childjobs.stream().filter(job -> releasedJobNames.contains(job.getName())).collect(Collectors.toList());
 
 					// This is the list of jobs that should be dependent on me to completed.
@@ -140,32 +137,80 @@ public class DependencyGraphMapper {
 		}
 	}
 
-	private void doHandleNotWithStatements(BaseCsvJobObject me, EspAbstractJob esp) {
+	private void doHandleNotWithStatements(BaseCsvJobObject me, final EspAbstractJob esp) {
+
+		String dotDashMatch = "XXXXXXXXXXXXXXXXXXXX\\..+|XXXXXXXXXXXXXXXXXXXX";
+		String dashDotDashMatch = "XXXXXXXXXXXXXXXXXXXX.*";
 
 		// traversing all jobs which must NOT be active in order for CURRENT job to run
 		esp.getStatementObject().getEspNotWithStatements().forEach(statement -> {
 
-			String lookfor = statement.getJobName().trim();
+			final String lookfor = statement.getJobName().trim();
+			String ingroup = statement.getJobGroupName();
 
 			List<EspAbstractJob> mydeps = new ArrayList<>();
 
-			if (lookfor.contains(".-")) {
-				lookfor = lookfor.replace(".-", "");
-				List<EspAbstractJob> founddeps = this.getEspmodel().getBaseObjectsNameBeginsWith(lookfor);
+			if (ingroup != null && !lookfor.contains("-")) {
+				// NOTWITH (MTIC_LOADBAT/WGBOSS01)
 
-				if (!founddeps.isEmpty()) {
-					mydeps.addAll(founddeps);
+				List<EspJobGroup> groups = this.getEspmodel().getObjectsByType(EspJobGroup.class);
+
+				EspJobGroup foundgroup = groups.stream().filter(f -> f.getName().equalsIgnoreCase(ingroup)).findFirst().orElse(null);
+
+				if (foundgroup != null) {
+					final String findme = lookfor;
+					EspAbstractJob foundjob = (EspAbstractJob) foundgroup.getChildren().stream().filter(c -> c.getName().equalsIgnoreCase(findme)).findFirst().orElse(null);
+					mydeps.add(foundjob);
 				} else {
-					log.debug("doHandleNotWithStatements ERROR Unable to set Dependency for Job[" + me.getFullPath() + "] unable to locate [" + lookfor + "]");
+					log.debug("doHandleNotWithStatements ERROR Unable to set Dependency for Job[" + me.getFullPath() + "] unable to locate Job[" + lookfor + "] in group[" + ingroup + "]");
 				}
 
+			} else if (lookfor.contains("-")) {
+				String tempregex = dotDashMatch;
+				String startswith = lookfor;
+
+				if (lookfor.contains("-.-")) {
+					tempregex = dashDotDashMatch;
+					startswith = lookfor.replace("-.-", "");
+				} else if (lookfor.contains(".-")) {
+					tempregex = dotDashMatch;
+					startswith = lookfor.replace(".-", "");
+				} else {
+					// Someting new.
+					startswith = lookfor.replace("-", "");
+				}
+
+				final String regextofind = tempregex.replace("XXXXXXXXXXXXXXXXXXXX", startswith);
+
+				List<EspAbstractJob> data = this.getEspmodel().getBaseObjectsNameBeginsWith(startswith);
+
+				// ONLY JOBS
+				List<EspAbstractJob> matchingdata = data.stream().filter(f -> !f.isGroup() && RegexHelper.matchesRegexPattern(f.getName(), regextofind)).collect(Collectors.toList());
+
+				if (!matchingdata.isEmpty()) {
+					mydeps.addAll(matchingdata);
+				} else {
+					log.debug("doHandleNotWithStatements ERROR Unable to set Dependency for Job[" + me.getFullPath() + "] unable to locate Jobs starting with [" + startswith + "]");
+				}
 			} else {
-				EspAbstractJob mydep = this.getEspmodel().getBaseObjectByName(lookfor);
-				if (mydep != null) {
-					mydeps.add(mydep);
+
+				// No group, just jobs so this should be my jobs in my group. not any other location
+
+				final EspJobGroup myparent = (EspJobGroup) esp.getParent();
+				EspAbstractJob esplocal = esp;
+				// ONLY jobs. 
+				EspAbstractJob foundjob = (EspAbstractJob) myparent.getChildren().stream().filter(c -> c.getName().equalsIgnoreCase(lookfor)).findFirst().orElse(null);
+
+				if (foundjob == null) {
+					foundjob = this.getEspmodel().getBaseObjectByName(lookfor);
+				}
+
+				if (foundjob != null) {
+					mydeps.add(foundjob);
 				} else {
 					log.debug("doHandleNotWithStatements ERROR Unable to set Dependency for Job[" + me.getFullPath() + "] unable to locate [" + lookfor + "]");
 				}
+
 			}
 
 			mydeps.forEach(mydep -> {
@@ -194,6 +239,9 @@ public class DependencyGraphMapper {
 		if (espAfterStatements != null && !espAfterStatements.isEmpty()) {
 
 			espAfterStatements.forEach(jobDepName -> {
+				if(esp.getParent()== null) {
+					return;
+				}
 				BaseJobOrGroupObject matchingEspJob = esp.getParent().getChildren().stream().filter(job -> job.getName().equals(jobDepName.getJobName())).findFirst().orElse(null);
 				if (matchingEspJob != null) {
 					BaseCsvJobObject jobDependency = this.getDatamodel().findFirstJobByFullPath(matchingEspJob.getFullPath());
@@ -215,7 +263,7 @@ public class DependencyGraphMapper {
 		}
 	}
 
-	// FIXME: This code is broken becuase of ESP changes.
+
 	private void doHandleExternalAppIDLogic(BaseCsvJobObject me, EspAbstractJob esp) {
 
 		if (esp.getName().contains("AIPPD040")) {
@@ -230,14 +278,13 @@ public class DependencyGraphMapper {
 				// Must be a group at all times.
 				CsvJobGroup jobgroup = (CsvJobGroup) this.getDatamodel().findGroupByName(externgroup);
 
-				 jobDependency = jobgroup;
+				jobDependency = jobgroup;
 
 				if (jobDependency == null) {
 					log.info("doHandleExternalAppIDLogic Missing Group[" + externgroup + "] Reference for Job[" + me.getFullPath() + "]");
 					return;
 				}
-				
-				
+
 				if (!StringUtils.isBlank(externjob)) {
 					// We have a job to depend on
 
@@ -245,28 +292,27 @@ public class DependencyGraphMapper {
 
 					if (jobdepingroup != null) {
 						jobDependency = jobdepingroup;
-					}else {
+					} else {
 						log.error("doHandleExternalAppIDLogic Missing Job[" + externgroup + "]  In Group Reference for Job[" + me.getFullPath() + "]");
 						return;
 					}
-					
+
 				}
-			}else {
+			} else {
 				if (!StringUtils.isBlank(externjob)) {
 					// No APPID set so this is only to find a job , any job that matches this name.
-				
-					BaseCsvJobObject jobinagroup  = this.getDatamodel().findFirstJobByName(externjob);
-					
+
+					BaseCsvJobObject jobinagroup = this.getDatamodel().findFirstJobByName(externjob);
+
 					if (jobinagroup != null) {
 						jobDependency = jobinagroup;
-					}else {
+					} else {
 						log.error("doHandleExternalAppIDLogic Missing Job[" + jobinagroup + "] No APPID REF");
 						return;
 					}
 				}
 			}
-			
-			
+
 			// status does NOT matter, since this job depends on the OTHER job completing
 			// (NO matter what status) -> setting status to NORMAL
 			// this.getTidal().addJobDependencyForJobCompletedNormal(me, jobDependency,
@@ -274,7 +320,7 @@ public class DependencyGraphMapper {
 			if (jobDependency != null) {
 				log.debug("doHandleAfterStatements Registering Dependency for Job[" + me.getFullPath() + "] this job must be completed [" + jobDependency.getFullPath() + "]");
 
-				this.getDatamodel().addJobDependencyForJob(me, jobDependency,DepLogic.MATCH, Operator.EQUAL, DependentJobStatus.COMPLETED_NORMAL, null);
+				this.getDatamodel().addJobDependencyForJob(me, jobDependency, DepLogic.MATCH, Operator.EQUAL, DependentJobStatus.COMPLETED_NORMAL, null);
 
 			}
 

@@ -23,7 +23,7 @@ public class EspJobsWithIfLogic implements IReporter {
 
 		log.trace("#######################################{}#######################################", this.getClass().getSimpleName());
 
-		espmodel.getDataObjects().forEach(f -> doCount(f));
+		espmodel.getDataObjects().forEach(f -> doCountIfLogicJobs(f));
 
 		jobcount.forEach(f -> {
 
@@ -32,11 +32,31 @@ public class EspJobsWithIfLogic implements IReporter {
 
 		});
 
+		jobcount.clear();
+		
+		
 		log.trace("#######################################{}#######################################", this.getClass().getSimpleName());
 
+		
+		log.trace("#######################################MODIFIED IF {}#######################################", this.getClass().getSimpleName());
+
+		
+		
+		espmodel.getDataObjects().forEach(f -> doCountIfLogicCleaned(f));
+
+		jobcount.forEach(f -> {
+
+			log.trace("{}", f);
+
+
+		});
+		
+		
+		log.trace("#######################################MODIFIED IF {}#######################################", this.getClass().getSimpleName());
+		
 	}
 
-	public void doCount(EspAbstractJob job) {
+	public void doCountIfLogicJobs(EspAbstractJob job) {
 
 
 
@@ -49,8 +69,26 @@ public class EspJobsWithIfLogic implements IReporter {
 		}
 
 		if (!job.getChildren().isEmpty()) {
-			job.getChildren().forEach(c -> doCount((EspAbstractJob) c));
+			job.getChildren().forEach(c -> doCountIfLogicJobs((EspAbstractJob) c));
 		}
 	}
 
+	
+	public void doCountIfLogicCleaned(EspAbstractJob job) {
+
+
+
+		if (job.isContainsIfLogicCleaned()) {
+			String key = job.getFullPath();
+			if (!jobcount.contains(key)) {
+				jobcount.add(key);
+			}
+
+		}
+
+		if (!job.getChildren().isEmpty()) {
+			job.getChildren().forEach(c -> doCountIfLogicCleaned((EspAbstractJob) c));
+		}
+	}
+	
 }

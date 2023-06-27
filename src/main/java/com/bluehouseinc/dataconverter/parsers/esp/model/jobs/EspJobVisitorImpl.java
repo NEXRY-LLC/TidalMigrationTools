@@ -79,13 +79,12 @@ public class EspJobVisitorImpl implements EspJobVisitor {
 
 		lines.forEach(f -> {
 			if (containsIfLogic(f)) {
-
+				job.setContainsIfLogic(true);
 				if (RegexHelper.matchesRegexPattern(f, IF_ELSE_ACTION_STATEMENT)) {
 					String action = RegexHelper.extractNthMatch(f, IF_ELSE_ACTION_STATEMENT, 1);
 					String rundal = RegexHelper.extractNthMatch(f, IF_ELSE_ACTION_STATEMENT, 2);
 					cleaned.add(action + " " + rundal);
-				} else {
-					job.setContainsIfLogic(true);
+					job.setContainsIfLogicCleaned(true);
 				}
 			} else {
 				cleaned.add(f);
@@ -292,17 +291,23 @@ public class EspJobVisitorImpl implements EspJobVisitor {
 		// RELEASE ADD(LIE.!ESPAPPL)
 		// jobs/jobNames containing LIE/LIS (dummy jobs)
 		EspReleaseStatement espReleaseStatement = new EspReleaseStatement();
-		String joinedDependencies = statementParameters.substring(statementParameters.indexOf("(") + 1, statementParameters.indexOf(")"));
-		List<String> jobNames = Arrays.asList(joinedDependencies.split(","));
-		espReleaseStatement.setReleaseJobs(jobNames);
+		
+		if (!statementParameters.contains("(")) {
+			espReleaseStatement.getClass();
+		} else {
+			//EspReleaseStatement espReleaseStatement = new EspReleaseStatement();
+			String joinedDependencies = statementParameters.substring(statementParameters.indexOf("(") + 1, statementParameters.indexOf(")"));
+			List<String> jobNames = Arrays.asList(joinedDependencies.split(","));
+			espReleaseStatement.setReleaseJobs(jobNames);
 
-		String[] parameters = statementParameters.split(" ");
-		if (parameters.length > 2) {
-			String cond = parameters[2];
-			String condRCValue = cond.substring(cond.indexOf("(") + 1, cond.indexOf(")") + 1);
-			espReleaseStatement.setCondition(condRCValue);
+			String[] parameters = statementParameters.split(" ");
+			if (parameters.length > 2) {
+				String cond = parameters[2];
+				String condRCValue = cond.substring(cond.indexOf("(") + 1, cond.indexOf(")") + 1);
+				espReleaseStatement.setCondition(condRCValue);
+			}
+
 		}
-
 		return espReleaseStatement;
 	}
 
@@ -322,12 +327,25 @@ public class EspJobVisitorImpl implements EspJobVisitor {
 		return new EspAfterStatement(jobName, EspJobDependencyTerminationStatus.N);
 	}
 
-	private EspNotWithStatement extractNotWithStatement(String statementParameters) {
-		statementParameters = statementParameters.replace("(", "").replace(")", "");
-		// if (statementParameters.contains("(") && statementParameters.contains(".")) {
-		// return new EspNotWithStatement(statementParameters.substring(statementParameters.indexOf("(") + 1, statementParameters.indexOf(".")));
+	private EspNotWithStatement extractNotWithStatement(String data) {
+
+		data = data.replace("(", "").replace(")", "").trim();
+
+		String jobname = data;
+		String jobgroup = null;
+
+		if (data.contains("/")) {
+			jobname = data.split("/", 2)[0];
+			jobgroup = data.split("/", 2)[1];
+
+		}
+		// else if (data.contains(".")) {
+		// String[] t = data.split("\\.", 2);
+		// jobgroup = t[0];
+		// jobname = t[1];
 		// }
-		return new EspNotWithStatement(statementParameters);
+
+		return new EspNotWithStatement(jobname, jobgroup);
 	}
 
 	private EspRunStatement extractEspRunStatement(String statementParameters) {

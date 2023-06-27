@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 
 import com.bluehouseinc.dataconverter.common.utils.RegexHelper;
 import com.bluehouseinc.dataconverter.parsers.esp.model.util.EspFileReaderUtils;
+import com.bluehouseinc.dataconverter.parsers.tivoli.data.job.TivoliJobProcessor;
 import com.bluehouseinc.dataconverter.parsers.tivoli.data.resource.ResourceData;
 import com.bluehouseinc.dataconverter.parsers.tivoli.data.schedule.job.JobScheduleDetail;
 import com.bluehouseinc.dataconverter.parsers.tivoli.data.schedule.on.RunOn;
@@ -36,6 +37,12 @@ public class TivoliScheduleProcessor {
 
 	Map<String, List<SchedualData>> data = new HashMap<>();
 
+	TivoliJobProcessor jobProcessor;
+	
+	public TivoliScheduleProcessor(TivoliJobProcessor job){
+		this.jobProcessor = job;
+	}
+	
 	public void doProcessFile(File datafile) {
 
 		BufferedReader reader = null;
@@ -88,15 +95,15 @@ public class TivoliScheduleProcessor {
 	private void procesData(final BufferedReader reader, String cpuline) throws IOException {
 
 		String groupname = RegexHelper.extractNthMatch(cpuline, SCHED_PATTERN, 0).trim();
-		String applytojobname = RegexHelper.extractNthMatch(cpuline, SCHED_PATTERN, 1).trim();
+		String workflowname = RegexHelper.extractNthMatch(cpuline, SCHED_PATTERN, 1).trim();
 
-		if (applytojobname.toUpperCase().contains("HNANOTES")) {
-			applytojobname.getBytes();
+		if (workflowname.toUpperCase().contains("HNANOTES")) {
+			workflowname.getBytes();
 		}
 		SchedualData schedule = new SchedualData();
 
 		schedule.setGroupName(groupname);
-		schedule.setName(applytojobname);
+		schedule.setName(workflowname);
 
 		List<String> lines = EspFileReaderUtils.parseJobLines(reader, END_PATTERN, null);
 
