@@ -649,6 +649,8 @@ public class EspParser extends AbstractParser<EspDataModel> {
 		if (data != null) {
 			in.setEventData(data);
 
+			
+			// Per ANkit , if the application (AKA group) in tidal contains a calendar 
 			data.getComments().forEach(c -> in.setComment(in.getComment() + "\n" + c.getData()));
 
 			if (data.isScheduleDataOnly()) {
