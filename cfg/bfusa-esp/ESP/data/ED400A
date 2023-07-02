@@ -1,0 +1,30 @@
+APPL ED400A WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/**********************************************************************/
+/* 05/02/18 -VMD- ADDED JOB ED400G03 TO SCHEDULE PER DANNY MCLEOD     */
+/**********************************************************************/
+
+/*********************************************************************/
+/*01/08/2018 -VMD- ADDED NOTWITH CMD TO JOB ED400B PER D MCLEOD     **/
+/*********************************************************************/
+
+NOTIFY FAILURE ABEND ALERT(REMD)
+
+JOB ED400X
+  CCCHK RC(10:4095) FAIL CONTINUE
+  RUN WEEKDAYS SAT
+  RELEASE ADD(ED400B)
+ENDJOB
+
+JOB ED400B
+  CCCHK RC(6:4095) FAIL CONTINUE
+  RUN WEEKDAYS SAT
+  NOTWITH (ED300A.-)
+  NOTWITH (ED366B.-)
+  NOTWITH (ELD377F1.-)
+  NOTWITH (JDRCVDLY.-)
+  NOTWITH (ED372U01.-)
+ENDJOB
+

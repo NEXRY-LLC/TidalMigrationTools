@@ -1,0 +1,13 @@
+APPL EL01 JOB_ANCESTOR_WAIT
+
+/* Alert to Complete APPL ELD501 id CC=2 IN ELD501 */
+/*                                                                */
+
+
+  IF (!MNAPPL EQ 'ELD501' AND -
+      !MNJOB EQ 'ELD501' AND -
+      !MNHIRC EQ 6) THEN -
+     DO
+       ESP AJ ALL COMPLETE APPL(ELD501.0)
+     ENDDO
+

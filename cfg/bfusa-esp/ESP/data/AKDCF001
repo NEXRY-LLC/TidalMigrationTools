@@ -1,0 +1,32 @@
+APPL AKDCF001 WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/*********************************************************************/
+/*07/08/2018 -JFC- CLEANED UP PROC - ADDED LIE - NO OTHER CHANGES
+/*07/08/2018 -JFC- CHANGED EVENT SUBTIMES LESS 2 HOURS AND ADDED
+/*               - RELDELAY TO LIS
+/*03/31/2022 -VV - added domain to user maestro
+/*********************************************************************/
+
+NOTIFY FAILURE ABEND ALERT(REMD)
+
+JOB LIS.!ESPAPPL LINK PROCESS
+  RUN DAILY
+  RELDELAY 120
+  RELEASE ADD(CFDOWNLOADBAT)
+ENDJOB
+
+NT_JOB CFDOWNLOADBAT
+  AGENT CYBA_CDC1AKFIS
+  CMDNAME D:\PLTD_TESS\CFDownload.bat
+  ARGS
+  RUN DAILY
+  USER bfusa\maestro
+  RELEASE ADD(LIE.!ESPAPPL)
+ENDJOB
+
+JOB LIE.!ESPAPPL LINK PROCESS
+   RUN DAILY
+ENDJOB
+

@@ -1,0 +1,18 @@
+APPL DS04 JOB_ANCESTOR_WAIT                                             00010001
+                                                                        00020000
+/* ALERT FOR APPL DSDJDA01 WHEN IT RUNS LONGER THAN 30 MINUTES          00030002
+/* WILL GENERATE CONSOLE MESSSGAE TO CONTACT D. WILLARD IMMEDIATELY.    00030102
+                                                                        00030202
+JCLLIB 'FTRF.PRDJOBS'                                                   00070000
+COPYJCL 'SWS.ESP.COPYLIB'                                               00080000
+TEMPLIB 'SWS.ESP.TEMPLIB'                                               00090000
+DOCLIB 'SWS.ESP.DOCLIB'                                                 00100000
+                                                                        00110000
+IF !ESPAPSUB# > 1 THEN JCLLIB 'SWS.ESP.COPYLIB'                         00120000
+                                                                        00130000
+OPTIONS RESTARTSTEP                                                     00140000
+                                                                        00150000
+JOB DSDJDAMN                                                            00160001
+   RUN NOW                                                              00170000
+ENDJOB                                                                  00180000
+                                                                        00190000

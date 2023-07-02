@@ -1,0 +1,39 @@
+APPL ARD002D WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/*********************************************************************/
+/*11/12/2018 -JFC- CLEANED UP PROC - CHANGED DUMMY ZOS TO LINK JOB
+/*08/26/2019 -JFC- REMOVED UNKOWN ALERT BL01 FROM APPL               */
+/*********************************************************************/
+
+NOTIFY ABEND FAILURE ALERT(REMD)
+
+FILE_TRIGGER ENTIRENET_INVOICES_COMPLETE
+   AGENT CYBB_BFP030
+   FILENAME /data/BFP/interfaces/output/dataout/+
+   zsdbli10_invoice_ent_complete.txt CREATE NOCHANGE(1)
+   RUN DAILY EXCEPT MON
+   RELEASE ADD(ARCARD002)
+ENDJOB
+
+UNIX_JOB ARCARD002
+   AGENT CYBA_ISBFP3
+   USER bfpadm
+   SCRIPTNAME /local/bin/arcfile.sh
+   ARGS interfaces/output/dataout/zsdbli10_invoice_ent_complete.txt D
+   RUN DAILY EXCEPT MON
+   RELEASE ADD(SUSPEND_ARD002TR)
+ENDJOB
+
+JOB SUSPEND_ARD002TR LINK PROCESS
+   RUN DAILY EXCEPT MON
+   ESP SUSPEND AR01.ARD002TR
+   RELEASE ADD(LIE.!ESPAPPL)
+ENDJOB
+
+JOB LIE.!ESPAPPL LINK PROCESS
+   RUN DAILY
+   DUEOUT EXEC NOW PLUS 9 HOURS
+ENDJOB
+

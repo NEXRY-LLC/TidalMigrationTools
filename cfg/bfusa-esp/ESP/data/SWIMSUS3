@@ -1,0 +1,31 @@
+APPL SWIMSUS3 WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/*********************************************************************/
+/*05/02/2019 -JFC- CLEANED UP PROC - ADDED LIE - NO OTHER CHANGES
+/*********************************************************************/
+
+NOTIFY FAILURE ABEND ALERT(REMD)
+
+JOB LIS.!ESPAPPL LINK PROCESS
+   RUN DAILY
+   RELEASE ADD(SWIMSUS3)
+ENDJOB
+
+JOB SWIMSUS3
+  CCCHK RC(1:4095) FAIL CONTINUE
+  RUN ANY
+  RELEASE ADD(SWIMSUS4)
+ENDJOB
+                                                                        00300020
+JOB SWIMSUS4
+  CCCHK RC(1:4095) FAIL CONTINUE
+  RUN ANY
+  RELEASE ADD(LIE.!ESPAPPL)
+ENDJOB
+
+JOB LIE.!ESPAPPL LINK PROCESS
+  RUN DAILY
+ENDJOB
+                                                                        00300020

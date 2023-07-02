@@ -1,0 +1,99 @@
+APPL JOGLM024 WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/*********************************************************************/
+/*06/11/19 -JFC- ADDED NOTIFY TO MY EMAIL SO I COULD GRAB CD DATA
+/*10/03/19 -JFC- DELETED NOTIFY I ADDED EARLIER - I GOT THE INFO     */
+/*********************************************************************/
+
+NOTIFY FAILURE ABEND ALERT(REMD)
+
+DATA_OBJECT PARMSET.!ESPAPPL
+   /*Create a timestamp in hhmmMMDDYY format*/
+   SETVAR TMSTMP='!ESPSHH.:!ESPSMN.,!ESPSMM./!ESPSDD./!ESPSYY'
+   SETVAR PID=''
+   SETVAR STMPTM='!ESPSMM./!ESPSDD./!ESPSYY.,!ESPSHH.:!ESPSMN'
+ENDJOB
+
+JOB LIS.!ESPAPPL LINK PROCESS
+   RUN TODAY
+   RELEASE ADD(GLM024JOCD)
+ENDJOB
+
+JOB SETPID.!ESPAPPL LINK PROCESS
+   /*get the next PID number from the ConnectDirect*/
+   /*Process ID table (CDPROD).  Save the value into*/
+   /*the applications DataObject for use by the C:D*/
+   /*job and the CDSTAT job (if needed).*/
+   VINCR (PID) TABLE(CDPROD) CLANG
+   VGET  (PID) TABLE(CDPROD) CLANG
+   ESP MGRMSG * . . . PARMSET.!ESPAPPL/!ESPAPPL..!ESPAPGEN/MAIN +
+   ACTION SET PID(!PID)
+   RUN TODAY
+   RELEASE ADD(GLM024JOCD)
+ENDJOB
+
+UNIX_JOB GLM024JOCD
+   AGENT CYBA_ISBFP3
+   PID= WOBDATA('PARMSET.!ESPAPPL','PID')
+   TMSTMP= WOBDATA('PARMSET.!ESPAPPL','TMSTMP')
+   SCRIPTNAME /apps/condir/bfsbin/submitcd.sh
+   ARGS glm024jo.cd 5 !PID !TMSTMP
+   RESOURCE ADD(1,ISBFP3CD)
+   USER cdprod
+   RUN TODAY
+    RELDELAY 1
+   RELEASE ADD(CDSTAT.GLM024JO(A))
+   RELEASE ADD(ZFIGLI64_88JO_CLOCK_ACCRUAL)
+ENDJOB
+
+AIX_JOB CDSTAT.GLM024JO CONDITIONAL
+   AGENT CYBA_ISBFP3
+   /*This job only runs if the C:D job does not end with*/
+   /*a EXITCODE of 0.  It can be rerun as often as*/
+   /*required to check the status of the C:D process.*/
+   /*When the C:D process finishes, complete the job*/
+   /*to release the successors.*/
+   USER cduser
+   STMPTM= WOBDATA('PARMSET.!ESPAPPL','STMPTM')
+   PID= WOBDATA('PARMSET.!ESPAPPL','PID')
+   CMDNAME /apps/condir/bfsbin/cdstat.sh
+   ARGS !STMPTM  j!PID
+   RUN TODAY
+ENDJOB
+
+SAP_JOB ZFIGLI64_88JO_CLOCK_ACCRUAL
+    SAPUSER SAPADM
+    AGENT CYBB_BFP030
+    SAPJOBNAME 'ZFIGLI64_88JO CLOCK - ACCRUAL'
+    SAPJOBCLASS C
+    ABAPNAME ZFIGLI64
+    VARIANT '88 CLOCK ACCR'
+    LANGUAGE E
+    PRINTDEST DZ01
+    PRINTCOPIES 001
+    PRINTIMMED YES
+    EXPIRATION 8
+    COLUMNS 132
+    BANNERPAGE YES
+    BANNER YES
+    RECIPIENT SIGOUINJEAN
+    ARCMODE PRINT
+    RUN TODAY
+    RELEASE ADD(GL24JOXX.ISBFP3)
+ENDJOB
+
+UNIX_JOB GL24JOXX.ISBFP3
+   AGENT CYBA_ISBFP3
+   SCRIPTNAME /local/bin/arcfile.sh
+   ARGS interfaces/input/datain/zfigli64_iid_clock_accrual_88 M
+   USER bfpadm
+   RUN TODAY
+   RELEASE ADD(LIE.!ESPAPPL)
+ENDJOB
+
+JOB LIE.!ESPAPPL LINK PROCESS
+   RUN TODAY
+ENDJOB
+

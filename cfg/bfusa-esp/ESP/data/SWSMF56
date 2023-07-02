@@ -1,0 +1,57 @@
+APPL SWSMF56 WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/*********************************************************************/
+/*01/14/2019 -JFC- CLEANED UP PROC - ADDED LIE - NO OTHER CHANGES
+/*********************************************************************/
+
+/*********************************************************************/
+/* GENTIME AND VARIABLES FOR JOB SWSMF56B
+/*********************************************************************/
+/*********************************************************************/
+GENTIME TL1Y TODAY LESS 1 YEAR
+USER4 = '!TL1YYEAR'
+/*********************************************************************/
+/*  USER3 IS CURRENT YEAR
+USER3 = '!ESPSYY'
+/*********************************************************************/
+
+JOB LIS.!ESPAPPL LINK PROCESS
+  RUN DAILY
+  ECHO USER3 = !USER3
+  ECHO USER4 = !USER4
+  RELEASE ADD(SWSMF56)
+  RELEASE ADD(SWSMFMTH)
+ENDJOB
+
+JOB SWSMF56
+  CCCHK RC(1:4095) FAIL CONTINUE
+  RUN WEEKDAYS SAT
+  RELEASE ADD(SWSMF56B)
+  RELEASE ADD(SWCOBUS5)
+ENDJOB
+
+JOB SWCOBUS5
+  CCCHK RC(1:4095) FAIL CONTINUE
+  RUN DAILY
+  RELEASE ADD(LIE.!ESPAPPL)
+ENDJOB
+
+JOB SWSMF56B
+  RUN 2ND MONDAY OF JANUARY
+  NOTIFY JOBEND ALERT(SW01)
+  RELEASE ADD(SWCOBUS5)
+ENDJOB
+
+JOB SWSMFMTH
+  CCCHK RC(1:4095) FAIL CONTINUE
+  RUN 2ND MONDAY OF MONTH
+  RELEASE ADD(LIE.!ESPAPPL)
+ENDJOB
+
+JOB LIE.!ESPAPPL LINK PROCESS
+  RUN DAILY
+  DUEOUT EXEC NOW PLUS 4 HOURS
+ENDJOB
+

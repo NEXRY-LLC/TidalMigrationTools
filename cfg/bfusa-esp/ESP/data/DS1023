@@ -1,0 +1,29 @@
+APPL DS1023 WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/**********************************************************************/
+/* 01/24/23 - CREATED PER KULKARNI ANKITA-RITM0252832
+/**********************************************************************/
+
+NOTIFY ABEND FAILURE ALERT(REMD)
+
+JOB LIS.!ESPAPPL LINK PROCESS
+   RUN DAILY
+   DELAYSUB 23:00
+   RELEASE ADD(JOB_INTERFACE_1023)
+ENDJOB
+
+LINUX_JOB JOB_INTERFACE_1023
+   AGENT LNX_DSRSAP01PAKR
+   USER bodsadmin
+   SCRIPTNAME /opt/ds_install/dataservices/JOB_scripts/+
+   JOB_INTERFACE_1023.sh
+   RUN DAILY
+   RELEASE ADD(LIE.!ESPAPPL)
+ENDJOB
+
+JOB LIE.!ESPAPPL LINK PROCESS
+   RUN DAILY
+   DUEOUT EXEC NOW PLUS 1 HOURS
+ENDJOB

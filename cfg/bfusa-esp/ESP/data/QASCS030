@@ -1,0 +1,46 @@
+APPL QASCS030 WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/*********************************************************************/
+/* 11/16/2015 - ADDED EXTERNAL TO 1182 - JFC                         */
+/* 11/16/2015 - CHANGED ALL JOBS FROM RUN 20TH DAY OF MONTH - JFC    */
+/* THIS APPL TRIGGERS QASCS008 - JFC                                 */
+/*********************************************************************/
+
+/*********************************************************************/
+/*02/19/2019 -VMD-  RENAMED LIE JOBS, USED CLANG VARIABLE FOR JOB NAME
+/*********************************************************************/
+
+NOTIFY FAILURE ABEND ALERT(REMD)
+NOTIFY FAILURE ABEND MAILBOX(QAFAIL1)
+NOTIFY OVERDUE MAILBOX(QAFAIL1)
+TAG PPIW
+
+NT_JOB INTERFACE_1182 EXTERNAL APPLID(SSISPPIW) SCOPE(-13)
+   RUN 2ND DAY OF MONTH
+   RELEASE ADD(LIS.!ESPAPPL)
+ENDJOB
+
+JOB LIS.!ESPAPPL LINK PROCESS
+  RUN 2ND DAY OF MONTH
+  RELEASE ADD(SCS_TBL_Orders_Rollupcmd)
+ENDJOB
+
+NT_JOB SCS_TBL_Orders_Rollupcmd
+  AGENT CYBA_PPIWPROD
+  CMDNAME X:\CMD_SCRIPTS\SCS_TBL_Orders_Rollup.cmd
+  RUN 2ND DAY OF MONTH
+  USER maestro
+  DUEOUT EXEC 7AM
+  RELEASE ADD(LIE.!ESPAPPL)
+ENDJOB
+
+NT_JOB LIE.!ESPAPPL
+  AGENT CYBA_PPIWPROD
+  CMDNAME X:\cmd_scripts\LinkedInEnd.cmd
+  ARGS
+  USER maestro
+  RUN 2ND DAY OF MONTH
+ENDJOB
+

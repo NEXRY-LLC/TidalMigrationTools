@@ -6,6 +6,7 @@ import com.bluehouseinc.tidal.api.model.job.JobType;
 import com.bluehouseinc.tidal.api.model.job.service.ServiceJob;
 import com.bluehouseinc.tidal.api.model.service.Service;
 import com.bluehouseinc.tidal.api.model.users.Users;
+import com.bluehouseinc.tidal.utils.StringUtils;
 import com.bluehouseinc.transform.ITransformer;
 import com.bluehouseinc.transform.TransformationException;
 
@@ -56,23 +57,24 @@ public class SAPJobTransformer implements ITransformer<CsvSAPJob, ServiceJob> {
 			Users rte = tidal.getUserByAccountNameAndDomain(in.getRuntimeUser().getRunTimeUserName(),null);
 			log.debug("SAPJobTransformer transform -> processing(" + in.getFullPath() + ")");
 
-			String plist = in.getPlist() == null ? "" : in.getPlist();
-			String programName = in.getProgramName() == null ? "BLUEHOUSE-PROGRAMNAME" : in.getProgramName();
-			String variant = in.getVariant() == null ? "BLUEHOUSE-VARIANT" : in.getVariant();
-			String columns = in.getPrintColumns() == null ? "1" : in.getPrintColumns().toString();
-			String recipient = in.getPrintRecipient() == null ? "BLUEHOUSE" : in.getPrintRecipient();
-			String departement = in.getPrintDept() == null ? "" : in.getPrintDept();
-			String expire = in.getPrintExpire() == null ? "8" : in.getPrintExpire().toString();
-			String printcopies = in.getPrintCopies() == null ? "1" : in.getPrintCopies().toString();
-			String printrows = in.getPrintRows() == null ? "65" : in.getPrintRows().toString();
-			String printspoolname = in.getPrintSpoolName() == null ? plist : in.getPrintSpoolName();;
 			
+			String plist = StringUtils.getOr(in.getPlist(), "");
+			String programName = StringUtils.getOr(in.getProgramName(), "BLUEHOUSE-PROGRAMNAME");
+			String variant = StringUtils.getOr(in.getVariant(), "BLUEHOUSE-VARIANT");
+			String recipient = StringUtils.getOr(in.getPrintRecipient(), "");
+			String departement = StringUtils.getOr(in.getPrintDept(), "");
+			String expire = StringUtils.getOr(in.getPrintExpire(), "");
+			String printcopies = StringUtils.getOr(in.getPrintCopies(), "");
+			String printcolumns = StringUtils.getOr(in.getPrintColumns(), "132");
+			String printrows = StringUtils.getOr(in.getPrintRows(), "65");
+			String printspoolname = StringUtils.getOr(in.getPrintSpoolName(), "");
+			String jobclass = StringUtils.getOr(in.getJobSAPClass(), "");
 
 			String extJobrun = getRunCopyNew().replace("$$RTEID$$", Integer.toString(rte.getId())).replace("$$JOBCLASS$$", in.getJobSAPClass() == null ? "" : in.getJobSAPClass()).replace("$$JOBNAME$$", in.getJobName().toUpperCase())
 					.replace("$$VARIANT$$", variant).replace("$$PROGNAME$$", programName).replace("$$PDEST$$", in.getPdest() == null ? "" : in.getPdest()).replace("$$PRCOP$$", in.getPrcop() == null ? "1" : "1")
 					.replace("$$PLIST$$", plist).replace("$$PRTXT$$", in.getPrtxt() == null ? "" : in.getPrtxt()).replace("$$PRBER$$", in.getPrber() == null ? "" : in.getPrber())
 					.replace("$$RTENAME$$", in.getRuntimeUser().getRunTimeUserName()).replace("$$RECIPIENT$$", recipient)
-					.replace("$$COLUMNS$$", columns).replace("$$DEPARTMENT$$", departement)
+					.replace("$$COLUMNS$$", printcolumns).replace("$$DEPARTMENT$$", departement)
 					.replace("$$EXPIRE$$", expire).replace("$$PRINTCOPY$$", printcopies)
 					.replace("$$ROWS$$", printrows).replace("$$SPOOLNAME$$", printspoolname);
 

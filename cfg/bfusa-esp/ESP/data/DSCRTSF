@@ -1,0 +1,30 @@
+APPL DSCRTSF WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/**********************************************************************/
+/* 12/26/22 - CREATED PER ANKITA KULKARNI -RITM0245433
+/**********************************************************************/
+
+NOTIFY ABEND FAILURE ALERT(REMD)
+
+JOB LIS.!ESPAPPL LINK PROCESS
+   RUN DAILY
+   DELAYSUB 01.00
+   RELEASE ADD(JOB_BW_CUST_SF_LOAD)
+ENDJOB
+
+LINUX_JOB JOB_BW_CUST_SF_LOAD
+   AGENT LNX_DSRSAP01PAKR
+   user bodsadmin
+   scriptname /opt/ds_install/dataservices/JOB_scripts/+
+   JOB_BW_CUST_SF_LOAD.sh
+   RUN DAILY
+   RELEASE ADD(LIE.!ESPAPPL)
+ENDJOB
+
+JOB LIE.!ESPAPPL LINK PROCESS
+   RUN DAILY
+   DUEOUT EXEC NOW PLUS 1 HOURS
+ENDJOB
+

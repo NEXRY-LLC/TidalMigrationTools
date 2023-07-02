@@ -1,0 +1,131 @@
+APPL DMPPD050 WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/**********************************************************************/
+/*INT-162 DesMoines Raw Material Consumption                          */
+/*F131RMGI creates the Raw Material Consumption file                  */
+/*F131RAWC (f131rawcon.cd) moves the raw materials file from +        */
+/*      the AS400 to UNIX                                             */
+/*ZMMIMI04 (zmmimi04_f131_rm_gi) SAP raw material process             */
+/*F131RMDL Clears the Raw Material Consumption file for the +         */
+/*     next processing cycle                                          */
+/*ARDMRMGI  Archives F131_RM_GI                                       */
+/**********************************************************************/
+/* 07/23/2018 -JFC- CHANGED ARCHIVE FOLDER FROM W TO D
+/* 02/14/2019 -JFC- REMOVED ALERT DM03 PER INC000001852710
+/* 02/24/2020 -JFC- UPDATED AGENT FROM R7 TO R11.5.0
+/*                - CHANGED JOBQ FROM CYBESPV210.CYBESPV2100
+/* 03/05/2020 -DSG- ADDED RESOURCE TO AS400 JOBS - INC000002178390
+/**********************************************************************/
+
+NOTIFY FAILURE ABEND ALERT(REMD)
+
+DATA_OBJECT PARMSET.!ESPAPPL
+   /*Create a timestamp in hhmmMMDDYY format*/
+   SETVAR TMSTMP='!ESPSHH.:!ESPSMN.,!ESPSMM./!ESPSDD./!ESPSYY'
+   SETVAR PID=''
+   SETVAR STMPTM='!ESPSMM./!ESPSDD./!ESPSYY.,!ESPSHH.:!ESPSMN'
+ENDJOB
+
+JOB LIS.!ESPAPPL LINK PROCESS
+    RUN DAILY
+     IF ESPSHH = '05' THEN DELAYSUB 07.30
+     IF ESPSHH = '17' THEN DELAYSUB 19.30
+    RELEASE ADD(F131RMGI.DM400A)
+ENDJOB
+
+AS400_JOB F131RMGI.DM400A
+    RESOURCE ADD(1,DM400A)
+    AGENT DM400A
+    COMMAND CYBROBOT F131RMGI
+    JOBQ CAWAAGENT.CYBESPJOBS
+    RUN DAILY
+    RELEASE ADD(F131RAWCONCD)
+ENDJOB
+
+JOB SETPID.!ESPAPPL LINK PROCESS
+    /*get the next PID number from the ConnectDirect*/
+    /*Process ID table (CDPROD).  Save the value into*/
+    /*the applications DataObject for use by the C:D*/
+    /*job and the CDSTAT job (if needed).*/
+    VINCR (PID) TABLE(CDPROD) CLANG
+    VGET  (PID) TABLE(CDPROD) CLANG
+    ESP MGRMSG * . . . PARMSET.!ESPAPPL/!ESPAPPL..!ESPAPGEN/MAIN +
+ ACTION SET PID(!PID)
+    RUN DAILY
+    RELEASE ADD(F131RAWCONCD)
+ENDJOB
+
+UNIX_JOB F131RAWCONCD
+    AGENT CYBA_ISBFP3
+    EARLYSUB REALNOW PLUS 20 SECONDS
+    PID= WOBDATA('PARMSET.!ESPAPPL','PID')
+    TMSTMP= WOBDATA('PARMSET.!ESPAPPL','TMSTMP')
+    SCRIPTNAME /apps/condir/bfsbin/submitcd.sh
+    ARGS f131rawcon.cd 5 !PID !TMSTMP
+    RESOURCE ADD(1,ISBFP3CD)
+    USER cdprod
+    RUN DAILY
+    RELEASE ADD(CDSTAT.F131RAWC(A))
+    RELEASE ADD(ZMMIMI04_F131_RM_GI)
+ENDJOB
+
+AIX_JOB CDSTAT.F131RAWC     CONDITIONAL
+    AGENT CYBA_ISBFP3
+    /*This job only runs if the C:D job does not end with*/
+    /*a EXITCODE of 0.  It can be rerun as often as*/
+    /*required to check the status of the C:D process.*/
+    /*When the C:D process finishes, complete the job*/
+    /*to release the successors.*/
+    USER cduser
+    STMPTM= WOBDATA('PARMSET.!ESPAPPL','STMPTM')
+    PID= WOBDATA('PARMSET.!ESPAPPL','PID')
+    CMDNAME /apps/condir/bfsbin/cdstat.sh
+    ARGS !STMPTM  j!PID
+    RUN DAILY
+ENDJOB
+
+SAP_JOB ZMMIMI04_F131_RM_GI
+    AGENT CYBB_BFP030
+    SAPJOBNAME ZMMIMI04_F131_RM_GI
+    SAPUSER SAPADM
+    SAPJOBCLASS C
+    ABAPNAME ZMMIMI04
+    VARIANT 'VARIANT F131'
+    LANGUAGE E
+    PRINTDEST DP33
+    PRINTCOPIES 001
+    EXPIRATION 8
+    COLUMNS 132
+    BANNER YES
+    RECIPIENT S_BC_CYBERM
+    ARCMODE PRINT
+    RUN DAILY
+    RELEASE ADD(F131RMDL.DM400A)
+ENDJOB
+
+AS400_JOB F131RMDL.DM400A
+    RESOURCE ADD(1,DM400A)
+    AGENT DM400A
+    COMMAND CYBROBOT F131RMDL
+    JOBQ CAWAAGENT.CYBESPJOBS
+    RUN DAILY
+    RELEASE ADD(AR_F131_RM_GI)
+ENDJOB
+
+UNIX_JOB AR_F131_RM_GI
+    AGENT CYBA_ISBFP3
+    SCRIPTNAME /local/bin/arcfile.sh
+    ARGS interfaces/input/datain/F131_RM_GI D
+    USER bfpadm
+    RUN DAILY
+    RELEASE ADD(LIE.!ESPAPPL)
+ENDJOB
+
+JOB LIE.!ESPAPPL LINK PROCESS
+    RUN DAILY
+    IF ESPSHH = '05' THEN DUEOUT EXEC 08.30
+    IF ESPSHH = '17' THEN DUEOUT EXEC 20.00
+ENDJOB
+

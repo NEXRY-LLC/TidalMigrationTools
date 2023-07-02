@@ -1,0 +1,25 @@
+APPL SWIMSUS5 JOB_ANCESTOR_WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/*********************************************************************/
+/*05/02/2019 -JFC- CLEANED UP PROC - ADDED LIE - NO OTHER CHANGES
+/*********************************************************************/
+
+NOTIFY FAILURE ABEND ALERT(REMD)
+
+JOB LIS.!ESPAPPL LINK PROCESS
+  RUN SATURDAY
+  RELEASE ADD(SWIMSUS5)
+ENDJOB
+
+JOB SWIMSUS5
+  CCCHK RC(1:4095) FAIL CONTINUE
+  RUN SATURDAY
+  RELEASE ADD(LIE.!ESPAPPL)
+ENDJOB
+
+JOB LIE.!ESPAPPL LINK PROCESS
+  RUN SATURDAY
+ENDJOB
+                                                                        00300020

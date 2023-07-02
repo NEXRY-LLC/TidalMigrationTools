@@ -1,0 +1,12 @@
+APPL OM01 JOB_ANCESTOR_WAIT
+
+/* Alert to Complete APPL OMDDAILY WHEN CC=0149 = EMPTY FILE */
+/*                                                                */
+
+  IF (!MNAPPL EQ 'OMDDAILY' AND -
+      !MNJOB EQ 'OMD600' AND -
+      !MNHIRC EQ 149) THEN -
+     DO
+       ESP AJ ALL COMPLETE APPL(OMDDAILY.0)
+     ENDDO
+

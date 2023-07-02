@@ -1,0 +1,141 @@
+APPL JOPPD050 WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/*********************************************************************/
+/* 01/04/2017 -JFC- CHANGED PRINTIMMED FROM YES TO NO
+/* 07/23/2018 -JFC- CHANGED ARCHIVE FOLDER FROM W TO D
+/* 02/14/2019 -JFC- REMOVED ALERT JO03 PER INC000001852710
+/* 02/25/2020 -DSG- UPDATED AGENT FROM R7 TO R11.5.0
+/*                - CHANGED JOBQ FROM CYBESPV210.CYBESPV2100
+/* 03/05/2020 -DSG- ADDED RESOURCE TO AS400 JOBS - INC000002178387
+/*********************************************************************/
+/**INT-162 JOLIETTE Raw Material Consumption                         */
+/**F201RMGI creates the Raw Material Consumption file                */
+/**F201RMCD (f201rawcon.cd) moves the raw materials file from the    */
+/*AS400 to UNIX                                                      */
+/**JOMIMI04 (zmmimi04_f201_rm_gi) SAP raw material process           */
+/**F201RMDL  Clears the Raw Material Consumption file for thenext +  */
+/*processing cycle                                                   */
+/**ARJORMGI  Archives file f201_rm_gi                                */
+/*********************************************************************/
+
+NOTIFY ABEND FAILURE ALERT(REMD)
+
+JOB BFPULOCK EXTERNAL SCHEDULED(YESTERDAY) APPLID(SUNMAINT) SCOPE(-04)
+   IF ESPSHH = '00' & TODAY('MONDAY') THEN RUN TODAY
+   RELEASE ADD(LIS.!ESPAPPL)
+ENDJOB
+
+JOB LIS.!ESPAPPL LINK PROCESS
+   RUN DAILY
+   RELEASE ADD(JOF201RMGI)
+ENDJOB
+
+DATA_OBJECT PARMSET.!ESPAPPL
+   /*Create a timestamp in hhmmMMDDYY format*/
+   SETVAR TMSTMP='!ESPSHH.:!ESPSMN.,!ESPSMM./!ESPSDD./!ESPSYY'
+   SETVAR PID=''
+   SETVAR STMPTM='!ESPSMM./!ESPSDD./!ESPSYY.,!ESPSHH.:!ESPSMN'
+ENDJOB
+
+JOB SETPID.!ESPAPPL LINK PROCESS
+   /*get the next PID number from the ConnectDirect*/
+   /*Process ID table (CDPROD).  Save the value into*/
+   /*the applications DataObject for use by the C:D*/
+   /*job and the CDSTAT job (if needed).*/
+   VINCR (PID) TABLE(CDPROD) CLANG
+   VGET  (PID) TABLE(CDPROD) CLANG
+   ESP MGRMSG * . . . PARMSET.!ESPAPPL/!ESPAPPL..!ESPAPGEN/MAIN +
+ACTION SET PID(!PID)
+   RUN DAILY
+   RELEASE ADD(RAW_MATERIAL_CONSUMPTION_FOR_F201CD)
+ENDJOB
+
+AS400_JOB JOF201RMGI
+  RESOURCE ADD(1,AKNITS)
+   AGENT AKNITS
+   COMMAND CYBROBOT JOF201RMGI
+   JOBQ CAWAAGENT.CYBESPJOBS
+   RUN DAILY
+   RELEASE ADD(RAW_MATERIAL_CONSUMPTION_FOR_F201CD)
+ENDJOB
+
+UNIX_JOB RAW_MATERIAL_CONSUMPTION_FOR_F201CD
+   AGENT CYBA_ISBFP3
+   EARLYSUB REALNOW PLUS 20 SECONDS
+   PID= WOBDATA('PARMSET.!ESPAPPL','PID')
+   TMSTMP= WOBDATA('PARMSET.!ESPAPPL','TMSTMP')
+   SCRIPTNAME /apps/condir/bfsbin/submitcd.sh
+   ARGS raw_material_consumption_for_f201.cd 7 !PID !TMSTMP
+   RESOURCE ADD(1,ISBFP3CD)
+   USER cdprod
+   RUN DAILY
+   RELEASE ADD(CDSTAT.F201RMCD(A))
+   RELEASE ADD(ZMMIMI04_F201_RM_GI)
+ENDJOB
+
+AIX_JOB CDSTAT.F201RMCD CONDITIONAL
+   AGENT CYBA_ISBFP3
+   /*This job only runs if the C:D job does not end with*/
+   /*a EXITCODE of 0.  It can be rerun as often as*/
+   /*required to check the status of the C:D process.*/
+   /*When the C:D process finishes, complete the job*/
+   /*to release the successors.*/
+   USER cduser
+   STMPTM= WOBDATA('PARMSET.!ESPAPPL','STMPTM')
+   PID= WOBDATA('PARMSET.!ESPAPPL','PID')
+   CMDNAME /apps/condir/bfsbin/cdstat.sh
+   ARGS !STMPTM  j!PID
+   RUN DAILY
+ENDJOB
+
+SAP_JOB ZMMIMI04_F201_RM_GI
+   AGENT CYBB_BFP030
+   SAPJOBNAME ZMMIMI04_F201_RM_GI
+   SAPJOBCLASS A
+   ABAPNAME ZMMIMI04
+   VARIANT 'VARIANT F201'
+   STEPUSER SAPADM
+   LANGUAGE F
+   PRINTDEST LP01
+   PRINTCOPIES 001
+   EXPIRATION 8
+   COLUMNS 80
+   BANNER D
+   ARCMODE PRINT
+   RUN DAILY
+   RELEASE ADD(JOF201RMDL)
+ENDJOB
+
+AS400_JOB JOF201RMDL
+  RESOURCE ADD(1,AKNITS)
+   AGENT AKNITS
+   COMMAND CYBROBOT JOF201RMDL
+   JOBQ CAWAAGENT.CYBESPJOBS
+   RUN DAILY
+   RELEASE ADD(AR_F201_RM_GI)
+ENDJOB
+
+UNIX_JOB AR_F201_RM_GI
+   AGENT CYBA_ISBFP3
+   SCRIPTNAME /local/bin/arcfile.sh
+   ARGS interfaces/input/datain/f201_rm_gi D
+   RUN DAILY
+   USER bfpadm
+   RELEASE ADD(LIE.!ESPAPPL)
+ENDJOB
+
+AIX_JOB LIE.!ESPAPPL
+   AGENT CYBA_ISBFP3
+   COMMAND /bin/sleep
+   ARGS 3
+   USER bfpadm
+   RUN DAILY
+   IF ESPSHH = '07' THEN DUEOUT EXEC 08.30
+   IF ESPSHH = '00' THEN DUEOUT EXEC 06.00
+   NOTIFY OVERDUE MAILBOX(AKRONJOBREQ)
+ENDJOB
+
+
+

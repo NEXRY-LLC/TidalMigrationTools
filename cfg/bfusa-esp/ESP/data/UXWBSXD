@@ -1,0 +1,49 @@
+APPL UXWBSXD WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/*********************************************************************/
+/*  Removed NBUINCR step & cleaned up application - 05/20/2016 jre
+/*02/19/2019 -JFC- CLEANED UP PROC - ADDED LIE - NO OTHER CHANGES
+/*********************************************************************/
+
+NOTIFY ABEND FAILURE ALERT(REMD)
+
+JOB LIS.!ESPAPPL LINK PROCESS
+   RUN SUN
+   EARLYSUB 19.00
+   RELEASE ADD(STOTC.SXDAPP1)
+ENDJOB
+
+UNIX_JOB STOTC.SXDAPP1
+   AGENT CYBA_SXDAPP1
+   SCRIPTNAME /apps/apache-tomcat-7.0.57/bin/shutdown.sh
+   ARGS -force
+   USER tomcat
+   RUN SUN
+   RELEASE ADD(STATC.SXDAPP1)
+   RELEASE ADD(SXDDBWKL.SXDDB)
+ENDJOB
+
+UNIX_JOB STATC.SXDAPP1
+   AGENT CYBA_SXDAPP1
+   SCRIPTNAME /apps/apache-tomcat-7.0.57/bin/startup.sh
+   USER tomcat
+   RUN SUN
+   RELDELAY 1
+   RELEASE ADD(LIE.!ESPAPPL)
+ENDJOB
+
+UNIX_JOB SXDDBWKL.SXDDB
+   AGENT CYBA_SXDDB
+   SCRIPTNAME /local/bin/db2_wklybkup_sbrx.sh
+   ARGS DI1 SBXD ONLINE
+   USER root
+   RUN SUN
+   RELEASE ADD(LIE.!ESPAPPL)
+ENDJOB
+
+JOB LIE.!ESPAPPL LINK PROCESS
+   RUN SUN
+ENDJOB
+

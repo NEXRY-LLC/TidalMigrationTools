@@ -1,0 +1,58 @@
+APPL ARD001 WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/*********************************************************************/
+/*11/07/2018 -JFC- removed CD job per Ajay Pande email
+/*11/14/2018 -JFC- added reldelay to archive job per Keith Miller
+/*08/17/2020 -JFC- disabled archive job per INC000002298147
+/*********************************************************************/
+
+NOTIFY ABEND FAILURE ALERT(REMD)
+
+
+JOB LIS.!ESPAPPL LINK PROCESS
+   RUN WEEKDAYS
+   RELEASE ADD(ZFIARI04_OPEN_AR_ITEMS_ENT)
+ENDJOB
+
+SAP_JOB ZFIARI04_OPEN_AR_ITEMS_ENT
+   AGENT CYBB_BFP030
+   SAPJOBNAME ZFIARI04_OPEN_AR_ITEMS_ENT
+   SAPJOBCLASS C
+   STARTMODE ASAP
+   ABAPNAME ZFIARI04
+   VARIANT Z_DAILY_REPOS
+   STEPUSER SAPADM
+   LANGUAGE E
+   PRINTDEST CP21
+   EXPIRATION 8
+   LINES 65
+   COLUMNS 80
+   BANNER D
+   RECIPIENT sapadm
+   ARCMODE PRINT
+   PRINTCOPIES 001
+   RUN WEEKDAYS
+   EARLYSUB 03.30
+   RELEASE ADD(LIE.!ESPAPPL)
+   RELEASE ADD(ARZFIARI04)
+ENDJOB
+
+UNIX_JOB ARZFIARI04 request
+   AGENT CYBA_ISBFP3
+   SCRIPTNAME /local/bin/arcfile.sh
+   ARGS +
+interfaces/output/dataout/zfiari04_open_ar_items_to_entirenet_full.txt D
+   USER bfpadm
+ /*RUN WEEKDAYS
+   RELDELAY 60
+   RELEASE ADD(LIE.!ESPAPPL)
+ENDJOB
+
+JOB LIE.!ESPAPPL LINK PROCESS
+   RUN DAILY
+   DUEOUT EXEC 6AM
+ENDJOB
+
+

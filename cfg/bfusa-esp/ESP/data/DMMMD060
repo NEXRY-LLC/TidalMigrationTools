@@ -1,0 +1,200 @@
+APPL DMMMD060 WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/*********************************************************************/
+/*01/31/2018-JFC-REMOVED RMRECIEPTS_SAP_TRANSFER JOB FROM APPL PER
+/*           JACK ROSA AND ADDED FILE TRIGGER
+/*           COPIED OLD APPL TO OBSOLETE FOR REF
+/*09/12/2022-for agent CYBA_CDC1AKFIS user maestro changed to
+/*           bfusa\maestro - INC0353221
+/*********************************************************************/
+
+NOTIFY ABEND FAILURE ALERT(REMD)
+
+DATA_OBJECT PARMSET.!ESPAPPL
+   /*Create a timestamp in hhmmMMDDYY format*/
+   SETVAR TMSTMP='!ESPSHH.:!ESPSMN.,!ESPSMM./!ESPSDD./!ESPSYY'
+   SETVAR PID=''
+   SETVAR STMPTM='!ESPSMM./!ESPSDD./!ESPSYY.,!ESPSHH.:!ESPSMN'
+ENDJOB
+
+JOB SETPID.!ESPAPPL LINK PROCESS
+   /*get the next PID number from the ConnectDirect*/
+   /*Process ID table (CDPROD).  Save the value into*/
+   /*the applications DataObject for use by the C:D*/
+   /*job and the CDSTAT job (if needed).*/
+   VINCR (PID) TABLE(CDPROD) CLANG
+   VGET  (PID) TABLE(CDPROD) CLANG
+   ESP MGRMSG * . . . PARMSET.!ESPAPPL/!ESPAPPL..!ESPAPGEN/MAIN +
+ACTION SET PID(!PID)
+   RUN DAILY
+   RELEASE ADD(MM_RAW_GR_FROM_F131CD)
+ENDJOB
+
+FILE_TRIGGER DESMOINESRAWMATRECPT_CREATE
+   AGENT CYBA_CDC1AKFIS
+   USER bfusa\maestro
+   FILENAME \\cdc1-ak-fis\Prod_Raw_Mat_Recpts\+
+            DesMoinesRawMatRecpt.txt create
+   RUN TODAY
+   RELEASE ADD(MM_RAW_GR_FROM_F131CD)
+ ENDJOB
+
+UNIX_JOB MM_RAW_GR_FROM_F131CD
+   AGENT CYBA_ISBFP3
+   PID= WOBDATA('PARMSET.!ESPAPPL','PID')
+   TMSTMP= WOBDATA('PARMSET.!ESPAPPL','TMSTMP')
+   SCRIPTNAME /apps/condir/bfsbin/submitcd.sh
+   ARGS mm_raw_gr_from_f131.cd 6 !PID !TMSTMP
+   RESOURCE ADD(1,ISBFP3CD)
+   USER cdprod
+   RUN DAILY
+   RELDELAY 1
+   RELEASE ADD(CDSTAT.MMRGF131(A))
+   RELEASE ADD(ZMMIMI18_RAW_MATL_GR_F131)
+ENDJOB
+
+AIX_JOB CDSTAT.MMRGF131 CONDITIONAL
+   AGENT CYBA_ISBFP3
+   /*This job only runs if the C:D job does not end with*/
+   /*a EXITCODE of 0.  It can be rerun as often as*/
+   /*required to check the status of the C:D process.*/
+   /*When the C:D process finishes, complete the job*/
+   /*to release the successors.*/
+   USER cduser
+   STMPTM= WOBDATA('PARMSET.!ESPAPPL','STMPTM')
+   PID= WOBDATA('PARMSET.!ESPAPPL','PID')
+   CMDNAME /apps/condir/bfsbin/cdstat.sh
+   ARGS !STMPTM  j!PID
+   RUN DAILY
+ENDJOB
+
+SAP_JOB ZMMIMI18_RAW_MATL_GR_F131
+   AGENT CYBB_BFP030
+   SAPUSER SAPADM
+   SAPJOBNAME ZMMIMI18_RAW_MATL_GR_F131
+   SAPJOBCLASS C
+   STARTMODE ASAP
+   ABAPNAME ZMMIMI18
+   VARIANT 'F131-DES MOINE'
+   STEPUSER SAPADM
+   LANGUAGE E
+   EXPIRATION 8
+   COLUMNS 255
+   BANNER D
+   RECIPIENT SAPADM
+   ARCMODE PRINT
+   PRINTCOPIES 001
+   RUN DAILY
+   RELEASE ADD(ARZMMIMI18_IID_F131)
+ENDJOB
+
+UNIX_JOB ARZMMIMI18_IID_F131
+   AGENT CYBA_ISBFP3
+   SCRIPTNAME /local/bin/arcfile.sh
+   ARGS interfaces/input/datain/zmmimi18_iid_F131 D
+   USER bfpadm
+   RUN DAILY
+   RELEASE ADD(ZMMIMI24_PO_LINES_F131)
+ENDJOB
+
+SAP_JOB ZMMIMI24_PO_LINES_F131
+   AGENT CYBB_BFP030
+   SAPJOBNAME ZMMIMI24_PO_LINES_F131
+   SAPUSER SAPADM
+   SAPJOBCLASS C
+   ABAPNAME ZMMIMI24
+   VARIANT 'F131 DESMOINES'
+   LANGUAGE E
+   PRINTDEST lp01
+   PRINTIMMED NO
+   PRINTREL YES
+   EXPIRATION 8
+   COLUMNS 255
+   BANNER D
+   ARCMODE PRINT
+   PRINTCOPIES 001
+   RUN DAILY
+   RELEASE ADD(F131PO_DETAILCD)
+ENDJOB
+
+JOB SETPID2.!ESPAPPL LINK PROCESS
+   /*get the next PID number from the ConnectDirect*/
+   /*Process ID table (CDPROD).  Save the value into*/
+   /*the applications DataObject for use by the C:D*/
+   /*job and the CDSTAT job (if needed).*/
+   VINCR (PID) TABLE(CDPROD) CLANG
+   VGET  (PID) TABLE(CDPROD) CLANG
+   ESP MGRMSG * . . . PARMSET.!ESPAPPL/!ESPAPPL..!ESPAPGEN/MAIN +
+ACTION SET PID(!PID)
+   RUN DAILY
+   RELEASE ADD(F131PO_DETAILCD)
+ENDJOB
+
+UNIX_JOB F131PO_DETAILCD
+   AGENT CYBA_ISBFP3
+   EARLYSUB REALNOW PLUS 20 SECONDS
+   PID= WOBDATA('PARMSET.!ESPAPPL','PID')
+   TMSTMP= WOBDATA('PARMSET.!ESPAPPL','TMSTMP')
+   SCRIPTNAME /apps/condir/bfsbin/submitcd.sh
+   ARGS f131po_detail.cd 5 !PID !TMSTMP
+   RESOURCE ADD(1,ISBFP3CD)
+   RESOURCE ADD(1,CDC1AKFIS)
+   USER cdprod
+   RUN DAILY
+   RELEASE ADD(CDSTAT.F131PODT(A))
+   RELEASE ADD(COPY_PO_DETAIL_TO_DESMOINES)
+ENDJOB
+
+AIX_JOB CDSTAT.F131PODT CONDITIONAL
+   AGENT CYBA_ISBFP3
+   /*This job only runs if the C:D job does not end with*/
+   /*a EXITCODE of 0.  It can be rerun as often as*/
+   /*required to check the status of the C:D process.*/
+   /*When the C:D process finishes, complete the job*/
+   /*to release the successors.*/
+   USER cduser
+   STMPTM= WOBDATA('PARMSET.!ESPAPPL','STMPTM')
+   PID= WOBDATA('PARMSET.!ESPAPPL','PID')
+   CMDNAME /apps/condir/bfsbin/cdstat.sh
+   ARGS !STMPTM  j!PID
+   RUN DAILY
+ENDJOB
+
+NT_JOB COPY_PO_DETAIL_TO_DESMOINES
+   AGENT CYBA_CDC1AKFIS
+   CMDNAME D:\DTS_RUN\BatchFiles\RawMaterials\+
+           Copy_PO_Detail_to_DesMoines.bat
+   ARGS
+   USER bfusa\maestro
+   RUN DAILY
+   RELEASE ADD(DELETE_FILES_FROM_CDC1_SERVER)
+ENDJOB
+
+NT_JOB DELETE_FILES_FROM_CDC1_SERVER
+   AGENT CYBA_CDC1AKFIS
+   CMDNAME D:\DTS_RUN\BatchFiles\RawMaterials\+
+           DesMoines_Raw_Matl_and_PO_Delete.bat
+   ARGS
+   USER bfusa\maestro
+   RUN DAILY
+   NOTIFY ABEND FAILURE OVERDUE MAILBOX(DMMMD060)
+   RELEASE ADD(ARZMMIMI24_IOD_PO_DETAIL_F131)
+ENDJOB
+
+UNIX_JOB ARZMMIMI24_IOD_PO_DETAIL_F131
+   AGENT CYBA_ISBFP3
+   SCRIPTNAME /local/bin/arcfile.sh
+   ARGS interfaces/output/dataout/zmmimi24_iod_po_detail_F131 D
+   USER bfpadm
+   RUN DAILY
+   DUEOUT EXEC NOW PLUS 4 HOURS
+   IF ESPAHH GE '16' THEN DUEOUT EXEC 9AM
+ENDJOB
+
+APPLEND !ESPAPPL
+  ESPNOMSG TRIGGER !ESPEVENT ADD
+  RELDELAY 1
+ENDJOB
+

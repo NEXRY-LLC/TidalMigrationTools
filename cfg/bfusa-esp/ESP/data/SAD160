@@ -1,0 +1,99 @@
+APPL SAD160 WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/*********************************************************************/
+/*09/24/2018 -JFC- CLEANED UP PROC - ADDED LIE - NO OTHER CHANGES
+/*********************************************************************/
+
+NOTIFY ABEND FAILURE ALERT(REMD)
+
+DATA_OBJECT PARMSET.!ESPAPPL
+   /*create a timestamp in hhmmmmddyy format*/
+   SETVAR TMSTMP='!ESPSHH.:!ESPSMN.,!ESPSMM./!ESPSDD./!ESPSYY'
+   SETVAR PID=''
+   SETVAR STMPTM='!ESPSMM./!ESPSDD./!ESPSYY.,!ESPSHH.:!ESPSMN'
+ENDJOB
+
+JOB SAD160 LINK PROCESS
+   RUN DAILY
+   EARLYSUB 06.00
+   RELEASE ADD(ZSDSAR09_BANDAG_SALES_ORDERS)
+ENDJOB
+
+SAP_JOB ZSDSAR09_BANDAG_SALES_ORDERS
+   AGENT CYBB_BFP030
+   SAPJOBNAME ZSDSAR09_BANDAG_SALES_ORDERS
+   SAPJOBCLASS C
+   PRINTCOPIES 001
+   STARTMODE ASAP
+   ABAPNAME ZSDSAR09
+   VARIANT Z4MTHS_REPORT
+   STEPUSER SAPADM
+   LANGUAGE E
+   PRINTDEST CP21
+   EXPIRATION 8
+   COLUMNS 132
+   BANNER D
+   RECIPIENT SAPADM
+   ARCMODE PRINT
+   RUN DAILY
+   RELEASE ADD(ZSDSAR09_BANDAG_SALES_ORDERS_CD)
+ENDJOB
+
+JOB SETPID1.!ESPAPPL LINK PROCESS
+   /*get the next PID number from the ConnectDirect*/
+   /*Process ID table (CDPROD).  Save the value into*/
+   /*the applications DataObject for use by the C:D*/
+   /*job and the CDSTAT job (if needed).*/
+   VINCR (PID) TABLE(CDPROD) CLANG
+   VGET  (PID) TABLE(CDPROD) CLANG
+   ESP MGRMSG * . . . PARMSET.!ESPAPPL/!ESPAPPL..!ESPAPGEN/MAIN +
+ACTION SET PID(!PID)
+   RUN DAILY
+   RELEASE ADD(ZSDSAR09_BANDAG_SALES_ORDERS_CD )
+ENDJOB
+
+UNIX_JOB ZSDSAR09_BANDAG_SALES_ORDERS_CD
+   AGENT CYBA_ISBFP3
+   PID= WOBDATA('PARMSET.!ESPAPPL','PID')
+   TMSTMP= WOBDATA('PARMSET.!ESPAPPL','TMSTMP')
+   SCRIPTNAME /apps/condir/bfsbin/submitcd.sh
+   ARGS zsdsar09.cd 5 !PID !TMSTMP
+   RESOURCE ADD(1,ISBFP3CD)
+   USER cdprod
+   RUN DAILY
+   RELEASE ADD(ARCSAD160)
+ENDJOB
+
+AIX_JOB CDSTAT1.!ESPAPPL CONDITIONAL
+   /*This job only runs if the C:D job does not end with*/
+   /*a EXITCODE of 0.  It can be rerun as often as*/
+   /*required to check the status of the C:D process.*/
+   /*When the C:D process finishes, complete the job*/
+   /*to release the successors.*/
+   AGENT CYBA_ISBFP3
+   USER cduser
+   STMPTM= WOBDATA('PARMSET.!ESPAPPL','STMPTM')
+   PID= WOBDATA('PARMSET.!ESPAPPL','PID')
+   CMDNAME /apps/condir/bfsbin/cdstat.sh
+   ARGS !STMPTM  j!PID
+   RUN DAILY
+   PREREQ (ZSDSAR09_BANDAG_SALES_ORDERS_CD(A))
+ENDJOB
+
+UNIX_JOB ARCSAD160
+   AGENT CYBA_ISBFP3
+   SCRIPTNAME /local/bin/arcfile.sh
+   ARGS interfaces/output/dataout/Bandag_Order_Report.txt D
+   USER bfpadm
+   RUN DAILY
+   RELEASE ADD(LIE.!ESPAPPL)
+ENDJOB
+
+JOB LIE.!ESPAPPL LINK PROCESS
+   RUN DAILY
+   DUEOUT EXEC NOW PLUS 4 HOURS
+ENDJOB
+
+

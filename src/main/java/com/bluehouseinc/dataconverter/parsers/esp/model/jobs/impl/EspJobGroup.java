@@ -35,7 +35,7 @@ public class EspJobGroup extends EspAbstractJob {
 	// String name; Name is defined in Base Object. this was root of breaking code.
 	List<String> amNotifyList = new ArrayList<>();; // AMNOTIFY statement
 
-	List<String> tags = new ArrayList<>();
+	//List<String> tags = new ArrayList<>();
 	Map<String, String> variables = new HashMap<>();
 
 	@Override

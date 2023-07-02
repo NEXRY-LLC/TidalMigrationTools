@@ -1,0 +1,30 @@
+APPL AKDES002 WAIT
+
+NOTIFY FAILURE ABEND ALERT(REMD)
+
+/*********************************************************************/
+/*07/08/2018 -JFC- CLEANED UP PROC - ADDED LIE - NO OTHER CHANGES
+/*03/31/2022 -VV - added domain to user maestro
+/*********************************************************************/
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+JOB LIS.!ESPAPPL LINK PROCESS
+  DELAYSUB 06.00
+  RUN DAILY
+  RELEASE ADD(EQPSPECBAT)
+ENDJOB
+
+NT_JOB EQPSPECBAT
+  AGENT CYBA_CDC1AKFIS
+  CMDNAME D:\PLTD_TESS\EQPSPEC.bat
+  ARGS
+  USER bfusa\maestro
+  RUN DAILY
+  RELEASE ADD(LIE.!ESPAPPL)
+ENDJOB
+
+JOB LIE.!ESPAPPL LINK PROCESS
+   RUN DAILY
+ENDJOB
+

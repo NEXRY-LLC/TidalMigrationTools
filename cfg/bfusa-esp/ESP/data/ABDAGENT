@@ -1,0 +1,68 @@
+APPL ABDAGENT WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/********************************************************************/
+/*  AUDAGENT will generate a 6 month ABENDED Job Rpt for any of the */
+/*  SAP Agents listed below, depending on which SCHDID is selected. */
+/*                                                                  */
+/********************************************************************/
+/*   USER2 = 001 for ABDAGENT                                       */
+/*   USER2 = 002 for ABENDBFP                                      */
+/*   USER2 = 003 for ABENDBGP                                      */
+/*   USER2 = 004 for ABENDBWP                                      */
+/*   USER2 = 005 for ABENDBZC                                      */
+/*   USER2 = 006 for ABENDBZP                                      */
+/*   USER2 = 007 for ABENDIZP                                      */
+/********************************************************************/
+
+SCHD001= 'YESTERDAY'
+SCHD002= 'YESTERDAY'
+SCHD003= 'YESTERDAY'
+SCHD004= 'YESTERDAY'
+SCHD005= 'YESTERDAY'
+SCHD006= 'YESTERDAY'
+SCHD007= 'YESTERDAY'
+
+IF !USER2 = 001 THEN SCHD001 = 'TODAY'
+IF !USER2 = 002 THEN SCHD002 = 'TODAY'
+IF !USER2 = 003 THEN SCHD003 = 'TODAY'
+IF !USER2 = 004 THEN SCHD004 = 'TODAY'
+IF !USER2 = 005 THEN SCHD005 = 'TODAY'
+IF !USER2 = 006 THEN SCHD006 = 'TODAY'
+IF !USER2 = 007 THEN SCHD007 = 'TODAY'
+
+JOB ABDAGENT
+  CCCHK RC(1:4095) OK CONTINUE
+  RUN !SCHD001
+ENDJOB
+
+JOB ABENDBFP
+  CCCHK RC(1:4095) OK CONTINUE
+  RUN !SCHD002
+ENDJOB
+
+JOB ABENDBGP
+  CCCHK RC(1:4095) OK CONTINUE
+  RUN !SCHD003
+ENDJOB
+
+JOB ABENDBWP
+  CCCHK RC(1:4095) OK CONTINUE
+  RUN !SCHD004
+ENDJOB
+
+JOB ABENDBZC
+  CCCHK RC(1:4095) OK CONTINUE
+  RUN !SCHD005
+ENDJOB
+
+JOB ABENDBZP
+  CCCHK RC(1:4095) OK CONTINUE
+  RUN !SCHD006
+ENDJOB
+
+JOB ABENDIZP
+  CCCHK RC(1:4095) OK CONTINUE
+  RUN !SCHD007
+ENDJOB

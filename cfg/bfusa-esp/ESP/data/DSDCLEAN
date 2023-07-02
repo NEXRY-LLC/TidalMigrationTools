@@ -1,0 +1,32 @@
+APPL DSDCLEAN WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/**********************************************************************/
+/* 09/06/21 - CREATED PER MANASI DILIP BERDE -CHG0036629
+/**********************************************************************/
+
+NOTIFY ABEND FAILURE ALERT(REMD)
+
+FILE_TRIGGER JOB_MDG_ADDR_CLEANSE_FT
+   AGENT DSSAPP01PAKR
+   FILENAME '\\dssapp01pakr\bods\MDG_ADDRESS\INPUT_FILE+
+   \Address Template_MDC_MDG.xlsx' CREATE
+   RUN DAILY
+  RELEASE ADD(JOB_MDG_ADDR_CLEANSE)
+ENDJOB
+
+NT_JOB JOB_MDG_ADDR_CLEANSE
+  AGENT DSSAPP01PAKR
+  USER svc_sap_ds_q
+  CMDNAME "\\dssapp01pakr\bods\Job_Scripts\+
+          JOB_MDG_ADDR_CLEANSE.bat"
+  RUN DAILY
+  RELEASE ADD(DSDCLEAN)
+ENDJOB
+
+APPLEND DSDCLEAN
+   ESPNOMSG TRIGGER !ESPEVENT ADD
+   RELDELAY 5
+ENDJOB
+

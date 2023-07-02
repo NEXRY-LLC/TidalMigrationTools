@@ -1,0 +1,267 @@
+APPL OSQAREC2 WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/*********************************************************************/
+/*03/18/20 -JFC- NEW APPL PER
+/*********************************************************************/
+/* JOBS IN THIS APPL RECYCLE THE ONESOURCE SERVERS IN QA ENVIRONMENT */
+/*********************************************************************/
+
+/*NOTIFY ABEND FAILURE ALERT(REMD)
+/*NOTIFY OVERDUE ALERT(LATE)
+
+JOB LIS.!ESPAPPL LINK PROCESS
+   RUN TODAY
+   RELEASE ADD(SHUTDOWN.APPTAX01QAKR)
+   RELEASE ADD(SHUTDOWN.APPTAX02QAKR)
+   RELEASE ADD(SHUTDOWN.APPTAX03QAKR)
+   RELEASE ADD(SHUTDOWN.APPTAX04QAKR)
+   RELEASE ADD(SHUTDOWN.APPTAX05QAKR)
+   RELEASE ADD(SHUTDOWN.APPTAX06QAKR)
+   RELEASE ADD(SHUTDOWN.APPTAX07QAKR)
+ENDJOB
+
+/*********************************************************************/
+/* JOBS TO RECYCLE THE ONESOURCE INSTANCE ON APPTAX01QAKR            */
+/*********************************************************************/
+
+LINUX_JOB SHUTDOWN.APPTAX01QAKR
+   AGENT APPTAX01_QA_LNX
+   SCRIPTNAME /apps/apache-tomcat-8.5.45/bin/shutdown.sh
+   ARGS force
+   USER root
+   RUN TODAY
+   RELEASE ADD(KILL_DETERM_JAVA.APPTAX01QAKR)
+ENDJOB
+
+LINUX_JOB KILL_DETERM_JAVA.APPTAX01QAKR
+   AGENT APPTAX01_QA_LNX
+   SCRIPTNAME /apps/apache-tomcat-8.5.45/bin/KILL_DETERM_JAVA.sh
+   ARGS force
+   USER root
+   RUN TODAY
+   RELEASE ADD(ALL_INSTANCES_STOPPED)
+ENDJOB
+
+LINUX_JOB STARTUP.APPTAX01QAKR
+   AGENT APPTAX01_QA_LNX
+   SCRIPTNAME /apps/apache-tomcat-8.5.45/bin/startup.sh
+   ARGS force
+   USER root
+   RUN TODAY
+   RELEASE ADD(LIE.!ESPAPPL)
+ENDJOB
+
+/*********************************************************************/
+/* JOBS TO RECYCLE THE ONESOURCE SERVER APPTAX02QAKR                 */
+/*********************************************************************/
+
+LINUX_JOB SHUTDOWN.APPTAX02QAKR
+   AGENT APPTAX02_QA_LNX
+   SCRIPTNAME /apps/apache-tomcat-8.5.45/bin/shutdown.sh
+   ARGS force
+   USER root
+   RUN TODAY
+   RELEASE ADD(KILL_DETERM_JAVA.APPTAX02QAKR)
+ENDJOB
+
+LINUX_JOB KILL_DETERM_JAVA.APPTAX02QAKR
+   AGENT APPTAX02_QA_LNX
+   SCRIPTNAME /apps/apache-tomcat-8.5.45/bin/KILL_DETERM_JAVA.sh
+   ARGS force
+   USER root
+   RUN TODAY
+   RELEASE ADD(ALL_INSTANCES_STOPPED)
+ENDJOB
+
+LINUX_JOB STARTUP.APPTAX02QAKR
+   AGENT APPTAX02_QA_LNX
+   SCRIPTNAME /apps/apache-tomcat-8.5.45/bin/startup.sh
+   ARGS force
+   USER root
+   RUN TODAY
+   RELEASE ADD(LIE.!ESPAPPL)
+ENDJOB
+
+/*********************************************************************/
+/* JOBS TO RECYCLE THE ONESOURCE INSTANCE ON APPTAX03QAKR            */
+/*********************************************************************/
+
+LINUX_JOB SHUTDOWN.APPTAX03QAKR
+   AGENT APPTAX03_QA_LNX
+   SCRIPTNAME /apps/apache-tomcat-8.5.45/bin/shutdown.sh
+   ARGS force
+   USER root
+   RUN TODAY
+   RELEASE ADD(KILL_DETERM_JAVA.APPTAX03QAKR)
+ENDJOB
+
+LINUX_JOB KILL_DETERM_JAVA.APPTAX03QAKR
+   AGENT APPTAX03_QA_LNX
+   SCRIPTNAME /apps/apache-tomcat-8.5.45/bin/KILL_DETERM_JAVA.sh
+   ARGS force
+   USER root
+   RUN TODAY
+   RELEASE ADD(ALL_INSTANCES_STOPPED)
+ENDJOB
+
+LINUX_JOB STARTUP.APPTAX03QAKR
+   AGENT APPTAX03_QA_LNX
+   SCRIPTNAME /apps/apache-tomcat-8.5.45/bin/startup.sh
+   ARGS force
+   USER root
+   RUN TODAY
+   RELEASE ADD(LIE.!ESPAPPL)
+ENDJOB
+
+/*********************************************************************/
+/* JOBS TO RECYCLE THE ONESOURCE SERVER APPTAX04QAKR                 */
+/*********************************************************************/
+
+LINUX_JOB SHUTDOWN.APPTAX04QAKR
+   AGENT APPTAX04_QA_LNX
+   SCRIPTNAME /apps/apache-tomcat-8.5.45/bin/shutdown.sh
+   ARGS force
+   USER root
+   RUN TODAY
+   RELEASE ADD(KILL_DETERM_JAVA.APPTAX04QAKR)
+ENDJOB
+
+LINUX_JOB KILL_DETERM_JAVA.APPTAX04QAKR
+   AGENT APPTAX04_QA_LNX
+   SCRIPTNAME /apps/apache-tomcat-8.5.45/bin/KILL_DETERM_JAVA.sh
+   ARGS force
+   USER root
+   RUN TODAY
+   RELEASE ADD(ALL_INSTANCES_STOPPED)
+ENDJOB
+
+LINUX_JOB STARTUP.APPTAX04QAKR
+   AGENT APPTAX04_QA_LNX
+   SCRIPTNAME /apps/apache-tomcat-8.5.45/bin/startup.sh
+   ARGS force
+   USER root
+   RUN TODAY
+   RELEASE ADD(RESTART_REPORTING_SERVER.APPTAX04QAKR)
+ENDJOB
+
+LINUX_JOB RESTART_REPORTING_SERVER.APPTAX04QAKR
+   AGENT APPTAX04_QA_LNX
+   SCRIPTNAME /apps/reporting/sap_bobj/restart_reporting_server.sh
+   ARGS Reporting
+   USER root
+   RUN TODAY
+   RELEASE ADD(LIE.!ESPAPPL)
+ENDJOB
+
+/*********************************************************************/
+/* JOBS TO RECYCLE THE ONESOURCE INSTANCE ON APPTAX05QAKR            */
+/*********************************************************************/
+
+LINUX_JOB SHUTDOWN.APPTAX05QAKR
+   AGENT APPTAX05_QA_LNX
+   SCRIPTNAME /apps/apache-tomcat-8.5.45/bin/shutdown.sh
+   ARGS force
+   USER root
+   RUN TODAY
+   RELEASE ADD(KILL_DETERM_JAVA.APPTAX05QAKR)
+ENDJOB
+
+LINUX_JOB KILL_DETERM_JAVA.APPTAX05QAKR
+   AGENT APPTAX05_QA_LNX
+   SCRIPTNAME /apps/apache-tomcat-8.5.45/bin/KILL_DETERM_JAVA.sh
+   ARGS force
+   USER root
+   RUN TODAY
+   RELEASE ADD(ALL_INSTANCES_STOPPED)
+ENDJOB
+
+LINUX_JOB STARTUP.APPTAX05QAKR
+   AGENT APPTAX05_QA_LNX
+   SCRIPTNAME /apps/apache-tomcat-8.5.45/bin/startup.sh
+   ARGS force
+   USER root
+   RUN TODAY
+   RELEASE ADD(LIE.!ESPAPPL)
+ENDJOB
+
+/*********************************************************************/
+/* JOBS TO RECYCLE THE ONESOURCE SERVER APPTAX06QAKR                 */
+/*********************************************************************/
+
+LINUX_JOB SHUTDOWN.APPTAX06QAKR
+   AGENT APPTAX06_QA_LNX
+   SCRIPTNAME /apps/apache-tomcat-8.5.45/bin/shutdown.sh
+   ARGS force
+   USER root
+   RUN TODAY
+   RELEASE ADD(KILL_DETERM_JAVA.APPTAX06QAKR)
+ENDJOB
+
+LINUX_JOB KILL_DETERM_JAVA.APPTAX06QAKR
+   AGENT APPTAX06_QA_LNX
+   SCRIPTNAME /apps/apache-tomcat-8.5.45/bin/KILL_DETERM_JAVA.sh
+   ARGS force
+   USER root
+   RUN TODAY
+   RELEASE ADD(ALL_INSTANCES_STOPPED)
+ENDJOB
+
+LINUX_JOB STARTUP.APPTAX06QAKR
+   AGENT APPTAX06_QA_LNX
+   SCRIPTNAME /apps/apache-tomcat-8.5.45/bin/startup.sh
+   ARGS force
+   USER root
+   RUN TODAY
+   RELEASE ADD(LIE.!ESPAPPL)
+ENDJOB
+
+/*********************************************************************/
+/* JOBS TO RECYCLE THE ONESOURCE INSTANCE ON APPTAX07QAKR            */
+/*********************************************************************/
+
+LINUX_JOB SHUTDOWN.APPTAX07QAKR
+   AGENT APPTAX07_QA_LNX
+   SCRIPTNAME /apps/apache-tomcat-8.5.45/bin/shutdown.sh
+   ARGS force
+   USER root
+   RUN TODAY
+   RELEASE ADD(KILL_DETERM_JAVA.APPTAX07QAKR)
+ENDJOB
+
+LINUX_JOB KILL_DETERM_JAVA.APPTAX07QAKR
+   AGENT APPTAX07_QA_LNX
+   SCRIPTNAME /apps/apache-tomcat-8.5.45/bin/KILL_DETERM_JAVA.sh
+   ARGS force
+   USER root
+   RUN TODAY
+   RELEASE ADD(ALL_INSTANCES_STOPPED)
+ENDJOB
+
+LINUX_JOB STARTUP.APPTAX07QAKR
+   AGENT APPTAX07_QA_LNX
+   SCRIPTNAME /apps/apache-tomcat-8.5.45/bin/startup.sh
+   ARGS force
+   USER root
+   RUN TODAY
+   RELEASE ADD(LIE.!ESPAPPL)
+ENDJOB
+
+/*********************************************************************/
+
+JOB ALL_INSTANCES_STOPPED LINK PROCESS
+   RUN TODAY
+   RELEASE ADD(STARTUP.APPTAX01QAKR)
+   RELEASE ADD(STARTUP.APPTAX02QAKR)
+   RELEASE ADD(STARTUP.APPTAX03QAKR)
+   RELEASE ADD(STARTUP.APPTAX04QAKR)
+   RELEASE ADD(STARTUP.APPTAX05QAKR)
+   RELEASE ADD(STARTUP.APPTAX06QAKR)
+   RELEASE ADD(STARTUP.APPTAX07QAKR)
+ENDJOB
+
+JOB LIE.!ESPAPPL LINK PROCESS
+   RUN TODAY
+ENDJOB
+

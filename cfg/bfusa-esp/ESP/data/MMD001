@@ -1,0 +1,55 @@
+APPL MMD001 WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/*********************************************************************/
+/*INT-443 INT-441 INT-442 SAP To/From MSIS Mold System*/
+/*11/07/2018 -JFC- removed CD job per Ajay Pande email
+/*11/14/2018 -JFC- added reldelay to archive job per Keith Miller
+/*********************************************************************/
+
+NOTIFY ABEND FAILURE ALERT(REMD)
+
+
+JOB LIS.!ESPAPPL LINK PROCESS
+   RUN DAILY
+   RELEASE ADD(ZMMEII01_WATP_RPD_CHI)
+ENDJOB
+
+SAP_JOB ZMMEII01_WATP_RPD_CHI
+   AGENT CYBB_BFP030
+   SAPJOBNAME ZMMEII01_WATP_RPD_CHI
+   SAPJOBCLASS C
+   STARTMODE ASAP
+   RELEASE (ZMMEII01CD)
+   ABAPNAME ZMMEII01
+   VARIANT WATP_RPD_CHI
+   STEPUSER SAPADM
+   LANGUAGE E
+   PRINTCOPIES 001
+   PRINTREL YES
+   EXPIRATION 8
+   COLUMNS 255
+   BANNER D
+   ARCMODE PRINT
+   DELAYSUB 01.00
+   RUN DAILY
+   RELEASE ADD(ARZMMEII01)
+ENDJOB
+
+UNIX_JOB ARZMMEII01
+   AGENT CYBA_ISBFP3
+   SCRIPTNAME /local/bin/arcfile.sh
+   ARGS interfaces/output/dataout/sap_hem_watp.dat D
+   USER bfpadm
+   RUN DAILY
+   RELDELAY 60
+   RELEASE ADD(LIE.!ESPAPPL)
+ENDJOB
+
+JOB LIE.!ESPAPPL LINK PROCESS
+   RUN DAILY
+   DUEOUT EXEC 6AM
+ENDJOB
+
+

@@ -1,0 +1,9 @@
+
+AIX_JOB LIE.!ESPAPPL
+  AGENT CYBA_ISBFP3
+  USER bfpadm
+  COMMAND /bin/sleep
+  ARGS 3
+  RUN DAILY
+ENDJOB
+

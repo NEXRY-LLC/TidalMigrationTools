@@ -1,0 +1,31 @@
+APPL QAQCCHEK WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/**********************************************************************/
+/*10/18/2016-JFC-CONVERTED LIE JOB FROM MVS TO LINK                   */
+/**********************************************************************/
+
+NOTIFY FAILURE ABEND ALERT(REMD)
+NOTIFY FAILURE ABEND MAILBOX(QAFAIL1)
+TAG PPIW
+
+JOB LIS.QAQCCHEK LINK PROCESS
+  RUN MON
+  DELAYSUB 13.00
+  RELEASE ADD(QC_ERROR_CODE_CHECKSCMD)
+ENDJOB
+
+NT_JOB QC_ERROR_CODE_CHECKSCMD
+  AGENT CYBA_PPIWPROD
+  CMDNAME X:\cmd_scripts\qc_error_code_checks.cmd
+  ARGS
+  USER maestro
+  RUN MON
+  RELEASE ADD(LIE.QAQCCHEK)
+ENDJOB
+
+JOB LIE.QAQCCHEK LINK PROCESS
+  RUN MON
+ENDJOB
+

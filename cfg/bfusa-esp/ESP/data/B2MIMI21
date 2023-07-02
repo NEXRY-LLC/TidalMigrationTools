@@ -1,0 +1,17 @@
+APPL B2MIMI21 WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/*********************************************************************/
+/*06/14/2018 -JFC- UPDATED PROC - NO CHANGES
+/*********************************************************************/
+
+NOTIFY FAILURE ABEND ALERT(REMD)
+
+JOB B2MIMI21
+  /*@@ SYSTEM=B2MIMI
+  CCCHK RC(1:4095) FAIL CONTINUE
+  RUN WEEKDAYS
+  DELAYSUB 05:00
+ENDJOB
+

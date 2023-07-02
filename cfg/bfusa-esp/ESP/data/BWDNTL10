@@ -1,0 +1,15 @@
+APPL BWDNTL10 WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+/*********************************************************************/
+/* 06/12/2023 - TA - CREATED AS PER RITM0300078                      */
+/*********************************************************************/
+
+NOTIFY FAILURE ABEND ALERT(REMD)
+
+BWPC_JOB ZLSCM_EDI
+   AGENT CYBB_BWP100
+   CHAIN 'ZLSCM_EDI'
+   RUN DAILY
+   DELAYSUB 02.00
+ENDJOB

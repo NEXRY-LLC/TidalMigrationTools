@@ -26,9 +26,9 @@ public class EspSapJob extends EspAbstractJob {
 	String startMode;
 	String printRecipient;
 	String printDept;
-	Integer printColumns = 80;//COLUMNS
-	Integer printExpire = 8;
-	Integer printRows = 65;
+	Integer printColumns;//COLUMNS
+	Integer printExpire;
+	Integer printRows;
 	String printFormat;
 	String printSpoolName;
 	

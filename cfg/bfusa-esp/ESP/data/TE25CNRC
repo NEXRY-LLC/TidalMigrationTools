@@ -1,0 +1,100 @@
+APPL TE25CNRC WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/********************************************************************/
+/*  TE25CNCR is for rerunning from the RENAME step when more than   */
+/*  one file was received from Concur for FSDP,AMEX, or STAN in     */
+/*  APPL TE25CONC.                                                  */
+/*                                                                  */
+/*  *ENTER FILE TIME STAMP IN USER 4 WHEN TRIGGERING EVENT*         */
+/********************************************************************/
+/* 1-look at this link:                                             */
+/*  -http://pgp2-ak-fis.bfusa.com/listing.txt                       */
+/* 2-copy the file name for Concur_extract_AMEX_xxxxxxxxxxxxxxxx.txt*/
+/*  -copy the file name for Concur_extract_FSDP_xxxxxxxxxxxxxxxx.txt*/
+/*  -copy the file name for Concur_extract_STAN_xxxxxxxxxxxxxxxx.txt*/
+/* 3-Enter the xxxxxxxxxxxxxx part of the file name into the        */
+/*    USER 4 parameter when triggering this event.                  */
+/* 4-USER2 = 001 for AMEX                                           */
+/*   USER2 = 002 for FSDP                                           */
+/*   USER2 = 003 for STAN                                           */
+/* 5-Verify that file or files have been processed                  */
+/********************************************************************/
+
+SCHD001= 'YESTERDAY'
+SCHD002= 'YESTERDAY'
+SCHD003= 'YESTERDAY'
+IF !USER2 = 001 THEN SCHD001 = 'TODAY'
+IF !USER2 = 002 THEN SCHD002 = 'TODAY'
+IF !USER2 = 003 THEN SCHD003 = 'TODAY'
+
+IF USER4 = '' THEN !USER4 = '?????????????????'
+
+LINUX_JOB RENAME_CONCUR_AMEX
+    AGENT CYBA_PGP2AKFIS
+    CMDNAME /bin/mv
+    ARGS /home/ceadmin/Concur_extract_amex_!USER4..txt +
+/home/ceadmin/BFS-AMEX-REMIT.txt
+    USER ceadmin
+    RUN !SCHD001
+    RELEASE ADD(REENCRYPT_CONCUR_AMEX)
+ENDJOB
+
+ LINUX_JOB REENCRYPT_CONCUR_AMEX
+    AGENT CYBA_PGP2AKFIS
+    SCRIPTNAME /usr/local/scripts/pgpencrypt.sh
+    USER ceadmin
+    ARGS BFS-AMEX-REMIT.txt +
+"SFT generated key"
+    RUN !SCHD001
+   RELEASE ADD(SEND_TO_AMEX)
+ ENDJOB
+
+ LINUX_JOB SEND_TO_AMEX
+    AGENT CYBA_PGP2AKFIS
+    SCRIPTNAME /usr/local/scripts/scpsend.sh
+    USER root
+    ARGS -u EXAMEX -p 2#rmXAAIJa42 -h Bsa-securetransfers.bfusa.com +
+ -f /home/ceadmin/BFS-AMEX-REMIT.txt.pgp
+    RUN !SCHD001
+ ENDJOB
+
+LINUX_JOB RENAME_CONCUR_FSDP
+    AGENT CYBA_PGP2AKFIS
+    CMDNAME /bin/mv
+    ARGS /home/ceadmin/Concur_extract_FSDP_!USER4..txt +
+/home/ceadmin/Concur_extract_FSDP.txt
+    USER ceadmin
+    RUN !SCHD002
+    RELEASE ADD(SEND_FSDP_2STERPROD)
+ENDJOB
+
+LINUX_JOB SEND_FSDP_2STERPROD
+   AGENT CYBA_PGP2AKFIS
+   USER root
+   SCRIPTNAME /usr/local/scripts/scpsend.sh
+   ARGS -u BFDPPROD -p 'sw5bre#6fRu5' -h sfgint01pnsh.bfusa.com +
+-f /home/ceadmin/Concur_extract_FSDP.txt
+   RUN !SCHD002
+ENDJOB
+
+LINUX_JOB RENAME_CONCUR_STAN
+   AGENT CYBA_PGP2AKFIS
+   CMDNAME /bin/mv
+   ARGS /home/ceadmin/Concur_extract_Stan_!USER4..txt +
+/home/ceadmin/ZFIAPI14CONCUREXP.dat
+   USER ceadmin
+   RUN !SCHD003
+   RELEASE ADD(SEND_TO_STAN)
+ENDJOB
+
+LINUX_JOB SEND_TO_STAN
+   AGENT CYBA_PGP2AKFIS
+   USER root
+   SCRIPTNAME /usr/local/scripts/scpsend.sh
+ /*ARGS -u BSSAPFIN -p 'm#c4Evast4tH' -h Bsa-securetransfers.bfusa.com
+   ARGS -u BSSAPFIN -p 'm#c4Evast4tH' -h sfgint01pnsh.bfusa.com +
+-f /home/ceadmin/ZFIAPI14CONCUREXP.dat
+   RUN !SCHD003
+ENDJOB

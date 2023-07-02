@@ -1,0 +1,49 @@
+APPL OSTAX01Q WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/*********************************************************************/
+/*03/18/20 -JFC- NEW APPL PER INC000002190394                        */
+/*********************************************************************/
+/* JOBS TO RECYCLE THE ONESOURCE INSTANCE ON APPTAX01QAKR            */
+/*********************************************************************/
+
+/*NOTIFY ABEND FAILURE ALERT(REMD)
+/*NOTIFY OVERDUE ALERT(LATE)
+
+JOB LIS.!ESPAPPL LINK PROCESS
+   RUN TODAY
+   RELEASE ADD(SHUTDOWN.APPTAX01QAKR)
+ENDJOB
+
+LINUX_JOB SHUTDOWN.APPTAX01QAKR
+   AGENT APPTAX01_QA_LNX
+   SCRIPTNAME /apps/apache-tomcat-8.5.45/bin/shutdown.sh
+   ARGS force
+   USER root
+   RUN TODAY
+   RELEASE ADD(KILL_DETERM_JAVA.APPTAX01QAKR)
+ENDJOB
+
+LINUX_JOB KILL_DETERM_JAVA.APPTAX01QAKR
+   AGENT APPTAX01_QA_LNX
+   SCRIPTNAME /apps/apache-tomcat-8.5.45/bin/KILL_DETERM_JAVA.sh
+   ARGS force
+   USER root
+   RUN TODAY
+   RELEASE ADD(STARTUP.APPTAX01QAKR)
+ENDJOB
+
+LINUX_JOB STARTUP.APPTAX01QAKR
+   AGENT APPTAX01_QA_LNX
+   SCRIPTNAME /apps/apache-tomcat-8.5.45/bin/startup.sh
+   ARGS force
+   USER root
+   RUN TODAY
+   RELEASE ADD(LIE.!ESPAPPL)
+ENDJOB
+
+JOB LIE.!ESPAPPL LINK PROCESS
+   RUN TODAY
+ENDJOB
+

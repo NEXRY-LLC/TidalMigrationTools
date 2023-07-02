@@ -1,0 +1,17 @@
+APPL PXDDEMER WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/*********************************************************************/
+/*06/14/2018 -JFC- NO CHANGES, JUST UPDATED PROC MEMBER
+/*********************************************************************/
+
+NOTIFY FAILURE ABEND ALERT(REMD)
+
+JOB PXDDEMER
+  OPTIONS NORESTARTSTEP
+  CCCHK RC(1:4095) FAIL CONTINUE
+  RUN WORKDAYS
+  DELAYSUB 17:00
+ENDJOB
+

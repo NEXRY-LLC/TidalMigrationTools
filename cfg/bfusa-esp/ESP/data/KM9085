@@ -1,0 +1,44 @@
+APPL KM9085 WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/*********************************************************************/
+/*04/03/2020 -JFC- CLEANED UP PROC - ADDED LIE - NO OTHER CHANGES
+/*********************************************************************/
+
+NOTIFY FAILURE ABEND ALERT(REMD)
+
+FILE_TRIGGER JPMC_TO_KINGS_MOUNTAIN
+   AGENT CYBA_PGP2AKFIS
+   FILENAME '/home/ceadmin/JPMC_BSAM_8745_KMCVCHK_+
+      ??????????????.pgp' CREATE
+   RUN 2ND DAY OF MONTH
+   DELAYSUB 07.00
+   RELEASE ADD(DECRYPT_JPMC_TO_KINGS_MOUNTAIN)
+ENDJOB
+
+LINUX_JOB DECRYPT_JPMC_TO_KINGS_MOUNTAIN
+    AGENT CYBA_PGP2AKFIS
+    SCRIPTNAME /usr/local/scripts/pgpdecrypt.sh
+    USER ceadmin
+    ARGS JPMC_BSAM_8745_KMCVCHK_??????????????.pgp +
+       'Bridgestone Firestone'
+    RUN 2ND DAY OF MONTH
+    RELEASE ADD(FTP_TO_KINGS_MOUNTAIN)
+ENDJOB
+
+LINUX_JOB FTP_TO_KINGS_MOUNTAIN
+   AGENT CYBA_PGP2AKFIS
+   SCRIPTNAME /usr/local/scripts/scpsend.sh
+   USER root
+   ARGS -u EDIXFER -p 'FSFTEDI' -h 10.6.8.35 +
+       -f /home/ceadmin/JPMC_BSAM_8745_KMCVCHK_?????????????? +
+       -r './inbound/'
+   RUN 2ND DAY OF MONTH
+   RELEASE ADD(LIE.!ESPAPPL)
+ENDJOB
+
+JOB LIE.!ESPAPPL LINK PROCESS
+   RUN 2ND DAY OF MONTH
+ENDJOB
+

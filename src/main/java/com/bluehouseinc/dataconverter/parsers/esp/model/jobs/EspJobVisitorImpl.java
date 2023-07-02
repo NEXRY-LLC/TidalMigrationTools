@@ -464,7 +464,7 @@ public class EspJobVisitorImpl implements EspJobVisitor {
 				espJob.setStartMode(statementParameters);
 				break;
 			case TAG:
-				espJob.setTag(statementParameters);
+				espJob.getTags().add(statementParameters);
 				break;
 			case USER:
 				espJob.setUser(statementParameters);

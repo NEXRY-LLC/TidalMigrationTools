@@ -1,0 +1,144 @@
+APPL PED110OR WAIT
+
+NOTIFY FAILURE ABEND ALERT(REMD)
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/*********************************************************************/
+/*INT-128 OTR Material Characteristics Extract
+/*CHAROTR (YMIMCHAR_MIMI MMP CHAR EXT OTR)  Extract OTR material+
+           characteristics
+/*CHROTRCD (saptomimi_matchar_otr.cd) Move OTR file from SAP to +
+          APPM-NA-BSP
+/*THE MIMI CD JOBS IN THIS APPL COMMUNICATE WITH APPM-NA-CHQ         */
+/*********************************************************************/
+
+JOB LIS.PED110OR LINK PROCESS
+  RUN DAILY
+  DELAYSUB 22.15
+  AFTER ADD(LIE.PED120C)
+ENDJOB
+
+ DATA_OBJECT PARMSET.!ESPAPPL
+    /*Create a timestamp in hhmmMMDDYY format*/
+    SETVAR TMSTMP='!ESPSHH.:!ESPSMN.,!ESPSMM./!ESPSDD./!ESPSYY'
+    SETVAR PID=''
+    SETVAR STMPTM='!ESPSMM./!ESPSDD./!ESPSYY.,!ESPSHH.:!ESPSMN'
+ ENDJOB
+
+ JOB SETPID.!ESPAPPL LINK PROCESS
+    RUN REF LIS.!ESPAPPL
+    AFTER ADD(LIS.!ESPAPPL)
+    /*get the next PID number from the ConnectDirect*/
+    /*Process ID table (CDPROD).  Save the value into*/
+    /*the applications DataObject for use by the C:D*/
+    /*job and the CDSTAT job (if needed).*/
+    VINCR (PID) TABLE(CDPROD) CLANG
+    VGET  (PID) TABLE(CDPROD) CLANG
+    ESP MGRMSG * . . . PARMSET.!ESPAPPL/!ESPAPPL..!ESPAPGEN/MAIN +
+    ACTION SET PID(!PID)
+ ENDJOB
+
+SAP_JOB YMIMCHAR_MIMI_MMP_CHAR_EXT_OTR
+    SAPUSER SAPADM
+    AGENT CYBB_BFP030
+    SAPJOBNAME 'YMIMCHAR_MIMI MMP CHAR EXT OTR'
+    SAPJOBCLASS C
+    ABAPNAME YMIMCHAR
+    VARIANT BFOR
+    LANGUAGE E
+    PRINTDEST CP40
+    PRINTCOPIES 001
+    EXPIRATION 8
+    LINES 65
+    COLUMNS 80
+    BANNER D
+    RECIPIENT DUETTAD
+    ARCMODE PRINT
+    RUN REF LIS.PED110OR
+    AFTER ADD(LIS.PED110OR)
+ENDJOB
+
+UNIX_JOB SAPTOMIMI_MATCHAR_OTRCD
+    AGENT CYBA_ISBFP3
+    AFTER ADD(SETPID.!ESPAPPL)
+    EARLYSUB REALNOW PLUS 20 SECONDS
+    PID= WOBDATA('PARMSET.!ESPAPPL','PID')
+    TMSTMP= WOBDATA('PARMSET.!ESPAPPL','TMSTMP')
+    SCRIPTNAME /apps/condir/bfsbin/submitcd.sh
+    ARGS saptomimi_matchar_otr.cd 5 !PID !TMSTMP
+    RUN REF LIS.PED110OR
+    USER cdprod
+    AFTER ADD(YMIMCHAR_MIMI_MMP_CHAR_EXT_OTR)
+ENDJOB
+
+ AIX_JOB CDSTAT.CHROTRCD   CONDITIONAL
+    AGENT CYBA_ISBFP3
+    AFTER ADD(SAPTOMIMI_MATCHAR_OTRCD(A))
+    /*This job only runs if the C:D job does not end with*/
+    /*a EXITCODE of 0.  It can be rerun as often as*/
+    /*required to check the status of the C:D process.*/
+    /*When the C:D process finishes, complete the job*/
+    /*to release the successors.*/
+    RUN REF LIS.!ESPAPPL
+    USER cduser
+    STMPTM= WOBDATA('PARMSET.!ESPAPPL','STMPTM')
+    PID= WOBDATA('PARMSET.!ESPAPPL','PID')
+    CMDNAME /apps/condir/bfsbin/cdstat.sh
+    ARGS !STMPTM  j!PID
+ ENDJOB
+
+ JOB SETPID2.!ESPAPPL LINK PROCESS
+    RUN REF LIS.!ESPAPPL
+    AFTER ADD(LIS.!ESPAPPL)
+    /*get the next PID number from the ConnectDirect*/
+    /*Process ID table (CDPROD).  Save the value into*/
+    /*the applications DataObject for use by the C:D*/
+    /*job and the CDSTAT job (if needed).*/
+    VINCR (PID) TABLE(CDPROD) CLANG
+    VGET  (PID) TABLE(CDPROD) CLANG
+    ESP MGRMSG * . . . PARMSET.!ESPAPPL/!ESPAPPL..!ESPAPGEN/MAIN +
+    ACTION SET PID(!PID)
+ ENDJOB
+
+UNIX_JOB SAPTOMIMI_OTR_MATCHAR_OTRCD request
+    AGENT CYBA_ISBFP3
+    AFTER ADD(SETPID2.!ESPAPPL)
+    EARLYSUB REALNOW PLUS 20 SECONDS
+    PID= WOBDATA('PARMSET.!ESPAPPL','PID')
+    TMSTMP= WOBDATA('PARMSET.!ESPAPPL','TMSTMP')
+    SCRIPTNAME /apps/condir/bfsbin/submitcd.sh
+    ARGS saptomimi_otr_matchar_otr.cd 5 !PID !TMSTMP
+    RUN REF LIS.PED110OR
+    USER cdprod
+    AFTER ADD(SAPTOMIMI_MATCHAR_OTRCD)
+ENDJOB
+
+ AIX_JOB CDSTAT.MTCHORCD     CONDITIONAL
+    AGENT CYBA_ISBFP3
+    AFTER ADD(SAPTOMIMI_OTR_MATCHAR_OTRCD(A))
+    /*This job only runs if the C:D job does not end with*/
+    /*a EXITCODE of 0.  It can be rerun as often as*/
+    /*required to check the status of the C:D process.*/
+    /*When the C:D process finishes, complete the job*/
+    /*to release the successors.*/
+    RUN REF LIS.!ESPAPPL
+    USER cduser
+    STMPTM= WOBDATA('PARMSET.!ESPAPPL','STMPTM')
+    PID= WOBDATA('PARMSET.!ESPAPPL','PID')
+    CMDNAME /apps/condir/bfsbin/cdstat.sh
+    ARGS !STMPTM  j!PID
+ ENDJOB
+
+AIX_JOB LIE.PED110OR
+   AGENT CYBA_ISBFP3
+   COMMAND /bin/sleep
+   ARGS 3
+   USER bfpadm
+   RUN REF LIS.PED110OR
+   AFTER ADD(SAPTOMIMI_OTR_MATCHAR_OTRCD)
+ENDJOB
+
+AIX_JOB LIE.PED120C EXTERNAL APPLID(PED120C)
+  RUN DAILY
+ENDJOB
+

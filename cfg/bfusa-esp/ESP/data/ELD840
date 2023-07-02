@@ -1,0 +1,19 @@
+APPL ELD840 WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/*********************************************************************/
+/*01/09/2019 -JFC- REMOVED JOB ELD812X2 PER INC INC000001820558
+/*********************************************************************/
+
+NOTIFY FAILURE ABEND ALERT(REMD)
+
+JOB ELD100
+  /*@@ SYSTEM=EDI
+  CCCHK RC(5:4095) FAIL CONTINUE
+  RUN WEEKDAYS
+  DELAYSUB 19:00
+  NOTWITH (OMD900.-)
+  NOTWITH (OMD500.-)
+ENDJOB
+

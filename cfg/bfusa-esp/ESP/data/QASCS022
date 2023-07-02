@@ -1,0 +1,54 @@
+APPL QASCS022 WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/**********************************************************************/
+/*10/18/2016-JFC-CONVERTED LIE JOB FROM MVS TO LINK                   */
+/**********************************************************************/
+
+NOTIFY FAILURE ABEND ALERT(REMD)
+NOTIFY FAILURE ABEND MAILBOX(QAFAIL1)
+TAG PPIW
+
+JOB LIS.QASCS022 LINK PROCESS
+  RUN MON
+  EARLYSUB 05.50
+  RELEASE ADD(SCS_v_mimi_ConsIMP_ArtDCWeekOrders_Stats.cmd)
+ENDJOB
+
+NT_JOB SCS_v_mimi_ConsIMP_ArtDCWeekOrders_Stats.cmd
+  AGENT CYBA_PPIWPROD
+  CMDNAME X:\CMD_SCRIPTS\SCS_v_mimi_ConsIMP_ArtDCWeekOrders_Stats.cmd
+  USER maestro
+  RUN MON
+  RELEASE ADD(SCS_v_mimi_ConsIMP_ArtWeekOrders_Stats.cmd)
+ENDJOB
+
+NT_JOB SCS_v_mimi_ConsIMP_ArtWeekOrders_Stats.cmd
+  AGENT CYBA_PPIWPROD
+  CMDNAME X:\CMD_SCRIPTS\SCS_v_mimi_ConsIMP_ArtWeekOrders_Stats.cmd
+  USER maestro
+  RUN MON
+  RELEASE ADD(SCS_v_mimi_CommIMP_ArtDCWeekOrders_Stats.cmd)
+ENDJOB
+
+NT_JOB SCS_v_mimi_CommIMP_ArtDCWeekOrders_Stats.cmd
+  AGENT CYBA_PPIWPROD
+  CMDNAME X:\CMD_SCRIPTS\SCS_v_mimi_CommIMP_ArtDCWeekOrders_Stats.cmd
+  USER maestro
+  RUN MON
+  RELEASE ADD(SCS_v_mimi_CommIMP_ArtWeekOrders_Stats.cmd)
+ENDJOB
+
+NT_JOB SCS_v_mimi_CommIMP_ArtWeekOrders_Stats.cmd
+  AGENT CYBA_PPIWPROD
+  CMDNAME X:\CMD_SCRIPTS\SCS_v_mimi_CommIMP_ArtWeekOrders_Stats.cmd
+  USER maestro
+  RUN MON
+  RELEASE ADD(LIE.QASCS022)
+ENDJOB
+
+JOB LIE.QASCS022 LINK PROCESS
+  RUN MON
+ENDJOB
+

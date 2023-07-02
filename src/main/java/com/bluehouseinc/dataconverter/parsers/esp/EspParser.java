@@ -228,7 +228,7 @@ public class EspParser extends AbstractParser<EspDataModel> {
 
 				String filename = filePath.getFileName().toString();
 
-				if (filename.equals("IPDREU01") || filename.contains("MNAPPL")) {
+				if (filename.equals("BLDAKPR1") || filename.contains("BLDAKPR1")) {
 					filename.chars();
 				}
 
@@ -320,12 +320,13 @@ public class EspParser extends AbstractParser<EspDataModel> {
 					// TODO: SHould I put else statement around this because this line is in job or not.
 					this.doProcessGroupData(currentJobGroup, line);
 
-					// Assign event data if we have it for this group.
-					SchEventElement edata = this.getParserDataModel().getScheduleEventDataProcessor().getElementByName(jobGroupName);
-
-					this.doProcessGroupSchEventElementLogic(currentJobGroup, edata);
-
 				}
+
+				// DO here as we are done with this file, or this group.
+				// Assign event data if we have it for this group.
+				SchEventElement edata = this.getParserDataModel().getScheduleEventDataProcessor().getElementByName(jobGroupName);
+
+				this.doProcessGroupSchEventElementLogic(currentJobGroup, edata);
 
 			} catch (IOException ioException) {
 				log.error(Arrays.toString(ioException.getStackTrace()));
@@ -350,10 +351,8 @@ public class EspParser extends AbstractParser<EspDataModel> {
 
 	private void extractJob(final BufferedReader reader, String jobName, EspJobType jobType, EspJobGroup parent, String rawdata) throws Exception {
 
-		if (parent != null && jobName.equals("DMTIC_LOADBAT")) {
-			if (parent.getName().equalsIgnoreCase("AOBOSS01")) {
-				jobName.getBytes();
-			}
+		if (jobName.equals("SMTPNOTE.SWESP6SC")) {
+			jobName.getBytes();
 		}
 
 		List<String> lines = parseJobLines(reader);
@@ -649,8 +648,13 @@ public class EspParser extends AbstractParser<EspDataModel> {
 		if (data != null) {
 			in.setEventData(data);
 
-			
-			// Per ANkit , if the application (AKA group) in tidal contains a calendar 
+			if (!StringUtils.isBlank(in.getDelaySubmission())) {
+				return; // do not apply this data to the group
+			} else if (!StringUtils.isBlank(in.getEarlySubmission())) {
+				return;// do not apply this data to the group
+			}
+
+			// Per ANkit , if the application (AKA group) in tidal contains a calendar
 			data.getComments().forEach(c -> in.setComment(in.getComment() + "\n" + c.getData()));
 
 			if (data.isScheduleDataOnly()) {
@@ -768,6 +772,8 @@ public class EspParser extends AbstractParser<EspDataModel> {
 
 			}
 			in.addEspStatementObject(data.getStatementObject());
+
+			in.getTags().addAll(data.getTags());
 		}
 	}
 }

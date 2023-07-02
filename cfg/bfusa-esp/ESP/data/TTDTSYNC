@@ -1,0 +1,46 @@
+APPL TTDTSYNC WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/*******************************************************************/
+/*12/26/2019-JFC-APPL CREATED PER INC INC000001796073
+/*******************************************************************/
+/*02/04/21 - BS09611 - scheduled to run daily - INC000002310077    */
+/*********************************************************************/
+
+/*NOTIFY ABEND FAILURE ALERT(REMD)
+/*NOTIFY OVERDUE ALERT(LATE)
+
+JOB LIS.!ESPAPPL LINK PROCESS
+   RUN WEEKDAY
+   DELAYSUB 02:00
+   RELEASE ADD(MOLD_EQUIP_SPEC_TO_TESS_SYNC)
+ENDJOB
+
+NT_JOB MOLD_EQUIP_SPEC_TO_TESS_SYNC
+   AGENT appcyb02ppd
+   USER svc_siftcalc
+   CMDNAME \\appcyb02ppd\esp$\MoldEquipSpecToTESS\+
+           EquipSpecTessSyncCommit.bat
+   RUN WEEKDAY
+   DUEOUT EXEC NOW PLUS 4 HOURS
+   RELEASE ADD(COPY_TEMP_FILE)
+ENDJOB
+
+JOB COPY_TEMP_FILE LINK PROCESS
+   /*COPY TEMP FILE TO \\appcyb02ppd\esp$\MoldEquipSpecToTESS\syncLogs
+   /*RUN WEEKDAY
+   RELEASE ADD(CLEAN_TEMP_FILE_DIRETORY)
+ENDJOB
+
+JOB CLEAN_TEMP_FILE_DIRETORY LINK PROCESS
+   /*CLEAN TEMP FILES THAT ARE 14 DAYS OR OLDER FROM
+   /* +\\appcyb02ppd\esp$\MoldEquipSpecToTESS\syncLogs
+   RUN WEEKDAY
+   RELEASE ADD(LIE.!ESPAPPL)
+ENDJOB
+
+JOB LIE.!ESPAPPL LINK PROCESS
+   RUN WEEKDAY
+ENDJOB
+

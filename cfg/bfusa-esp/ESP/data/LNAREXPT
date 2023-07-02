@@ -1,0 +1,25 @@
+APPL LNAREXPT WAIT                                                      00010001
+                                                                        00020001
+NOTIFY FAILURE ABEND ALERT(REMD)                                        00030001
+                                                                        00040001
+                                                                        00050001
+SCHD1 = 'YESTERDAY'                                                     00060001
+                                                                        00070001
+IF !USER2 = 1 OR !USER2 = '' THEN SCHD1 = 'TODAY'                       00080001
+                                                                        00090001
+JCLLIB 'FTRF.PRDJOBS'                                                   00100001
+COPYJCL 'SWS.ESP.COPYLIB'                                               00110001
+TEMPLIB 'SWS.ESP.TEMPLIB'                                               00120001
+DOCLIB 'SWS.ESP.DOCLIB'                                                 00130001
+                                                                        00140001
+IF !ESPAPSUB# > 1 THEN JCLLIB 'SWS.ESP.COPYLIB'                         00150001
+                                                                        00160001
+OPTIONS RESTARTSTEP                                                     00170001
+                                                                        00180001
+JOB LNAREXPT                                                            00190001
+  /*@@ SYSTEM=LAWSON                                                    00200001
+  /*@@ JOBNET=IEBGENER                                                  00210001
+  CCCHK RC(1:4095) FAIL CONTINUE                                        00220001
+  RUN !SCHD1                                                            00230001
+ENDJOB                                                                  00240001
+                                                                        00250001

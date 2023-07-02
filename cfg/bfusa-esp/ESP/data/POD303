@@ -1,0 +1,30 @@
+APPL POD303 WAIT                                                        00010000
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+                                                                        00020000
+/*********************************************************************/ 00030000
+/*03/11/2019 -JFC-  UPDATED PROC PER INC000001872111                 */ 00040000
+/*********************************************************************/ 00050000
+                                                                        00050000
+NOTIFY FAILURE ABEND ALERT(REMD)                                        00070000
+
+JOB LIS.!ESPAPPL LINK PROCESS
+  RUN DAILY
+  RELEASE ADD(POD303)
+ENDJOB
+                                                                        00110000
+JOB POD303                                                              00166000
+  CCCHK RC(1:4095) FAIL STOP                                            00167000
+  RUN TODAY                                                             00110000
+  RELEASE ADD(POD302)
+ENDJOB                                                                  00220000
+                                                                        00110000
+JOB POD302                                                              00166000
+  CCCHK RC(2:4095) FAIL STOP                                            00167000
+  RUN TODAY                                                             00110000
+  RELEASE ADD(LIE.!ESPAPPL)
+ENDJOB
+
+JOB LIE.!ESPAPPL LINK PROCESS
+  RUN DAILY
+ENDJOB                                                                  00220000

@@ -1,0 +1,125 @@
+APPL QARMA001 WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/*********************************************************************/
+/* 04/04/2016 - JFC - NEW APPL PER JOHN HRITZ                       */
+/* 05/09/2016 - JFC - ADDED DS TRIG TO EVENT                        */
+/*********************************************************************/
+
+NOTIFY ABEND FAILURE ALERT(REMD)
+NOTIFY FAILURE ABEND MAILBOX(QAFAIL1)
+TAG PPIW
+
+DATA_OBJECT PARMSET.!ESPAPPL
+   /*Create a timestamp in hhmmMMDDYY format*/
+   SETVAR TMSTMP='!ESPSHH.:!ESPSMN.,!ESPSMM./!ESPSDD./!ESPSYY'
+   SETVAR PID=''
+   SETVAR STMPTM='!ESPSMM./!ESPSDD./!ESPSYY.,!ESPSHH.:!ESPSMN'
+ENDJOB
+
+JOB TT360HOT EXTERNAL SCOPE(08)
+   RUN TODAY
+   RELEASE ADD(LOCK_RMACMD)
+ENDJOB
+
+NT_JOB LOCK_RMACMD
+   AGENT CYBA_PPIWPROD
+   CMDNAME X:\cmd_scripts\lock_rma.cmd
+   ARGS
+   USER maestro
+   RUN TODAY
+   RELEASE ADD(WEB_SITE_LOCK_RMACMD)
+ENDJOB
+
+NT_JOB WEB_SITE_LOCK_RMACMD
+   AGENT CYBA_PPIWPROD
+   CMDNAME X:\cmd_scripts\web_site_lock_rma.cmd
+   ARGS
+   USER maestro
+   RUN TODAY
+   RELEASE ADD(CD_RMA_OTR)
+ENDJOB
+
+JOB SETPID.!ESPAPPL LINK PROCESS
+   VINCR (PID) TABLE(CDPROD) CLANG
+   VGET  (PID) TABLE(CDPROD) CLANG
+   ESP MGRMSG * . . . PARMSET.!ESPAPPL/!ESPAPPL..!ESPAPGEN/MAIN +
+   ACTION SET PID(!PID)
+   RUN TODAY
+   RELEASE ADD(CD_RMA_OTR)
+ENDJOB
+
+NT_JOB CD_RMA_OTR
+   AGENT CYBA_CDC1AKFIS
+   EARLYSUB REALNOW PLUS 10 SECONDS
+   PID= WOBDATA('PARMSET.!ESPAPPL','PID')
+   TMSTMP= WOBDATA('PARMSET.!ESPAPPL','TMSTMP')
+   CMDNAME D:\site\apps\cdnt\batchcmd\submit.cmd
+   ARGS CD_RMA_OTR.cdp 0 !pid
+   USER cdprod
+   RUN TODAY
+   RELEASE ADD(RMA_OTR_TEMPCMD)
+   RELEASE ADD(CDSTAT.CDRMAOTR(a))
+ENDJOB
+
+AIX_JOB CDSTAT.CDRMAOTR    CONDITIONAL
+   AGENT CYBA_ISBFP3
+   /*This job only runs if the C:D job does not end with*/
+   /*a EXITCODE of 0.  It can be rerun as often as*/
+   /*required to check the status of the C:D process.*/
+   /*When the C:D process finishes, complete the job*/
+   /*to release the successors.*/
+   USER cduser
+   STMPTM= WOBDATA('PARMSET.!ESPAPPL','STMPTM')
+   PID= WOBDATA('PARMSET.!ESPAPPL','PID')
+   CMDNAME /apps/condir/bfsbin/cdstat.sh
+   ARGS !STMPTM  j!PID
+   RUN DAILY
+ENDJOB
+
+NT_JOB RMA_OTR_TEMPCMD
+   AGENT CYBA_PPIWPROD
+   CMDNAME X:\cmd_scripts\rma_otr_temp.cmd
+   ARGS
+   USER maestro
+   RUN TODAY
+   RELEASE ADD(RMA_OTR_CONTROLCMD)
+ENDJOB
+
+NT_JOB RMA_OTR_CONTROLCMD
+   AGENT CYBA_PPIWPROD
+   CMDNAME X:\cmd_scripts\rma_otr_control.cmd
+   ARGS
+   USER maestro
+   RUN TODAY
+   RELEASE ADD(TBLRMA_OTRDATACMD)
+ENDJOB
+
+NT_JOB TBLRMA_OTRDATACMD
+   AGENT CYBA_PPIWPROD
+   CMDNAME X:\cmd_scripts\tblrma_otrdata.cmd
+   ARGS
+   USER maestro
+   RUN TODAY
+   RELDELAY 1
+   RELEASE ADD(UNLOCK_RMACMD)
+ENDJOB
+
+NT_JOB UNLOCK_RMACMD
+   AGENT CYBA_PPIWPROD
+   CMDNAME X:\cmd_scripts\unlock_rma.cmd
+   ARGS
+   USER maestro
+   RUN TODAY
+   RELEASE ADD(WEB_SITE_UNLOCK_RMACMD)
+ENDJOB
+
+NT_JOB WEB_SITE_UNLOCK_RMACMD
+   AGENT CYBA_PPIWPROD
+   CMDNAME X:\cmd_scripts\web_site_unlock_rma.cmd
+   ARGS
+   RUN TODAY
+   USER maestro
+ENDJOB
+

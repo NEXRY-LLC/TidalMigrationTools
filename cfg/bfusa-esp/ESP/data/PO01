@@ -1,0 +1,19 @@
+APPL PO01 JOB_ANCESTOR_WAIT
+
+/*********************************************************************/
+/*********************************************************************/
+
+  IF (!MNAPPL EQ 'POD302' AND -
+      !MNJOB EQ 'POD302') THEN -
+      DO
+       ESP AJ ALL COMPLETE APPL(POD302.0)                               00290026
+       ESP TRIGGER PO01.POD303 ADD                                      00290026
+     ENDDO
+
+  IF (!MNAPPL EQ 'POD900' AND -
+      !MNJOB EQ 'POD900') THEN -
+      DO
+       ESP AJ ALL COMPLETE APPL(POD900.0)                               00290026
+       ESP TRIGGER PO01.POD901 ADD                                      00290026
+     ENDDO
+

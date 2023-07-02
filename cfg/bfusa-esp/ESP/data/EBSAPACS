@@ -1,0 +1,19 @@
+APPL EBSAPACS WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/*********************************************************************/
+/*11/13/2019 -VMD- CHANGED SPECIFIED AGENTS - PER   INC000002085604
+/*********************************************************************/
+
+NOTIFY FAILURE ABEND ALERT(REMP)
+
+NT_JOB EBSAPACS_TORN
+   AGENT APPPLS02PAKR
+   USER bsprintuser
+   CMDNAME D:\APPS\SAP\START\SAP_ACS_TORNS.BAT
+   ENVAR STDOUT=D:\APPS\SAP\REPORTFILES\+
+   SAP_ACS_TORNS.TXT
+   RUN TODAY
+ENDJOB
+

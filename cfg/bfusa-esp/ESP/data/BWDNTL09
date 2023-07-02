@@ -1,0 +1,15 @@
+APPL BWDNTL09 WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+/*********************************************************************/
+/* 03/24/2023 - SS - CREATED AS PER RITM0270530                      */
+/*********************************************************************/
+
+NOTIFY FAILURE ABEND ALERT(REMD)
+
+BWPC_JOB ZFI_MASTER_CHAIN
+   AGENT CYBB_BWP100
+   CHAIN 'ZFI_MASTER_CHAIN'
+   RUN DAILY
+   DELAYSUB 13.00
+ENDJOB

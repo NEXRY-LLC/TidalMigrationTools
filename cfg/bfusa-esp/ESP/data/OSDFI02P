@@ -1,0 +1,36 @@
+APPL OSDFI02P WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/*********************************************************************/
+/*11/11/20 -JFC- NEW APPL PER INC000002365399                        */
+/*11/17/20 -JFC- SET EXITCODE TO ACCEPT 1 AS GOOD CODE PER GREG      */
+/*********************************************************************/
+/* JOBS THAT RUN ON APPTAX02PAKR                                     */
+/* RUN A SCRIPT TO DELETE LOG FILES AND REPORT FILE EACH DAY .       */
+/*********************************************************************/
+
+NOTIFY ABEND FAILURE ALERT(REMD)
+NOTIFY OVERDUE ALERT(LATE)
+
+JOB LIS.!ESPAPPL LINK PROCESS
+   RUN DAILY
+   DELAYSUB 8AM
+   RELEASE ADD(REMOVE_REPORT_FILES.APPTAX02PAKR)
+ENDJOB
+
+LINUX_JOB REMOVE_REPORT_FILES.APPTAX02PAKR
+   AGENT APPTAX02_PD_LNX
+   SCRIPTNAME /apps/reporting/sap_bobj/Remove_Report_files.sh
+   ARGS
+   USER onesrc
+   RUN DAILY
+   EXITCODE 0-1 SUCCESS
+   RELEASE ADD(LIE.!ESPAPPL)
+ENDJOB
+
+JOB LIE.!ESPAPPL LINK PROCESS
+   RUN DAILY
+   DUEOUT EXEC 9am
+ENDJOB
+

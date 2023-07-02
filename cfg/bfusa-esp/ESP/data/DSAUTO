@@ -1,0 +1,29 @@
+APPL DSAUTO WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/**********************************************************************/
+/* 05/05/23 - CREATED PER PRITTISH SANA - RITM0286782                 */
+/**********************************************************************/
+
+NOTIFY ABEND FAILURE ALERT(REMD)
+
+JOB LIS.!ESPAPPL LINK PROCESS
+   RUN FRIDAY
+   DELAYSUB 18.30
+   RELEASE ADD(JOB_AUTOMATION_FRAMEWORK)
+ENDJOB
+
+NT_JOB JOB_AUTOMATION_FRAMEWORK
+  AGENT DSSAPP01PAKR
+  USER svc_sap_ds_q
+  CMDNAME \\dssapp01pakr\bods\Job_Scripts\+
+          JOB_AUTOMATION_FRAMEWORK.bat
+  RUN FRIDAY
+  RELEASE ADD(LIE.!ESPAPPL)
+ENDJOB
+
+JOB LIE.!ESPAPPL LINK PROCESS
+   RUN FRIDAY
+ENDJOB
+

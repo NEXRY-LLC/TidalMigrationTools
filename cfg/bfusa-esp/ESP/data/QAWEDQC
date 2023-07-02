@@ -1,0 +1,40 @@
+APPL QAWEDQC WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/**********************************************************************/
+/*QC CHECKS                                                           */
+/*10/18/2016-JFC-CONVERTED LIE JOB FROM MVS TO LINK                   */
+/**********************************************************************/
+
+NOTIFY FAILURE ABEND ALERT(REMD)
+NOTIFY FAILURE ABEND MAILBOX(QAFAIL1)
+TAG PPIW
+
+JOB LIS.QAWEDQC LINK PROCESS
+  RUN THU
+  RELEASE ADD(RPT6_EMAIL)
+ENDJOB
+
+NT_JOB RPT6_EMAIL
+  AGENT CYBA_PPIWPROD
+  CMDNAME X:\cmd_scripts\rpt6_email.cmd
+  ARGS
+  USER maestro
+  RUN THU
+  RELEASE ADD(RPT4_EMAIL)
+ENDJOB
+
+NT_JOB RPT4_EMAIL
+  AGENT CYBA_PPIWPROD
+  CMDNAME X:\cmd_scripts\RPT4_EMAIL.cmd
+  ARGS
+  USER maestro
+  RUN THU
+  RELEASE ADD(LIE.QAWEDQC)
+ENDJOB
+
+JOB LIE.QAWEDQC LINK PROCESS
+  RUN THU
+ENDJOB
+

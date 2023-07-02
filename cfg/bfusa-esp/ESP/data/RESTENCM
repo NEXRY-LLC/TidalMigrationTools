@@ -1,0 +1,13 @@
+APPL RESTENCM
+
+/*********************************************************************/
+/*02/27/2019 -JFC- CLEANED UP PROC - ADDED LIE - NO OTHER CHANGES    */
+/*********************************************************************/
+
+NOTIFY FAILURE ABEND ALERT(REMD)
+
+JOB RESTENCM LINK PROCESS
+    DELAYSUB NOW PLUS 60 SECONDS
+    VS 'F SWESPWMM,ENCPARM RESTART'
+    RUN ANY
+ENDJOB

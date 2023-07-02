@@ -1,0 +1,29 @@
+APPL ADWDSTAB WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/*********************************************************************/
+/*10/12/2022-created new schedule - REQ0191345
+/*
+/*********************************************************************/
+
+NOTIFY FAILURE ABEND ALERT(REMD)
+
+JOB LIS.!ESPAPPL LINK PROCESS
+  RUN DAILY
+  RELEASE ADD(ADWDSTABLEAU)
+ENDJOB
+
+NT_JOB ADWDSTABLEAU
+  AGENT CYBA_CDC1AKFIS
+  CMDNAME \\cdc1-ak-fis\site\Data\ADW\DS_Tableau_Triggers\ +
+  PROD\Script\BSRO_Pricing_Discounting_Trigger.bat
+  ARGS
+  RUN DAILY
+  RELEASE ADD(LIE.!ESPAPPL)
+ENDJOB
+
+JOB LIE.!ESPAPPL LINK PROCESS
+   RUN DAILY
+ENDJOB
+

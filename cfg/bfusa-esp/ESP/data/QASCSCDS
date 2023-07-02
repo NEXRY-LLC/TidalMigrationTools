@@ -1,0 +1,26 @@
+APPL QASCSCDS WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/*********************************************************************/
+/* 11/16/2015 -JFC- CREATED PER REMEDY INC#997645 & DAVE REGUEIRO    */
+/*            -APPL IS PART OF COPA MONTHLY DATA LOADS               */
+/*********************************************************************/
+/* RECOVERY RESTART INSTRUCTIONS:
+/* -NOTIFY PPIW SUPPORT
+/* -REMEDY TICKET GROUP=PPIW SUPPORT
+/*********************************************************************/
+
+NOTIFY FAILURE ABEND ALERT(REMD)
+NOTIFY FAILURE ABEND OVERDUE MAILBOX(QAFAIL1)
+TAG PPIW
+
+NT_JOB SCS_COMMERCIAL_DAILY_SALES_COPA
+  AGENT CYBA_PPIWPROD
+  CMDNAME X:\CMD_SCRIPTS\SCS_COMMERCIAL_DAILY_SALES_COPA.CMD
+  RUN 3RD DAY OF MONTH
+  USER maestro
+  DELAYSUB 5AM
+  DUEOUT EXEC 9AM
+ENDJOB
+

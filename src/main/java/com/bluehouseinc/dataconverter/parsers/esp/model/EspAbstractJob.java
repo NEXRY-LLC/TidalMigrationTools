@@ -59,7 +59,7 @@ public abstract class EspAbstractJob extends BaseJobOrGroupObject implements Esp
 	String startMode;
 	String transferCodeType;
 	String user;
-	String tag;
+	List<String> tags = new ArrayList<>();
 	List<String> notifyList = new ArrayList<>();
 	String jobAttributes;
 

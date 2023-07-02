@@ -1,0 +1,31 @@
+APPL DSOTCJO WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/**********************************************************************/
+/* 08/25/2022 - RITM0201786 - TA - new schedule created
+/**********************************************************************/
+
+NOTIFY ABEND FAILURE ALERT(REMD)
+
+JOB LIS.!ESPAPPL LINK PROCESS
+   RUN DAILY
+   DELAYSUB 10.50 PM
+   RELEASE ADD(DS_JOB_OTC_MM_Joilette)
+ENDJOB
+
+LINUX_JOB DS_JOB_OTC_MM_Joilette
+   AGENT LNX_DSRSAP01PAKR
+   USER bodsadmin
+   SCRIPTNAME /opt/ds_install/dataservices/JOB_scripts/+
+   JOB_OTC_MM_Joilette.sh
+   RUN DAILY
+   RELEASE ADD(LIE.!ESPAPPL)
+ENDJOB
+
+JOB LIE.!ESPAPPL LINK PROCESS
+   RUN DAILY
+   DUEOUT EXEC NOW PLUS 4 HOURS
+ENDJOB
+
+

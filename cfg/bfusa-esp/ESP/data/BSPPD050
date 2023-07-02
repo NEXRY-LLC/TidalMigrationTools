@@ -1,0 +1,120 @@
+APPL BSPPD050 WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/*********************************************************************/
+/*02/19/2019 -JFC- CLEANED UP PROC - ADDED LIE - NO OTHER CHANGES
+/*09/12/2022-for agent CYBA_CDC1AKFIS user maestro changed to
+/*           bfusa\maestro - INC0353221
+/*********************************************************************/
+
+NOTIFY ABEND FAILURE ALERT(REMD)
+
+DATA_OBJECT PARMSET.!ESPAPPL
+   /*Create a timestamp in hhmmMMDDYY format*/
+   SETVAR TMSTMP='!ESPSHH.:!ESPSMN.,!ESPSMM./!ESPSDD./!ESPSYY'
+   SETVAR PID=''
+   SETVAR STMPTM='!ESPSMM./!ESPSDD./!ESPSYY.,!ESPSHH.:!ESPSMN'
+ENDJOB
+
+FILE_TRIGGER BSPPD050
+   AGENT CYBA_CDC1AKFIS
+   FILENAME \\cdc1-ak-fis\Data\Monterrey\Raw_Matl_Consumption+
+    \ZMMIMI04_2000_RM_GI.txt CREATE NOCHANGE(3)
+   RUN DAILY
+   RELEASE ADD(LIS.!ESPAPPL)
+ENDJOB
+
+JOB LIS.!ESPAPPL LINK PROCESS
+   RUN DAILY
+   RELEASE ADD(RAWCON_2000_CD)
+ENDJOB
+
+JOB SETPID.!ESPAPPL LINK PROCESS
+   /*get the next PID number from the ConnectDirect*/
+   /*Process ID table (CDPROD).  Save the value into*/
+   /*the applications DataObject for use by the C:D*/
+   /*job and the CDSTAT job (if needed).*/
+   VINCR (PID) TABLE(CDPROD) CLANG
+   VGET  (PID) TABLE(CDPROD) CLANG
+   ESP MGRMSG * . . . PARMSET.!ESPAPPL/!ESPAPPL..!ESPAPGEN/MAIN +
+ACTION SET PID(!PID)
+   RUN DAILY
+   RELEASE ADD(RAWCON_2000_CD)
+ENDJOB
+
+UNIX_JOB RAWCON_2000_CD
+   AGENT CYBA_ISBFP3
+   EARLYSUB REALNOW PLUS 20 SECONDS
+   PID= WOBDATA('PARMSET.!ESPAPPL','PID')
+   TMSTMP= WOBDATA('PARMSET.!ESPAPPL','TMSTMP')
+   SCRIPTNAME /apps/condir/bfsbin/submitcd.sh
+   ARGS 2000rawcon.cd 5 !PID !TMSTMP
+   RESOURCE ADD(1,ISBFP3CD)
+   USER cdprod
+   RUN DAILY
+   RELEASE ADD(CDSTAT.RAWCON_2000_CD(A))
+   RELEASE ADD(ZMMIMI04_2000_RM_GI)
+ENDJOB
+
+AIX_JOB CDSTAT.RAWCON_2000_CD CONDITIONAL
+   AGENT CYBA_ISBFP3
+   /*This job only runs if the C:D job does not end with*/
+   /*a EXITCODE of 0.  It can be rerun as often as*/
+   /*required to check the status of the C:D process.*/
+   /*When the C:D process finishes, complete the job*/
+   /*to release the successors.*/
+   USER cduser
+   STMPTM= WOBDATA('PARMSET.!ESPAPPL','STMPTM')
+   PID= WOBDATA('PARMSET.!ESPAPPL','PID')
+   CMDNAME /apps/condir/bfsbin/cdstat.sh
+   ARGS !STMPTM  j!PID
+   RUN DAILY
+ENDJOB
+
+SAP_JOB ZMMIMI04_2000_RM_GI
+   AGENT CYBB_BFP030
+   SAPJOBNAME ZMMIMI04_2000_RM_GI
+   SAPJOBCLASS C
+   STARTMODE ASAP
+   ABAPNAME ZMMIMI04
+   VARIANT 'VARIANT 2000'
+   SAPEMAILADDR 'PaezRobertoCaleb@contractor.bfusa.com,-
+MaldonadoAlbertoIsaac@contractor.bfusa.com,AguilarVicto@bfusa.com,-
+bsmrreceiving@bfusa.com.'
+   STEPUSER SAPADM
+   LANGUAGE E
+   PRINTDEST MY33
+   PRINTIMMED YES
+   EXPIRATION 8
+   COLUMNS 132
+   BANNER D
+   RECIPIENT sapadm
+   ARCMODE PRINT
+   PRINTCOPIES 001
+   RUN DAILY
+   RELEASE ADD(AR_RAWCON_DEL)
+ENDJOB
+
+NT_JOB AR_RAWCON_DEL
+   AGENT CYBA_CDC1AKFIS
+   CMDNAME D:\DTS_RUN\BATCHFILES\CONSUMPTION\2000RAWCON_DEL.bat
+   ARGS
+   USER bfusa\maestro
+   RUN DAILY
+   RELEASE ADD(AR2000RMGI)
+ENDJOB
+
+UNIX_JOB AR2000RMGI
+   AGENT CYBA_ISBFP3
+   SCRIPTNAME /local/bin/arcfile.sh
+   ARGS interfaces/input/datain/ZMMIMI04_2000_RM_GI.txt D
+   USER bfpadm
+   RUN DAILY
+   RELEASE ADD(LIE.!ESPAPPL)
+ENDJOB
+
+JOB LIE.!ESPAPPL LINK PROCESS
+   RUN DAILY
+ENDJOB
+

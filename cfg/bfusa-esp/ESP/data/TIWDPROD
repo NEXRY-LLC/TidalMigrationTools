@@ -1,0 +1,25 @@
+APPL TIWDPROD WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/*********************************************************************/
+/*05/11/2020 -JFC- CREATED PER INC000002226546
+/*********************************************************************/
+
+JOB LIS.!ESPAPPL LINK PROCESS
+  RUN DAILY
+  RELEASE ADD(TIPS_INTERFACE_WORKDAY_NOTIFICATION)
+ENDJOB
+
+NT_JOB TIPS_INTERFACE_WORKDAY_NOTIFICATION
+  AGENT APPGEN02_PRD_WIN
+  CMDNAME "D:\BFUSA\ASDApps\TipsWorkdayNotifications\+
+           TipsInterfaces.WorkdayNotification.exe"
+  RUN DAILY
+  RELEASE ADD(LIE.!ESPAPPL)
+ENDJOB
+
+JOB LIE.!ESPAPPL LINK PROCESS
+  RUN DAILY
+ENDJOB
+

@@ -1,5 +1,6 @@
 package com.bluehouseinc.dataconverter.parsers.esp.model;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -178,8 +179,16 @@ public class EspToTidalTransformer2 implements ITransformer<List<EspAbstractJob>
 
 		// Set our rerun times if we have any data.
 		if (in.getRuntimes().size() > 1) {
-			List<String> oftimes = in.getRuntimes().stream().map(String::valueOf).collect(Collectors.toList());
+		
+			List<String> oftimes =  new ArrayList<>();
+			in.getRuntimes().forEach(t -> {
+				// Change from 0100 to 01:00 because TIDAL is forever changing rules :) 
+				String milltime = t.replaceAll("..(?!$)", "$0:");
+				oftimes.add(milltime);
+			});	
+					//in.getRuntimes().stream().map(String::valueOf).collect(Collectors.toList());
 			String starttimes = String.join(",", oftimes);
+			//starttimes = starttimes.replace(".", ":");
 			APIDateUtils.setRerunSameStartTimes(starttimes, out, datamodel, true);
 		}
 	}
@@ -308,6 +317,7 @@ public class EspToTidalTransformer2 implements ITransformer<List<EspAbstractJob>
 			out.setPrintRows(in.getPrintRows());
 			out.setPrintColumns(in.getPrintColumns());
 			out.setPrintSpoolName(in.getPrintSpoolName());
+			out.setJobSAPClass(in.getSapJobClass());
 			
 			out.setJobMode("RUN_COPY"); // Force to this job type
 			log.debug("doHandleSAP Processing data for Job[" + in.getFullPath() + "]");
@@ -466,6 +476,12 @@ public class EspToTidalTransformer2 implements ITransformer<List<EspAbstractJob>
 		if (in.getDueout() != null) {
 			String endtime = in.getDueout().replace("EXEC ", "").replace(".", "").replace(":", "");
 
+			if(endtime.contains("AM") || endtime.contains("PM")) {
+				endtime = endtime.replace("AM", "00").replace("PM", "00");
+				// Make 0600 vs 6 AM => 600
+				endtime = String.format("%1$" + 4 + "s", endtime).replace(' ', '0');
+			}
+			
 			if (NumberUtils.isParsable(endtime)) {
 				out.setEndTime(endtime); // Delay Sub is ESP way of saying dont run until this
 			} else {
@@ -483,8 +499,10 @@ public class EspToTidalTransformer2 implements ITransformer<List<EspAbstractJob>
 			// out.setEndTime(endtime);
 		}
 
-		if(!StringUtils.isBlank(in.getTag())) {
-			datamodel.addJobTagToJob(out, new CsvJobTag(in.getTag()));
+		if(!in.getTags().isEmpty()) {
+			in.getTags().forEach(t ->{
+				datamodel.addJobTagToJob(out, new CsvJobTag(t));
+			});
 		}
 		
 	}

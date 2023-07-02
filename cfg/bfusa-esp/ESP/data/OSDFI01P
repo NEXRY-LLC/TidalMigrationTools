@@ -1,0 +1,53 @@
+APPL OSDFI01P WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/*********************************************************************/
+/*09/01/20 -JFC- NEW APPL PER INC000002308895                        */
+/*********************************************************************/
+/* JOBS TO RECYCLE THE ONESOURCE INSTANCE ON APPTAX01PAKR            */
+/*********************************************************************/
+
+NOTIFY ABEND FAILURE ALERT(REMD)
+NOTIFY OVERDUE ALERT(LATE)
+
+JOB LIS.!ESPAPPL LINK PROCESS
+   RUN DAILY
+   DELAYSUB 8AM
+   RELEASE ADD(SHUTDOWN.APPTAX01PAKR)
+ENDJOB
+
+LINUX_JOB SHUTDOWN.APPTAX01PAKR
+   AGENT APPTAX01_PD_LNX
+   SCRIPTNAME /apps/apache-tomcat-8.5.45-dfi/bin/shutdown.sh
+   ARGS
+   USER onesrc
+   RUN DAILY
+   RELEASE ADD(REMOVE_DFI_LOGS.APPTAX01PAKR)
+ENDJOB
+
+LINUX_JOB REMOVE_DFI_LOGS.APPTAX01PAKR
+   AGENT APPTAX01_PD_LNX
+   SCRIPTNAME /apps/apache-tomcat-8.5.45-dfi/bin/Remove_DFI_LOGS.sh
+   ARGS
+   USER onesrc
+   RUN DAILY
+   RELDELAY 1
+   RELEASE ADD(STARTUP.APPTAX01PAKR)
+ENDJOB
+
+LINUX_JOB STARTUP.APPTAX01PAKR
+   AGENT APPTAX01_PD_LNX
+   SCRIPTNAME /apps/apache-tomcat-8.5.45-dfi/bin/startup.sh
+   ARGS
+   USER onesrc
+   RUN DAILY
+   RELDELAY 1
+   RELEASE ADD(LIE.!ESPAPPL)
+ENDJOB
+
+JOB LIE.!ESPAPPL LINK PROCESS
+   RUN DAILY
+   DUEOUT EXEC 9am
+ENDJOB
+

@@ -1,0 +1,30 @@
+APPL SCMRPRTS WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/********************************************************************/
+/* THIS JOB USES SMTPNOTE TO SEND DSN TO EMAIL ADDRESS              */
+/********************************************************************/
+/* WHEN YOU DEMAND IN THE EVENT:                                    */
+/* 1 - ENTER EMAIL ADDRESS INTO "PARAMETER 1" FIELD                 */
+/* 2 - ENTER EMAIL2 ADDRESS INTO "PARAMETER 2" FIELD                */
+/* 3 - ENTER SUBJECT INTO "PARAMETER 3" FIELD                       */
+/* 4 - ENTER DATASET NAME INTO "PARAMETER 4" FIELD                  */
+/* 11/23/22 - SCTASK0205227 - MAIL ID CHANGED
+/********************************************************************/
+
+
+DSTRIG MNTH.REPORT7
+  DSNAME US.ESP.MNTH.REPORT7.G-
+  RUN DAILY
+  RELEASE SMTPNOTE.REPORT7
+ENDJOB
+
+JOB SMTPNOTE.REPORT7
+  !USER1 = 'IT-SYSADMIN-SCHEDULING@BFUSA.COM'
+  ECHO '!USER2'
+  ECHO 'US.ESP.MNTH.REPORT7'
+  ECHO 'US.ESP.MNTH.REPORT7.(0)'
+  RUN DAILY
+ENDJOB
+

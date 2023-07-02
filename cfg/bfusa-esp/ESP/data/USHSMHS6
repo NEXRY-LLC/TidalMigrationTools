@@ -1,0 +1,31 @@
+APPL USHSMHS6 WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/*********************************************************************/
+/*05/07/2019 -JFC- CLEANED UP PROC - ADDED LIE - NO OTHER CHANGES
+/*********************************************************************/
+
+NOTIFY FAILURE ABEND ALERT(REMD)
+
+JOB LIS.!ESPAPPL LINK PROCESS
+  RUN DAILY
+  RELEASE ADD(USHSMHS6)
+ENDJOB
+
+JOB USHSMHS6
+  CCCHK RC(1:4095) FAIL CONTINUE
+  RUN DAILY
+  RELEASE ADD(USHSMHS7)                                                     0029
+ENDJOB
+
+JOB USHSMHS7
+  CCCHK RC(1:4095) FAIL CONTINUE
+  RUN SAT
+  RELEASE ADD(LIE.!ESPAPPL)
+ENDJOB
+
+JOB LIE.!ESPAPPL LINK PROCESS
+  RUN DAILY
+ENDJOB
+

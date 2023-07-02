@@ -1,0 +1,66 @@
+APPL TE25CHAK WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/*********************************************************************/
+/*07/08/2018 -JFC- CLEANED UP PROC - ADDED LIE - NO OTHER CHANGES
+/*********************************************************************/
+
+NOTIFY FAILURE ABEND ALERT(REMD)
+
+FILE_TRIGGER RECEIVE.CHASEACK
+   /*INCOMING FILE SENT FROM CHASE TO PGP2 VIA STERPROD
+   AGENT CYBA_PGP2AKFIS
+   FILENAME '/home/ceadmin/BRIDGESTONEAM.ACH.ACK.+
+   ??????????????.txt' CREATE
+   RUN DAILY
+   RELEASE ADD(GET.CHSEACK)
+ENDJOB
+
+AIX_JOB GET.CHSEACK
+   AGENT CYBA_ISHRP1
+   USER ceadmin
+   SCRIPTNAME /local/bin/sftp2.sh
+   ARGS get "pgp2-ak-fis:/home/ceadmin/BRIDGESTONEAM.ACH.ACK.*.txt" +
+   "/data/HRP/interfaces/input/datain/"
+   RUN DAILY
+   RELEASE ADD(CHNGPERM.CHSEACK)
+ENDJOB
+
+AIX_JOB CHNGPERM.CHSEACK
+   AGENT CYBA_ISHRP1
+   USER ceadmin
+   CMDNAME /usr/bin/chmod
+   ARGS 660 +
+    /data/HRP/interfaces/input/datain/BRIDGESTONEAM.ACH.ACK.*.txt
+   RUN DAILY
+   RELEASE ADD(SEND2ROC.CHSEACK)
+ENDJOB
+
+AIX_JOB SEND2ROC.CHSEACK
+   AGENT CYBA_ISHRP1
+   USER hrpadm
+   SCRIPTNAME /local/bin/sftp2.sh
+   ARGS put "/data/HRP/interfaces/input/datain/+
+    BRIDGESTONEAM.ACH.ACK.*.txt" bhpftp@10.186.1.81:.+
+    /interfaces/input/datain
+   RUN DAILY
+   RELEASE ADD(ARCFILE.CHSEACK)
+ENDJOB
+
+AIX_JOB ARCFILE.CHSEACK
+   RELDELAY 1
+   AGENT CYBA_ISHRP1
+   USER hrpadm
+   SCRIPTNAME /local/bin/arcfile.sh
+   ARGS -p interfaces/input/datain/BRIDGESTONEAM.ACH.ACK. W
+   RUN DAILY
+ENDJOB
+
+APPLEND TRIGNEW1.!ESPAPPL
+   ESPNOMSG TRIGGER !ESPEVENT ADD
+   RUN DAILY
+ENDJOB
+
+
+

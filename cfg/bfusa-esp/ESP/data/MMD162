@@ -1,0 +1,139 @@
+APPL MMD162 WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/*********************************************************************/
+/*Delete old MRP reservations
+/*INT-418 MRP Reservations*/
+/*Create validation file for WEB data entry screen*/
+/*   Removed AFTER ADD AND RUN REF STMTS    JRE   01/21/15
+/*05/09/2018 -JFC- COMBINED APPLS MMD161 AND MMD162 AND CHANGED PREFIX
+/* 04/28/2022 -VV - changed agent for job SAPMATERIAL
+/*********************************************************************/
+
+NOTIFY FAILURE ABEND ALERT(REMD)
+
+DATA_OBJECT PARMSET.!ESPAPPL
+   /*Create a timestamp in hhmmMMDDYY format*/
+   SETVAR TMSTMP='!ESPSHH.:!ESPSMN.,!ESPSMM./!ESPSDD./!ESPSYY'
+   SETVAR PID=''
+   SETVAR STMPTM='!ESPSMM./!ESPSDD./!ESPSYY.,!ESPSHH.:!ESPSMN'
+ENDJOB
+
+JOB LIS.!ESPAPPL LINK PROCESS
+    RUN DAILY
+    DELAYSUB 00.02
+    RELEASE ADD(RM07RVER_MRP_RESERV_DELETE_OLD)
+ENDJOB
+
+SAP_JOB RM07RVER_MRP_RESERV_DELETE_OLD
+    SAPUSER SAPADM
+    AGENT CYBB_BFP030
+    SAPJOBNAME RM07RVER_MRP_RESERV_DELETE_OLD
+    SAPJOBCLASS C
+    ABAPNAME RM07RVER
+    VARIANT OLD_RESERV
+    LANGUAGE E
+    PRINTDEST CP21
+    PRINTCOPIES 001
+    EXPIRATION 8
+    LINES 65
+    COLUMNS 80
+    BANNER YES
+    RECIPIENT PELLETIERALA
+    ARCMODE PRINT
+    RUN DAILY
+    RELEASE ADD(ZMMIMI27_MRP_RESERV_VAL_FILE)
+ENDJOB
+
+/*JOBS FROM OLD MMD162 START HERE
+
+SAP_JOB ZMMIMI27_MRP_RESERV_VAL_FILE
+   AGENT CYBB_BFP030
+   SAPJOBNAME ZMMIMI27_MRP_RESERV_VAL_FILE
+   SAPUSER SAPADM
+   PRINTCOPIES 001
+   SAPJOBCLASS C
+   ABAPNAME ZMMIMI27
+   VARIANT 'ALL ROH HALB'
+   LANGUAGE E
+   PRINTDEST CP21
+   EXPIRATION 8
+   COLUMNS 170
+   BANNER D
+   RECIPIENT SYLVESTTOM
+   ARCMODE PRINT
+   STARTMODE ASAP
+   RUN DAILY
+   RELEASE ADD(ZMMIMI27CD)
+ENDJOB
+
+JOB SETPID.MMD162 LINK PROCESS
+   /*get the next PID number from the ConnectDirect*/
+   /*Process ID table (CDPROD).  Save the value into*/
+   /*the applications DataObject for use by the C:D*/
+   /*job and the CDSTAT job (if needed).*/
+   VINCR (PID) TABLE(CDPROD) CLANG
+   VGET  (PID) TABLE(CDPROD) CLANG
+   ESP MGRMSG * . . . PARMSET.!ESPAPPL/!ESPAPPL..!ESPAPGEN/MAIN +
+   ACTION SET PID(!PID)
+   RUN DAILY
+   RELEASE ADD(ZMMIMI27CD)
+ENDJOB
+
+UNIX_JOB ZMMIMI27CD
+   AGENT CYBA_ISBFP3
+   USER cdprod
+   EARLYSUB REALNOW PLUS 20 SECONDS
+   PID= WOBDATA('PARMSET.!ESPAPPL','PID')
+   TMSTMP= WOBDATA('PARMSET.!ESPAPPL','TMSTMP')
+   /*@@ "/apps/condir/bfsbin/submit.sh zmmimi27.cd 5"*/
+   SCRIPTNAME /apps/condir/bfsbin/submitcd.sh
+   ARGS zmmimi27.cd 10 !PID !TMSTMP
+   RESOURCE ADD(1,ISBFP3CD)
+   RUN DAILY
+   RELEASE ADD(CDSTAT.ZMMIMI27(A))
+   RELEASE ADD(SAPMATERIALLOADBAT)
+ENDJOB
+
+AIX_JOB CDSTAT.ZMMIMI27 CONDITIONAL
+   /*This job only runs if the C:D job does not end with*/
+   /*a EXITCODE of 0.  It can be rerun as often as*/
+   /*required to check the status of the C:D process.*/
+   /*When the C:D process finishes, complet  the job*/
+   /*to release the successors.*/
+   AGENT CYBA_ISBFP3
+   USER cduser
+   STMPTM= WOBDATA('PARMSET.!ESPAPPL','STMPTM')
+   PID= WOBDATA('PARMSET.!ESPAPPL','PID')
+   CMDNAME /apps/condir/bfsbin/cdstat.sh
+   ARGS !STMPTM  j!PID
+   ARGS !STMPTM  j!PID
+   RUN DAILY
+ENDJOB
+
+NT_JOB SAPMATERIALLOADBAT
+   AGENT WEB3AKATC
+   CMDNAME D:\SAP_RESERVATION\batch_files\material_load.bat
+   RUN DAILY
+   RELEASE ADD(RMZMMIMI27_IOD_CCTR_AND_MATL)
+ENDJOB
+
+UNIX_JOB RMZMMIMI27_IOD_CCTR_AND_MATL
+   AGENT CYBA_ISBFP3
+   USER cdprod
+   CMDNAME /bin/rm
+   ARGS +
+/data/BFP/interfaces/output/dataout/zmmimi27_iod_cctr_and_matl.txt
+   RUN DAILY
+   RELEASE ADD(LIE.!ESPAPPL)
+ENDJOB
+
+AIX_JOB LIE.!ESPAPPL
+   AGENT CYBA_ISBFP3
+   COMMAND /bin/sleep
+   ARGS 3
+   USER bfpadm
+   RUN DAILY
+ENDJOB
+

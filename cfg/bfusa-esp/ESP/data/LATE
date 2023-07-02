@@ -1,0 +1,32 @@
+APPL LATE WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/*******************************************************************/
+/*    USE THIS PROC TO REPLACE THE OLD LATE ALERT PROC             */
+/*1 - RENAME THE CURRENT LATE MEMBER TO LATEOLD1                   */
+/*2 - BACK ALL THE WAY OUT OF PROCLIB                              */
+/*3 - RENAME THIS PROC MEMBER TO LATE                              */
+/*******************************************************************/
+
+JOB LIS.!ESPAPPL LINK PROCESS
+   RUN NOW
+   RELEASE ADD(SWESPEMO.!MNAPPL)
+ENDJOB
+
+JOB SWESPEMO.!MNAPPL
+     RUN NOW
+     ESP_BG_COLOR    = '#FF8800'
+     ESP_RECIPIENT_1 = 'RCPT TO:<AKRONJOBREQ@BFUSA.COM>'
+     ESP_HEADER      = 'JOB OVERDUE ACTION REQUIRED IN ESP'
+     ESP_MESSAGE_1   = 'JOBNAME = !MNFULLNAME'
+     ESP_MESSAGE_2   = 'JOB TYPE = !MNJOBTYPE on system !MNSYS'
+     ESP_MESSAGE_3   = 'START TIME = !MNJSTART'
+     ESP_MESSAGE_4   = 'STATUS = !MNSTATUS'
+  RELEASE ADD(LIE.!ESPAPPL)
+ENDJOB
+
+JOB LIE.!ESPAPPL LINK PROCESS
+   RUN NOW
+ENDJOB
+

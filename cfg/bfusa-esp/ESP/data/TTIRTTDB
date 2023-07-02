@@ -1,0 +1,80 @@
+APPL TTIRTTDB WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+/**********************************************************************/
+/* CREATED ON 11/20/2017 -JFC- PER AKIKO NEIL - INC00000???????*/
+/* -JOB TO REFRESH TIRE TEST DASHBOARD EVERY HOUR IN ORDER TO UPLOAD */
+/*  THE DATABASE.
+/**********************************************************************/
+/*NOTIFY ABEND FAILURE ALERT(REMD)
+
+NT_JOB TT01_REFRESH_TIRE_TEST_DASHBOARD_01 hold
+  AGENT APPCYB02PPD
+  USER svc_TTDashboard
+  CMDNAME \\serverds\TireTestTechnology\Tools\TireTestDashboard\+
+          RefreshTireTestDashboard.vbs
+  ARGS
+  RUN DAILY
+ENDJOB
+
+NT_JOB TT01_REFRESH_TIRE_TEST_DASHBOARD_wscript hold
+  AGENT APPCYB02PPD
+  USER svc_TTDashboard
+  CMDNAME c:\Windows\system32\wscript.exe
+  ARGS \\APPCYB02PPD\esp$\TireTestDashboard\+
+        RefreshTireTestDashboard.vbs
+  RUN DAILY
+ENDJOB
+
+NT_JOB TT01_REFRESH_TIRE_TEST_DASHBOARD_cscript hold
+  AGENT APPCYB02PPD
+  USER svc_TTDashboard
+  CMDNAME c:\Windows\system32\cscript.exe
+  ARGS \\APPCYB02PPD\esp$\TireTestDashboard\+
+        RefreshTireTestDashboard.vbs
+  RUN DAILY
+ENDJOB
+
+NT_JOB TT01_REFRESH_TIRE_TEST_DASHBOARD_REQ_TIMER_Wscript hold
+  AGENT APPCYB02PPD
+  USER svc_TTDashboard
+  CMDNAME c:\Windows\system32\wscript.exe
+  ARGS \\APPCYB02PPD\esp$\TireTestDashboard\+
+        RefreshTireTestDashboard.vbs
+  RUN DAILY
+ENDJOB
+
+NT_JOB TT01_REFRESH_TIRE_TEST_DASHBOARD_REQ_TIMER_Cscript hold
+  AGENT APPCYB02PPD
+  USER svc_TTDashboard
+  CMDNAME c:\Windows\system32\cscript.exe
+  ARGS \\APPCYB02PPD\esp$\TireTestDashboard\+
+        RefreshTireTestDashboard.vbs
+  RUN DAILY
+ENDJOB
+
+NT_JOB TT01_REFRESH_TIRE_TEST_DASHBOARD_04 hold
+  AGENT APPCYB02PPD
+  USER svc_TTDashboard
+  CMDNAME c:\Windows\system32\cscript.exe
+  ARGS \\APPCYB02PPD\esp$\TireTestDashboard\+
+        RefreshTireTestDashboard_Test4.vbs
+/*RUN DAILY
+ENDJOB
+
+NT_JOB TT01_REFRESH_TIRE_TEST_DASHBOARD_05
+  AGENT APPCYB02PPD
+  USER svc_TTDashboard
+  CMDNAME c:\Windows\system32\cscript.exe
+  ARGS \\APPCYB02PPD\esp$\TireTestDashboard\+
+        RefreshTireTestDashboard_Test4.vbs
+/*RUN DAILY
+ENDJOB
+
+NT_JOB TT01_REFRESH_TIRE_TEST_DASHBOARD_bat
+  AGENT APPCYB02PPD
+  USER svc_TTDashboard
+  CMDNAME \\APPCYB02PPD\esp$\TireTestDashboard\refresh.bat
+/*RUN DAILY
+ENDJOB
+

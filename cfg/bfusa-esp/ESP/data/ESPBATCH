@@ -1,0 +1,61 @@
+//BS09611A  JOB (XXXXXX,SQS8),CLASS=R,MSGCLASS=J
+//STEP1    EXEC PGM=ESP,REGION=4000K,PARM='SUBSYS(ESPM)'
+//DUMMY    DD DSN=SW.ESP.HISTARCH.WEEKLY.ESPM(+0),
+//            UNIT=(VTS1,,DEFER),DISP=OLD
+//HISTIN   DD DSN=SW.ESP.HISTARCH.WEEKLY.ESPM(-3),
+//            UNIT=AFF=DUMMY,DISP=OLD
+//         DD DSN=SW.ESP.HISTARCH.WEEKLY.ESPM(-2),
+//            UNIT=AFF=DUMMY,DISP=OLD
+//         DD DSN=SW.ESP.HISTARCH.WEEKLY.ESPM(-1),
+//            UNIT=AFF=DUMMY,DISP=OLD
+//         DD DSN=SW.ESP.HISTARCH.WEEKLY.ESPM(+0),
+//            UNIT=AFF=DUMMY,DISP=OLD
+//SYSPRINT DD DSN=BS09611.HISTORY.ESP1,
+//            DCB=(LRECL=150,BLKSIZE=0,RECFM=FB),
+//*           DCB=(LRECL=80,BLKSIZE=0,RECFM=FB), 1
+//            DISP=(NEW,CATLG,DELETE),
+//            SPACE=(CYL,(2,10),RLSE)
+//SYSIN    DD *
+REPORT
+HISTFILE HIST1
+INPUT FILE(HISTIN)
+CRITERIA ESPSUB EQ 'YES'
+ DISPLAY JOBNAME EXECSDATE EXECST ENDDATE
+         ENDT STATUS AGENT
+ FROM NOW LESS 15 MIN TO NOW
+ SORT EXECSDATE EXECST
+ ENDR
+//
+//********** NOTE: THIS JOBDOC SECTION MUST FOLLOW "//" EOJ CARD ****** 00250
+//*$GENERAL:                                                            00251
+//*   THIS JOB RUNS A DAILY ESP REPORT SHOWING APPL LED080 RUNS         00252
+//*   WHICH EXCEEDED 5 MINUTES                                          00252
+//*                                                                     00253
+//*$CONTROLS/BALANCING:                                                 00254
+//*   1) RETURN CODE CHECK:  <NONE>...............................      00255
+//*        IF THIS JOB DOES NOT END WITH A GOOD RETURN CODE:            00256
+//*        <REFER TO RECOVERY/RESTART INSTRUCTIONS>...............      00257
+//*                                                                     00258
+//*$RECOVERY/RESTART:                                                   00259
+//*                                                                     00261
+//*   1) IF ABEND OR BAD CONDITION CODE OCCURS:                         00262
+//*      CONTACT RESPONSIBLE PERSON (DURING NORMAL WORKING HOURS):      00264
+//*          ROY PREECE                                                 00265
+//*                                                                     00265
+//*$RUN-SCHEDULE:                                                       00266
+//*   DAILY                                                             00267
+//*                                                                     00268
+//*$REPORTS: NONE                                                       00269
+//*                                                                     00270
+//*$DETAILS:                                                            00271
+//*   1) THIS JOB IS: NONIMS                                            00272
+//*                                                                     00273
+//*   2) DETAILED DESCRIPTION OF THE JOB (A SHORT PARAGRAPH).           00274
+//*   THIS JOB RUNS A DAILY ESP REPORT SHOWING APPL LED080 RUNS         00252
+//*   WHICH EXCEEDED 5 MINUTES                                          00252
+//*                                                                     00276
+//*$PARM-FORMAT:                                                        00277
+//*   1) JOB SETUP INSTRUCTIONS:  <NONE>                                00278
+//*                                                                     00279
+//*$MODIFICATIONS:                                                      00280
+//*   1) 01/18/12 INITIAL CREATION                                      00281

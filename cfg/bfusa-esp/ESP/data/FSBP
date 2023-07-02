@@ -1,0 +1,15 @@
+APPL FSBP JOB_ANCESTOR_WAIT
+
+/* Alert to mark FSBP/FSIP Appls complete if files not created  /*
+/* by 10 PM EST.                                                /*
+
+  IF (!MNAPPL EQ 'FSIBP001') THEN -
+     DO
+       ESP AJ ALL COMPLETE APPL(FSIBP001.0)
+     ENDDO
+
+  IF (!MNAPPL EQ 'FSBPOA1P') THEN -
+     DO
+       ESP AJ ALL COMPLETE APPL(FSBPOA1P.0)
+     ENDDO
+

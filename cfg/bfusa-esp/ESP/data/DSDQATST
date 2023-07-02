@@ -1,0 +1,27 @@
+APPL DSDQATST WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/**********************************************************************/
+/* 09/19/19 - CREATED PER RAGHAV PANCHAPAKESAN -DSG- INCXXXXXXXXXXXX
+/**********************************************************************/
+
+/*NOTIFY ABEND FAILURE ALERT(REMD)
+/*NOTIFY OVERDUE ALERT(LATE)
+
+JOB LIS.!ESPAPPL LINK PROCESS
+   RUN TODAY
+   /*DELAYSUB XX.XX
+   RELEASE ADD(DSDQATEST)
+ENDJOB
+
+NT_JOB DSDQATEST
+   AGENT CYBA_BIRDMAKFIS
+   USER sapcyber
+   CMDNAME "K:\DS Tableau Triggers\QA\Script\+
+   BSRO_Pricing_Discounting_Trigger.bat"
+   RUN DAILY
+  RELEASE ADD(LIE.!ESPAPPL)
+ENDJOB
+
+

@@ -1,0 +1,32 @@
+APPL SCCR8REM WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/******************************************************************/
+/* 10/20/2018 -JFC- JOB TO CREATE TICKET FOR SCHEDULING CHANGES   */
+/******************************************************************/
+/*  USE USER1 = APPLNAME
+/*  USE USER2 = SCHEDULER LAST NAME
+/*  USE USER3 = TYPE OF CHANGE REQUESTED
+/*  USE USER4 = REQUESTED USER NAME
+/****   USER1 AND USER2 GO INTO NOTES SECTION ALSO
+/******************************************************************/
+
+REM_EXMK='!'
+FIRSTNAME = ''
+IF !USER2 = 'COSTELLO' THEN !FIRSTNAME = 'JOHN'
+IF !USER2 = 'DICOLA' THEN !FIRSTNAME = 'VICTOR'
+IF !USER2 = 'GRIMMETT' THEN !FIRSTNAME = 'DAVE'
+
+
+JOB SWESPRES
+  ECHO !USER1
+  ECHO !USER2
+  ECHO !FIRSTNAME
+  ECHO !USER3
+  ECHO !USER4
+  RUN TODAY
+ENDJOB
+
+
+

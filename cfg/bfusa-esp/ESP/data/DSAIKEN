@@ -1,0 +1,32 @@
+APPL DSAIKEN WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/**********************************************************************/
+/* 08/04/2022 - RITM0193592 - TA - NEW SCHEDULE CREATED               */
+/* 08/05/2022 - RITM0193592 - TA - CHANGED SCRIPT PER MANASI          */
+/**********************************************************************/
+
+NOTIFY ABEND FAILURE ALERT(REMD)
+
+JOB LIS.!ESPAPPL LINK PROCESS
+   RUN DAILY
+   DELAYSUB 11.00 AM
+   RELEASE ADD(DS_JOB_OTC_MM_AIKEN)
+ENDJOB
+
+LINUX_JOB DS_JOB_OTC_MM_AIKEN
+   AGENT LNX_DSRSAP01PAKR
+   USER bodsadmin
+   SCRIPTNAME /opt/ds_install/dataservices/JOB_scripts/+
+   JOB_OTC_MM_Aiken.sh
+   RUN DAILY
+   RELEASE ADD(LIE.!ESPAPPL)
+ENDJOB
+
+JOB LIE.!ESPAPPL LINK PROCESS
+   RUN DAILY
+   DUEOUT EXEC NOW PLUS 4 HOURS
+ENDJOB
+
+

@@ -1,0 +1,29 @@
+APPL DSOTCORR WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/**********************************************************************/
+/* 11/01/2022 - RITM0230665 - PS - new schedule created
+/**********************************************************************/
+
+NOTIFY ABEND FAILURE ALERT(REMD)
+
+JOB LIS.!ESPAPPL LINK PROCESS
+   RUN DAILY
+   DELAYSUB 12.00
+   RELEASE ADD(JOB_OTC_MM_AIKEN_ORR)
+ENDJOB
+
+LINUX_JOB JOB_OTC_MM_AIKEN_ORR
+   AGENT LNX_DSRSAP01PAKR
+   USER bodsadmin
+   SCRIPTNAME /opt/ds_install/dataservices/JOB_scripts/+
+   JOB_OTC_MM_AIKEN_ORR.sh
+   RUN DAILY
+   RELEASE ADD(LIE.!ESPAPPL)
+ENDJOB
+
+JOB LIE.!ESPAPPL LINK PROCESS
+   RUN DAILY
+   DUEOUT EXEC NOW PLUS 4 HOURS
+ENDJOB

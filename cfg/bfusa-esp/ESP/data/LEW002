@@ -1,0 +1,99 @@
+APPL LEW002 WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/*********************************************************************/
+/*03/21/2019 -JFC- CLEANED UP PROC - ADDED LIE - NO OTHER CHANGES
+/*********************************************************************/
+
+NOTIFY ABEND FAILURE ALERT(REMD)
+
+DATA_OBJECT PARMSET.!ESPAPPL                                            00050004
+   /*Create a timestamp in hhmmMMDDYY format*/                          00060004
+   SETVAR TMSTMP='!ESPSHH.:!ESPSMN.,!ESPSMM./!ESPSDD./!ESPSYY'          00070004
+   SETVAR PID=''                                                        00080004
+   SETVAR STMPTM='!ESPSMM./!ESPSDD./!ESPSYY.,!ESPSHH.:!ESPSMN'          00090004
+ENDJOB                                                                  00100004
+                                                                        00110004
+JOB LISLE.LEW002 LINK PROCESS
+   RUN SAT
+   EARLYSUB 09.00
+   RELEASE (ZSDLMR04_SHIPTO_CUST_EXT )
+ENDJOB
+
+SAP_JOB ZSDLMR04_SHIPTO_CUST_EXT
+   AGENT CYBB_BFP030
+   SAPJOBNAME ZSDLMR04_SHIPTO_CUST_EXT
+   SAPJOBCLASS C
+   STARTMODE ASAP
+   ABAPNAME ZSDLMR04
+   VARIANT ZSDLMR04_DEF
+   STEPUSER SAPADM
+   LANGUAGE E
+   PRINTDEST CP21
+   PRINTCOPIES 001
+   EXPIRATION 8
+   LINES 65
+   COLUMNS 80
+   BANNER D
+   RECIPIENT SAPADM
+   ARCMODE PRINT
+   RUN SAT
+   RELEASE (ZSDLMR04.CD )
+ENDJOB
+
+JOB SETPID1.!ESPAPPL LINK PROCESS                                       01220004
+   /*get the next PID number from the ConnectDirect*/                   01230004
+   /*Process ID table (CDPROD).  Save the value into*/                  01240004
+   /*the applications DataObject for use by the C:D*/                   01250004
+   /*job and the CDSTAT job (if needed).*/                              01260004
+   VINCR (PID) TABLE(CDPROD) CLANG                                      01270004
+   VGET  (PID) TABLE(CDPROD) CLANG                                      01280004
+   ESP MGRMSG * . . . PARMSET.!ESPAPPL/!ESPAPPL..!ESPAPGEN/MAIN +       01290004
+ACTION SET PID(!PID)                                                    01300004
+   RUN SAT                                                              01310004
+   RELEASE ADD(ZSDLMR04.CD)                                             01320004
+ENDJOB                                                                  01330004
+                                                                        01340004
+UNIX_JOB ZSDLMR04.CD                                                    01350004
+   AGENT CYBA_ISBFP3                                                    01360004
+   PID= WOBDATA('PARMSET.!ESPAPPL','PID')                               01370004
+   TMSTMP= WOBDATA('PARMSET.!ESPAPPL','TMSTMP')                         01380004
+   SCRIPTNAME /apps/condir/bfsbin/submitcd.sh                           01390004
+   ARGS zsdlmr04.cd 5 !PID !TMSTMP                                      01400005
+   RESOURCE ADD(1,ISBFP3CD)                                             01410004
+   USER cdprod                                                          01420004
+   RUN SAT                                                              01430004
+   RELEASE ADD(ARCLEW002 )
+ENDJOB                                                                  01450004
+                                                                        01460004
+AIX_JOB CDSTAT1.ZSDLMR04 CONDITIONAL                                    01470004
+   AGENT CYBA_ISBFP3                                                    01480004
+   /*This job only runs if the C:D job does not end with*/              01490004
+   /*a EXITCODE of 0.  It can be rerun as often as*/                    01500004
+   /*required to check the status of the C:D process.*/                 01510004
+   /*When the C:D process finishes, complete the job*/                  01520004
+   /*to release the successors.*/                                       01530004
+   USER cduser                                                          01540004
+   STMPTM= WOBDATA('PARMSET.!ESPAPPL','STMPTM')                         01550004
+   PID= WOBDATA('PARMSET.!ESPAPPL','PID')                               01560004
+   CMDNAME /apps/condir/bfsbin/cdstat.sh                                01570004
+   ARGS !STMPTM  j!PID                                                  01580004
+   AFTER ADD(ZSDLMR04.CD)                                               01590004
+   RUN SAT                                                              01600004
+   RELEASE ADD(LIE.!ESPAPPL)
+ENDJOB                                                                  01610004
+                                                                        01620004
+UNIX_JOB ARCLEW002
+   AGENT CYBA_ISBFP3
+   SCRIPTNAME /local/bin/arcfile.sh
+   ARGS interfaces/output/dataout/zsdlmr04_shipto_supply_point.txt W
+   RUN SAT
+   USER bfpadm
+   RELEASE ADD(LIE.!ESPAPPL)
+ENDJOB
+
+JOB LIE.!ESPAPPL LINK PROCESS
+   RUN SAT
+ENDJOB
+

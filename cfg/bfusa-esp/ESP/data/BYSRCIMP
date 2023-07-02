@@ -1,0 +1,27 @@
+APPL BYSRCIMP WAIT
+
+/*********************************************************************/
+/*01/20/2018-JFC-DELETED A COUPLE OLD NORUN STATEMENTS
+/*01/20/2018-JFC-ADDED DUEOUT AND ADDITIONAL NOTIFY STAEMTENTS
+/*********************************************************************/
+/* --THIS APPL/JOB IS A DEPENDENCY IN APPL SSIS2009   ****************/
+/*********************************************************************/
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+NOTIFY FAILURE ABEND ALERT(REMD)
+NOTIFY FAILURE ABEND OVERDUE MAILBOX(AKRONJOBREQ)
+
+/**BWPC_JOB ZDDBYSOURCEPL EXTERNAL APPLID(BWDNTL05) SCOPE(-04)
+/**RUN DAILY
+/**RELEASE ADD(BYSOURCE_IMPORT)
+/**ENDOB
+
+NT_JOB BYSOURCE_IMPORT
+   AGENT CYBA_BIRDMAKFIS
+   USER sapcyber
+   CMDNAME "K:\OTC SSIS Production\BatchFiles\BySource_Import.bat"
+   RUN DAILY
+   IF TODAY('APR 10 2016') THEN JOBATTR HOLD
+   DUEOUT EXEC 8AM
+ENDJOB
+

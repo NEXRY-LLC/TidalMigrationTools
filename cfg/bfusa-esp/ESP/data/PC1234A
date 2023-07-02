@@ -1,0 +1,26 @@
+APPL PC1234A WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/*********************************************************************/
+/*08/03/2020 -JFC-  NEW APPL CREATE PER INC000002287367              */
+/*********************************************************************/
+
+NOTIFY FAILURE ABEND ALERT(REMD)
+
+JOB LIS.!ESPAPPL LINK PROCESS
+  RUN DAILY
+  DELAYSUB 06.00
+  RELEASE ADD(PC1234A)
+ENDJOB
+
+JOB PC1234A
+  CCCHK RC(5:4095) FAIL CONTINUE
+  RUN DAILY
+  RELEASE ADD(LIE.!ESPAPPL)
+ENDJOB
+
+JOB LIE.!ESPAPPL LINK PROCESS
+  RUN DAILY
+ENDJOB
+

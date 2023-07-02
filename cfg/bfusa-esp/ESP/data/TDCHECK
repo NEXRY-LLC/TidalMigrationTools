@@ -1,0 +1,17 @@
+APPL TDCHECK WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/*********************************************************************/
+/*02/20/2019 -VMD- ADDED INVOKE (#DISTRIB)STATEMENT                  */
+/*********************************************************************/
+
+NOTIFY FAILURE ABEND ALERT(REMD)
+
+NOTIFY OVERDUE MAILBOX(AKRONJOBREQ)
+
+JOB TDCHECK
+  RESOURCE ADD(1,SYS3)
+  RUN NOW
+ENDJOB
+

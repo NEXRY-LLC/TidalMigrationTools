@@ -1,0 +1,13 @@
+APPL POD018 WAIT
+
+ INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/*********************************************************************/
+/*03/11/2019 -JFC-  UPDATED PROC PER INC000001872111                */
+/*********************************************************************/
+/* 10/29/2021 - VV - RITM0096231 - NEW JOBS ADDED                   */
+/* 11/01/2021 - VV - RITM0096508- MODIFY CC CHECK ON NEW JOBS      */
+JOB POD018 REQUEST
+  CCCHK RC(2:4095) FAIL CONTINUE
+  RUN MON
+ENDJOB

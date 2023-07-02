@@ -1,0 +1,83 @@
+APPL SFQCYLSI WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/**********************************************************************/
+/*THIS APPL CYCLES THE SI INSTANCE ON SFGINT01QAKR and SFGINT02QAKR   */
+/** USE THE MATRIX AND CALL THE EDI ON CALL PERSON FOR JOB ABENDS    **/
+/**********************************************************************/
+/*08/30/2018 -JFC - CREATED PER INCXXXXXXXXXXXX
+/**********************************************************************/
+
+NOTIFY FAILURE ABEND ALERT(REMD)
+
+JOB LIS.!ESPAPPL LINK PROCESS
+  RUN TODAY
+  DELAYSUB 20.30
+  RELEASE ADD(STERLING_NODE1_CONTROL_EXTPURGE_STOP)
+ENDJOB
+
+LINUX_JOB STERLING_NODE1_CONTROL_EXTPURGE_STOP
+  AGENT SFGINT01Q_LNX
+  USER siadmin
+  SCRIPTNAME /app/sterling/SI56/install/bin/control_extpurge.sh
+  ARGS stop
+  RUN TODAY
+  RELEASE ADD(STERLING_NODE1_STOP)
+ENDJOB
+
+LINUX_JOB STERLING_NODE1_STOP
+  AGENT SFGINT01Q_LNX
+  USER siadmin
+  SCRIPTNAME /app/sterling/SI56/install/bin/hardstop.sh
+  RUN TODAY
+  RELDELAY 10
+  RELEASE ADD(STERLING_NODE1_RESTART)
+ENDJOB
+
+LINUX_JOB STERLING_NODE1_RESTART
+  AGENT SFGINT01Q_LNX
+  USER siadmin
+  SCRIPTNAME /app/sterling/SI56/install/bin/run.sh
+  ARGS restart
+  RUN TODAY
+  RELDELAY 5
+  RELEASE ADD(STERLING_NODE1_CONTROL_EXTPURGE_START)
+ENDJOB
+
+LINUX_JOB STERLING_NODE1_CONTROL_EXTPURGE_START
+  AGENT SFGINT01Q_LNX
+  USER siadmin
+  SCRIPTNAME /app/sterling/SI56/install/bin/control_extpurge.sh
+  ARGS start
+  RUN TODAY
+  RELEASE ADD(STERLING_NODE2_STOP)
+ENDJOB
+
+/**********************************************************************/
+/*RECYCLE JOBS FOR NODE2
+/**********************************************************************/
+
+LINUX_JOB STERLING_NODE2_STOP
+  AGENT SFGINT02Q_LNX
+  USER siadmin
+  SCRIPTNAME /app/sterling/SI56/install/bin/hardstop.sh
+  RUN TODAY
+  RELDELAY 5
+  RELEASE ADD(STERLING_NODE2_RESTART)
+ENDJOB
+
+LINUX_JOB STERLING_NODE2_RESTART
+  AGENT SFGINT02Q_LNX
+  USER siadmin
+  SCRIPTNAME /app/sterling/SI56/install/bin/run.sh
+  ARGS
+  RUN TODAY
+  RELDELAY 5
+  RELEASE ADD(LIE.!ESPAPPL)
+ENDJOB
+
+JOB LIE.!ESPAPPL LINK PROCESS
+  RUN TODAY
+ENDJOB
+

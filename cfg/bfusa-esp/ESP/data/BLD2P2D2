@@ -1,0 +1,38 @@
+APPL BLD2P2D2 WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/*********************************************************************/
+/*11/07/2018 -JFC- CHANGED DUMMY ZOS TO LINK JOBS                    */
+/*********************************************************************/
+
+NOTIFY ABEND FAILURE ALERT(REMD)
+
+FILE_TRIGGER BLD002P2_INVOICES_COMPLETE
+   AGENT CYBB_BFP030
+   FILENAME /data/BFP/interfaces/output/dataout/+
+   zsdbli10_bld002p2_complete.txt CREATE NOCHANGE(1)
+   RUN TUE WED THU FRI SAT SUN
+   RELEASE ADD(ARCBLD2P2)
+ENDJOB
+
+UNIX_JOB ARCBLD2P2
+   AGENT CYBA_ISBFP3
+   SCRIPTNAME /local/bin/arcfile.sh
+   ARGS interfaces/output/dataout/zsdbli10_bld002p2_complete.txt D
+   USER bfpadm
+   RUN TUE WED THU FRI SAT SUN
+   RELEASE ADD(SUSPEND.BLD2P2T)
+ENDJOB
+
+JOB SUSPEND.BLD2P2T LINK PROCESS
+   RUN TUE WED THU FRI SAT SUN
+   ESP SUSPEND BL01.BLD2P2T
+   RELEASE ADD(LIE.!ESPAPPL)
+ENDJOB
+
+JOB LIE.!ESPAPPL LINK PROCESS
+   RUN DAILY
+   DUEOUT EXEC 6AM
+ENDJOB
+

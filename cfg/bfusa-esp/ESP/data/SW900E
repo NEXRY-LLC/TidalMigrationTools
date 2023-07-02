@@ -1,0 +1,23 @@
+APPL SW900E WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/*********************************************************************/
+/*02/26/2019 -JFC- MOVED TO OBSOLETE - LAST RUN 11/07/2013           */
+/*********************************************************************/
+
+NOTIFY FAILURE ABEND ALERT(REMD)
+
+JOB LIS.!ESPAPPL LINK PROCESS
+   RUN DAILY
+   RELEASE ADD(SW900E)
+ENDJOB
+
+JOB SW900E
+  /*@@ SYSTEM=MICS
+  OPTIONS NORESTARTSTEP
+  CCCHK RC(1:4095) FAIL CONTINUE
+  RUN MON TUE WED THU FRI SAT
+  DELAYSUB 00:01
+ENDJOB
+

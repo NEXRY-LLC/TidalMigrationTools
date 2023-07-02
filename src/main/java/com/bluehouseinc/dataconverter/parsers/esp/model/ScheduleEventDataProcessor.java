@@ -100,9 +100,9 @@ public class ScheduleEventDataProcessor {
 		String system = RegexHelper.extractNthMatch(eventline, EVENT_PATTERN, 3);
 
 		SchEventElement event = new SchEventElement(id, user, owner, system);
-		
+
 		event.setRawEventLine(eventline);
-		
+
 		List<String> lines = EspFileReaderUtils.parseJobLines(reader, "ENDDEF", '-');
 
 		for (String line : lines) {
@@ -116,7 +116,9 @@ public class ScheduleEventDataProcessor {
 				event.getComments().add(new SchComment(value));
 				break;
 			case "CALENDAR":
-				event.setCalendar(new SchCalendar(value));
+				if (!value.equals("SYSTEM")) {
+					event.setCalendar(new SchCalendar(value));
+				}
 				break;
 			case "SCHEDULE":
 				SchScheduleAction sched = new SchScheduleAction(value);

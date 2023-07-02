@@ -1,0 +1,40 @@
+APPL POD302 WAIT                                                        00010000
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/*********************************************************************/ 00030000
+/*03/11/2019 -JFC-  UPDATED PROC PER INC000001872111                 */ 00040000
+/*09/09/2022 -TA-  ADDED EXTERNAL JOB INTERFACE_1022 PER RITM0207587 */ 00040000
+/*09/20/2022 -TA-  ADDED EXTERNAL AS PER RITM0212554                 */ 00040000
+/*09/26/2022 -TA-  REMOVED EXTERNAL AS PER RITM0215498               */ 00040000
+/*********************************************************************/ 00050000
+                                                                        00050000
+NOTIFY FAILURE ABEND ALERT(REMD)                                        00070000
+
+JOB LIS.!ESPAPPL LINK PROCESS
+  RUN DAILY
+  DUEOUT EXEC 23.50
+  RELEASE ADD(POD302)
+ENDJOB
+                                                                        00110000
+/*NT_JOB INTERFACE_1022 EXTERNAL SCOPE(-04.00) APPLID(SSISMM01)
+/*  RUN WEEKDAYS SAT
+/*  NORUN JUL 23 2014
+/*  RELEASE ADD(POD302)
+/*ENDJOB
+
+NT_JOB DS_JOB_INTERFACE_1022 EXTERNAL SCOPE(-04.00) APPLID(DS1022)
+  RUN WEEKDAYS SAT
+  RELEASE ADD(POD302)
+ENDJOB
+
+JOB POD302                                                              00166000
+  CCCHK RC(2:4095) FAIL STOP                                            00167000
+  RUN WEEKDAYS SAT                                                      00110000
+  NOTIFY OVERDUE ALERT(PO01)
+  RELEASE ADD(LIE.!ESPAPPL)
+ENDJOB
+
+JOB LIE.!ESPAPPL LINK PROCESS
+  RUN DAILY
+ENDJOB                                                                  00220000

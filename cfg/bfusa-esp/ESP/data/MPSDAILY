@@ -1,0 +1,78 @@
+APPL MPSDAILY WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/**********************************************************************/
+/*03/22/2017 -JFC- MOVED JOB PS200A TO APPL DI203C                    */
+/*04/02/2017 -JFC- TURNED OFF EXTERNAL PS200A PER MARTY               */
+/*10/02/2017 -VMD- TURNED OFF EXTERNAL DI200A PER INC000002331848     */
+/**********************************************************************/
+
+NOTIFY FAILURE ABEND ALERT(REMD)
+
+/**********************************************************************/
+/***  DATASET TRIGGER DEFINITIONS
+
+DSTRIG WKINDCTN.FROMSAP REQUEST
+   /* DATASET CREATED IN SSISMISC - INTERFACE_1098 */
+  DSNAME 'PS.PRD.WEEKLY.INDUCTN.FROMSAP.G-'
+  RUN MON
+  DUEOUT EXEC 8AM
+  NOTIFY OVERDUE MAILBOX(WPS2DRP)
+  RELEASE ADD(PS130A)
+ENDJOB
+
+
+/*********************************************************************/
+/*EXTERNAL JOB DEFINITIONS BEGIN                                     */
+/*********************************************************************/
+
+
+JOB PS200A EXTERNAL SCOPE(-06)
+/*RUN 1ST DAY OF MONTH
+/*RUN MON TUE WED THU FRI SAT
+  RELEASE ADD(PS130A)
+/*RELEASE ADD(PS210A)
+ENDJOB
+
+JOB DB0469A.MON1AM EXTERNAL SCOPE(-02)
+  RUN MON
+  RELEASE ADD(PS130A)
+ENDJOB
+
+JOB DI200A EXTERNAL SCOPE(-06)
+  /*RUN 1ST DAY OF MONTH
+  RUN MON
+  NORUN MAY 24 2015
+  NORUN MAY 25 2015
+  NORUN MAY 26 2015
+  RELEASE ADD(PS130A)
+  /*RELEASE ADD(JOB LIS.!ESPAPPL LINK PROCESS)
+ENDJOB
+
+
+/*********************************************************************/
+/* JOB DEFINITIONS BEGIN                                     */
+/*********************************************************************/
+
+JOB LIS.!ESPAPPL LINK PROCESS
+  RUN DAILY
+  RELEASE ADD(PS750A)
+  RELEASE ADD(PS210A)
+  RELEASE ADD(PS130A)
+ENDJOB
+
+JOB PS130A
+  /*@@ SYSTEM=MPS
+  CCCHK RC(1:4095) FAIL CONTINUE
+  RUN MON
+ENDJOB
+
+JOB PS750A
+  /*@@ SYSTEM=MPS
+  CCCHK RC(1:4095) FAIL CONTINUE
+  DELAYSUB 00.01
+  RUN DAILY
+ENDJOB
+
+

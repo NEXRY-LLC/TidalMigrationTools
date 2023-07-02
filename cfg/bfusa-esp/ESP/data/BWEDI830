@@ -1,0 +1,20 @@
+APPL BWEDI830 WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/*********************************************************************/
+/*** EDI 862 DELIVERY ORDERS LOAD ***/
+/*********************************************************************/
+/*12/15/2022 -VV - CREATED NEW SCHEDULE SCTASK0200639
+/*********************************************************************/
+
+NOTIFY FAILURE ABEND ALERT(REMD)
+
+
+BWPC_JOB ZCR_EDI_830_LOAD
+    AGENT CYBB_BWP100
+    CHAIN 'ZCR_EDI_830_LOAD'
+    RUN DAILY
+    NOTIFY JOBEND MAILBOX(BWPEDIOR)
+ ENDJOB
+

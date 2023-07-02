@@ -1,0 +1,26 @@
+APPL USDATE WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/*********************************************************************/
+/*02/26/2019 -JFC- CLEANED UP PROC - ADDED LIE - NO OTHER CHANGES    */
+/*********************************************************************/
+
+NOTIFY FAILURE ABEND ALERT(REMD)
+
+JOB LIS.!ESPAPPL LINK PROCESS
+   RUN DAILY
+   RELEASE ADD(USDATE)
+ENDJOB
+
+JOB USDATE
+  /*@@ SYSTEM=AUTOBAL
+  RUN DAILY
+  DELAYSUB 07:00
+  RELEASE ADD(LIE.!ESPAPPL)
+ENDJOB
+
+JOB LIE.!ESPAPPL LINK PROCESS
+   RUN DAILY
+ENDJOB
+

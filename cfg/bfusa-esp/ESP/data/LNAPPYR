@@ -1,0 +1,21 @@
+APPL LNAPPYR WAIT
+
+/*********************************************************************/
+/*01/02/2018 -JFC- ADDED NOTIFY TO BROOKPARKOPS PER STAN AND MARK    */
+/*********************************************************************/
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+NOTIFY FAILURE ABEND ALERT(REMD)
+NOTIFY END MAILBOX(BROOKPARKOPS)
+
+SCHD1 = 'YESTERDAY'
+IF !USER2 = 1 OR !USER2 = '' THEN SCHD1 = 'TODAY'
+
+JOB LNAPPYR
+  /*@@ SYSTEM=LAWSON
+  CCCHK RC(1:4095) FAIL CONTINUE
+    /*@@ SCHID=001
+  RUN !SCHD1
+ENDJOB
+

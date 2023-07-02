@@ -1,0 +1,28 @@
+APPL PC008AB WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/*********************************************************************/
+/*04/01/2021 - SCTASK0047454 - NEW JOB CREATED                       */
+/*********************************************************************/
+
+NOTIFY FAILURE ABEND ALERT(REMD)
+
+JOB LIS.!ESPAPPL LINK PROCESS
+  RUN DAILY
+  DELAYSUB 01:30
+  RELEASE ADD(PC008AB)
+ENDJOB
+
+JOB PC008AB
+  /*@@ SYSTEM=PRDPROC
+  CCCHK RC(1:4) CONTINUE
+  CCCHK RC(5:4095) FAIL CONTINUE
+  RUN DAILY
+  RELEASE ADD(LIE.!ESPAPPL)
+ENDJOB
+
+JOB LIE.!ESPAPPL LINK PROCESS
+  RUN DAILY
+ENDJOB
+

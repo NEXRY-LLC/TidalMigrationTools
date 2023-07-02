@@ -1,0 +1,26 @@
+APPL DSAUSP WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/**********************************************************************/
+/* 12/09/2022 - TA - SCHEDULE CREATED PER RITM0241591                 */
+/**********************************************************************/
+
+NOTIFY ABEND FAILURE ALERT(REMD)
+
+JOB LIS.!ESPAPPL LINK PROCESS
+   RUN WEEKDAYS
+   RELEASE ADD(JOB_PLA_AUSP_PIVOT)
+ENDJOB
+
+NT_JOB JOB_PLA_AUSP_PIVOT
+  AGENT DSSAPP01PAKR
+  USER svc_sap_ds_q
+  CMDNAME \\dssapp01pakr\bods\Job_Scripts\JOB_PLA_AUSP_PIVOT.bat
+  RUN WEEKDAYS
+  RELEASE ADD(LIE.!ESPAPPL)
+ENDJOB
+
+JOB LIE.!ESPAPPL LINK PROCESS
+  RUN WEEKDAYS
+ENDJOB

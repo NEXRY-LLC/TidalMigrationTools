@@ -1,0 +1,33 @@
+APPL SCSMTPDS WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/********************************************************************/
+/* THIS JOB USES SMTPNOTE TO SEND DSN TO EMAIL ADDRESS              */
+/********************************************************************/
+/* WHEN YOU DEMAND IN THE EVENT:                                    */
+/* 1 - ENTER EMAIL ADDRESS INTO "PARAMETER 1" FIELD                 */
+/* 2 - ENTER EMAIL2 ADDRESS INTO "PARAMETER 2" FIELD                */
+/* 3 - ENTER SUBJECT INTO "PARAMETER 3" FIELD                       */
+/* 4 - ENTER DATASET NAME INTO "PARAMETER 4" FIELD                  */
+/********************************************************************/
+
+
+JOB LIS.!ESPAPPL LINK PROCESS
+   RUN DAILY
+   RELEASE ADD(SMTPNOTE)
+ENDJOB
+
+JOB SMTPNOTE
+  ECHO '!USER1'
+  ECHO '!USER2'
+  ECHO '!USER3'
+  ECHO '!USER4'
+  RUN DAILY
+  RELEASE ADD(LIE.!ESPAPPL)
+ENDJOB
+
+JOB LIE.!ESPAPPL LINK PROCESS
+  RUN DAILY
+ENDJOB
+

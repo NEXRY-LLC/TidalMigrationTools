@@ -1,0 +1,9 @@
+/**********************************************************************/
+/* IMPORTANT MEMBER CONTAINING NORUN DATES FOR BW UPGRADES.           */
+/* DO NOT DELETE OR ALTER DATES WITHOUT PROPER APPROVAL.              */
+/* USED BY JOBS IN APPL DSDJDA01.                                     */
+/**********************************************************************/
+
+   NORUN AUG 18 2018
+   NORUN AUG 19 2018
+

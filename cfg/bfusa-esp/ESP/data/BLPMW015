@@ -1,0 +1,43 @@
+APPL BLPMW015 WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/*********************************************************************/
+/*01/31/2019-JFC-CLEANED UP PROC - no changes
+/*********************************************************************/
+/**PM weekly date monitoring job for Bloomington
+/*********************************************************************/
+
+NOTIFY FAILURE ABEND ALERT(REMD)
+
+JOB LIS.!ESPAPPL LINK PROCESS
+   RUN SUN
+   DELAYSUB 01.00
+   RELEASE ADD(RISTRA20_PM_DATE_MONITOR_F111)
+ENDJOB
+
+SAP_JOB RISTRA20_PM_DATE_MONITOR_F111
+   SAPUSER SAPADM
+   AGENT CYBB_BFP030
+   SAPJOBNAME 'RISTRA20_PM DATE MONITOR - F111'
+   SAPJOBCLASS C
+   ABAPNAME RISTRA20
+   VARIANT F111_DATEMONTR
+   LANGUAGE E
+   PRINTDEST HI02
+   PRINTCOPIES 001
+   EXPIRATION 8
+   LINES 65
+   COLUMNS 80
+   BANNERPAGE YES
+   BANNER YES
+   RECIPIENT WEMYSSDAVID
+   ARCMODE PRINT
+   RUN SUN
+   RELEASE ADD(LIE.!ESPAPPL)
+ENDJOB
+
+JOB LIE.!ESPAPPL LINK PROCESS
+   RUN SUN
+ENDJOB
+

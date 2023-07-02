@@ -1,0 +1,30 @@
+APPL TPGWETT WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/**********************************************************************/
+/*12/09/2022 -TA - CREATED SCHEDULE PER SCTASK0208626
+/*********************************************************************/
+
+NOTIFY ABEND FAILURE ALERT(REMD)
+
+JOB LIS.!ESPAPPL LINK PROCESS
+   RUN DAILY
+   DELAYSUB 13:30
+   RELEASE ADD(TPG_WET_TRACTION_UPLOAD)
+ENDJOB
+
+NT_JOB TPG_WET_TRACTION_UPLOAD
+  AGENT APPCYB02PPD
+  USER svc_siftcalc
+  CMDNAME \\appcyb02ppd\esp$\TPGWetTractionUpload\+
+          TPGWetTraction.exe
+  ARGS
+  RUN DAILY
+  RELEASE ADD(LIE.!ESPAPPL)
+ENDJOB
+
+JOB LIE.!ESPAPPL LINK PROCESS
+   RUN DAILY
+ENDJOB
+

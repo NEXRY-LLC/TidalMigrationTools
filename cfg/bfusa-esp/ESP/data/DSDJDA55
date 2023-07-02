@@ -1,0 +1,27 @@
+APPL DSDJDA55 WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/**********************************************************************/
+/* 04/17/23 - CREATED PER ANKTA PRITTISH-RITM0279351*/
+/**********************************************************************/
+
+NOTIFY ABEND FAILURE ALERT(REMD)
+
+FILE_TRIGGER BSRO_FILE_INV_MOVEMENT_COMP_V2
+   AGENT LNX_DSRSAP01PAKR
+   FILENAME '/mnt/bods/bsro/prod/outbound/JDADS/+
+jda_analy_invaud*.dat*' CREATE NOCHANGE(1)
+   RUN SUN
+   RELEASE ADD(DS_JDA_INV_MOVEMENT_V2)
+ENDJOB
+
+LINUX_JOB DS_JDA_INV_MOVEMENT_V2
+    AGENT LNX_DSRSAP01PAKR
+    USER bodsadmin
+    SCRIPTNAME /opt/ds_install/dataservices/JOB_scripts/+
+    JOB_JDA_INV_MOVEMENT.sh
+    NOTIFY ABEND FAILURE MAILBOX(DSJOBADW)
+    NOTIFY OVERDUE MAILBOX(DSJOBNOTIFY)
+    RUN SUN
+ENDJOB

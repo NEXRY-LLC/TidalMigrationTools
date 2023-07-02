@@ -1,0 +1,383 @@
+APPL AI03
+
+TAG 'SWTEST'
+
+JCLLIB 'FTRF.PRDJOBS'
+COPYJCL 'SWS.ESP.COPYLIB'
+TEMPLIB 'SWS.ESP.TEMPLIB'
+DOCLIB 'SWS.ESP.DOCLIB'
+
+IF !ESPAPSUB# > 1 THEN JCLLIB 'SWS.ESP.COPYLIB'
+
+OPTIONS RESTARTSTEP
+
+LATE_EMAIL1      = ' '
+LATE_EMAIL2      = ' '
+LATE_EMAIL3      = ' '
+LATE_EMAIL4      = ' '
+LATE_EMAIL5      = ' '
+LATE_SUBJECT     = ' '
+LATE_TEXT1       = ' '
+LATE_TEXT2       = ' '
+LATE_TEXT3       = ' '
+LATE_SEND_IT     = 'YES'
+LATE_MESSAGE_1   = 'NONE'
+LATE_MESSAGE_2   = 'NONE'
+STD_LATE_SUBJECT = ' '
+STD_LATE_1       = ' '
+STD_LATE_2       = ' '
+STD_LATE_3       = ' '
+STD_LATE_4       = ' '
+STD_LATE_5       = ' '
+STD_LATE_6       = ' '
+STD_LATE_7       = ' '
+STD_LATE_8       = ' '
+STD_LATE_9       = ' '
+STD_LATE_10      = ' '
+STD_DONE_SUBJECT = ' '
+STD_DONE_1       = ' '
+STD_DONE_2       = ' '
+STD_DONE_3       = ' '
+STD_DONE_4       = ' '
+STD_DONE_5       = ' '
+STD_DONE_6       = ' '
+STD_DONE_7       = ' '
+STD_DONE_8       = ' '
+STD_DONE_9       = ' '
+STD_DONE_10      = ' '
+
+
+REXXON GEN PROC
+
+LATE_EMAIL1      = ' '
+LATE_EMAIL2      = ' '
+LATE_EMAIL3      = ' '
+LATE_EMAIL4      = ' '
+LATE_EMAIL5      = ' '
+LATE_SUBJECT     = ' '
+LATE_TEXT1       = ' '
+LATE_TEXT2       = ' '
+LATE_TEXT3       = ' '
+LATE_SEND_IT     = 'YES'
+STD_LATE_SUBJECT = ' '
+STD_LATE_1       = ' '
+STD_LATE_2       = ' '
+STD_LATE_3       = ' '
+STD_LATE_4       = ' '
+STD_LATE_5       = ' '
+STD_LATE_6       = ' '
+STD_LATE_7       = ' '
+STD_LATE_8       = ' '
+STD_LATE_9       = ' '
+STD_LATE_10      = ' '
+STD_DONE_SUBJECT = ' '
+STD_DONE_1       = ' '
+STD_DONE_2       = ' '
+STD_DONE_3       = ' '
+STD_DONE_4       = ' '
+STD_DONE_5       = ' '
+STD_DONE_6       = ' '
+STD_DONE_7       = ' '
+STD_DONE_8       = ' '
+STD_DONE_9       = ' '
+STD_DONE_10      = ' '
+
+LATE_MESSAGE_1   = 'NONE'
+LATE_MESSAGE_2   = 'NONE'
+
+/* **************************************************************** */
+/* APPLICATION TABLES START HERE                                    */
+/* **************************************************************** */
+
+/* **************************************************************** */
+/*                                                                  */
+/* THE VALUES TO BE ENTERED FOR EACH TABLE ARE AS FOLLOWS:          */
+/*                                                                  */
+/*     (FOR ALL ENTRIES:                                            */
+/*         XXXXXXXX.YYYYYYYY.   IS THE APPLICATION.JOB NAME         */
+/*                              WHERE XXXXXXXX IS THE APPLICATION   */
+/*                              NAME AND YYYYYYYY IS THE JOB NAME)  */
+/*                                                                  */
+/*     XXXXXXXX.YYYYYYYY. = ''  THIS IS A DUMMY ENTRY TO INITIALIZE */
+/*                              NON-EXISTENT ENTRIES.               */
+/*                              IT MUST BE PRESENT.                 */
+/*                                                                  */
+/*     XXXXXXXX.YYYYYYYY.APPLJOB = 'XXXXXXXX.YYYYYYYY'              */
+/*                              THIS IS A CHECK ENTRY WHERE THE     */
+/*                              APPLICATION AND JOB NAMES SHOULD    */
+/*                              BE THE SAME ON BOTH SIDES OF THE    */
+/*                              EQUAL SIGN.                         */
+/*                              IT MUST BE PRESENT.                 */
+/*                                                                  */
+/*     XXXXXXXX.YYYYYYYY.EMAIL1 = 'XXXXXXXXX@XXXXXXXXX'             */
+/*     XXXXXXXX.YYYYYYYY.EMAIL2 = 'XXXXXXXXX@XXXXXXXXX'             */
+/*     XXXXXXXX.YYYYYYYY.EMAIL3 = 'XXXXXXXXX@XXXXXXXXX'             */
+/*     XXXXXXXX.YYYYYYYY.EMAIL4 = 'XXXXXXXXX@XXXXXXXXX'             */
+/*     XXXXXXXX.YYYYYYYY.EMAIL5 = 'XXXXXXXXX@XXXXXXXXX'             */
+/*                              THESE ARE ADDRESSES TO SEND THE     */
+/*                              EMAIL TO.  THEY CAN BE INDIVIDUAL   */
+/*                              OR GROUPS WHICH ARE DEFINED IN      */
+/*                              OUTLOOK.                            */
+/*                              ALL five ENTRIES MUST BE PRESENT    */
+/*                              AND AT LEAST THE FIRST ONE MUST BE  */
+/*                              NON-BLANK.  ANY ENTRY NOT USED      */
+/*                              SHOULD BE SET TO ' ' (ONE SPACE).   */
+/*                                                                  */
+/*     XXXXXXXX.YYYYYYYY.SUBJECT = 'XXXXXX XXXXXXX XXXX'            */
+/*                              THIS IS A FREE-FORM SUBJECT LINE    */
+/*                              FOR THE EMAIL (SUCH AS 'THE DAILY   */
+/*                              SALES REPORT WILL BE LATE').        */
+/*                              THIS ENTRY SHOULD BE PRESENT AND    */
+/*                              IF NOT USED SHOULD BE SET TO ' '    */
+/*                              (ONE SPACE).                        */
+/*                                                                  */
+/*     XXXXXXXX.YYYYYYYY.TEXT1 = 'XXXXXX XXXXXXX XXXX'              */
+/*     XXXXXXXX.YYYYYYYY.TEXT2 = 'XXXXXX XXXXXXX XXXX'              */
+/*     XXXXXXXX.YYYYYYYY.TEXT3 = 'XXXXXX XXXXXXX XXXX'              */
+/*                              THIS IS A FREE-FORM TEXT LINE       */
+/*                              FOR THE EMAIL.  THERE ARE 3 LINES   */
+/*                              OF FREE FORM TEXT AVAILABLE FOR     */
+/*                              USAGE BESIDES THE STANDARD TEXT     */
+/*                              WHICH WILL BE SENT.                 */
+/*                              IF NOT USED SHOULD BE SET TO ' '    */
+/*                              (ONE SPACE).                        */
+/*                                                                  */
+/* **************************************************************** */
+
+/*02/14/2019 - JFC - NO APPLICATIONS ARE CURRENTLY USING THIS ALERT
+
+
+/* ***************************** */
+/* APPLICATION TABLES END HERE   */
+/* ***************************** */
+
+/* GET MONITOR APPLICATION AND JOB NAME */
+
+MON_APPL    = CLANGVAR('!MNAPPL')
+MON_JOB     = CLANGVAR('!MNJOB')
+
+/* SAY 'MON_APPL =' MON_APPL  */
+/* SAY 'MON_JOB  =' MON_JOB   */
+
+/* CHECK TO SEE IF THERE IS A TABLE ENTRY FOR THIS APPL & JOB */
+
+NO_TABLE_ENTRY = MON_APPL || '.' || MON_JOB || '.APPLJOB'
+
+INTERPRET "TABLE_APPLJOB =" MON_APPL"."MON_JOB".APPLJOB"
+
+/* SAY 'TABLE_APPLJOB IS' TABLE_APPLJOB   */
+/* SAY 'NO_TABLE_ENTRY IS' NO_TABLE_ENTRY */
+
+IF TABLE_APPLJOB = NO_TABLE_ENTRY THEN
+  DO
+    LATE_SEND_IT = 'NO'
+    LATE_MESSAGE_1 = 'NO TABLE ENTRY FOUND FOR APPL' -
+                     MON_APPL 'JOB' MON_JOB
+    SIGNAL ALL_DONE
+  END
+
+/* GET TABLE VALUES FOR THIS APPL */
+
+INTERPRET "LATE_EMAIL1   =" MON_APPL"."MON_JOB".EMAIL1"
+INTERPRET "LATE_EMAIL2   =" MON_APPL"."MON_JOB".EMAIL2"
+INTERPRET "LATE_EMAIL3   =" MON_APPL"."MON_JOB".EMAIL3"
+INTERPRET "LATE_EMAIL4   =" MON_APPL"."MON_JOB".EMAIL4"
+INTERPRET "LATE_EMAIL5   =" MON_APPL"."MON_JOB".EMAIL5"
+INTERPRET "LATE_SUBJECT  =" MON_APPL"."MON_JOB".SUBJECT"
+INTERPRET "LATE_TEXT1    =" MON_APPL"."MON_JOB".TEXT1"
+INTERPRET "LATE_TEXT2    =" MON_APPL"."MON_JOB".TEXT2"
+INTERPRET "LATE_TEXT3    =" MON_APPL"."MON_JOB".TEXT3"
+
+IF LATE_EMAIL1 = '' | SUBSTR(LATE_EMAIL1,1,1) = ' ' THEN
+    DO
+      LATE_SEND_IT = 'NO'
+      LATE_MESSAGE_1 = 'NO EMAIL1 ADDRESS FOUND FOR APPL' -
+                       MON_APPL 'JOB' MON_JOB
+    END
+
+
+ALL_DONE:
+
+STD_LATE_SUBJECT = 'Job' MON_JOB 'Is Running Late'
+STD_LATE_1       = 'Job' MON_JOB 'in application' MON_APPL,
+                   'is running late.'
+STD_LATE_2       = ' '
+STD_LATE_3       = ' '
+STD_LATE_4       = ' '
+STD_LATE_5       = ' '
+STD_LATE_6       = ' '
+STD_LATE_7       = 'You will be notified when it finishes.'
+STD_LATE_8       = ' '
+STD_LATE_9       = 'If you have questions and/or concerns about this',
+                   ' job,'
+STD_LATE_10      = 'please call Operations at 800-681-8964.'
+
+STD_DONE_SUBJECT = 'Job' MON_JOB 'Has Completed'
+STD_DONE_1       = 'Job' MON_JOB 'in application' MON_APPL,
+                   'has completed.'
+STD_DONE_2       = ' '
+STD_DONE_3       = ' '
+STD_DONE_4       = ' '
+STD_DONE_5       = ' '
+STD_DONE_6       = ' '
+STD_DONE_7       = ' '
+STD_DONE_8       = ' '
+STD_DONE_9       = ' '
+STD_DONE_10      = ' '
+
+"LATE_EMAIL1='"LATE_EMAIL1"'"
+"LATE_EMAIL2='"LATE_EMAIL2"'"
+"LATE_EMAIL3='"LATE_EMAIL3"'"
+"LATE_EMAIL4='"LATE_EMAIL4"'"
+"LATE_EMAIL5='"LATE_EMAIL5"'"
+"LATE_SUBJECT='"LATE_SUBJECT"'"
+"LATE_TEXT1='"LATE_TEXT1"'"
+"LATE_TEXT2='"LATE_TEXT2"'"
+"LATE_TEXT3='"LATE_TEXT3"'"
+"LATE_SEND_IT='"LATE_SEND_IT"'"
+"LATE_MESSAGE_1='"LATE_MESSAGE_1"'"
+"LATE_MESSAGE_2='"LATE_MESSAGE_2"'"
+"STD_LATE_SUBJECT='"STD_LATE_SUBJECT"'"
+"STD_LATE_1='"STD_LATE_1"'"
+"STD_LATE_2='"STD_LATE_2"'"
+"STD_LATE_3='"STD_LATE_3"'"
+"STD_LATE_4='"STD_LATE_4"'"
+"STD_LATE_5='"STD_LATE_5"'"
+"STD_LATE_6='"STD_LATE_6"'"
+"STD_LATE_7='"STD_LATE_7"'"
+"STD_LATE_8='"STD_LATE_8"'"
+"STD_LATE_9='"STD_LATE_9"'"
+"STD_LATE_10='"STD_LATE_10"'"
+"STD_DONE_SUBJECT='"STD_DONE_SUBJECT"'"
+"STD_DONE_1='"STD_DONE_1"'"
+"STD_DONE_2='"STD_DONE_2"'"
+"STD_DONE_3='"STD_DONE_3"'"
+"STD_DONE_4='"STD_DONE_4"'"
+"STD_DONE_5='"STD_DONE_5"'"
+"STD_DONE_6='"STD_DONE_6"'"
+"STD_DONE_7='"STD_DONE_7"'"
+"STD_DONE_8='"STD_DONE_8"'"
+"STD_DONE_9='"STD_DONE_9"'"
+"STD_DONE_10='"STD_DONE_10"'"
+
+REXXOFF
+
+ESP_BG_COLOR   = '#FF8800'
+/* Background color choices are : '#FF0000'  (red)       */
+/*                                '#FF8800'  (orange)    */
+/*                                '#FFFF00'  (yellow)    */
+ESP_RECIPIENT_1 = ' '
+ESP_RECIPIENT_2 = ' '
+ESP_RECIPIENT_3 = ' '
+ESP_RECIPIENT_4 = ' '
+ESP_RECIPIENT_5 = ' '
+ESP_RECIPIENT_6 = ' '
+ESP_RECIPIENT_7 = ' '
+ESP_RECIPIENT_8 = ' '
+ESP_RECIPIENT_9 = ' '
+ESP_RECIPIENT_10 = ' '
+ESP_MESSAGE_1   = ' '
+ESP_MESSAGE_2   = ' '
+ESP_MESSAGE_3   = ' '
+ESP_MESSAGE_4   = ' '
+ESP_MESSAGE_5   = ' '
+ESP_MESSAGE_6   = ' '
+ESP_MESSAGE_7   = ' '
+ESP_MESSAGE_8   = ' '
+ESP_MESSAGE_9   = ' '
+ESP_MESSAGE_10  = ' '
+ESP_MESSAGE_11  = ' '
+ESP_MESSAGE_12  = ' '
+ESP_MESSAGE_13  = ' '
+ESP_MESSAGE_14  = ' '
+ESP_MESSAGE_15  = ' '
+ESP_MESSAGE_16  = ' '
+ESP_MESSAGE_17  = ' '
+ESP_MESSAGE_18  = ' '
+ESP_MESSAGE_19  = ' '
+ESP_MESSAGE_20  = ' '
+ESP_MESSAGE_21  = ' '
+ESP_MESSAGE_22  = ' '
+ESP_MESSAGE_23  = ' '
+ESP_MESSAGE_24  = ' '
+ESP_MESSAGE_25  = ' '
+ESP_SUBJECT     = ' '
+
+/*    Message lines may be continued as shown here, where the   */
+/*    plus sign says continue on the next line and ignore the   */
+/*    leading spaces.                                           */
+/*                                                              */
+/*    ESP_MESSAGE_1  = 'Job !MNJOB has ended with a maximum +   */
+/*                      RC of !MNMXRC..'                        */
+/*                                                              */
+/*    Note that a line can be from 40 to 70 characters without  */
+/*    wrapping in the resulting email.  This is dependent on    */
+/*    the width of the various characters used in the text.     */
+
+IF !MNPOINT = 'OVERDUE' AND LATE_SEND_IT = 'YES' THEN -
+  DO
+    JOB SWNOTIFY
+      ESP_BG_COLOR    = '#FF0000'
+      ESP_RECIPIENT_1 = 'RCPT TO:<!LATE_EMAIL1>'
+      ESP_RECIPIENT_2 = 'RCPT TO:<!LATE_EMAIL2>'
+      ESP_RECIPIENT_3 = 'RCPT TO:<!LATE_EMAIL3>'
+      ESP_RECIPIENT_4 = 'RCPT TO:<!LATE_EMAIL4>'
+      ESP_RECIPIENT_5 = 'RCPT TO:<!LATE_EMAIL5>'
+      IF !LATE_SUBJECT = ' ' THEN
+        DO
+          ESP_SUBJECT = '!STD_LATE_SUBJECT'
+        ENDDO
+      ELSE
+        DO
+          ESP_SUBJECT = '!LATE_SUBJECT'
+        ENDDO
+      ESP_MESSAGE_1   = '!STD_LATE_1'
+      ESP_MESSAGE_2   = '!STD_LATE_2'
+      ESP_MESSAGE_3   = '!LATE_TEXT1'
+      ESP_MESSAGE_4   = '!LATE_TEXT2'
+      ESP_MESSAGE_5   = '!LATE_TEXT3'
+      ESP_MESSAGE_6   = '!STD_LATE_6'
+      ESP_MESSAGE_7   = '!STD_LATE_7'
+      ESP_MESSAGE_8   = '!STD_LATE_8'
+      ESP_MESSAGE_9   = '!STD_LATE_9'
+      ESP_MESSAGE_10  = '!STD_LATE_10'
+      RUN NOW
+    ENDJOB
+  ENDDO
+
+IF !MNPOINT = 'JOBEND' AND LATE_SEND_IT = 'YES' THEN -
+  DO
+    JOB SWNOTIFY
+      ESP_BG_COLOR    = '#FFFF00'
+      ESP_RECIPIENT_1 = 'RCPT TO:<!LATE_EMAIL1>'
+      ESP_RECIPIENT_2 = 'RCPT TO:<!LATE_EMAIL2>'
+      ESP_RECIPIENT_3 = 'RCPT TO:<!LATE_EMAIL3>'
+      ESP_RECIPIENT_4 = 'RCPT TO:<!LATE_EMAIL4>'
+      ESP_RECIPIENT_5 = 'RCPT TO:<!LATE_EMAIL5>'
+      IF !LATE_SUBJECT = ' ' THEN
+        DO
+          ESP_SUBJECT = '!STD_DONE_SUBJECT'
+        ENDDO
+      ELSE
+        DO
+          ESP_SUBJECT = '!LATE_SUBJECT'
+        ENDDO
+      ESP_MESSAGE_1   = '!STD_DONE_1'
+      ESP_MESSAGE_2   = '!STD_DONE_2'
+      ESP_MESSAGE_3   = '!LATE_TEXT1'
+      ESP_MESSAGE_4   = '!LATE_TEXT2'
+      ESP_MESSAGE_5   = '!LATE_TEXT3'
+      ESP_MESSAGE_6   = '!STD_DONE_6'
+      ESP_MESSAGE_7   = '!STD_DONE_7'
+      ESP_MESSAGE_8   = '!STD_DONE_8'
+      ESP_MESSAGE_9   = '!STD_DONE_9'
+      ESP_MESSAGE_10  = '!STD_DONE_10'
+      RUN NOW
+    ENDJOB
+  ENDDO
+
+IF LATE_MESSAGE_1 NE 'NONE' THEN -
+  SEND 'AI03-!LATE_MESSAGE_1'
+IF LATE_MESSAGE_2 NE 'NONE' THEN -
+  SEND 'AI03-!LATE_MESSAGE_2'
+

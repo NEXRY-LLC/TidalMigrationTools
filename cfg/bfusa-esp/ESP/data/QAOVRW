@@ -1,0 +1,43 @@
+APPL QAOVRW WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/**********************************************************************/
+/*10/18/2016-JFC-CONVERTED LIE JOB FROM MVS TO NT JOB                 */
+/**********************************************************************/
+
+NOTIFY FAILURE ABEND ALERT(REMD)
+NOTIFY FAILURE ABEND MAILBOX(QAFAIL1)
+TAG PPIW
+
+JOB LIS.QAOVRW LINK PROCESS
+   RUN SUN
+   EARLYSUB 01.00
+   RELEASE ADD(VIN_MAKE_OVERWRITECMD)
+   RELEASE ADD(VIN_MODEL_OVERWRITECMD)
+ENDJOB
+
+NT_JOB VIN_MAKE_OVERWRITECMD
+   AGENT CYBA_PPIWPROD
+   CMDNAME X:\cmd_scripts\vin_make_overwrite.cmd
+   ARGS
+   USER maestro
+   RUN SUN
+   RELEASE ADD(LIE.QAOVRW)
+ENDJOB
+
+NT_JOB VIN_MODEL_OVERWRITECMD
+   AGENT CYBA_PPIWPROD
+   CMDNAME X:\cmd_scripts\vin_model_overwrite.cmd
+   USER maestro
+   RUN SUN
+   RELEASE ADD(LIE.QAOVRW)
+ENDJOB
+
+NT_JOB LIE.QAOVRW
+   AGENT CYBA_PPIWPROD
+   CMDNAME X:\cmd_scripts\LinkedInEnd.cmd
+   USER maestro
+   RUN SUN
+ENDJOB
+

@@ -1,0 +1,41 @@
+APPL DS5363 WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/**********************************************************************/
+/* 11/14/2022 - REQ0199978 - New schedule
+/**********************************************************************/
+
+NOTIFY ABEND FAILURE ALERT(REMD)
+
+JOB LIS.!ESPAPPL LINK PROCESS
+   RUN WEEKDAYS SAT
+   DELAYSUB 22.40
+   RELEASE ADD(DS_JOB_INTERFACE_1163)
+ENDJOB
+
+LINUX_JOB DS_JOB_INTERFACE_1163
+   AGENT LNX_DSRSAP01PAKR
+   USER bodsadmin
+   SCRIPTNAME /opt/ds_install/dataservices/JOB_scripts/+
+   JOB_INTERFACE_1163.sh
+   RUN DAILY
+   RELEASE ADD(DS_JOB_INTERFACE_1053)
+ENDJOB
+
+LINUX_JOB DS_JOB_INTERFACE_1053
+   AGENT LNX_DSRSAP01PAKR
+   USER bodsadmin
+   SCRIPTNAME /opt/ds_install/dataservices/JOB_scripts/+
+   JOB_INTERFACE_1053.sh
+   EARLYSUB 22.45
+   RUN DAILY
+   RELEASE ADD(LIE.!ESPAPPL)
+ENDJOB
+
+JOB LIE.!ESPAPPL LINK PROCESS
+   RUN DAILY
+   DUEOUT EXEC NOW PLUS 4 HOURS
+ENDJOB
+
+

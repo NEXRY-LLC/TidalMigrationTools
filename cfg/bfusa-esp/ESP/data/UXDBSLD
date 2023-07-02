@@ -1,0 +1,30 @@
+APPL UXDBSLD WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/*********************************************************************/
+/* CONVERTED TO COMMVAULT MAY 2017 - MFM                                00010002
+/*07/25/2019 -JFC- CLEANED UP PROC - ADDED LIE - NO OTHER CHANGES
+/*********************************************************************/
+
+NOTIFY ABEND FAILURE ALERT(REMD)
+
+JOB LIS.!ESPAPPL LINK PROCESS
+   RUN WEEKDAYS SAT
+   RELEASE ADD(DAILY_INCREMENTAL_BKUP_FOR_SAPSLD)
+ENDJOB
+
+UNIX_JOB DAILY_INCREMENTAL_BKUP_FOR_SAPSLD                              00200001
+   AGENT CYBA_SAPSLD                                                    00210001
+   SCRIPTNAME /db2/db2sld/Commvault_Backup_Scripts/DB2_CV_Backup.sh     00220001
+   ARGS SLD INCREMENTAL                                                 00230001
+   USER db2sld                                                          00240001
+   RUN WEEKDAYS SAT                                                     00250000
+   DELAYSUB 18.10                                                       00260000
+  RELEASE ADD(LIE.!ESPAPPL)
+ENDJOB
+
+JOB LIE.!ESPAPPL LINK PROCESS
+  RUN WEEKDAYS SAT
+ENDJOB                                                                  00270000
+                                                                        00280000

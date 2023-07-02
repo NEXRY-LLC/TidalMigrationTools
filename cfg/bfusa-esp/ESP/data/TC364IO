@@ -1,0 +1,27 @@
+APPL TC364IO WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/*********************************************************************/
+/*05/02/2019 -JFC- CLEANED UP PROC
+/*********************************************************************/
+
+NOTIFY FAILURE ABEND ALERT(REMD)
+
+SCHD001 = 'YESTERDAY'
+IF !USER2 = 001 OR !USER2 = '' THEN SCHD001 = 'TODAY'
+
+JOB TC364I
+  CCCHK RC(1:4095) FAIL CONTINUE
+    /*@@ SCHID=001
+  RUN !SCHD001
+  RELEASE ADD(TC363HO)
+ENDJOB
+
+JOB TC363HO
+  CCCHK RC(1:4095) FAIL CONTINUE
+    /*@@ SCHID=001
+  RUN !SCHD001
+ENDJOB
+
+

@@ -1,0 +1,107 @@
+APPL PO01 JOB_ANCESTOR_WAIT
+
+/*********************************************************************/
+/*********************************************************************/
+/* Alert to Complete POD000R1 and POD000R POD000Y  */
+/* Alert to SUBMIT POD000R1 and POD000A1 AND POD000Y1  */
+/* Alert to SUBMIT POD000A1 and POD000R1 in APPL PODORD */
+/*********************************************************************/
+
+  IF (!MNAPPL EQ 'POD005' AND -
+      !MNJOB EQ 'POD000R' AND -
+      !MNMXRC EQ 0) THEN -
+     DO
+       ESP AJ POD000R1 REQUEST APPL(!MNAPPL..!MNAPPLGEN)                00290026
+     ENDDO
+
+  IF (!MNAPPL EQ 'PODCOMB' AND -
+      !MNJOB EQ 'POD000R' AND -
+      !MNMXRC EQ 0) THEN -
+     DO
+       ESP AJ POD000R1 REQUEST APPL(!MNAPPL..!MNAPPLGEN)                00290026
+     ENDDO
+
+  IF (!MNAPPL EQ 'POD005' AND -
+      !MNJOB EQ 'POD000A' AND -
+      !MNMXRC EQ 0) THEN -
+     DO
+       ESP AJ POD000A1 REQUEST APPL(!MNAPPL..!MNAPPLGEN)                00290026
+     ENDDO
+
+  IF (!MNAPPL EQ 'PODCOMB' AND -
+      !MNJOB EQ 'POD000A' AND -
+      !MNMXRC EQ 0) THEN -
+     DO
+       ESP AJ POD000A1 REQUEST APPL(!MNAPPL..!MNAPPLGEN)                00290026
+     ENDDO
+
+  IF (!MNAPPL EQ 'POD005' AND -
+      !MNJOB EQ 'POD000Y' AND -
+      !MNMXRC EQ 0) THEN -
+     DO
+       ESP AJ POD000Y1 REQUEST APPL(!MNAPPL..!MNAPPLGEN)                00290026
+     ENDDO
+
+  IF (!MNAPPL EQ 'PODCOMB' AND -
+      !MNJOB EQ 'POD000Y' AND -
+      !MNMXRC EQ 0) THEN -
+     DO
+       ESP AJ POD000Y1 REQUEST APPL(!MNAPPL..!MNAPPLGEN)                00290026
+     ENDDO
+
+  IF (!MNAPPL EQ 'POD005' AND -
+      !MNJOB EQ 'POM000R' AND -
+      !MNMXRC EQ 0) THEN -
+     DO
+       ESP AJ POM000R1 REQUEST APPL(!MNAPPL..!MNAPPLGEN)                00290026
+     ENDDO
+
+  IF (!MNAPPL EQ 'PODCOMB' AND -
+      !MNJOB EQ 'POM000R' AND -
+      !MNMXRC EQ 0) THEN -
+     DO
+       ESP AJ POM000R1 REQUEST APPL(!MNAPPL..!MNAPPLGEN)                00290026
+     ENDDO
+
+  IF (!MNAPPL EQ 'POD005' AND -
+      !MNJOB EQ 'POM000A' AND -
+      !MNMXRC EQ 0) THEN -
+     DO
+       ESP AJ POM000A1 REQUEST APPL(!MNAPPL..!MNAPPLGEN)                00290026
+     ENDDO
+
+  IF (!MNAPPL EQ 'PODCOMB' AND -
+      !MNJOB EQ 'POM000A' AND -
+      !MNMXRC EQ 0) THEN -
+     DO
+       ESP AJ POM000A1 REQUEST APPL(!MNAPPL..!MNAPPLGEN)                00290026
+     ENDDO
+
+  IF (!MNAPPL EQ 'PODORD' AND -
+      !MNJOB EQ 'POD000R' AND -
+      !MNMXRC EQ 0) THEN -
+     DO
+       ESP AJ POD000R1 REQUEST APPL(!MNAPPL..!MNAPPLGEN)                00290026
+     ENDDO
+
+  IF (!MNAPPL EQ 'PODORD' AND -
+      !MNJOB EQ 'POD000A' AND -
+      !MNMXRC EQ 0) THEN -
+     DO
+       ESP AJ POD000A1 REQUEST APPL(!MNAPPL..!MNAPPLGEN)                00290026
+     ENDDO
+
+  IF (!MNAPPL EQ 'POD302' AND -
+      !MNJOB EQ 'POD302') THEN -
+      DO
+       ESP AJ ALL COMPLETE APPL(POD302.0)                               00290026
+       ESP TRIGGER PO01.POD303 ADD                                      00290026
+     ENDDO
+
+  IF (!MNAPPL EQ 'POD900' AND -
+      !MNJOB EQ 'POD900') THEN -
+      DO
+       ESP AJ ALL COMPLETE APPL(POD900.0)                               00290026
+       ESP TRIGGER PO01.POD901 ADD                                      00290026
+     ENDDO
+

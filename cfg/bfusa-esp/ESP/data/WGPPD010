@@ -1,0 +1,334 @@
+APPL WGPPD010 WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/**********************************************************************/
+/* IF YOU ARE SUSPENDING/RESUMING THIS APPLICATION                    */
+/* YOU MUST MODIFY EXTERNALS IN APPLS WGPPD020                        */
+/**********************************************************************/
+/*INT003 -  Net Change BOM CFS                                        */
+/*SAPCF8H   Robot job to create CFS files for Wilson BOM loads        */
+/*(bom1_for_f171_cfs.cd)Transfer CFS BOM1 file from AS400 to SAP      */
+/*(bom2_for_f171_cfs.cd)Transfer CFS BOM2 file from AS400 to SAP      */
+/*(bom3_for_f171_cfs.cd)Transfer CFS BOM3 file from AS400 to SAP      */
+/*(mm_for_f171_cfs.cd)Transfer CFS Material file from AS400 to SAP    */
+/*(ZMMBI002_CFS_F171)  CFS Semi-Finished Goods Material Masterload    */
+/*(ZMMBI025_CFS_F171)  CFS BOM Pre-load                               */
+/*(ZMMBI018_CFS_F171)  CFS BOM Load                                   */
+/*ARWICBM1  Archive data used for CFS BOM1 load -bom1c_F171.txt       */
+/*ARWICBM2  Archive data used for CFS BOM2 load -bom2c_F171.txt       */
+/*ARWICBM3  Archive data used for CFS BOM3 load -bom3c_F171.txt       */
+/*ARWIMMCF  Archive data used for CFS MM load -  mmc_F171.txt         */
+/**********************************************************************/
+/* 02/14/2019 -VIC- REMOVED ALERT WG03 PER INC000001852710
+/* 11/05/2019 -JFC- ADDED DUEOUT STATEMENT FOR SUNMAINT-INC000002078424
+/* 02/25/2020 -DSG- UPDATED AGENT FROM R7 TO R11.5.0
+/*                - CHANGED JOBQ FROM CYBESPV210.CYBESPV2100
+/* 03/05/2020 -DSG- ADDED RESOURCE TO AS400 JOB - INC000002178387
+/**********************************************************************/
+
+NOTIFY FAILURE ABEND ALERT(REMD)
+
+JOB BFPULOCK EXTERNAL APPLID(SUNMAINT)
+  RUN SUN
+  RELEASE ADD(LIS.!ESPAPPL)
+ENDJOB
+
+JOB LIS.!ESPAPPL LINK PROCESS
+  RUN DAILY
+  DELAYSUB 20.00
+  RELEASE ADD(SAPCF8H.AKNITS)
+ENDJOB
+
+DATA_OBJECT PARMSET.!ESPAPPL
+   /*Create a timestamp in hhmmMMDDYY format*/
+   SETVAR TMSTMP='!ESPSHH.:!ESPSMN.,!ESPSMM./!ESPSDD./!ESPSYY'
+   SETVAR PID=''
+   SETVAR STMPTM='!ESPSMM./!ESPSDD./!ESPSYY.,!ESPSHH.:!ESPSMN'
+ENDJOB
+
+JOB SETPID.!ESPAPPL LINK PROCESS
+   /*get the next PID number from the ConnectDirect*/
+   /*Process ID table (CDPROD).  Save the value into*/
+   /*the applications DataObject for use by the C:D*/
+   /*job and the CDSTAT job (if needed).*/
+   VINCR (PID) TABLE(CDPROD) CLANG
+   VGET  (PID) TABLE(CDPROD) CLANG
+   ESP MGRMSG * . . . PARMSET.!ESPAPPL/!ESPAPPL..!ESPAPGEN/MAIN +
+   ACTION SET PID(!PID)
+   RUN DAILY
+  RELEASE ADD(BOM1_FOR_F171_CFSCD)
+ENDJOB
+
+AS400_JOB SAPCF8H.AKNITS
+  RESOURCE ADD(1,AKNITS)
+  AGENT AKNITS
+  COMMAND CYBROBOT SAPCF8H
+  JOBQ CAWAAGENT.CYBESPJOBS
+  RUN DAILY
+  RELEASE ADD(BOM1_FOR_F171_CFSCD)
+ENDJOB
+
+UNIX_JOB BOM1_FOR_F171_CFSCD
+  AGENT CYBA_ISBFP3
+  EARLYSUB REALNOW PLUS 20 SECONDS
+  PID= WOBDATA('PARMSET.!ESPAPPL','PID')
+  TMSTMP= WOBDATA('PARMSET.!ESPAPPL','TMSTMP')
+  SCRIPTNAME /apps/condir/bfsbin/submitcd.sh
+  ARGS bom1_for_f171_cfs.cd 5 !PID !TMSTMP
+  RESOURCE ADD(1,ISBFP3CD)
+  USER cdprod
+  RUN DAILY
+  RELEASE ADD(CDSTAT.WGB1CFS(A))
+  RELEASE ADD(BOM2_FOR_F171_CFSCD)
+ENDJOB
+
+AIX_JOB CDSTAT.WGB1CFS      CONDITIONAL
+   AGENT CYBA_ISBFP3
+   /*This job only runs if the C:D job does not end with*/
+   /*a EXITCODE of 0.  It can be rerun as often as*/
+   /*required to check the status of the C:D process.*/
+   /*When the C:D process finishes, complete the job*/
+   /*to release the successors.*/
+   USER cduser
+   STMPTM= WOBDATA('PARMSET.!ESPAPPL','STMPTM')
+   PID= WOBDATA('PARMSET.!ESPAPPL','PID')
+   CMDNAME /apps/condir/bfsbin/cdstat.sh
+   ARGS !STMPTM  j!PID
+   RUN DAILY
+ENDJOB
+
+JOB SETPID2.!ESPAPPL LINK PROCESS
+   /*get the next PID number from the ConnectDirect*/
+   /*Process ID table (CDPROD).  Save the value into*/
+   /*the applications DataObject for use by the C:D*/
+   /*job and the CDSTAT job (if needed).*/
+   VINCR (PID) TABLE(CDPROD) CLANG
+   VGET  (PID) TABLE(CDPROD) CLANG
+   ESP MGRMSG * . . . PARMSET.!ESPAPPL/!ESPAPPL..!ESPAPGEN/MAIN +
+   ACTION SET PID(!PID)
+   RUN DAILY
+   RELEASE ADD(BOM2_FOR_F171_CFSCD)
+ENDJOB
+
+UNIX_JOB BOM2_FOR_F171_CFSCD
+  AGENT CYBA_ISBFP3
+  EARLYSUB REALNOW PLUS 20 SECONDS
+  PID= WOBDATA('PARMSET.!ESPAPPL','PID')
+  TMSTMP= WOBDATA('PARMSET.!ESPAPPL','TMSTMP')
+  SCRIPTNAME /apps/condir/bfsbin/submitcd.sh
+  ARGS bom2_for_f171_cfs.cd 5 !PID !TMSTMP
+  RESOURCE ADD(1,ISBFP3CD)
+  USER cdprod
+  RUN DAILY
+  RELEASE ADD(CDSTAT.WGB2CFS(A))
+  RELEASE ADD(BOM3_FOR_F171_CFSCD)
+ENDJOB
+
+AIX_JOB CDSTAT.WGB2CFS      CONDITIONAL
+   AGENT CYBA_ISBFP3
+   /*This job only runs if the C:D job does not end with*/
+   /*a EXITCODE of 0.  It can be rerun as often as*/
+   /*required to check the status of the C:D process.*/
+   /*When the C:D process finishes, complete the job*/
+   /*to release the successors.*/
+   USER cduser
+   STMPTM= WOBDATA('PARMSET.!ESPAPPL','STMPTM')
+   PID= WOBDATA('PARMSET.!ESPAPPL','PID')
+   CMDNAME /apps/condir/bfsbin/cdstat.sh
+   ARGS !STMPTM  j!PID
+   RUN DAILY
+ENDJOB
+
+JOB SETPID3.!ESPAPPL LINK PROCESS
+   /*get the next PID number from the ConnectDirect*/
+   /*Process ID table (CDPROD).  Save the value into*/
+   /*the applications DataObject for use by the C:D*/
+   /*job and the CDSTAT job (if needed).*/
+   VINCR (PID) TABLE(CDPROD) CLANG
+   VGET  (PID) TABLE(CDPROD) CLANG
+   ESP MGRMSG * . . . PARMSET.!ESPAPPL/!ESPAPPL..!ESPAPGEN/MAIN +
+   ACTION SET PID(!PID)
+   RUN DAILY
+   RELEASE ADD(BOM3_FOR_F171_CFSCD)
+ENDJOB
+
+UNIX_JOB BOM3_FOR_F171_CFSCD
+  AGENT CYBA_ISBFP3
+  EARLYSUB REALNOW PLUS 20 SECONDS
+  PID= WOBDATA('PARMSET.!ESPAPPL','PID')
+  TMSTMP= WOBDATA('PARMSET.!ESPAPPL','TMSTMP')
+  SCRIPTNAME /apps/condir/bfsbin/submitcd.sh
+  ARGS bom3_for_f171_cfs.cd 5 !PID !TMSTMP
+  RESOURCE ADD(1,ISBFP3CD)
+  USER cdprod
+  RUN DAILY
+  RELEASE ADD(CDSTAT.WGB3CFS(A))
+  RELEASE ADD(MM_FOR_F171_CFSCD)
+ENDJOB
+
+AIX_JOB CDSTAT.WGB3CFS      CONDITIONAL
+   AGENT CYBA_ISBFP3
+   /*This job only runs if the C:D job does not end with*/
+   /*a EXITCODE of 0.  It can be rerun as often as*/
+   /*required to check the status of the C:D process.*/
+   /*When the C:D process finishes, complete the job*/
+   /*to release the successors.*/
+   USER cduser
+   STMPTM= WOBDATA('PARMSET.!ESPAPPL','STMPTM')
+   PID= WOBDATA('PARMSET.!ESPAPPL','PID')
+   CMDNAME /apps/condir/bfsbin/cdstat.sh
+   ARGS !STMPTM  j!PID
+   RUN DAILY
+ENDJOB
+
+JOB SETPID4.!ESPAPPL LINK PROCESS
+   /*get the next PID number from the ConnectDirect*/
+   /*Process ID table (CDPROD).  Save the value into*/
+   /*the applications DataObject for use by the C:D*/
+   /*job and the CDSTAT job (if needed).*/
+   VINCR (PID) TABLE(CDPROD) CLANG
+   VGET  (PID) TABLE(CDPROD) CLANG
+   ESP MGRMSG * . . . PARMSET.!ESPAPPL/!ESPAPPL..!ESPAPGEN/MAIN +
+   ACTION SET PID(!PID)
+   RUN DAILY
+   RELEASE ADD(MM_FOR_F171_CFSCD)
+ENDJOB
+
+UNIX_JOB MM_FOR_F171_CFSCD
+  AGENT CYBA_ISBFP3
+  EARLYSUB REALNOW PLUS 20 SECONDS
+  PID= WOBDATA('PARMSET.!ESPAPPL','PID')
+  TMSTMP= WOBDATA('PARMSET.!ESPAPPL','TMSTMP')
+  SCRIPTNAME /apps/condir/bfsbin/submitcd.sh
+  ARGS mm_for_f171_cfs.cd 5 !PID !TMSTMP
+  RESOURCE ADD(1,ISBFP3CD)
+  USER cdprod
+  RUN DAILY
+  RELEASE ADD(CDSTAT.MF171CFS(A))
+  RELEASE ADD(ZMMBI002_CFS_F171)
+ENDJOB
+
+AIX_JOB CDSTAT.MF171CFS    CONDITIONAL
+   AGENT CYBA_ISBFP3
+   /*This job only runs if the C:D job does not end with*/
+   /*a EXITCODE of 0.  It can be rerun as often as*/
+   /*required to check the status of the C:D process.*/
+   /*When the C:D process finishes, complete the job*/
+   /*to release the successors.*/
+   USER cduser
+   STMPTM= WOBDATA('PARMSET.!ESPAPPL','STMPTM')
+   PID= WOBDATA('PARMSET.!ESPAPPL','PID')
+   CMDNAME /apps/condir/bfsbin/cdstat.sh
+   ARGS !STMPTM  j!PID
+   RUN DAILY
+ENDJOB
+
+SAP_JOB ZMMBI002_CFS_F171
+    SAPUSER SAPADM
+    AGENT CYBB_BFP030
+    SAPJOBNAME ZMMBI002_CFS_F171
+    SAPJOBCLASS C
+    ABAPNAME ZMMBI002
+    VARIANT ZMMBI002_F171C
+    LANGUAGE E
+    PRINTDEST DZ01
+    PRINTCOPIES 001
+    PRINTIMMED YES
+    EXPIRATION 8
+    COLUMNS 132
+    BANNER D
+    RECIPIENT DUETTAD
+    ARCMODE PRINT
+    RUN DAILY
+    RELEASE ADD(ZMMBI025_CFS_F171)
+ENDJOB
+
+SAP_JOB ZMMBI025_CFS_F171
+    SAPUSER SAPADM
+    AGENT CYBB_BFP030
+    SAPJOBNAME ZMMBI025_CFS_F171
+    SAPJOBCLASS C
+    ABAPNAME ZMMBI025
+    VARIANT ZMMBI025_F171C
+    LANGUAGE E
+    PRINTDEST CP40
+    PRINTCOPIES 001
+    EXPIRATION 8
+    COLUMNS 132
+    BANNER D
+    RECIPIENT DUETTAD
+    ARCMODE PRINT
+    RUN DAILY
+    RELEASE ADD(ZMMBI018_CFS_F171)
+ENDJOB
+
+SAP_JOB ZMMBI018_CFS_F171
+    SAPUSER SAPADM
+    AGENT CYBB_BFP030
+    SAPJOBNAME ZMMBI018_CFS_F171
+    RECIPIENTTYPE MAIL
+    SPOOLRECIPIENT 'restrepohernan@BFUSA.COM'
+    SAPJOBCLASS C
+    ABAPNAME ZMMBI018
+    VARIANT ZMMBI018_F171C
+    LANGUAGE E
+    PRINTDEST DZ01
+    PRINTCOPIES 001
+    PRINTIMMED YES
+    EXPIRATION 8
+    COLUMNS 132
+    BANNER D
+    RECIPIENT DUETTAD
+    ARCMODE PRINT
+    RUN DAILY
+    RELEASE ADD(AR_BOM1C_F171TXT)
+ENDJOB
+
+UNIX_JOB AR_BOM1C_F171TXT
+  AGENT CYBA_ISBFP3
+  SCRIPTNAME /local/bin/arcfile.sh
+  ARGS interfaces/input/datain/bom1c_f171.txt D
+  USER bfpadm
+  RUN DAILY
+  RELEASE ADD(AR_BOM2C_F171TXT)
+ENDJOB
+
+UNIX_JOB AR_BOM2C_F171TXT
+  AGENT CYBA_ISBFP3
+  SCRIPTNAME /local/bin/arcfile.sh
+  ARGS interfaces/input/datain/bom2c_f171.txt D
+  USER bfpadm
+  RUN DAILY
+  RELEASE ADD(AR_BOM3C_F171TXT)
+ENDJOB
+
+UNIX_JOB AR_BOM3C_F171TXT
+  AGENT CYBA_ISBFP3
+  SCRIPTNAME /local/bin/arcfile.sh
+  ARGS interfaces/input/datain/bom3c_f171.txt D
+  USER bfpadm
+  RUN DAILY
+  RELEASE ADD(AR_MMC_F171TXT)
+ENDJOB
+
+UNIX_JOB AR_MMC_F171TXT
+  AGENT CYBA_ISBFP3
+  SCRIPTNAME /local/bin/arcfile.sh
+  ARGS interfaces/input/datain/mmc_f171.txt D
+  USER bfpadm
+  RUN DAILY
+  RELEASE ADD(LIE.!ESPAPPL)
+ENDJOB
+
+AIX_JOB LIE.!ESPAPPL
+  AGENT CYBA_ISBFP3
+  COMMAND /bin/sleep
+  ARGS 3
+  USER bfpadm
+  RUN DAILY
+   DUEOUT EXEC 21.30
+   IF TODAY('SUNDAY') THEN DUEOUT EXEC 23.50
+  NOTIFY OVERDUE MAILBOX(AKRONJOBREQ)
+ENDJOB
+

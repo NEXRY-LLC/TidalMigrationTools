@@ -1,0 +1,129 @@
+APPL UXDBBFP WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/*********************************************************************/
+/*  Removed NBUINCR step  -  05/19/2016    jre                       /*
+/*  When UXDBBFP runs early - before 21:00 - on Sunday do the following:
+/*  1) schedule Jobs BFPDBSNP and SETWRITE_RESUME_BFPDBSNP in UXDBBFP
+/*     to run.
+/*  2) bypass Jobs BFPDBSNP.SAPBFPDB and SETWRITE_RESUME_BFPDBSNP_SUN
+/*     in SUNMAINT; neither job should run when UXDBBFP runs early;
+/*  3) Confirm setup with DBA (Roger Lamb as of 07/17/2017 - MFM)
+/*********************************************************************/
+
+/*********************************************************************/
+/*07/25/2019 -VMD- Added a RELDELAY statement to job UNIX_JOB BFPDBSNP
+/*07/25/2019 -VMD- Added a RELDELAY statement to job LIE.UXDBBFP LINK
+/*12/20/2019 -VMD- Took out run statements for last weeks special    */
+/*                 5am SAT run (12/14/19) per Roger Brown            */
+/**************************************************PROCESS************/
+
+NOTIFY ABEND FAILURE ALERT(REMD)
+
+UNIX_JOB SETWRITE_RESUME_BFPDBSNP_SUN EXTERNAL APPLID(SUNMAINT) -
+SCOPE(-04)
+  RUN SUN
+  RELEASE ADD(LIS.UXDBBFP)
+ENDJOB
+
+JOB LIS.UXDBBFP LINK PROCESS
+  RUN DAILY
+  IF TODAY('SUNDAY') THEN DELAYSUB 21.00
+  IF TODAY('WEEKDAYS SAT') THEN DELAYSUB 23.30
+  RELEASE ADD(BFPDBSNP)
+  RELEASE ADD(SETWRITE_RESUME_BFPDBSNP)
+ENDJOB
+
+UNIX_JOB BFPDBSNP
+  AGENT CYBA_OPMAPP
+  USER root
+  SCRIPTNAME /local/bin/create_snap.sh
+  ARGS sapbfpdb BFP daily
+  RUN WEEKDAYS SAT
+  IF TODAY('DEC 15 2019') AND ESPSHH EQ '05' THEN RUN TODAY
+  RUN JUL 16 2017
+  NOTWITH BFPUNMNT_DAILY
+  RELDELAY 15
+  RELEASE ADD(BFPMNTSNP)
+ENDJOB
+
+/* Return Codes for Job SETWRITE_RESUME_BFPDBSNP:
+/*    0 Successful start
+/*
+/*    1 Invalid User ID
+/*    2 Invalid number of parameters passed - acceptable ccchk.
+/*    3 /db2/<SID> not found.  Bad parm?
+/*    4 Database Connection Error
+/*    5 Unknown error
+
+UNIX_JOB SETWRITE_RESUME_BFPDBSNP
+  AGENT CYBA_SAPBFPDB
+  USER root
+  SCRIPTNAME /local/bin/db2_Set_Write_Resume.sh
+  ARGS BFP
+  EXITCODE 0-1 FAILURE
+  EXITCODE 2 SUCCESS
+  EXITCODE 3-9099 FAILURE
+  RUN WEEKDAYS SAT
+  IF TODAY('DEC 15 2019') AND ESPSHH EQ '05' THEN RUN TODAY
+  RUN JUL 16 2017
+  RELDELAY 8
+  RELEASE ADD(BFPMNTSNP)
+ENDJOB
+
+UNIX_JOB BFPMNTSNP
+  AGENT CYBA_OPMAPP
+  USER root
+  SCRIPTNAME /local/bin/mount_snap.sh
+  ARGS sapbfpdb BFP daily
+  RUN DAILY
+  NORUN APR 13 2018
+  RELEASE ADD(BFPPSTMNT)
+ENDJOB
+
+UNIX_JOB BFPPSTMNT
+  AGENT CYBA_OPMAPP
+  USER root
+  SCRIPTNAME /local/bin/db2_postmount.sh
+  ARGS BFP
+  RUN DAILY
+  NORUN APR 13 2018
+  RELEASE ADD(BFPBKPSNP)
+ENDJOB
+
+UNIX_JOB BFPBKPSNP
+  AGENT CYBA_OPMAPP
+  USER root
+  SCRIPTNAME /local/bin/db2_backup_snap.sh
+  ARGS BFP
+  RUN DAILY
+  NORUN APR 13 2018
+  RELEASE ADD(BFPDBSTP)
+ ENDJOB
+
+UNIX_JOB BFPDBSTP
+  AGENT CYBA_OPMAPP
+  USER root
+  SCRIPTNAME /local/bin/stop_db2.sh
+  ARGS BFP
+  RUN DAILY
+  NORUN APR 13 2018
+  RELEASE ADD(BFPUNMNT_DAILY)
+ENDJOB
+
+UNIX_JOB BFPUNMNT_DAILY
+  AGENT CYBA_OPMAPP
+  USER root
+  SCRIPTNAME /local/bin/unmount_snap.sh
+  ARGS sapbfpdb BFP daily
+  RUN DAILY
+  NORUN APR 13 2018
+  RELEASE ADD(LIE.!ESPAPPL)
+ENDJOB
+
+JOB LIE.!ESPAPPL LINK PROCESS
+   RUN DAILY
+   RELDELAY 15
+ENDJOB
+

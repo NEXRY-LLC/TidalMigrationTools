@@ -207,10 +207,12 @@ public class EspJobVisitorHelper {
 				break;
 			case "CMDNAME":
 			case "SCRIPTNAME":
+			case "scriptname":
 			case "COMMAND":
 				job.setCommand(statementParameters);
 				break;
-
+			case "user":
+				break;
 			default:
 				// no statement hit
 				return false;

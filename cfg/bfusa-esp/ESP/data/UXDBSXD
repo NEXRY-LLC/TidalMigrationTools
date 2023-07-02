@@ -1,0 +1,31 @@
+APPL UXDBSXD WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/*********************************************************************/
+/*  Removed NBUINCR step  -  05/19/2016    jre                       /*
+/* 02/19/2019 -VMD- CHANGED LINK JOBS TO CLANG VARIABLES              */
+/* 02/20/19 -DSG- CHANGED ENDING ZOS JOB TO ESPAPPL LINK PROCESS
+/*********************************************************************/
+
+NOTIFY ABEND FAILURE ALERT(REMD)
+
+JOB LIS.!ESPAPPL LINK PROCESS
+   RUN WEEKDAYS SAT
+   EARLYSUB 18.00
+   RELEASE ADD(SXDDBONL.SXDDB)
+ENDJOB
+
+UNIX_JOB SXDDBONL.SXDDB
+   AGENT CYBA_SXDDB
+   SCRIPTNAME /local/bin/db2_backup_sbrx.sh
+   ARGS DI1 SBXD "ONLINE INCREMENTAL"
+   USER root
+   RUN WEEKDAYS SAT
+   RELEASE ADD(LIE.!ESPAPPL)
+ENDJOB
+
+JOB LIE.!ESPAPPL LINK PROCESS
+   RUN WEEKDAYS SAT
+ENDJOB
+

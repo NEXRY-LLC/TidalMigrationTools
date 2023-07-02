@@ -1,0 +1,100 @@
+APPL PED120C WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/*********************************************************************/
+/*INT-129 -  Country of Orgin
+/*YMIMCOO (YMIMCOO_MIMI_MMP COO EXT TB)  Extract data from SAP f+
+/*        or use in MIMI.
+/*MATCOOCD (saptomimi_matcoo_tb.cd) Move the data from SAP to AP+
+/*        PM-NA-BSP
+/*THE MIMI CD JOBS IN THIS APPL COMMUNICATE WITH APPM-NA-CHQ         */
+/*********************************************************************/
+
+NOTIFY FAILURE ABEND ALERT(REMD)
+
+AIX_JOB LIE.PED110C EXTERNAL APPLID(PED110C)
+  RUN DAILY
+  RELEASE ADD(LIS.!ESPAPPL)
+ENDJOB
+
+JOB LIS.!ESPAPPL LINK PROCESS
+  RUN DAILY
+  RELEASE ADD(YMIMCOO_MIMI_MMP_COO_EXT_TB)
+ENDJOB
+
+SAP_JOB YMIMCOO_MIMI_MMP_COO_EXT_TB                                     B')
+    AGENT CYBB_BFP030
+    SAPJOBNAME 'YMIMCOO_MIMI MMP COO EXT TB'
+    SAPUSER SAPADM
+    SAPJOBCLASS A
+    ABAPNAME YMIMCOO
+    VARIANT 'VARIANT TB'
+    LANGUAGE E
+    PRINTCOPIES 001
+    EXPIRATION 8
+    LINES 65
+    COLUMNS 80
+    BANNER D
+    RECIPIENT DUETTAD
+    ARCMODE PRINT
+    RUN DAILY
+    RELEASE ADD(SAPTOMIMI_MATCOO_TBCD)
+ENDJOB
+
+DATA_OBJECT PARMSET.!ESPAPPL
+   /*Create a timestamp in hhmmMMDDYY format*/
+   SETVAR TMSTMP='!ESPSHH.:!ESPSMN.,!ESPSMM./!ESPSDD./!ESPSYY'
+   SETVAR PID=''
+   SETVAR STMPTM='!ESPSMM./!ESPSDD./!ESPSYY.,!ESPSHH.:!ESPSMN'
+ENDJOB
+
+JOB SETPID.!ESPAPPL LINK PROCESS
+   /*get the next PID number from the ConnectDirect*/
+   /*Process ID table (CDPROD).  Save the value into*/
+   /*the applications DataObject for use by the C:D*/
+   /*job and the CDSTAT job (if needed).*/
+   VINCR (PID) TABLE(CDPROD) CLANG
+   VGET  (PID) TABLE(CDPROD) CLANG
+   ESP MGRMSG * . . . PARMSET.!ESPAPPL/!ESPAPPL..!ESPAPGEN/MAIN +
+   ACTION SET PID(!PID)
+   RUN DAILY
+   RELEASE ADD(SAPTOMIMI_MATCOO_TBCD)
+ENDJOB
+
+UNIX_JOB SAPTOMIMI_MATCOO_TBCD
+    AGENT CYBA_ISBFP3
+    USER cdprod
+    EARLYSUB REALNOW PLUS 20 SECONDS
+    PID= WOBDATA('PARMSET.!ESPAPPL','PID')
+    TMSTMP= WOBDATA('PARMSET.!ESPAPPL','TMSTMP')
+    SCRIPTNAME /apps/condir/bfsbin/submitcd.sh
+    ARGS saptomimi_matcoo_tb.cd 5 !PID !TMSTMP
+    RUN DAILY
+    RELEASE ADD(CDSTAT.MATCOOCD(A))
+    RELEASE ADD(LIE.!ESPAPPL)
+ENDJOB
+
+AIX_JOB CDSTAT.MATCOOCD     CONDITIONAL
+   AGENT CYBA_ISBFP3
+   /*This job only runs if the C:D job does not end with*/
+   /*a EXITCODE of 0.  It can be rerun as often as*/
+   /*required to check the status of the C:D process.*/
+   /*When the C:D process finishes, complete the job*/
+   /*to release the successors.*/
+   USER cduser
+   STMPTM= WOBDATA('PARMSET.!ESPAPPL','STMPTM')
+   PID= WOBDATA('PARMSET.!ESPAPPL','PID')
+   CMDNAME /apps/condir/bfsbin/cdstat.sh
+   ARGS !STMPTM  j!PID
+   RUN DAILY
+ENDJOB
+
+AIX_JOB LIE.!ESPAPPL
+   AGENT CYBA_ISBFP3
+   COMMAND /bin/sleep
+   ARGS 3
+   USER bfpadm
+   RUN DAILY
+ENDJOB
+

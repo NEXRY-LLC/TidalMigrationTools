@@ -1,0 +1,84 @@
+APPL JOGLM021 WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+NOTIFY FAILURE ABEND ALERT(REMD)
+
+DATA_OBJECT PARMSET.!ESPAPPL
+   /*Create a timestamp in hhmmMMDDYY format*/
+   SETVAR TMSTMP='!ESPSHH.:!ESPSMN.,!ESPSMM./!ESPSDD./!ESPSYY'
+   SETVAR PID=''
+   SETVAR STMPTM='!ESPSMM./!ESPSDD./!ESPSYY.,!ESPSHH.:!ESPSMN'
+ENDJOB
+
+JOB SETPID.!ESPAPPL LINK PROCESS
+   /*get the next PID number from the ConnectDirect*/
+   /*Process ID table (CDPROD).  Save the value into*/
+   /*the applications DataObject for use by the C:D*/
+   /*job and the CDSTAT job (if needed).*/
+   VINCR (PID) TABLE(CDPROD) CLANG
+   VGET  (PID) TABLE(CDPROD) CLANG
+   ESP MGRMSG * . . . PARMSET.!ESPAPPL/!ESPAPPL..!ESPAPGEN/MAIN +
+   ACTION SET PID(!PID)
+   RUN DAILY
+   RELEASE ADD(GLM021JOCD)
+ENDJOB
+
+UNIX_JOB GLM021JOCD
+  AGENT CYBA_ISBFP3
+  PID= WOBDATA('PARMSET.!ESPAPPL','PID')
+  TMSTMP= WOBDATA('PARMSET.!ESPAPPL','TMSTMP')
+  SCRIPTNAME /apps/condir/bfsbin/submitcd.sh
+  ARGS glm021jo.cd 5 !PID !TMSTMP
+  RESOURCE ADD(1,ISBFP3CD)
+  USER cdprod
+  RUN DAILY
+   RELDELAY 1
+  RELEASE ADD(CDSTAT.CDISBFD(A))
+  RELEASE ADD(ZFIGLI64_88JO_CLOCK_ACTUAL)
+ENDJOB
+
+AIX_JOB CDSTAT.CDISBFD CONDITIONAL
+   AGENT CYBA_ISBFP3
+   /*This job only runs if the C:D job does not end with*/
+   /*a EXITCODE of 0.  It can be rerun as often as*/
+   /*required to check the status of the C:D process.*/
+   /*When the C:D process finishes, complete the job*/
+   /*to release the successors.*/
+   USER cduser
+   STMPTM= WOBDATA('PARMSET.!ESPAPPL','STMPTM')
+   PID= WOBDATA('PARMSET.!ESPAPPL','PID')
+   CMDNAME /apps/condir/bfsbin/cdstat.sh
+   ARGS !STMPTM  j!PID
+   RUN DAILY
+ENDJOB
+
+SAP_JOB ZFIGLI64_88JO_CLOCK_ACTUAL
+    SAPUSER SAPADM
+    AGENT CYBB_BFP030
+    SAPJOBNAME 'ZFIGLI64_88JO CLOCK - ACTUAL'
+    SAPJOBCLASS C
+    ABAPNAME ZFIGLI64
+    VARIANT '88 CLOCK ACT'
+    LANGUAGE E
+    PRINTDEST DZ01
+    PRINTCOPIES 001
+    PRINTIMMED YES
+    EXPIRATION 8
+    COLUMNS 132
+    BANNERPAGE YES
+    BANNER YES
+    RECIPIENT SIGOUINJEAN
+    ARCMODE PRINT
+    RUN DAILY
+    RELEASE ADD(GL21JOXX.ISBFP3)
+ENDJOB
+
+UNIX_JOB GL21JOXX.ISBFP3
+  AGENT CYBA_ISBFP3
+  SCRIPTNAME /local/bin/arcfile.sh
+  ARGS interfaces/input/datain/zfigli64_iid_clock_actual_88 M
+  USER bfpadm
+  RUN DAILY
+ENDJOB
+

@@ -1,0 +1,26 @@
+APPL ED400N  WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/*********************************************************************/
+/*05/17/2018 -VMD- REMOVED JOBS ED606DT AND ED607DT PER DANNY MCLEOD */
+/*********************************************************************/
+
+NOTIFY FAILURE ABEND ALERT(REMD)
+
+JOB ED400N
+  /*@@ SYSTEM=EDI
+  CCCHK RC(7:4095) FAIL CONTINUE
+  RUN TODAY
+  RELEASE ADD(ED400N1)
+  NOTWITH (ED400C.-)
+  NOTWITH (ED400S.-)
+  NOTWITH (ED400Z.-)
+ENDJOB
+
+JOB ED400N1
+  /*@@ SYSTEM=EDI
+  CCCHK RC(7:4095) FAIL CONTINUE
+  RUN TODAY
+ENDJOB
+

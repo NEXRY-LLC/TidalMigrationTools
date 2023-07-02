@@ -1,0 +1,42 @@
+APPL APW008
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/*********************************************************************/
+/*AMEX Expense Reports -  Prior Week
+/*********************************************************************/
+/*03/19/2019 -JFC-  UPDATED PROC PER  INC000001878221                */
+/*********************************************************************/
+
+NOTIFY FAILURE ABEND ALERT(REMD)
+
+JOB LIS.!ESPAPPL LINK PROCESS
+    RUN MON
+    DELAYSUB 06.30
+    RELEASE ADD(ZFIAPR09_ER_WORK_WKLY)
+ENDJOB
+
+SAP_JOB ZFIAPR09_ER_WORK_WKLY
+    SAPUSER SAPADM
+    AGENT CYBB_BFP030
+    SAPJOBNAME ZFIAPR09_ER-WORK-WKLY
+    SAPJOBCLASS C
+    ABAPNAME ZFIAPR09
+    VARIANT ER-WORK-WKLY
+    LANGUAGE E
+    PRINTDEST CC13
+    PRINTCOPIES 001
+    PRINTIMMED YES
+    EXPIRATION 8
+    COLUMNS 132
+    BANNER YES
+    RECIPIENT STABLESRESH
+    ARCMODE PRINT
+    RUN MON
+    RELEASE ADD(LIE.!ESPAPPL)
+ENDJOB
+
+JOB LIE.!ESPAPPL LINK PROCESS
+    RUN MON
+ENDJOB
+

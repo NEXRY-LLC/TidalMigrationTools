@@ -1,0 +1,102 @@
+APPL TE25DALY WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/*********************************************************************/
+/*09/26/2018 -JFC- CLEANED UP PROC - ADDED LIE - NO OTHER CHANGES
+/*********************************************************************/
+
+NOTIFY ABEND FAILURE ALERT(REMD)
+
+DATA_OBJECT PARMSET.!ESPAPPL
+   /*Create a timestamp in hhmmMMDDYY format*/
+   SETVAR TMSTMP='!ESPSHH.:!ESPSMN.,!ESPSMM./!ESPSDD./!ESPSYY'
+   SETVAR PID=''
+   SETVAR STMPTM='!ESPSMM./!ESPSDD./!ESPSYY.,!ESPSHH.:!ESPSMN'
+ENDJOB
+
+JOB LIS.!ESPAPPL LINK PROCESS
+   DELAYSUB 19.30
+   RUN TODAY
+   RELEASE ADD(TE250010.ISHRP1)
+ENDJOB
+
+DSTRIG TE25SAP.EMAILDSN
+   /*WAITS FOR DSN: 'TE.SAP.TE250010.EMAIL.G-' TO*/
+   /*COME ACROSS ON MAINFRAME AT APPROX 20.00 DAILY*/
+   DSNAME 'TE.SAP.TE250010.EMAIL.G-'
+   /**/
+   RUN TODAY
+   IF TODAY('JAN 13 2012') THEN NORUN TODAY
+   RELEASE ADD(TE250010.ISHRP1)
+ENDJOB
+
+JOB SETPID2.!ESPAPPL LINK PROCESS
+   /*get the next PID number from the ConnectDirect*/
+   /*Process ID table (CDPROD).  Save the value into*/
+   /*the applications DataObject for use by the C:D*/
+   /*job and the CDSTAT job (if needed).*/
+   VINCR (PID) TABLE(CDPROD) CLANG
+   VGET  (PID) TABLE(CDPROD) CLANG
+   ESP MGRMSG * . . . PARMSET.!ESPAPPL/!ESPAPPL..!ESPAPGEN/MAIN +
+    ACTION SET PID(!PID)
+   RELDELAY  1
+   RUN TODAY
+   RELEASE ADD(TE250010.ISHRP1)
+ENDJOB
+
+UNIX_JOB TE250010.ISHRP1
+   AGENT CYBA_ISHRP1
+   EARLYSUB REALNOW PLUS 10 SECONDS
+   PID= WOBDATA('PARMSET.!ESPAPPL','PID')
+   TMSTMP= WOBDATA('PARMSET.!ESPAPPL','TMSTMP')
+   /*@@ "/apps/condir/bfsbin/submitcd.sh TE250010.cd 5"*/
+   SCRIPTNAME /apps/condir/bfsbin/submitcd.sh
+   ARGS TE250010_EMAIL.cd 10 !PID !TMSTMP
+   USER cdhrprd
+   RELDELAY  1
+   RUN TODAY
+   RELEASE ADD(SFP2.TE250010_MAIL)
+ENDJOB
+
+AIX_JOB SFP2.TE250010_MAIL REQUEST
+   AGENT CYBA_ISHRP1
+   USER hrpadm
+   SCRIPTNAME /local/bin/sftp2.sh
+   ARGS put /data/HRP/interfaces/input/datain/+
+    SAPPM_EMAIL_ZHRPM_EMAIL_ADDRESS.TXT bhpftp@10.186.1.81:.+
+    /interfaces/input/datain
+   RUN TODAY
+   RELEASE ADD(ARCFILE.TE250010_MAIL)
+ENDJOB
+
+AIX_JOB ARCFILE.TE250010_MAIL REQUEST
+   AGENT CYBA_ISHRP1
+   SCRIPTNAME /local/bin/arcfile.sh
+   ARGS interfaces/input/datain/SAPPM_EMAIL_ZHRPM_EMAIL_ADDRESS.TXT D
+   USER hrpadm
+   RUN TODAY
+ENDJOB
+
+AIX_JOB CDSTAT2.!ESPAPPL CONDITIONAL
+   AGENT CYBA_ISHRP1
+   /*This job only runs if the C:D job does not end with*/
+   /*a EXITCODE of 0.  It can be rerun as often as*/
+   /*required to check the status of the C:D process.*/
+   /*When the C:D process finishes, complete the job*/
+   /*to release the successors.*/
+   USER cduser
+   STMPTM= WOBDATA('PARMSET.!ESPAPPL','STMPTM')
+   PID= WOBDATA('PARMSET.!ESPAPPL','PID')
+   CMDNAME /apps/condir/bfsbin/cdstat.sh
+   ARGS !STMPTM  j!PID
+   AFTER ADD(TE250010.ISHRP1(A))
+   RUN TODAY
+ENDJOB
+
+APPLEND TRIGNEW1.!ESPAPPL
+   ESPNOMSG TRIGGER !ESPEVENT ADD ADD
+   RUN DAILY
+ENDJOB
+
+

@@ -1,0 +1,17 @@
+APPL US10PMDP WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/*********************************************************************/
+/*02/26/2019 -JFC- CLEANED UP PROC - ADDED LIE - NO OTHER CHANGES    */
+/*********************************************************************/
+
+NOTIFY FAILURE ABEND ALERT(REMD)
+
+JOB US10PMDP
+  OPTIONS NORESTARTSTEP
+  CCCHK RC(1:4095) FAIL CONTINUE
+  RUN DAILY
+  DELAYSUB 22:00
+ENDJOB
+

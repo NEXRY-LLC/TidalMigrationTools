@@ -1,0 +1,25 @@
+APPL PIR013  WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/*********************************************************************/
+/*03/11/2019 -JFC-  UPDATED PROC PER INC000001874368                */
+/*********************************************************************/
+
+NOTIFY FAILURE ABEND ALERT(REMD)
+
+JOB LIS.!ESPAPPL LINK PROCESS
+   RUN TODAY
+   RELEASE ADD(PIR013)
+ENDJOB
+
+JOB PIR013
+  OPTIONS NORESTARTSTEP
+  RUN TODAY
+  RELEASE ADD(LIE.!ESPAPPL)
+ENDJOB
+
+JOB LIE.!ESPAPPL LINK PROCESS
+  RUN DAILY
+ENDJOB
+
