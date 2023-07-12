@@ -13,6 +13,9 @@ import com.bluehouseinc.dataconverter.parsers.esp.reporter.EspJobsWithAdvancedDu
 import com.bluehouseinc.dataconverter.parsers.esp.reporter.EspJobsWithComplexCccchk;
 import com.bluehouseinc.dataconverter.parsers.esp.reporter.EspJobsWithIfLogic;
 import com.bluehouseinc.dataconverter.parsers.esp.reporter.EspJobsWithMultipleExitCodes;
+import com.bluehouseinc.dataconverter.parsers.esp.reporter.EspJobsWithRequestAttribute;
+import com.bluehouseinc.dataconverter.parsers.esp.reporter.EspJobsWithScopeAttribute;
+import com.bluehouseinc.dataconverter.parsers.esp.reporter.EspSAPJobsWithMultipleJobSteps;
 
 public class EspReporter implements IModelReport {
 
@@ -28,7 +31,9 @@ public class EspReporter implements IModelReport {
 		core.add(new EspJobsWithMultipleExitCodes());
 		core.add(new EspComplexSchedEventData());
 		core.add(new EspJobsWithComplexCccchk());
-
+		core.add(new EspSAPJobsWithMultipleJobSteps());
+		core.add(new EspJobsWithRequestAttribute());
+		core.add(new EspJobsWithScopeAttribute());
 		return core;
 	}
 

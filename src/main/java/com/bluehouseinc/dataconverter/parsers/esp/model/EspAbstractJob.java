@@ -25,7 +25,9 @@ public abstract class EspAbstractJob extends BaseJobOrGroupObject implements Esp
 	boolean containsIfLogicCleaned = false;
 	boolean containsAdvancedDelaySubLogic = false;
 	boolean containsAdvancedDueOutLogic = false;
-
+	boolean containsRequestAttribute = false;
+	boolean containsScopeAttribute = false;
+	
 	public abstract EspJobType getJobType();
 	
 	EspStatementObject statementObject = new EspStatementObject();

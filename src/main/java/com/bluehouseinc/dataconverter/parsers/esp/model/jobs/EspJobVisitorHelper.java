@@ -27,6 +27,7 @@ import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.impl.EspUnixJob;
 import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.impl.EspWindowsJob;
 import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.impl.EspZosJob;
 import com.bluehouseinc.dataconverter.parsers.esp.model.statements.EspEnvVarStatement;
+import com.bluehouseinc.tidal.utils.StringUtils;
 
 import io.vavr.Function2;
 
@@ -384,11 +385,15 @@ public class EspJobVisitorHelper {
 		};
 	}
 
-	Function2<String, String, Boolean> visitJob(EspSapJob job) {
+	Function2<String, String, Boolean> visitJob(final EspSapJob job) {
 		return (statementType, statementParameters) -> {
 			switch (statementType) {
 			case "ABAPNAME":
-				job.setAbapName(statementParameters);
+				if(StringUtils.isBlank(job.getAbapName())) {
+					job.setAbapName(statementParameters);
+				}else {
+					job.setMultiplePrograms(true);
+				}
 				break;
 			case "SAPUSER":
 				job.setSapUser(statementParameters);
@@ -403,7 +408,11 @@ public class EspJobVisitorHelper {
 				job.setSapJobName(statementParameters);
 				break;
 			case "VARIANT":
-				job.setVariant(statementParameters);
+				if(StringUtils.isBlank(job.getVariant())) {
+					job.setVariant(statementParameters);
+				}else {
+					job.setMultiplePrograms(true);
+				}
 				break;
 			case "STARTMODE":
 				job.setStartMode(statementParameters);

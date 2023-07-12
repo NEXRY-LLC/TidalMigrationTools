@@ -437,6 +437,11 @@ public class EspParser extends AbstractParser<EspDataModel> {
 			throw new TidalException("Unknown Job Type[" + jobType.name() + "]");
 		}
 
+		if(rawdata.contains("REQUEST")) {
+			currentJob.setContainsRequestAttribute(true);
+		}
+		
+		
 		// Go and do this visitor pattern stuff :) I rewrote this to work with my mind.
 		currentJob.processData(espJobVisitor, lines);
 
@@ -487,6 +492,10 @@ public class EspParser extends AbstractParser<EspDataModel> {
 				exj.setExternJobName(jobName);
 			}
 
+			if(rawdata.contains("SCOPE(")) {
+				parent.setContainsScopeAttribute(true);
+			}
+			
 			parent.getExternalApplicationDep().add(exj);
 			return;
 		} else {
@@ -774,6 +783,10 @@ public class EspParser extends AbstractParser<EspDataModel> {
 			in.addEspStatementObject(data.getStatementObject());
 
 			in.getTags().addAll(data.getTags());
+			
+			in.setContainsScopeAttribute(data.isContainsScopeAttribute());
+			
+			in.setContainsRequestAttribute(data.isContainsRequestAttribute());
 		}
 	}
 }
