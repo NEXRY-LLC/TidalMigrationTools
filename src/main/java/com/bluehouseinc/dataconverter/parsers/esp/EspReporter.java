@@ -10,6 +10,7 @@ import com.bluehouseinc.dataconverter.parsers.esp.reporter.EspAgentsByJobType;
 import com.bluehouseinc.dataconverter.parsers.esp.reporter.EspComplexSchedEventData;
 import com.bluehouseinc.dataconverter.parsers.esp.reporter.EspJobsWithAdvancedDelaySubLogic;
 import com.bluehouseinc.dataconverter.parsers.esp.reporter.EspJobsWithAdvancedDueOutLogic;
+import com.bluehouseinc.dataconverter.parsers.esp.reporter.EspJobsWithComplexCccchk;
 import com.bluehouseinc.dataconverter.parsers.esp.reporter.EspJobsWithIfLogic;
 import com.bluehouseinc.dataconverter.parsers.esp.reporter.EspJobsWithMultipleExitCodes;
 
@@ -26,6 +27,7 @@ public class EspReporter implements IModelReport {
 		core.add(new EspJobsWithAdvancedDueOutLogic());
 		core.add(new EspJobsWithMultipleExitCodes());
 		core.add(new EspComplexSchedEventData());
+		core.add(new EspJobsWithComplexCccchk());
 
 		return core;
 	}

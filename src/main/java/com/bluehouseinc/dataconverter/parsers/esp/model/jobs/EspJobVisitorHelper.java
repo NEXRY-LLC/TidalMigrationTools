@@ -1,11 +1,13 @@
 package com.bluehouseinc.dataconverter.parsers.esp.model.jobs;
 
+import com.bluehouseinc.dataconverter.common.utils.RegexHelper;
 import com.bluehouseinc.dataconverter.parsers.esp.model.EspDataModel;
 import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.data.EspAppEndData;
 import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.data.EspExternalApplicationData;
 import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.data.EspLIEData;
 import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.data.EspLISData;
 import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.data.EspLinkProcessData;
+import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.impl.CcCheck;
 import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.impl.EspAgentMonitorJob;
 import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.impl.EspAixJob;
 import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.impl.EspAs400Job;
@@ -28,15 +30,14 @@ import com.bluehouseinc.dataconverter.parsers.esp.model.statements.EspEnvVarStat
 
 import io.vavr.Function2;
 
-
 public class EspJobVisitorHelper {
 
 	EspDataModel datamodel;
-	
-	EspJobVisitorHelper(EspDataModel datamodel){
+
+	EspJobVisitorHelper(EspDataModel datamodel) {
 		this.datamodel = datamodel;
 	}
-	
+
 	Function2<String, String, Boolean> visitJob(EspAgentMonitorJob job) {
 		return (statementType, statementParameters) -> {
 			switch (statementType) {
@@ -231,24 +232,23 @@ public class EspJobVisitorHelper {
 	Function2<String, String, Boolean> visitJob(EspZosJob job) {
 
 		String command = datamodel.getConfigeProvider().getZosLibPath();
-		
+
 		// Per customer , any job name with a dot in it , the dot and all data to the right is not used.
 		// Display only
 		String cliname = job.getName();
-		if(cliname.contains(".")) {
+		if (cliname.contains(".")) {
 			cliname = cliname.substring(0, cliname.indexOf("."));
 		}
-		command = command+"("+cliname+")";
-		
-		
+		command = command + "(" + cliname + ")";
+
 		job.setCommandLine(command);
-		
+
 		String runtime = datamodel.getConfigeProvider().getZosLibDefaultRuntimeUser();
 		job.setUser(runtime);
-		
+
 		String agent = datamodel.getConfigeProvider().getZosLibDefaultAgent();
 		job.setAgent(agent);
-		
+
 		return (statementType, statementParameters) -> {
 
 			if (statementType.contains("ESP_RECIPIENT_") || statementType.contains("ESP_MESSAGE_") || statementType.contains("ESP_HEADER") || statementType.contains("REM_")) {
@@ -281,7 +281,7 @@ public class EspJobVisitorHelper {
 				job.setEncParam(statementParameters);
 				break;
 			case "CCCHK":
-				job.getCcchk().add(statementParameters);
+				job.getCcchks().add(extractCheck(statementParameters,job));
 				break;
 			case "ESP_SUBJECT":
 			case "ESP_BG_COLOR":
@@ -301,6 +301,49 @@ public class EspJobVisitorHelper {
 		};
 	}
 
+	private CcCheck extractCheck(String data,EspZosJob job) {
+		CcCheck check = new CcCheck();
+
+		String regexrange = "^RC\\((\\d+):(\\d+)\\).*";
+		String regexsingle = "^RC\\((\\d+)\\).*";
+
+		if (data.contains("FAIL CONTINUE")) {
+			check.setNotEquals(true);
+		}
+
+		String start = "0";
+		String end = "0";
+
+		if(RegexHelper.matchesRegexPattern(data, regexrange) | RegexHelper.matchesRegexPattern(data, regexsingle)) {
+			// One or the other. 
+
+			if (data.contains(":")) {
+				// Range data;
+				if (RegexHelper.matchesRegexPattern(data, regexrange)) {
+					 start = RegexHelper.extractNthMatch(data, regexrange, 0);
+					 end = RegexHelper.extractNthMatch(data, regexrange, 1);
+				}else {
+					job.setComplexCcCheck(true);
+				}
+			}else {
+				// Better be single
+				if (RegexHelper.matchesRegexPattern(data, regexsingle)) {
+					start = RegexHelper.extractNthMatch(data, regexsingle, 0);
+					end = start;
+				}else {
+					job.setComplexCcCheck(true);
+				}
+			}
+			
+		}else {
+			job.setComplexCcCheck(true);
+		}
+		
+		check.setStartcode(Integer.valueOf(start));
+		check.setEndcode(Integer.valueOf(end));
+		
+		return check;
+	}
 	// EspSAPBwpcJob
 
 	Function2<String, String, Boolean> visitJob(EspSAPBwpcJob job) {
@@ -373,10 +416,10 @@ public class EspJobVisitorHelper {
 				break;
 			case "PRINTDEPARTMENT":
 				job.setPrintDept(statementParameters);
-				break;	
+				break;
 			case "EXPIRATION":
 				job.setPrintExpire(Integer.valueOf(statementParameters));
-				break;	
+				break;
 			case "LINES":
 				job.setPrintRows(Integer.valueOf(statementParameters));
 				break;
@@ -385,7 +428,7 @@ public class EspJobVisitorHelper {
 				break;
 			case "PRINTSPOOLNAME":
 				job.setPrintSpoolName(statementParameters);
-				break;	
+				break;
 			default:
 				try {
 					job.getOptionalStatements().putIfAbsent(EspSapJob.EspSapJobOptionalStatement.valueOf(statementType), statementParameters);
@@ -607,7 +650,7 @@ public class EspJobVisitorHelper {
 
 		};
 	}
-	
+
 	Function2<String, String, Boolean> visitJob(EspTaskProcessJob job) {
 		return (statementType, statementParameters) -> {
 			switch (statementType) {

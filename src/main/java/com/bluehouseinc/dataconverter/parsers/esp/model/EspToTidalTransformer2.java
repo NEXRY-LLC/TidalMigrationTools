@@ -23,6 +23,7 @@ import com.bluehouseinc.dataconverter.model.impl.CsvOSJob;
 import com.bluehouseinc.dataconverter.model.impl.CsvResource;
 import com.bluehouseinc.dataconverter.model.impl.CsvRuntimeUser;
 import com.bluehouseinc.dataconverter.model.impl.CsvSAPJob;
+import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.impl.CcCheck;
 import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.impl.EspAgentMonitorJob;
 import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.impl.EspAs400Job;
 import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.impl.EspFileTriggerJob;
@@ -204,25 +205,33 @@ public class EspToTidalTransformer2 implements ITransformer<List<EspAbstractJob>
 		}
 		
 		
-		String extract = "RC\\((\\S+)\\).*";
+		//String extract = "RC\\((\\S+)\\).*";
 		
-		if(!in.getCcchk().isEmpty()) {
-		 List<String>	data = in.getCcchk();
+		if(!in.getCcchks().isEmpty()) {
+		 List<CcCheck>	data = in.getCcchks();
 			if(data.size()==1) {
+				CcCheck check = data.get(0);
 				// Single can handle
-				String range = RegexHelper.extractFirstMatch(in.getCcchk().get(0), extract);
+				//String range = RegexHelper.extractFirstMatch(in.getCcchk().get(0), extract);
 				
 				CsvJobExitCode exitcode = new CsvJobExitCode();
 
-				if(range.contains(":")) {
-				exitcode.setExitStart(Integer.valueOf(range.split(":")[0]));
-				exitcode.setExitEnd(Integer.valueOf(range.split(":")[1]));
-				
+//				if(range.contains(":")) {
+//				exitcode.setExitStart(Integer.valueOf(range.split(":")[0]));
+//				exitcode.setExitEnd(Integer.valueOf(range.split(":")[1]));
+//				
+//				}else {
+//					exitcode.setExitStart(Integer.valueOf(range));
+//				}
+//				
+				if(check.isNotEquals()) {
+					exitcode.setExitLogic(ExitLogic.NE);
 				}else {
-					exitcode.setExitStart(Integer.valueOf(range));
+					exitcode.setExitLogic(ExitLogic.EQ);
 				}
 				
-				exitcode.setExitLogic(ExitLogic.EQ);
+				exitcode.setExitStart(check.getStartcode());		
+				exitcode.setExitEnd(check.getEndcode());
 				
 				out.setExitcode(exitcode);
 				
@@ -451,21 +460,28 @@ public class EspToTidalTransformer2 implements ITransformer<List<EspAbstractJob>
 			this.datamodel.addRunTimeUserToJobOrGroup(out, new CsvRuntimeUser(rtu));
 		}
 
-		String delaysub = in.getDelaySubmission();
+		// earlysub is the same as delaysub
+		//RFCHKU00_CHECK_NUMBER
+		String earlysub = 	in.getEarlySubmission();
+		String startime = in.getDelaySubmission();
 
-		if (!StringUtils.isBlank(delaysub)) {
-			delaysub = delaysub.replace(".", "").replace(":", ""); // esp uses a dot ?? This should be 0700 format
+		if(StringUtils.isBlank(startime)) {
+			startime = earlysub;
+		}
+		
+		if (!StringUtils.isBlank(startime)) {
+			startime = startime.replace(".", "").replace(":", ""); // esp uses a dot ?? This should be 0700 format
 			// only.
 
-			if (NumberUtils.isParsable(delaysub)) {
-				out.setStartTime(delaysub); // Delay Sub is ESP way of saying dont run until this
+			if (NumberUtils.isParsable(startime)) {
+				out.setStartTime(startime); // Delay Sub is ESP way of saying dont run until this
 			} else {
 				// Not parsing likely more than just a time.
 				// E.G DELAYSUB 6.30 TODAY PLUS 1 WORKDAY vs. DELAYSUB 6.30
 				in.setContainsAdvancedDelaySubLogic(true);
-				String stmsg = out.getNotes() + "\nDelaySubmission: " + delaysub;
+				String stmsg = out.getNotes() + "\nDelaySubmission: " + startime;
 				out.setNotes(stmsg);
-				log.error("doHandleGenericData Incorrect Start Time [" + delaysub + "] for Job: " + in.getFullPath());
+				log.error("doHandleGenericData Incorrect Start Time [" + startime + "] for Job: " + in.getFullPath());
 			}
 
 		}

@@ -59,8 +59,8 @@ public class SAPJobTransformer implements ITransformer<CsvSAPJob, ServiceJob> {
 
 			
 			String plist = StringUtils.getOr(in.getPlist(), "");
-			String programName = StringUtils.getOr(in.getProgramName(), "BLUEHOUSE-PROGRAMNAME");
-			String variant = StringUtils.getOr(in.getVariant(), "BLUEHOUSE-VARIANT");
+			String programName = StringUtils.getOr(in.getProgramName(), "");
+			String variant = StringUtils.getOr(in.getVariant(), "");
 			String recipient = StringUtils.getOr(in.getPrintRecipient(), "");
 			String departement = StringUtils.getOr(in.getPrintDept(), "");
 			String expire = StringUtils.getOr(in.getPrintExpire(), "");

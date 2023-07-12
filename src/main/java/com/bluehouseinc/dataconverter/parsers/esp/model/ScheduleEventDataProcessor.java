@@ -68,7 +68,7 @@ public class ScheduleEventDataProcessor {
 				}
 
 				// Fix our newline
-				line = EspFileReaderUtils.readLineMerged(reader, line, '-');
+				line = EspFileReaderUtils.readLineMerged(reader, line, '-', true);
 
 				if (isEventPattern(line)) {
 

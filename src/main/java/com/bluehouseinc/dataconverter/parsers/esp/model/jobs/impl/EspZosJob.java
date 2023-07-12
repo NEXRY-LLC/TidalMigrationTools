@@ -19,6 +19,7 @@ public class EspZosJob extends EspAbstractJob {
 	boolean isHold; // contains HOLD keyword as part of JOB Statement
 	boolean isTask; // contains TASK keyword which indicates that JOB is a task
 	boolean isMultipleExitCodes;
+	boolean isComplexCcCheck;
 	
 	String abandon;
 	List<String> echos = new ArrayList<>();
@@ -27,7 +28,7 @@ public class EspZosJob extends EspAbstractJob {
 	String member;
 	String send;
 	String deQueue;
-	List<String> ccchk = new ArrayList<>(); // Specify the action taken if a job, step, procstep or program produces a specified condition code.
+	List<CcCheck> ccchks = new ArrayList<>(); // Specify the action taken if a job, step, procstep or program produces a specified condition code.
 
 	String commandLine;
 	
@@ -45,4 +46,5 @@ public class EspZosJob extends EspAbstractJob {
 	public EspJobType getJobType() {
 		return EspJobType.ZOS;
 	}
+	
 }

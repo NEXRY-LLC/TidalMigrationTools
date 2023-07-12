@@ -54,7 +54,7 @@ public class MailListDataProcessor {
 				}
 
 				// Fix our newline
-				line = EspFileReaderUtils.readLineMerged(reader, line, '-');
+				line = EspFileReaderUtils.readLineMerged(reader, line, '-', true);
 
 				if (isMailDataPattern(line)) {
 					String mailboxname = RegexHelper.extractFirstMatch(line, MAILBOX_PATTERN);

@@ -33,16 +33,16 @@ public class TivoliScheduleProcessor {
 
 	private final static String SCHED_PATTERN = "^SCHEDULE (\\w+)#(\\w+)";
 	private final static String END_PATTERN = "END";
-	private final static String JOB_DEP_PATTERN = "(\\w+)#(\\w+)";
+	private final static String JOB_EXTERN_DEP_PATTERN = "(\\w+)#(\\w+)";
 
 	Map<String, List<SchedualData>> data = new HashMap<>();
 
 	TivoliJobProcessor jobProcessor;
-	
-	public TivoliScheduleProcessor(TivoliJobProcessor job){
+
+	public TivoliScheduleProcessor(TivoliJobProcessor job) {
 		this.jobProcessor = job;
 	}
-	
+
 	public void doProcessFile(File datafile) {
 
 		BufferedReader reader = null;
@@ -107,16 +107,16 @@ public class TivoliScheduleProcessor {
 
 		List<String> lines = EspFileReaderUtils.parseJobLines(reader, END_PATTERN, null);
 
-		boolean isdepdata = false;
-		List<String> depdata = new ArrayList<>();
+		boolean isworkflowdata = false;
+		List<String> workflowdata = new ArrayList<>();
 
 		for (String line : lines) {
 
 			if (line.startsWith(":")) { // ALL data from this point is dep data.
-				isdepdata = true;
+				isworkflowdata = true;
 				continue;
-			} else if (isdepdata) {
-				depdata.add(line);
+			} else if (isworkflowdata) {
+				workflowdata.add(line);
 				continue;
 			} else {
 
@@ -128,6 +128,7 @@ public class TivoliScheduleProcessor {
 					line.getBytes();
 
 				}
+				
 				if (data.length >= 2) {
 					value = data[1].trim();
 				}
@@ -137,6 +138,7 @@ public class TivoliScheduleProcessor {
 					doSetNeedsData(value, schedule);
 					break;
 				case "ON":
+					// REQUEST is on demand
 					doSetOnData(value, schedule);
 					break;
 				case "AT":
@@ -146,17 +148,7 @@ public class TivoliScheduleProcessor {
 					// Not needed
 					break;
 				case "FOLLOWS":
-					JobFollows jobfollows = new JobFollows();
-					if (RegexHelper.matchesRegexPattern(JOB_DEP_PATTERN, value)) {
-						String ingroup = RegexHelper.extractNthMatch(value, JOB_DEP_PATTERN, 0);
-						String followthisjob = RegexHelper.extractNthMatch(value, JOB_DEP_PATTERN, 1);
-						jobfollows.setInGroup(ingroup);
-						jobfollows.setJobToFollow(followthisjob);
-					} else {
-						jobfollows.setJobToFollow(value);
-						jobfollows.setInGroup(schedule.getGroupName());
-					}
-					schedule.getFollows().add(jobfollows);
+					schedule.getFollows().add(getFollowsFromData(value));
 					break;
 				case "DESCRIPTION":
 					if (StringUtils.isBlank(schedule.getDescription())) {
@@ -194,8 +186,8 @@ public class TivoliScheduleProcessor {
 			}
 		}
 
-		if (!depdata.isEmpty()) {
-			doProcessDepData(depdata, schedule);
+		if (!workflowdata.isEmpty()) {
+			doProcessWorkflowData(workflowdata, schedule);
 		}
 
 		if (this.data.containsKey(groupname)) {
@@ -285,20 +277,21 @@ public class TivoliScheduleProcessor {
 		}
 	}
 
-	public void doProcessDepData(List<String> objdata, SchedualData obj) {
+	public void doProcessWorkflowData(List<String> objdata, SchedualData obj) {
 
 		JobScheduleDetail jobdetail = null;
 
 		for (String line : objdata) {
 			line = line.trim();
-			if (RegexHelper.matchesRegexPattern(line, JOB_DEP_PATTERN)) {
+			if (RegexHelper.matchesRegexPattern(line, JOB_EXTERN_DEP_PATTERN)) {
 
 				jobdetail = new JobScheduleDetail();
-				String groupname = RegexHelper.extractNthMatch(line, JOB_DEP_PATTERN, 0);
-				String jobname = RegexHelper.extractNthMatch(line, JOB_DEP_PATTERN, 1);
+				String groupname = RegexHelper.extractNthMatch(line, JOB_EXTERN_DEP_PATTERN, 0);
+				String jobname = RegexHelper.extractNthMatch(line, JOB_EXTERN_DEP_PATTERN, 1);
 				jobdetail.setGroupName(groupname);
 				jobdetail.setJobName(jobname);
 
+				
 				obj.getJobScheduleDetail().add(jobdetail);
 				// AMFINAN1#LAWSTAMP
 				// AMFINAN1#BNS00A
@@ -319,18 +312,7 @@ public class TivoliScheduleProcessor {
 
 				switch (element) {
 				case "FOLLOWS":
-					JobFollows jobfollows = new JobFollows();
-					if (RegexHelper.matchesRegexPattern(JOB_DEP_PATTERN, value)) {
-						String ingroup = RegexHelper.extractNthMatch(value, JOB_DEP_PATTERN, 0);
-						String followthisjob = RegexHelper.extractNthMatch(value, JOB_DEP_PATTERN, 1);
-						jobfollows.setInGroup(ingroup);
-						jobfollows.setJobToFollow(followthisjob);
-					} else {
-						jobfollows.setJobToFollow(value);
-						jobfollows.setInGroup(obj.getGroupName());
-					}
-
-					jobdetail.getFollows().add(jobfollows);
+					jobdetail.getFollows().add(getFollowsFromData(value));
 					break;
 				case "PRIORITY":
 					jobdetail.setPriority(value);
@@ -360,7 +342,7 @@ public class TivoliScheduleProcessor {
 					break;
 				case "OPENS":
 					if (value.contains("#")) {
-						jobdetail.setOpensFile(value.split("#",2)[1]);
+						jobdetail.setOpensFile(value.split("#", 2)[1]);
 					} else {
 						jobdetail.setOpensFile(value);
 					}
@@ -371,6 +353,44 @@ public class TivoliScheduleProcessor {
 				}
 			}
 		}
+	}
+
+	// AGENT#WORKFLOW.JOBNAME
+	// AGENT#WORKFLOW.@ // Group Level
+	// AGENT#WORKFLOW.JOBNAME PREVIOUS = Yesterday Schedule
+	/**
+	 * 
+	 * @param value
+	 * @return
+	 */
+	public JobFollows getFollowsFromData(String value) {
+
+		if (StringUtils.isBlank(value)) {
+			return null;
+		}
+
+		JobFollows jobfollows = new JobFollows();
+
+		// Space is important , could have done an ends with too.
+		if (value.endsWith(" PREVIOUS")) {
+			jobfollows.setPreviousDay(true);
+			value = value.replace(" PREVIOUS", "");
+		}
+
+		if (RegexHelper.matchesRegexPattern(JOB_EXTERN_DEP_PATTERN, value)) {
+			String ingroup = RegexHelper.extractNthMatch(value, JOB_EXTERN_DEP_PATTERN, 0);
+			String followthisjob = RegexHelper.extractNthMatch(value, JOB_EXTERN_DEP_PATTERN, 1);
+			jobfollows.setInGroup(ingroup);
+			if (followthisjob.contains("@")) {
+				jobfollows.setDependsOnGroup(true);
+			} else {
+				jobfollows.setJobToFollow(followthisjob);
+			}
+		} else {
+			jobfollows.setJobToFollow(value);
+		}
+
+		return jobfollows;
 	}
 
 	public SchedualData getSchedualDataByGroupName(String group, String name) {

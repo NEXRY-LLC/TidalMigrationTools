@@ -163,8 +163,8 @@ public class EspParser extends AbstractParser<EspDataModel> {
 				break;
 			}
 
-			line = EspFileReaderUtils.readLineMerged(reader, line, '-');
-			line = EspFileReaderUtils.readLineMerged(reader, line, '+');
+			line = EspFileReaderUtils.readLineMerged(reader, line, '-', true);
+			line = EspFileReaderUtils.readLineMerged(reader, line, '+', false);
 
 			if (skipLine(line)) {
 				continue;
@@ -255,8 +255,8 @@ public class EspParser extends AbstractParser<EspDataModel> {
 						line.toCharArray();
 					}
 
-					line = EspFileReaderUtils.readLineMerged(reader, line, '-');
-					line = EspFileReaderUtils.readLineMerged(reader, line, '+');
+					line = EspFileReaderUtils.readLineMerged(reader, line, '-', true);
+					line = EspFileReaderUtils.readLineMerged(reader, line, '+' , false);
 
 					if (skipLine(line)) {
 						continue;

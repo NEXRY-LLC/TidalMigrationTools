@@ -3,7 +3,6 @@ package com.bluehouseinc.dataconverter.parsers.tivoli.data.job;
 import com.bluehouseinc.dataconverter.model.BaseJobOrGroupObject;
 import com.bluehouseinc.dataconverter.parsers.tivoli.data.cpu.CpuData;
 import com.bluehouseinc.dataconverter.parsers.tivoli.data.resource.ResourceData;
-import com.bluehouseinc.dataconverter.parsers.tivoli.data.schedule.SchedualData;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;

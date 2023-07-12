@@ -34,14 +34,18 @@ public abstract class EspFileReaderUtils {
 	 * @return
 	 * @throws IOException
 	 */
-	public static String readLineMerged(BufferedReader reader, String line, Character newline) throws IOException {
+	public static String readLineMerged(BufferedReader reader, String line, Character newline, boolean spaceonmerge) throws IOException {
 
 		if (newline != null) { // Ignore if null
 			while (line.endsWith(newline.toString())) {
 				String nextLine = readLineTrimmed(reader);
 				String substringline = line.substring(0, line.length() - 1);
 				String nextlinedata = nextLine.trim();
-				line = String.join(" ", substringline, nextlinedata);
+				String joinline = "";
+				if(spaceonmerge) {
+					joinline = " ";
+				}
+				line = String.join(joinline, substringline, nextlinedata);
 			}
 
 		}
@@ -49,7 +53,7 @@ public abstract class EspFileReaderUtils {
 	}
 
 	public static List<String> parseJobLines(BufferedReader reader, String endofdata, Character newline) throws IOException {
-		return parseJobLines(reader, endofdata, newline, true);
+		return parseJobLines(reader, endofdata, newline, true, true);
 	}
 
 	/**
@@ -61,7 +65,7 @@ public abstract class EspFileReaderUtils {
 	 * @return List of lines
 	 * @throws IOException
 	 */
-	public static List<String> parseJobLines(BufferedReader reader, String endofdata, Character newline, boolean checkskip) throws IOException {
+	public static List<String> parseJobLines(BufferedReader reader, String endofdata, Character newline, boolean checkskip, boolean addspace) throws IOException {
 		List<String> lines = new ArrayList<>();
 		String line;
 		while (!Objects.equals(line = readLineTrimmed(reader), endofdata)) {
@@ -72,7 +76,7 @@ public abstract class EspFileReaderUtils {
 				}
 			}
 			
-			line = readLineMerged(reader, line, newline);
+			line = readLineMerged(reader, line, newline,addspace);
 			lines.add(line.trim());
 		}
 		return lines;

@@ -1,7 +1,6 @@
 package com.bluehouseinc.dataconverter.model;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -14,7 +13,6 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-import lombok.ToString.Include;
 
 @ToString(onlyExplicitlyIncluded = true)
 @Data

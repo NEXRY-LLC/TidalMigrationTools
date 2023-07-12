@@ -109,7 +109,7 @@ public class TivoliJobProcessor {
 		job.setResourceData(resdata);
 
 
-		List<String> lines = EspFileReaderUtils.parseJobLines(reader, "", null, false);
+		List<String> lines = EspFileReaderUtils.parseJobLines(reader, "", null, false, true);
 
 		for (String dataline : lines) {
 
@@ -139,6 +139,7 @@ public class TivoliJobProcessor {
 				job.setRecovery(value);
 				break;
 			case "RCCONDSUCC":
+				// Use this to set exit codes 
 				job.setReturnCodeSucess(value);
 				break;
 			case "SCRIPTNAME":

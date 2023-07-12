@@ -1,6 +1,7 @@
 package com.bluehouseinc.dataconverter.parsers.tivoli.data.schedule.job;
 
-import java.util.ArrayList;
+
+import java.util.LinkedList;
 import java.util.List;
 
 import com.bluehouseinc.dataconverter.parsers.tivoli.data.schedule.JobFollows;
@@ -10,7 +11,7 @@ import lombok.Data;
 
 @Data
 public class JobScheduleDetail {
-	List<JobFollows> follows = new ArrayList<>();
+	List<JobFollows> follows = new LinkedList<>();
 	
 	String jobName;
 	String groupName;

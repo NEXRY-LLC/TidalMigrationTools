@@ -180,6 +180,8 @@ public class EspJobVisitorImpl implements EspJobVisitor {
 
 	}
 
+
+	
 	// Function2 is dynamic function that accepts 2 params and returns a boolean value
 	// whether a second invoked switch hit a statement or not
 	private void visitCommon(EspAbstractJob job, List<String> lines, Function2<String, String, Boolean> lambdaFunction) {

@@ -6,5 +6,7 @@ import lombok.Data;
 public class JobFollows {
 	String inGroup;
 	String jobToFollow;
+	boolean previousDay = false;
+	boolean dependsOnGroup = false;
 	
 }
