@@ -27,7 +27,10 @@ public class CsvOSJob extends BaseCsvJobObject {
 
 	@CsvRecurse
 	CsvJobExitCode exitcode;
-	
+
+	@CsvBindByName
+	Boolean sourceProfile = false;
+
 	@Override
 	public JobType getType() {
 		return JobType.OSJOB;

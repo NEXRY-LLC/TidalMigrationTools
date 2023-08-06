@@ -12,15 +12,23 @@ import org.springframework.stereotype.Component;
 
 import com.bluehouseinc.dataconverter.common.utils.RegexHelper;
 import com.bluehouseinc.dataconverter.parsers.esp.model.util.EspFileReaderUtils;
+import com.bluehouseinc.dataconverter.parsers.tivoli.data.schedule.TivoliScheduleProcessor;
 import com.bluehouseinc.tidal.api.exceptions.TidalException;
 
+import lombok.AccessLevel;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 @Data
 @Component
 public class TivoliResourceProcessor {
-	private final static String RES_PATTERN = "^(\\w+)#(\\w+)(.*)";
+	@Setter(value = AccessLevel.PRIVATE)
+	@Getter(value = AccessLevel.PRIVATE)
+	private  static String RES_PATTERN = "^(\\w+)#(\\w+)(.*)";
 
+	@Setter(value = AccessLevel.PRIVATE)
+	@Getter(value = AccessLevel.PRIVATE)
 	Map<String, List<ResourceData>> data = new HashMap<>();
 
 	public void doProcessFile(File datafile) {
@@ -87,7 +95,7 @@ public class TivoliResourceProcessor {
 		return RegexHelper.matchesRegexPattern(line, RES_PATTERN);
 	}
 
-	public ResourceData getResourceByGroupName(String group, String name) {
+	public ResourceData getResourceInGroupByName(String group, String name) {
 		
 		List<ResourceData> resdata = this.data.get(group);
 		

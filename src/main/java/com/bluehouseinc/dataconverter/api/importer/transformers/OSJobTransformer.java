@@ -74,6 +74,14 @@ public class OSJobTransformer implements ITransformer<CsvOSJob, OSJob> {
 				this.base.setNormalexittorange(end);
 			}
 		}
+		
+		
+		
+		if(in.getSourceProfile()) {
+			this.base.setUnixprofile(8192);
+			//this.base.setMode("8192");
+		}
+		
 		return this.base;
 	}
 

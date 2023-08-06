@@ -13,9 +13,9 @@ import org.springframework.stereotype.Component;
 
 import com.bluehouseinc.dataconverter.common.utils.RegexHelper;
 import com.bluehouseinc.dataconverter.parsers.esp.model.util.EspFileReaderUtils;
+import com.bluehouseinc.dataconverter.parsers.tivoli.data.job.TivoliJobObject;
 import com.bluehouseinc.dataconverter.parsers.tivoli.data.job.TivoliJobProcessor;
-import com.bluehouseinc.dataconverter.parsers.tivoli.data.resource.ResourceData;
-import com.bluehouseinc.dataconverter.parsers.tivoli.data.schedule.job.JobScheduleDetail;
+import com.bluehouseinc.dataconverter.parsers.tivoli.data.schedule.job.JobScheduleData;
 import com.bluehouseinc.dataconverter.parsers.tivoli.data.schedule.on.RunOn;
 import com.bluehouseinc.dataconverter.parsers.tivoli.data.schedule.on.RunOnRequest;
 import com.bluehouseinc.dataconverter.parsers.tivoli.data.schedule.on.RunOnRunCycle;
@@ -23,7 +23,10 @@ import com.bluehouseinc.dataconverter.parsers.tivoli.data.schedule.on.RunOnType;
 import com.bluehouseinc.tidal.api.exceptions.TidalException;
 import com.bluehouseinc.tidal.utils.StringUtils;
 
+import lombok.AccessLevel;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
 
 @Log4j2
@@ -31,11 +34,19 @@ import lombok.extern.log4j.Log4j2;
 @Component
 public class TivoliScheduleProcessor {
 
-	private final static String SCHED_PATTERN = "^SCHEDULE (\\w+)#(\\w+)";
-	private final static String END_PATTERN = "END";
-	private final static String JOB_EXTERN_DEP_PATTERN = "(\\w+)#(\\w+)";
+	@Setter(value = AccessLevel.PRIVATE)
+	@Getter(value = AccessLevel.PRIVATE)
+	private static String SCHED_PATTERN = "^SCHEDULE (\\w+)#(\\w+)";
 
-	Map<String, List<SchedualData>> data = new HashMap<>();
+	@Setter(value = AccessLevel.PRIVATE)
+	@Getter(value = AccessLevel.PRIVATE)
+	private static String END_PATTERN = "END";
+
+	@Setter(value = AccessLevel.PRIVATE)
+	@Getter(value = AccessLevel.PRIVATE)
+	private static String JOB_EXTERN_DEP_PATTERN = "^(\\w+)#(\\w+)";
+
+	Map<String, List<SchedualData>> scheduleData = new HashMap<>();
 
 	TivoliJobProcessor jobProcessor;
 
@@ -103,7 +114,7 @@ public class TivoliScheduleProcessor {
 		SchedualData schedule = new SchedualData();
 
 		schedule.setGroupName(groupname);
-		schedule.setName(workflowname);
+		schedule.setWorkflowName(workflowname);
 
 		List<String> lines = EspFileReaderUtils.parseJobLines(reader, END_PATTERN, null);
 
@@ -128,14 +139,14 @@ public class TivoliScheduleProcessor {
 					line.getBytes();
 
 				}
-				
+
 				if (data.length >= 2) {
 					value = data[1].trim();
 				}
 
 				switch (element) {
 				case "NEEDS":
-					doSetNeedsData(value, schedule);
+					schedule.getNeeds().add(getNeedsData(value));
 					break;
 				case "ON":
 					// REQUEST is on demand
@@ -190,16 +201,16 @@ public class TivoliScheduleProcessor {
 			doProcessWorkflowData(workflowdata, schedule);
 		}
 
-		if (this.data.containsKey(groupname)) {
-			this.data.get(groupname).add(schedule);
+		if (this.scheduleData.containsKey(groupname)) {
+			this.scheduleData.get(groupname).add(schedule);
 		} else {
 			List<SchedualData> schedlist = new ArrayList<>();
 			schedlist.add(schedule);
-			this.data.put(groupname, schedlist);
+			this.scheduleData.put(groupname, schedlist);
 		}
 	}
 
-	public void doSetNeedsData(String data, SchedualData obj) {
+	private NeedsResource getNeedsData(String data) {
 		// NEEDS 1 AMFINAN1#BONUS2DF
 
 		NeedsResource res = new NeedsResource();
@@ -217,14 +228,14 @@ public class TivoliScheduleProcessor {
 		res.setName(resourcename);
 		res.setGroupName(groupname);
 
-		obj.getNeeds().add(res);
+		return res;
 		// Expect number and then
 		// Group and name of resource
 		// AMFINAN1#BONUS2DF;
 
 	}
 
-	public void doSetOnData(String data, SchedualData obj) {
+	private void doSetOnData(String data, SchedualData obj) {
 		// ON RUNCYCLE APTMON DESCRIPTION "10th of Month" "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=10"
 		// ON RUNCYCLE CALENDAR1 LN4THWD
 		// ON RUNCYCLE RULE1 "FREQ=WEEKLY;BYDAY=SA"
@@ -277,22 +288,27 @@ public class TivoliScheduleProcessor {
 		}
 	}
 
-	public void doProcessWorkflowData(List<String> objdata, SchedualData obj) {
+	private void doProcessWorkflowData(List<String> objdata, SchedualData obj) {
 
-		JobScheduleDetail jobdetail = null;
+		JobScheduleData jobdetail = null;
 
 		for (String line : objdata) {
 			line = line.trim();
 			if (RegexHelper.matchesRegexPattern(line, JOB_EXTERN_DEP_PATTERN)) {
 
-				jobdetail = new JobScheduleDetail();
+				jobdetail = new JobScheduleData();
 				String groupname = RegexHelper.extractNthMatch(line, JOB_EXTERN_DEP_PATTERN, 0);
 				String jobname = RegexHelper.extractNthMatch(line, JOB_EXTERN_DEP_PATTERN, 1);
-				jobdetail.setGroupName(groupname);
-				jobdetail.setJobName(jobname);
 
-				
-				obj.getJobScheduleDetail().add(jobdetail);
+				TivoliJobObject job = getJobProcessor().getJobInGroupByName(groupname, jobname);
+
+				if (job == null) {
+					log.info("ERROR in Schedual Data, Job {} is missing in group {}", jobname, groupname);
+				} else {
+					jobdetail.setJob(job);
+					jobdetail.setGroupName(groupname);
+					obj.getJobScheduleData().add(jobdetail);
+				}
 				// AMFINAN1#LAWSTAMP
 				// AMFINAN1#BNS00A
 				// FOLLOWS LAWSTAMP
@@ -322,17 +338,17 @@ public class TivoliScheduleProcessor {
 					if (value.contains("UNTIL")) {
 						String tmpat = value.substring(0, value.indexOf("UNTIL"));
 						String tmpuntil = value.substring(value.indexOf("UNTIL") + 6, value.length());
-						jobdetail.setAtTime(tmpat);
-						jobdetail.setUntilTime(tmpuntil);
+						jobdetail.setAtTime(new JobRunTime(tmpat));
+						jobdetail.setUntilTime(new JobRunTime(tmpuntil));
 					} else {
-						jobdetail.setAtTime(value);
+						jobdetail.setAtTime(new JobRunTime(value));
 					}
 					break;
 				case "EVERY":
-					jobdetail.setRerunEvery(value);
+					jobdetail.setRerunEvery(Integer.valueOf(value));
 					break;
 				case "UNTIL":
-					jobdetail.setUntilTime(value);
+					jobdetail.setUntilTime(new JobRunTime(value));
 					break;
 				case "DEADLINE":
 					jobdetail.setDeadline(new JobRunTime(value));
@@ -347,6 +363,9 @@ public class TivoliScheduleProcessor {
 						jobdetail.setOpensFile(value);
 					}
 				case "PROMPT":
+					break;
+				case "NEEDS":
+					jobdetail.getNeeds().add(getNeedsData(value));
 					break;
 				default:
 					log.info("Unknown SCHED Data Element: " + line);
@@ -363,7 +382,7 @@ public class TivoliScheduleProcessor {
 	 * @param value
 	 * @return
 	 */
-	public JobFollows getFollowsFromData(String value) {
+	private JobFollows getFollowsFromData(String value) {
 
 		if (StringUtils.isBlank(value)) {
 			return null;
@@ -393,13 +412,17 @@ public class TivoliScheduleProcessor {
 		return jobfollows;
 	}
 
-	public SchedualData getSchedualDataByGroupName(String group, String name) {
+	public List<SchedualData> getSchedualDataByGroupName(String group) {
+		return this.scheduleData.get(group);
+	}
 
-		List<SchedualData> resdata = this.data.get(group);
+	public SchedualData getSchedualDataInGroupByName(String group, String name) {
+
+		List<SchedualData> resdata = getSchedualDataByGroupName(group);
 
 		if (resdata == null) {
 			return null;
 		}
-		return resdata.stream().filter(f -> f.getName().trim().equalsIgnoreCase(name.trim())).findFirst().orElse(null);
+		return resdata.stream().filter(f -> f.getWorkflowName().trim().equalsIgnoreCase(name.trim())).findFirst().orElse(null);
 	}
 }

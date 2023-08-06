@@ -1,10 +1,9 @@
 package com.bluehouseinc.dataconverter.parsers.tivoli.data.schedule;
 
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
-import com.bluehouseinc.dataconverter.parsers.tivoli.data.schedule.job.JobScheduleDetail;
+import com.bluehouseinc.dataconverter.parsers.tivoli.data.schedule.job.JobScheduleData;
 import com.bluehouseinc.dataconverter.parsers.tivoli.data.schedule.on.RunOn;
 
 import lombok.Data;
@@ -15,7 +14,7 @@ public class SchedualData {
 	
 	private String description;
 	private String groupName;
-	private String name;
+	private String workflowName;
 	
 	//ON RUNCYCLE RULE1 "FREQ=WEEKLY;BYDAY=TH"
 	//ON REQUEST
@@ -34,7 +33,7 @@ public class SchedualData {
 	//FOLLOWS AMFINAN1#OBDLYLAW.BSTRTLL 
 	private List<JobFollows> follows;
 	
-	private List<JobScheduleDetail> jobScheduleDetail;
+	private List<JobScheduleData> jobScheduleData;
 	
 	private List<String> filedeps;
 	
@@ -42,7 +41,7 @@ public class SchedualData {
 		this.needs = new LinkedList<>();
 		this.runOn = new LinkedList<>();
 		this.follows = new LinkedList<>();
-		this.jobScheduleDetail = new LinkedList<>();
+		this.jobScheduleData = new LinkedList<>();
 		this.filedeps = new LinkedList<>();
 	}
 }

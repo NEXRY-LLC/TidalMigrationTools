@@ -11,7 +11,7 @@
 	</parent>
 	<groupId>com.bluehouseinc</groupId>
 	<artifactId>TidalMigrationTools</artifactId>
-	<version>1.0.32</version>
+	<version>1.0.33</version>
 	<name>Tidal Scheduler Migration</name>
 	<description>Converting data and importing into TIDAL system</description>
 	<properties>

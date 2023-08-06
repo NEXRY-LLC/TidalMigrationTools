@@ -3,6 +3,8 @@ package com.bluehouseinc.dataconverter.parsers.tivoli.data.job;
 import com.bluehouseinc.dataconverter.model.BaseJobOrGroupObject;
 import com.bluehouseinc.dataconverter.parsers.tivoli.data.cpu.CpuData;
 import com.bluehouseinc.dataconverter.parsers.tivoli.data.resource.ResourceData;
+import com.bluehouseinc.dataconverter.parsers.tivoli.data.schedule.SchedualData;
+import com.bluehouseinc.dataconverter.parsers.tivoli.data.schedule.job.JobScheduleData;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -14,7 +16,6 @@ public class TivoliJobObject extends BaseJobOrGroupObject {
 	
 	private CpuData cpuData;
 	private ResourceData resourceData;
-	
 	private String doCommand;
 	private String streamLogon;
 	private String description;
@@ -24,6 +25,15 @@ public class TivoliJobObject extends BaseJobOrGroupObject {
 	private String scriptName;
 	private String afterJob;
 	private String abendPrompt;
+	
+	/*
+	 * This object represents the tivoli schedule details in the schedule file. AKA everyting before the defining 
+	 * workflow that contains all our job schedule details. 
+	 * 
+	 * Logically , a group will have schedule data and jobs job schedule detail
+	 */
+	private SchedualData schedualData; 
+	private JobScheduleData jobScheduleData;
 	
 	@Override
 	public boolean isGroup() {

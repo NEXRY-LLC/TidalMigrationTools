@@ -5,8 +5,9 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Objects;
+import java.util.Map;
 
 import org.springframework.stereotype.Component;
 
@@ -19,17 +20,29 @@ import com.bluehouseinc.dataconverter.parsers.tivoli.data.resource.ResourceData;
 import com.bluehouseinc.dataconverter.parsers.tivoli.data.resource.TivoliResourceProcessor;
 import com.bluehouseinc.tidal.api.exceptions.TidalException;
 
+import lombok.AccessLevel;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 @Data
 @Component
 public class TivoliJobProcessor {
 
+	@Setter(value = AccessLevel.PRIVATE)
+	@Getter(value = AccessLevel.PRIVATE)
 	private String JOB_LINE_PATTERN = "^(\\w+)#(\\w+)";
 
-	List<TivoliJobObject> data = new ArrayList<>();;
+	@Setter(value = AccessLevel.PRIVATE)
+	@Getter(value = AccessLevel.PRIVATE)
+	Map<String, List<TivoliJobObject>> jobData = new HashMap<>();
 
+	@Setter(value = AccessLevel.PRIVATE)
+	@Getter(value = AccessLevel.PRIVATE)
 	TivoliCPUProcessor cpuProcessor;
+	
+	@Setter(value = AccessLevel.PRIVATE)
+	@Getter(value = AccessLevel.PRIVATE)
 	TivoliResourceProcessor resProcessor;
 
 	public TivoliJobProcessor(TivoliCPUProcessor cpu, TivoliResourceProcessor res) {
@@ -50,8 +63,6 @@ public class TivoliJobProcessor {
 
 			String line;
 
-			TivoliJobObject currentGroup = null;
-
 			while ((line = EspFileReaderUtils.readLineTrimmed(reader)) != null) {
 
 				line.trim();
@@ -67,16 +78,7 @@ public class TivoliJobProcessor {
 
 					CpuData cpu = cpuProcessor.getCPUByName(groupName);
 
-					if (currentGroup == null || !Objects.equals(groupName, currentGroup.getName())) {
-						currentGroup = new TivoliJobObject();
-						currentGroup.setName(groupName);
-						currentGroup.setGroupFlag(true);
-						currentGroup.setCpuData(cpu);
-						this.data.add(currentGroup);
-						// currentGroup.setResourceData(resdata);
-					}
-
-					processJobData(reader, jobname, currentGroup, cpu);
+					processJobData(reader, jobname, groupName, cpu);
 
 				}
 			}
@@ -95,16 +97,22 @@ public class TivoliJobProcessor {
 		return RegexHelper.matchesRegexPattern(line, JOB_LINE_PATTERN);
 	}
 
-	private void processJobData(final BufferedReader reader, String jobname, TivoliJobObject currentGroup, CpuData cpu) throws IOException {
+	private void processJobData(final BufferedReader reader, String jobname, String groupname, CpuData cpu) throws IOException {
 
 		TivoliJobObject job = new TivoliJobObject();
 		job.setName(jobname);
 
-		currentGroup.addChild(job);
+		if (this.jobData.containsKey(groupname)) {
+			this.jobData.get(groupname).add(job);
+		} else {
+			List<TivoliJobObject> joblist = new ArrayList<>();
+			joblist.add(job);
+			this.jobData.put(groupname, joblist);
+		}
 		
 		job.setCpuData(cpu);
 
-		ResourceData resdata = resProcessor.getResourceByGroupName(currentGroup.getName(), jobname);
+		ResourceData resdata = resProcessor.getResourceInGroupByName(groupname, jobname);
 
 		job.setResourceData(resdata);
 
@@ -159,4 +167,18 @@ public class TivoliJobProcessor {
 
 	}
 
+	
+	public List<TivoliJobObject> getJobDataByGroupName(String group) {
+		return this.jobData.get(group);
+	}
+
+	public TivoliJobObject getJobInGroupByName(String group, String name) {
+
+		List<TivoliJobObject> jobdata = getJobDataByGroupName(group);
+
+		if (jobdata == null) {
+			return null;
+		}
+		return jobdata.stream().filter(f -> f.getName().trim().equalsIgnoreCase(name.trim())).findFirst().orElse(null);
+	}
 }

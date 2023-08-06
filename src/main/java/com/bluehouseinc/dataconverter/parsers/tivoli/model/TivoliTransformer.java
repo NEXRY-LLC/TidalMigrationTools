@@ -4,16 +4,24 @@ import java.util.List;
 
 import com.bluehouseinc.dataconverter.model.TidalDataModel;
 import com.bluehouseinc.dataconverter.model.impl.BaseCsvJobObject;
+import com.bluehouseinc.dataconverter.model.impl.CsvCalendar;
 import com.bluehouseinc.dataconverter.model.impl.CsvJobGroup;
 import com.bluehouseinc.dataconverter.model.impl.CsvOSJob;
+import com.bluehouseinc.dataconverter.model.impl.CsvResource;
 import com.bluehouseinc.dataconverter.model.impl.CsvRuntimeUser;
 import com.bluehouseinc.dataconverter.parsers.tivoli.data.cpu.CpuData;
 import com.bluehouseinc.dataconverter.parsers.tivoli.data.job.TivoliJobObject;
+import com.bluehouseinc.dataconverter.parsers.tivoli.data.schedule.JobRunTime;
+import com.bluehouseinc.dataconverter.parsers.tivoli.data.schedule.SchedualData;
+import com.bluehouseinc.dataconverter.parsers.tivoli.data.schedule.on.RunOn;
 import com.bluehouseinc.tidal.api.exceptions.TidalException;
 import com.bluehouseinc.tidal.utils.StringUtils;
 import com.bluehouseinc.transform.ITransformer;
 import com.bluehouseinc.transform.TransformationException;
 
+import lombok.extern.log4j.Log4j2;
+
+@Log4j2
 public class TivoliTransformer implements ITransformer<List<TivoliJobObject>, TidalDataModel> {
 
 	TidalDataModel datamodel;
@@ -79,86 +87,78 @@ public class TivoliTransformer implements ITransformer<List<TivoliJobObject>, Ti
 
 		final BaseCsvJobObject out = tempjob;
 
-		CpuData cpu =  job.getCpuData();
-		
-		if(cpu != null) {
-			datamodel.addNodeToJobOrGroup(out , cpu.getNodeName() == null ? "TIVOLI-NOTSET" : cpu.getNodeName());
-			
+		CpuData cpu = job.getCpuData();
+
+		if (cpu != null) {
+			datamodel.addNodeToJobOrGroup(out, cpu.getNodeName() == null ? "TIVOLI-NOTSET" : cpu.getNodeName());
+
 			String domain = cpu.getDomain();
 			String runtime = cpu.getForUser();
-			
-			if(!StringUtils.isBlank(runtime)) {
+
+			if (!StringUtils.isBlank(runtime)) {
 				CsvRuntimeUser rte = new CsvRuntimeUser(runtime, domain);
 				datamodel.addRunTimeUserToJobOrGroup(tempjob, rte);
-			}else {
+			} else {
 				datamodel.addRunTimeUserToJobOrGroup(out, new CsvRuntimeUser("runtime-notset"));
 			}
-		}else {
+		} else {
 			// Error with cpu data, this object doesnt not have a default
 			datamodel.addNodeToJobOrGroup(out, "TIVOLI-NOTSET");
 		}
-		
+
 		datamodel.addOwnerToJobOrGroup(out, datamodel.getDefaultOwner());
-
-//
-//		SchedualData schedata = job.getScheduleData();
-//
-//		if (schedata != null) {
-//
-//			JobRunTime runtime = job.getScheduleData().getAtTime();
-//
-//			if (runtime != null) {
-//				String runat = job.getScheduleData().getAtTime().getAtTime();
-//				if (!StringUtils.isBlank(runat)) {
-//					out.setStartTime(runat);
-//				}
-//			}
-//			
-//			JobRunTime dealine = job.getScheduleData().getDeadline();
-//
-//			if (dealine != null) {
-//				String runtill = job.getScheduleData().getDeadline().getAtTime();
-//				if (!StringUtils.isBlank(runtill)) {
-//					out.setStartTime(runtill);
-//				}
-//			}
-//
-//			job.getScheduleData().getNeeds().forEach(n -> {
-//
-//				Integer resneed = n.getAmount();
-//				CsvResource res = new CsvResource(n.getName(), datamodel.getDefaultOwner());
-//				res.setLimit(resneed);
-//				datamodel.addResourceToJob(out, res);
-//
-//			});
-//
-//			datamodel.addCalendarToJobOrGroup(out, new CsvCalendar("Daily"));
-//
-//			// Need to build some calendars using the schedule data.
-//			job.getScheduleData().getRunOn().forEach(r -> {
-//
-//				r.getType();
-//			});
-
-//		} else {
-//			// why are we missing data?
-//			out.getFullPath();
-//
-//		}
 
 		return out;
 	}
 
 	private void processJob(TivoliJobObject in, CsvJobGroup out) {
 
+		SchedualData schedata = in.getSchedualData();
+
+		setStartTime(out, schedata.getAtTime());
+
+		setEndTime(out, schedata.getDeadline());
+
+		schedata.getNeeds().forEach(n -> {
+			addResource(out, n.getName(), n.getAmount());
+		});
+
+		datamodel.addCalendarToJobOrGroup(out, new CsvCalendar("Daily"));
+		
+		if (schedata.getRunOn() == null) {
+
+		} else if (!schedata.getRunOn().isEmpty()) {
+			
+
+			StringBuilder b = new StringBuilder();
+
+			
+			List<RunOn> runons = schedata.getRunOn();
+
+			if (runons.size() == 1) {
+
+				
+			}else {
+				schedata.getRunOn().forEach(cal -> {
+
+				});
+			}
+		}
+
 	}
 
 	private void processJob(TivoliJobObject in, CsvOSJob out) {
 
-		String cmddata = in.getDoCommand() == null ? in.getScriptName() : in.getDoCommand();
+		String cmddata = in.getDoCommand() == null ? in.getScriptName().trim() : in.getDoCommand().trim();
 
-		if (cmddata == null) {
+		if (StringUtils.isBlank(cmddata)) {
+			log.info("Missing command line data for JOB{}",in.getFullPath());
 			cmddata = "NOTSET";
+		}
+
+		if(cmddata.startsWith("\"") & cmddata.endsWith("\"")) {
+			cmddata = cmddata.substring(1, cmddata.length()-1);
+			cmddata = cmddata.trim();
 		}
 
 		if (cmddata.startsWith("\"")) {
@@ -168,8 +168,8 @@ public class TivoliTransformer implements ITransformer<List<TivoliJobObject>, Ti
 		if (cmddata.endsWith("\"")) {
 			cmddata = cmddata.substring(0, cmddata.length() - 1);
 		}
-
-		String[] cmddata_split = cmddata.split(" ", 2);
+		
+		String[] cmddata_split = cmddata.trim().split("\\s+", 2);
 
 		if (cmddata_split.length == 2) {
 			out.setCommandLine(cmddata_split[0]);
@@ -178,5 +178,47 @@ public class TivoliTransformer implements ITransformer<List<TivoliJobObject>, Ti
 			out.setCommandLine(cmddata_split[0]);
 		}
 
+		if (StringUtils.isBlank(out.getCommandLine())) {
+			out.setCommandLine("NOTSET");;
+		}
+		
+		setStartTime(out, in.getJobScheduleData().getAtTime());
+
+		setEndTime(out, in.getJobScheduleData().getUntilTime());
+		setEndTime(out, in.getJobScheduleData().getDeadline());
+
+		out.setInheritCalendar(true);
+
+		in.getJobScheduleData().getNeeds().forEach(n -> {
+			addResource(out, n.getName(), n.getAmount());
+		});
+	}
+
+	private void addResource(BaseCsvJobObject job, String name, Integer limit) {
+
+		CsvResource res = new CsvResource(name, datamodel.getDefaultOwner());
+		res.setLimit(limit);
+		datamodel.addResourceToJob(job, res);
+
+	}
+
+	private void setStartTime(BaseCsvJobObject out, JobRunTime runtime) {
+		if (runtime != null) {
+			String runat = runtime.getAtTime();
+			if (!StringUtils.isBlank(runat)) {
+				out.setStartTime(runat);
+			}
+
+		}
+	}
+
+	private void setEndTime(BaseCsvJobObject out, JobRunTime runtime) {
+		if (runtime != null) {
+			String runat = runtime.getAtTime();
+			if (!StringUtils.isBlank(runat)) {
+				out.setEndTime(runat);
+			}
+
+		}
 	}
 }

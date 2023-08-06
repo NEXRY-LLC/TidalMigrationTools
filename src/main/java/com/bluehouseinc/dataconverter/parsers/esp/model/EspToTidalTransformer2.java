@@ -245,6 +245,8 @@ public class EspToTidalTransformer2 implements ITransformer<List<EspAbstractJob>
 	private void processJob(EspOSJOb in, CsvOSJob out) {
 		out.setCommandLine(in.getCommand());
 		out.setParamaters(in.getParams());
+		
+		out.setSourceProfile(true);
 	}
 
 	private void processJob(EspAs400Job in, CsvOS400 out) {
