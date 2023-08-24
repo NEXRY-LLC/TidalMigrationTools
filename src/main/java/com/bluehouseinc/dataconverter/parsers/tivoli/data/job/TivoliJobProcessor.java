@@ -18,6 +18,7 @@ import com.bluehouseinc.dataconverter.parsers.tivoli.data.cpu.TivoliCPUProcessor
 import com.bluehouseinc.dataconverter.parsers.tivoli.data.job.TivoliJobObject.TaskType;
 import com.bluehouseinc.dataconverter.parsers.tivoli.data.resource.ResourceData;
 import com.bluehouseinc.dataconverter.parsers.tivoli.data.resource.TivoliResourceProcessor;
+import com.bluehouseinc.dataconverter.parsers.tivoli.data.variable.TivoliVariableProcessor;
 import com.bluehouseinc.tidal.api.exceptions.TidalException;
 
 import lombok.AccessLevel;
@@ -40,14 +41,19 @@ public class TivoliJobProcessor {
 	@Setter(value = AccessLevel.PRIVATE)
 	@Getter(value = AccessLevel.PRIVATE)
 	TivoliCPUProcessor cpuProcessor;
-	
+
 	@Setter(value = AccessLevel.PRIVATE)
 	@Getter(value = AccessLevel.PRIVATE)
 	TivoliResourceProcessor resProcessor;
+	
+	@Setter(value = AccessLevel.PRIVATE)
+	@Getter(value = AccessLevel.PRIVATE)
+	TivoliVariableProcessor variableProcessor;
 
-	public TivoliJobProcessor(TivoliCPUProcessor cpu, TivoliResourceProcessor res) {
+	public TivoliJobProcessor(TivoliCPUProcessor cpu, TivoliResourceProcessor res, TivoliVariableProcessor var) {
 		this.cpuProcessor = cpu;
 		this.resProcessor = res;
+		this.variableProcessor = var;
 	}
 
 	public void doProcessFile(File datafile) {
@@ -109,13 +115,12 @@ public class TivoliJobProcessor {
 			joblist.add(job);
 			this.jobData.put(groupname, joblist);
 		}
-		
+
 		job.setCpuData(cpu);
 
 		ResourceData resdata = resProcessor.getResourceInGroupByName(groupname, jobname);
 
 		job.setResourceData(resdata);
-
 
 		List<String> lines = EspFileReaderUtils.parseJobLines(reader, "", null, false, true);
 
@@ -129,6 +134,8 @@ public class TivoliJobProcessor {
 				value = data[1].trim();
 			}
 
+			value = EspFileReaderUtils.trimCharBeginOrEnd('"', value);
+
 			switch (element) {
 			case "DOCOMMAND":
 				job.setDoCommand(value);
@@ -138,7 +145,13 @@ public class TivoliJobProcessor {
 				break;
 			case "STREAMLOGON":
 				// Tidal does not support variables for runtime users so we will map them
-				job.setStreamLogon(value.replace("^", ""));
+				if (value.contains("^")) {
+					value = value.replace("^", "");
+					value = this.getVariableProcessor().getValueByName(value);
+				}
+
+				job.setStreamLogon(value);
+
 				break;
 			case "TASKTYPE":
 				job.setTaskType(TaskType.valueOf(value));
@@ -147,7 +160,7 @@ public class TivoliJobProcessor {
 				job.setRecovery(value);
 				break;
 			case "RCCONDSUCC":
-				// Use this to set exit codes 
+				// Use this to set exit codes
 				job.setReturnCodeSucess(value);
 				break;
 			case "SCRIPTNAME":
@@ -167,7 +180,6 @@ public class TivoliJobProcessor {
 
 	}
 
-	
 	public List<TivoliJobObject> getJobDataByGroupName(String group) {
 		return this.jobData.get(group);
 	}

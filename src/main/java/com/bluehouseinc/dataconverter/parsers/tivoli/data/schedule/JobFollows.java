@@ -4,9 +4,12 @@ import lombok.Data;
 
 @Data
 public class JobFollows {
-	String inGroup;
+	
+	String inContainer;
+	String inWorkflow;
 	String jobToFollow;
 	boolean previousDay = false;
 	boolean dependsOnGroup = false;
+	boolean islocal = true;
 	
 }

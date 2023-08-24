@@ -2,6 +2,7 @@ package com.bluehouseinc.dataconverter.parsers.tivoli.model;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -12,6 +13,7 @@ import com.bluehouseinc.dataconverter.model.TidalDataModel;
 import com.bluehouseinc.dataconverter.parsers.esp.model.EspAbstractJob;
 import com.bluehouseinc.dataconverter.parsers.tivoli.data.job.TivoliJobObject;
 import com.bluehouseinc.dataconverter.util.ObjectUtils;
+import com.bluehouseinc.tidal.utils.StringUtils;
 
 import lombok.extern.log4j.Log4j2;
 
@@ -27,10 +29,34 @@ public class TivoliVariableProcessor extends BaseVariableProcessor<TivoliJobObje
 	@Override
 	public void processJobVariables(TivoliJobObject job) {
 
-	// This will do all in a generic / reflection way vs individual getters.. This also covers any changes to the classes!!!
+		// This will do all in a generic / reflection way vs individual getters.. This also covers any changes to the classes!!!
 		List<Field> rawfields = ObjectUtils.getAllKnownFields(job).stream().filter(f -> f.getType().isInstance(new String())).collect(Collectors.toList());
 
 		convertReplaceVariblesToTidal(job, rawfields);
+
+		// Do we have a variable in our job for a file dep?
+		if (job.getJobScheduleData() != null) {
+			if (!StringUtils.isBlank(job.getJobScheduleData().getFileDep())) {
+				String filedep = job.getJobScheduleData().getFileDep();
+				filedep = convertReplaceVariblesToTidal(filedep);
+				job.getJobScheduleData().setFileDep(filedep);
+			}
+
+		}
+
+		if (job.getSchedualData() != null) {
+			if (!job.getSchedualData().getFiledepData().isEmpty()) {
+				final List<String> varfiledeps = new ArrayList<>();
+
+				job.getSchedualData().getFiledepData().forEach(f -> {
+					f = convertReplaceVariblesToTidal(f);
+					varfiledeps.add(f);
+				});
+				
+				job.getSchedualData().getFiledepData().clear();
+				job.getSchedualData().getFiledepData().addAll(varfiledeps);
+			}
+		}
 	}
 
 	protected void convertReplaceVariblesToTidal(TivoliJobObject job, List<Field> fields) {
@@ -48,7 +74,7 @@ public class TivoliVariableProcessor extends BaseVariableProcessor<TivoliJobObje
 						if (rawdata != null) {
 
 							// Must have a variable.
-							rawdata = convertReplaceVariblesToTidal(rawdata, job);
+							rawdata = convertReplaceVariblesToTidal(rawdata);
 
 							f.set(job, rawdata); // Set new data
 						}
@@ -62,7 +88,7 @@ public class TivoliVariableProcessor extends BaseVariableProcessor<TivoliJobObje
 		});
 	}
 
-	private String convertReplaceVariblesToTidal(String rawValue, TivoliJobObject job) {
+	private String convertReplaceVariblesToTidal(String rawValue) {
 		String newValue = rawValue;
 		if (newValue != null) {
 			if (newValue.contains("^")) {

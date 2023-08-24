@@ -11,4 +11,9 @@ public class RunOnRunCycle extends RunOn {
 	String description;
 	String calendarName;
 	
+	
+	@Override
+	public RunOnType getRunOnType() {
+		return RunOnType.RUNCYCLE;
+	}
 }

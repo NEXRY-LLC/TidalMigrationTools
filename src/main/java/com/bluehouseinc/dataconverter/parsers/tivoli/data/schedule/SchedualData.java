@@ -19,6 +19,9 @@ public class SchedualData {
 	//ON RUNCYCLE RULE1 "FREQ=WEEKLY;BYDAY=TH"
 	//ON REQUEST
 	private List<RunOn> runOn; 
+	//EXCEPT RUNCYCLE CALENDAR2 POSHDAYS
+	private List<String> exceptOn;
+	
 	private JobRunTime atTime;
 	
 	private boolean critical = false;
@@ -35,13 +38,14 @@ public class SchedualData {
 	
 	private List<JobScheduleData> jobScheduleData;
 	
-	private List<String> filedeps;
+	private List<String> filedepData;
 	
 	public SchedualData(){
 		this.needs = new LinkedList<>();
 		this.runOn = new LinkedList<>();
 		this.follows = new LinkedList<>();
 		this.jobScheduleData = new LinkedList<>();
-		this.filedeps = new LinkedList<>();
+		this.filedepData = new LinkedList<>();
+		this.exceptOn = new LinkedList<>();		
 	}
 }

@@ -230,6 +230,8 @@ public class TidalImporter {
 
 		new JobGroupExecutor(tidal, model, cp).execute();
 
+		model.getDependencies().forEach(dep -> VariableUtil.doProcessVariables(dep, tidal.getVariables()));
+
 		new DependencyExecutor(tidal, model, cp).execute();
 
 		try {
@@ -321,6 +323,7 @@ public class TidalImporter {
 
 	public void printWorkToDo(TidalDataModel model) {
 
+		log.info("Agent Objects To Process [" + model.getNodes().size() + "]");
 		log.info("TimeZone Objects To Process [" + model.getTimeZones().size() + "]");
 		log.info("Resource Objects To Process [" + model.getResource().size() + "]");
 		log.info("Runtime User Objects To Process [" + model.getRuntimeusers().size() + "]");

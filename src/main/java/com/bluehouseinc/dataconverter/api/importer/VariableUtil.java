@@ -9,7 +9,9 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import com.bluehouseinc.dataconverter.model.impl.BaseCsvJobObject;
+import com.bluehouseinc.dataconverter.model.impl.BaseCvsDependency;
 import com.bluehouseinc.dataconverter.model.impl.CsvActionEmail;
+import com.bluehouseinc.dataconverter.model.impl.CvsDependencyFile;
 import com.bluehouseinc.dataconverter.util.ObjectUtils;
 import com.bluehouseinc.tidal.api.model.variable.Variable;
 
@@ -38,6 +40,13 @@ public abstract class VariableUtil {
 
 		List<Field> fields = ObjectUtils.getAllKnownFields(email).stream().filter(f -> f.getType().isInstance(new String())).collect(Collectors.toList());
 		doProcessStringFields(email, fields, variables);
+	}
+
+	static void doProcessVariables(BaseCvsDependency filedep, Collection<Variable> variables) {
+		if (filedep instanceof CvsDependencyFile) {
+			List<Field> fields = ObjectUtils.getAllKnownFields(filedep).stream().filter(f -> f.getType().isInstance(new String())).collect(Collectors.toList());
+			doProcessStringFields(filedep, fields, variables);
+		}
 	}
 
 	static void doProcessStringFields(Object ajob, List<Field> fields, Collection<Variable> variables) {

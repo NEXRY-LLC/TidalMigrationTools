@@ -93,7 +93,8 @@ public class TivoliCPUProcessor {
 				value = data[1].trim(); 
 			}
 
-
+			value = EspFileReaderUtils.trimCharBeginOrEnd('"',value);
+			
 			switch (element) {
 			case "DESCRIPTION":
 				cpu.setDescription(value);

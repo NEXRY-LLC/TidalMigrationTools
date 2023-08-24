@@ -11,7 +11,6 @@ import com.bluehouseinc.tidal.utils.StringUtils;
 
 import lombok.extern.log4j.Log4j2;
 
-
 public abstract class EspFileReaderUtils {
 	private final static String EMPTY_LINE_PATTERN = "^\\s*$";
 	private final static String COMMENT_PATTERN = "^\\/*(.*) *\\/$";
@@ -42,7 +41,7 @@ public abstract class EspFileReaderUtils {
 				String substringline = line.substring(0, line.length() - 1);
 				String nextlinedata = nextLine.trim();
 				String joinline = "";
-				if(spaceonmerge) {
+				if (spaceonmerge) {
 					joinline = " ";
 				}
 				line = String.join(joinline, substringline, nextlinedata);
@@ -75,8 +74,8 @@ public abstract class EspFileReaderUtils {
 					continue;
 				}
 			}
-			
-			line = readLineMerged(reader, line, newline,addspace);
+
+			line = readLineMerged(reader, line, newline, addspace);
 			lines.add(line.trim());
 		}
 		return lines;
@@ -96,6 +95,32 @@ public abstract class EspFileReaderUtils {
 
 	private static boolean isCommentLine(String line) {
 		return RegexHelper.matchesRegexPattern(line, COMMENT_PATTERN) || line.startsWith("/*") || line.startsWith("#") || line.startsWith("//");
+	}
+
+	public static String trimCharBeginOrEnd(char c, String data) {
+		if (StringUtils.isBlank(data)) {
+			return data;
+		}
+
+		return trimCharEnd(c, trimCharBegins(c, data));
+	}
+
+	public static String trimCharBegins(char c, String data) {
+
+		if (data.startsWith(String.valueOf(c))) {
+			return data.substring(1);
+		}
+
+		return data;
+	}
+
+	public static String trimCharEnd(char c, String data) {
+
+		if (data.endsWith(String.valueOf(c))) {
+			return data.substring(0, data.length()-1);
+		}
+
+		return data;
 	}
 
 }

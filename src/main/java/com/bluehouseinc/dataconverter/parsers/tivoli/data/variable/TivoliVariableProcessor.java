@@ -52,7 +52,7 @@ public class TivoliVariableProcessor {
 					VariableData variable = new VariableData();
 					variable.setName(variabledata[0]);
 					if (variabledata.length > 1) {
-						variable.setValue(variabledata[1]);
+						variable.setValue(EspFileReaderUtils.trimCharBeginOrEnd('"',variabledata[1]));
 					}
 
 					data.add(variable);
@@ -73,4 +73,13 @@ public class TivoliVariableProcessor {
 		return RegexHelper.matchesRegexPattern(line, VAR_PATTERN);
 	}
 
+	public String getValueByName(String name) {
+		VariableData varobj = data.stream().filter(f -> f.getName().equalsIgnoreCase(name)).findAny().orElse(null);
+		
+		if(varobj == null) {
+			return null;
+		}
+		
+		return varobj.getValue();
+	}
 }

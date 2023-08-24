@@ -21,20 +21,24 @@ import com.bluehouseinc.tidal.api.exceptions.TidalException;
 import com.bluehouseinc.tidal.utils.StringUtils;
 import com.bluehouseinc.transform.ITransformer;
 
+import lombok.AccessLevel;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
 
 @Data
 @EqualsAndHashCode(callSuper = false)
 public class BMCDataModel extends BaseParserDataModel<BaseBMCJobOrFolder,BMCConfigProvider> implements IParserModel {
+	
 	private Map<String, DoMailData> uniqueEmails = new HashMap<>();
 
-	DependencyGraphMapper depgraph;
+	@Getter(value =  AccessLevel.PRIVATE)
+	@Setter(value = AccessLevel.PRIVATE)
+	private DependencyGraphMapper depgraph;
 	
 	public BMCDataModel(ConfigurationProvider cfgProvider) {
 		super(new BMCConfigProvider(cfgProvider));
-		
-		depgraph = new DependencyGraphMapper(this);
 	}
 
 	@Override
@@ -44,11 +48,18 @@ public class BMCDataModel extends BaseParserDataModel<BaseBMCJobOrFolder,BMCConf
 
 	@Override
 	public ITransformer<List<BaseBMCJobOrFolder>, TidalDataModel> getJobTransformer(TidalDataModel model) {
-		return new BMCToTIDALTransformer(model, this, depgraph);
+		return new BMCToTIDALTransformer(model, this);
 	}
 
 	private Map<BMCJobTypes, List<BaseBMCJobOrFolder>> jobtypes = new Hashtable<>();
 
+	public DependencyGraphMapper getDependencyGraphMapper() {
+		if(depgraph == null) {
+			depgraph = new DependencyGraphMapper(this);
+		}
+		
+		return depgraph;
+	}
 
 	@Override
 	public void doPostTransformJobObjects(List<BaseBMCJobOrFolder> jobs) {

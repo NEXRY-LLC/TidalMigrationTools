@@ -7,10 +7,10 @@ import lombok.Data;
 //ON RUNCYCLE RULE1 "FREQ=WEEKLY;BYDAY=SA"
 //ON RUNCYCLE RULE2 "FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR;"
 
-@Data
 public abstract class RunOn {
 
 	RunOnType type;
 
 
+	public abstract RunOnType getRunOnType();
 }

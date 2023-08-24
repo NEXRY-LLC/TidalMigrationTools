@@ -89,14 +89,14 @@ public class TivoliParser extends AbstractParser<TivoliDataModel> {
 		res_processor = new TivoliResourceProcessor();
 		res_processor.doProcessFile(res);
 
-		job_processor = new TivoliJobProcessor(cpu_processor, res_processor);
+		job_processor = new TivoliJobProcessor(cpu_processor, res_processor,var_processor);
 		job_processor.doProcessFile(job);
 
 		sch_processor = new TivoliScheduleProcessor(job_processor);
 		sch_processor.doProcessFile(sch);
 
 		sch_processor.getScheduleData().keySet().forEach(key -> {
-			doProcessSchedualData(sch_processor.getScheduleData().get(key));
+			doProcessSchedualData(key, sch_processor.getScheduleData().get(key));
 		});
 	}
 
@@ -108,8 +108,15 @@ public class TivoliParser extends AbstractParser<TivoliDataModel> {
 	/*
 	 * This will take the schedules of data to build out groups of data. This is the core of TWS
 	 */
-	private void doProcessSchedualData(List<SchedualData> data) {
+	private void doProcessSchedualData(String containername, List<SchedualData> data) {
 
+		TivoliJobObject container = new TivoliJobObject();
+		container.setName(containername);
+
+		
+		this.getParserDataModel().addDataDuplicateLevelCheck(container);
+		log.info("Added Container{} to model", container.getFullPath());
+		
 		data.forEach(sched -> {
 			String groupname = sched.getWorkflowName();
 
@@ -125,8 +132,9 @@ public class TivoliParser extends AbstractParser<TivoliDataModel> {
 				group.setGroupFlag(true);
 				// ALl our details about our group or schedule in tivoli
 				group.setSchedualData(sched);
-				log.debug("Adding Group {} to model", groupname);
-				this.getParserDataModel().addDataDuplicateLevelCheck(group);
+				container.addChild(group);
+				log.info("Added Group {} to container{}", group.getFullPath(),container.getName());
+				//this.getParserDataModel().addDataDuplicateLevelCheck(group);
 			}
 
 			doProcessJobScheduleDetails(group, sched.getJobScheduleData());
@@ -148,7 +156,7 @@ public class TivoliParser extends AbstractParser<TivoliDataModel> {
 				// Add to our group
 				group.addChild(tivoli);
 				
-				log.debug("Adding Job {} to model", tivoli.getFullPath());
+				log.debug("Added Job {} to Group{}", tivoli.getFullPath(), group.getName());
 
 			} catch (IllegalAccessException e) {
 				throw new TidalException(e);

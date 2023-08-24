@@ -5,6 +5,7 @@ import com.bluehouseinc.dataconverter.model.impl.CsvOSJob;
 import com.bluehouseinc.tidal.api.exceptions.TidalException;
 import com.bluehouseinc.tidal.api.model.YesNoType;
 import com.bluehouseinc.tidal.api.model.job.BaseJob;
+import com.bluehouseinc.tidal.api.model.job.ConcurrentType;
 import com.bluehouseinc.tidal.api.model.job.ftp.FTPJob;
 import com.bluehouseinc.tidal.api.model.job.group.JobGroup;
 import com.bluehouseinc.tidal.api.model.job.os.OSJob;
@@ -96,7 +97,8 @@ public class APIJobUtils {
 		} else {
 			setEnableInhertOnJob(job);
 		}
-
+		
+		
 	}
 
 

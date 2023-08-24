@@ -11,6 +11,7 @@ public abstract class AbstractConfigProvider {
 	private ConfigurationProvider provider;
 	private String SKIPDEPS = "tidal.skipdeps";
 	private String APPEND_JOB_TYPE = "tidal.agent.appendjobtype";
+	private String TIDAL_ConcurrentType ="tidal.job.ConcurrentType";
 	
 	public AbstractConfigProvider(ConfigurationProvider provider) {
 		this.provider = provider;
@@ -31,4 +32,7 @@ public abstract class AbstractConfigProvider {
 		return Boolean.valueOf(tf);
 	}
 	
+	public String getTidalConcurrentType() {
+		return this.getProvider().getConfigurations().getOrDefault(TIDAL_ConcurrentType, "RUNANYWAY");
+	}
 }

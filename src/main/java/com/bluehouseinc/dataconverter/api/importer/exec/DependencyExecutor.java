@@ -63,7 +63,7 @@ public class DependencyExecutor extends AbstractAPIExecutor {
 			Integer depson;
 			String mepath = adep.getJobObject().getFullPath();
 			
-			if (mepath.toUpperCase().contains("AIPPD040")) {
+			if (mepath.toUpperCase().contains("ISBONUSL")) {
 				mepath.getBytes();
 			}
 			
@@ -126,9 +126,11 @@ public class DependencyExecutor extends AbstractAPIExecutor {
 				FileDependency filedep = new FileDependency();
 				CvsDependencyFile cdep = (CvsDependencyFile)adep;
 				
+				filedep.setJobid(me);
 				filedep.setFilename(cdep.getFilename());
 				filedep.setFiletype(DepType.EXISTS);
 				filedep.setInheritagent(YesNoType.YES);
+
 				
 				try {
 

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.bluehouseinc.dataconverter.model.BaseJobOrGroupObject;
+import com.bluehouseinc.tidal.api.model.job.ConcurrentType;
 import com.bluehouseinc.tidal.api.model.job.JobType;
 import com.bluehouseinc.tidal.utils.DependencyBuilder;
 import com.bluehouseinc.tidal.utils.StringUtils;
@@ -111,6 +112,9 @@ public abstract class BaseCsvJobObject extends BaseJobOrGroupObject {
 
 	@CsvRecurse
 	CsvJobTag tag;
+	
+	@CsvRecurse
+	ConcurrentType concurrentIfActiveLogic = ConcurrentType.RUNANYWAY;
 	
 	@Setter(value = AccessLevel.PRIVATE)
 	DependencyBuilder compoundDependencyBuilder = new DependencyBuilder();

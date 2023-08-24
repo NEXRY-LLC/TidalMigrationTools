@@ -57,15 +57,14 @@ public class BMCToTIDALTransformer implements ITransformer<List<BaseBMCJobOrFold
 	// Map<String, List<BaseBMCJobOrFolder>> OutStringToFullPathList = new HashedMap<>();
 
 	private Set<String> duplicateJobNameValidation = new HashSet<>();
-	DependencyGraphMapper depgraphmap;
+
 
 	// Integer containerLen;
 
-	public BMCToTIDALTransformer(TidalDataModel datamodel,BMCDataModel bmcdatamodel, DependencyGraphMapper depgraph) {
+	public BMCToTIDALTransformer(TidalDataModel datamodel,BMCDataModel bmcdatamodel) {
 		this.bmcDataModel = bmcdatamodel;
 		this.tidalDataModel = datamodel;
 		trans400 = new BMCOS400JobTransformer(datamodel);
-		this.depgraphmap = depgraph;
 		this.SAPImporter = new SapDataImporter(bmcdatamodel.getConfigeProvider().getProvider());
 		// USENEWDEPCODE = Boolean.valueOf(this.cfgProvider.getConfiguration().getOrDefault("tidal.dep.newcode", "false"));
 	}
@@ -135,7 +134,7 @@ public class BMCToTIDALTransformer implements ITransformer<List<BaseBMCJobOrFold
 
 				// if (USENEWDEPCODE) {
 				// // this.depthread.doRegisterJobDepGraph(group, base);
-				this.depgraphmap.doProcessJobDepGraph(group, base);
+				this.bmcDataModel.getDependencyGraphMapper().doProcessJobDepGraph(group, base);
 				// // DependencyGraph.registerJobDepGraph(base, group);
 				// } else {
 				// doProcessJobDepGraph(group, base);
@@ -181,7 +180,7 @@ public class BMCToTIDALTransformer implements ITransformer<List<BaseBMCJobOrFold
 			// if (USENEWDEPCODE) {
 			// // DependencyGraph.registerJobDepGraph(base, newjob);
 			// // this.depthread.doRegisterJobDepGraph(newjob, base);
-			this.depgraphmap.doProcessJobDepGraph(newjob, base);
+			this.bmcDataModel.getDependencyGraphMapper().doProcessJobDepGraph(newjob, base);
 			// } else {
 			// doProcessJobDepGraph(newjob, base);
 			// }

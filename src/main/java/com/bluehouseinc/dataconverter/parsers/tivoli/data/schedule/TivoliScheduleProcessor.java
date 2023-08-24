@@ -108,7 +108,7 @@ public class TivoliScheduleProcessor {
 		String groupname = RegexHelper.extractNthMatch(cpuline, SCHED_PATTERN, 0).trim();
 		String workflowname = RegexHelper.extractNthMatch(cpuline, SCHED_PATTERN, 1).trim();
 
-		if (workflowname.toUpperCase().contains("HNANOTES")) {
+		if (workflowname.toUpperCase().contains("CHECKCRD")) {
 			workflowname.getBytes();
 		}
 		SchedualData schedule = new SchedualData();
@@ -144,6 +144,8 @@ public class TivoliScheduleProcessor {
 					value = data[1].trim();
 				}
 
+				value = EspFileReaderUtils.trimCharBeginOrEnd('"',value);
+				
 				switch (element) {
 				case "NEEDS":
 					schedule.getNeeds().add(getNeedsData(value));
@@ -175,10 +177,10 @@ public class TivoliScheduleProcessor {
 					break;
 				case "OPENS":
 					if (value.contains("#")) {
-						String filename = value.split("#", 2)[1];
-						schedule.getFiledeps().add(filename);
+						String actualfilename = EspFileReaderUtils.trimCharBeginOrEnd('"',value.split("#", 2)[1]);					
+						schedule.getFiledepData().add(actualfilename);
 					} else {
-						schedule.getFiledeps().add(value);
+						schedule.getFiledepData().add(value);
 					}
 					break;
 				case "PRIORITY":
@@ -190,6 +192,7 @@ public class TivoliScheduleProcessor {
 					schedule.setDeadline(new JobRunTime(value));
 					break;
 				case "EXCEPT":
+					schedule.getExceptOn().add(value);
 					break;
 				default:
 					log.info("Unknown Data Element: " + line);
@@ -254,6 +257,7 @@ public class TivoliScheduleProcessor {
 			return; // This is on demand, nothing more to do.
 		case RUNCYCLE:
 			ondata = new RunOnRunCycle();
+			obj.getRunOn().add(ondata);
 			break;
 
 		default:
@@ -326,6 +330,8 @@ public class TivoliScheduleProcessor {
 					value = data[1].trim();
 				}
 
+				value = EspFileReaderUtils.trimCharBeginOrEnd('"',value);
+				
 				switch (element) {
 				case "FOLLOWS":
 					jobdetail.getFollows().add(getFollowsFromData(value));
@@ -358,9 +364,12 @@ public class TivoliScheduleProcessor {
 					break;
 				case "OPENS":
 					if (value.contains("#")) {
-						jobdetail.setOpensFile(value.split("#", 2)[1]);
+						// Cheeting , AMFINAN1#"^INBOUND^WEX_BAD , contains a " char
+						// We cleaned up these above but missing one. 
+						String actualfilename = EspFileReaderUtils.trimCharBeginOrEnd('"',value.split("#", 2)[1]);
+						jobdetail.setFileDep(actualfilename);
 					} else {
-						jobdetail.setOpensFile(value);
+						jobdetail.setFileDep(value);
 					}
 				case "PROMPT":
 					break;
@@ -396,19 +405,49 @@ public class TivoliScheduleProcessor {
 			value = value.replace(" PREVIOUS", "");
 		}
 
-		if (RegexHelper.matchesRegexPattern(JOB_EXTERN_DEP_PATTERN, value)) {
-			String ingroup = RegexHelper.extractNthMatch(value, JOB_EXTERN_DEP_PATTERN, 0);
-			String followthisjob = RegexHelper.extractNthMatch(value, JOB_EXTERN_DEP_PATTERN, 1);
-			jobfollows.setInGroup(ingroup);
-			if (followthisjob.contains("@")) {
+		// TODO: Fix this variable because its not working JOB_EXTERN_DEP_PATTERN
+		
+//		if (RegexHelper.matchesRegexPattern(JOB_EXTERN_DEP_PATTERN, value)) {
+//			jobfollows.setIslocal(false);
+//			String ingroup = RegexHelper.extractNthMatch(value, JOB_EXTERN_DEP_PATTERN, 0);
+//			String followthisjob = RegexHelper.extractNthMatch(value, JOB_EXTERN_DEP_PATTERN, 1);
+//			jobfollows.setInGroup(ingroup);
+//			if (followthisjob.contains("@")) {
+//				jobfollows.setDependsOnGroup(true);
+//			} else {
+//				jobfollows.setJobToFollow(followthisjob);
+//			}
+//		} else {
+//			jobfollows.setJobToFollow(value);
+//		}
+
+		
+		if(value.contains("#")) {
+			// Is external !! 
+			jobfollows.setIslocal(false);
+			
+			String[] data = value.split("#",2);
+			
+			// Here we will have two options..
+			//AMFINAN1#OBDLYLAW.BSTRTLL = group . job in group to depend on
+			// or AMFINAN1#OBDLYLAW.@ = depend on the whole group.
+			jobfollows.setInContainer(data[0]);
+			
+			String[] groupNjob = data[1].split("\\.");
+			
+			// ALWAYS GOING TO BE A GROUP IN POS 0
+			jobfollows.setInWorkflow(groupNjob[0]);
+			
+			if(groupNjob[1].contains("@")) {
 				jobfollows.setDependsOnGroup(true);
-			} else {
-				jobfollows.setJobToFollow(followthisjob);
+			}else {
+				jobfollows.setJobToFollow(groupNjob[1]);
 			}
-		} else {
+			
+		}else {
 			jobfollows.setJobToFollow(value);
 		}
-
+		
 		return jobfollows;
 	}
 

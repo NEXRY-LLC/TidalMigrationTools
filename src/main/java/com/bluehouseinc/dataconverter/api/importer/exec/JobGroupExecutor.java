@@ -133,6 +133,9 @@ public class JobGroupExecutor extends AbstractAPIExecutor {
 				source.getName();
 			}
 
+			// Match our logic on if active what to do :) 
+			destination.setConcurrency(source.getConcurrentIfActiveLogic());
+			
 			APIJobUtils.setJobDefaults(destination);
 
 			String agentname = source.getAgentName();

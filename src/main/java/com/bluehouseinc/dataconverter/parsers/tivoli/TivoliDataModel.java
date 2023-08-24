@@ -15,15 +15,21 @@ import com.bluehouseinc.dataconverter.parsers.IParserModel;
 import com.bluehouseinc.dataconverter.parsers.tivoli.data.job.TivoliJobObject;
 import com.bluehouseinc.dataconverter.parsers.tivoli.data.schedule.JobFollows;
 import com.bluehouseinc.dataconverter.parsers.tivoli.data.schedule.SchedualData;
+import com.bluehouseinc.dataconverter.parsers.tivoli.data.schedule.job.JobScheduleData;
 import com.bluehouseinc.dataconverter.parsers.tivoli.model.TivoliTransformer;
 import com.bluehouseinc.dataconverter.parsers.tivoli.model.TivoliVariableProcessor;
 import com.bluehouseinc.dataconverter.providers.ConfigurationProvider;
+import com.bluehouseinc.tidal.api.model.dependency.job.DepLogic;
+import com.bluehouseinc.tidal.api.model.dependency.job.DependentJobStatus;
+import com.bluehouseinc.tidal.api.model.dependency.job.Operator;
 import com.bluehouseinc.tidal.utils.StringUtils;
 import com.bluehouseinc.transform.ITransformer;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.extern.log4j.Log4j2;
 
+@Log4j2
 @Data
 @EqualsAndHashCode(callSuper = false)
 public class TivoliDataModel extends BaseParserDataModel<TivoliJobObject, TivoliConfigProvider> implements IParserModel {
@@ -54,120 +60,90 @@ public class TivoliDataModel extends BaseParserDataModel<TivoliJobObject, Tivoli
 
 	public void doProcessJobDependency(TivoliJobObject job) {
 
-		if(job.getName().contains("NANOTERM")) {
+		if (job.getName().contains("ISBONUSL")) {
 			job.getName();
 		}
-		
-		SchedualData data = null; //job.getScheduleData();
 
-		if (data != null) {
-			String fullpath = job.getFullPath();
-			final BaseCsvJobObject me = getTidal().findFirstJobByFullPath(fullpath);
+		BaseCsvJobObject me = getTidal().findFirstJobByFullPath(job.getFullPath());
 
-			if (me == null) {
-				return;
-			}
+		if (me != null) {
+			SchedualData data = job.getSchedualData();
+			JobScheduleData jobdata = job.getJobScheduleData();
 
-			if (!data.getFiledeps().isEmpty()) {
-
-				data.getFiledeps().forEach(f -> {
-					getTidal().addFileDependencyForJob(me, f);
-				});
-			}
-
+			final List<JobFollows> follows = new ArrayList<>();
+			final List<String> filedeps = new ArrayList<>();
 			
-			List<JobFollows> followsdata = data.getFollows();
-			if (!followsdata.isEmpty()) {
-
-				if (!followsdata.isEmpty()) {
-					followsdata.forEach(follows -> {
-						List<BaseCsvJobObject> depjobs = new ArrayList<>();
-
-						String ingroup = follows.getInGroup();
-						String tempjob = follows.getJobToFollow();
-
-						// AMFINAN1#BNS00A.@
-						if (tempjob.contains("#")) {
-							if (ingroup.equalsIgnoreCase(tempjob.split("#", 2)[0])) {
-								// ingroup = thisjob.split("#",2)[0]; // Do we override or simply ignore?
-								// Do nothing they are the same.
-							} else {
-								// SHoudl we override?
-								String diffgroup = tempjob.split("#", 2)[0];
-								ingroup = diffgroup;
-							}
-
-							tempjob = tempjob.split("#", 2)[1]; // Replace with the job
-						} else {
-							// Do we care?
-							tempjob.getBytes();
-						}
-
-						boolean jobbeginswith = tempjob.contains(".@");
-
-						if (!StringUtils.isBlank(ingroup)) {
-
-							CsvJobGroup group = getTidal().findGroupByName(ingroup);
-
-							if (jobbeginswith) {
-
-								String jobstart = tempjob.replace(".@", "").trim().toLowerCase();
-
-								List<BaseJobOrGroupObject> matches = group.getChildren().stream().filter(f -> f.getName().toLowerCase().startsWith(jobstart)).collect(Collectors.toList());
-
-								if (!matches.isEmpty()) {
-									matches.forEach(m -> {
-										BaseCsvJobObject depjob = (BaseCsvJobObject) m;
-										depjobs.add(depjob);
-									});
-								} else {
-									// No matches found.
-									jobstart.getBytes();
-								}
-							} else {
-
-								final String finaltempjob = tempjob;
-								BaseCsvJobObject deponme = (BaseCsvJobObject) group.getChildren().stream().filter(f -> f.getName().equalsIgnoreCase(finaltempjob)).findAny().orElse(null);
-
-								if (deponme != null) {
-									depjobs.add(deponme);
-								} else {
-									job.getName();
-									// ERROR cant find a job using this name in this group
-								}
-							}
-
-						} else {
-
-							BaseCsvJobObject deponme = getTidal().findFirstJobByFullPath(tempjob);
-
-							if (deponme != null) {
-								depjobs.add(deponme);
-							} else {
-								job.getName();
-								// ERROR cant find a job using this name in this group
-							}
-
-						}
-
-						if (!depjobs.isEmpty()) {
-							depjobs.forEach(d -> {
-								getTidal().addJobDependencyForJobCompletedNormal(me, d, null);
-							});
-
-						}
-					});
-				} else {
-					job.getName();
-					// ERROR unable to find me
+			if (data != null) {
+				if (!data.getFollows().isEmpty()) {
+					follows.addAll(data.getFollows());
+				}
+				
+				if(!data.getFiledepData().isEmpty()) {
+					filedeps.addAll(data.getFiledepData());
+				}
+			} else if (jobdata != null) {
+				if (!jobdata.getFollows().isEmpty()) {
+					follows.addAll(jobdata.getFollows());
+				}
+				
+				if(jobdata.getFileDep() != null) {
+					filedeps.add(jobdata.getFileDep());
 				}
 			}
 
-			// if(data.)
+			if (!follows.isEmpty()) {
 
+				follows.forEach(followsjob -> {
+					BaseCsvJobObject dependsonjob = null;
+
+					if(followsjob.isIslocal()) {
+						// Local to my group so do it that way.
+						 List<BaseJobOrGroupObject> childs = me.getParent().getChildren();
+						
+						dependsonjob = findJobInList(childs,followsjob.getJobToFollow());
+					}else {
+						
+						BaseCsvJobObject container =  getTidal().findGroupByName(followsjob.getInContainer());
+						String workflow = followsjob.getInWorkflow();
+
+						dependsonjob = findJobInList(container.getChildren(),workflow);
+						
+						if(followsjob.isDependsOnGroup()) {
+							// Do nothing we are depending on our group
+						}else {
+							// But if not on group, then a job in this group
+							dependsonjob =	findJobInList(dependsonjob.getChildren(),followsjob.getJobToFollow());
+						}
+					}
+
+					if (dependsonjob != null) {
+
+						if (followsjob.isPreviousDay()) {
+							getTidal().addJobDependencyForJobCompletedNormal(me, dependsonjob, 1);
+						} else {
+							getTidal().addJobDependencyForJobCompletedNormal(me, dependsonjob, null);
+						}
+					}else {
+						log.info("doProcessJobDependency UNABLE TO BUILD DEPENDENCY FOR{}",followsjob);
+					}
+				});
+			}
+
+			// Add our file dependencies. 
+			if(!filedeps.isEmpty()) {
+				filedeps.forEach(f ->{
+					getTidal().addFileDependencyForJob(me, f);
+				});
+			}
+		}else {
+			//TODO: ERROR here, we cant find out dep object.
+			log.info("doProcessJobDependency MISSING JOB{}",job.getFullPath());
 		}
 
 		job.getChildren().forEach(c -> doProcessJobDependency((TivoliJobObject) c));
 	}
 
+	private BaseCsvJobObject findJobInList(List<BaseJobOrGroupObject> childs, String name) {
+		return (BaseCsvJobObject) childs.stream().filter(child -> child.getName().equalsIgnoreCase(name)).findFirst().orElse(null);
+	}
 }
