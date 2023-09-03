@@ -11,5 +11,5 @@ public class JobFollows {
 	boolean previousDay = false;
 	boolean dependsOnGroup = false;
 	boolean islocal = true;
-	
+	boolean completedOnlyLogic = false;
 }

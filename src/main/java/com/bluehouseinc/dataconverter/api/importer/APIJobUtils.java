@@ -127,7 +127,9 @@ public class APIJobUtils {
 				dest.setParamaters(params);
 			}
 		} catch (IllegalArgumentException e) {
-			throw new TidalException(e);
+			log.info(e.getLocalizedMessage());
+			dest.setCommandLine("UNSET");
+			//throw new TidalException(e);
 		}
 
 	}

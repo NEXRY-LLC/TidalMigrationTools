@@ -342,7 +342,7 @@ public class AutosysJobVisitorImpl implements AutosysJobVisitor {
 					//log.debug("Added Job[{}] to parent[{}]", job.getFullPath(), parent.getFullPath());
 				} else {
 					log.info("ERROR in locating Parent[{}] for Job[{}]; object.name={}", value, job.getFullPath(), job.getName());
-					throw new RuntimeException("ERROR in locating Parent[" + value + "] for Job["+ job.getFullPath() + "]");
+					//throw new RuntimeException("ERROR in locating Parent[" + value + "] for Job["+ job.getFullPath() + "]");
 				}
 			}
 			
@@ -480,6 +480,10 @@ public class AutosysJobVisitorImpl implements AutosysJobVisitor {
 		case "fail_codes":
 		case "svcdesk_imp":
 		case "svcdesk_pri":
+		case "timezone":
+		case "envvars":
+		case "notification_id":
+		case "svcdesk_desc":
 			// job.setNotificationMsg(value);
 			break;
 

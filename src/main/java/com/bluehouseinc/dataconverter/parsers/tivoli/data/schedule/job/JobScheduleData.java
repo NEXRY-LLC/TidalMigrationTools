@@ -22,7 +22,7 @@ public class JobScheduleData {
 	JobRunTime untilTime;
 	String priority;
 	Integer rerunEvery;
-	JobRunTime deadline;
+	//JobRunTime deadline;
 	String fileDep;
 	boolean critical = false;
 	private List<NeedsResource> needs = new ArrayList<>();

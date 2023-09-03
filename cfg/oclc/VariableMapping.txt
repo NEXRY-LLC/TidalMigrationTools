@@ -1,0 +1,2 @@
+NAME,NEWNAME
+.*($STAMPDIR).*,<sysdata.mmddyyyy>

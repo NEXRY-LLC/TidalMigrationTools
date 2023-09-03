@@ -10,6 +10,7 @@ import com.bluehouseinc.dataconverter.model.impl.CsvJobRerunLogic;
 import com.bluehouseinc.dataconverter.model.impl.CsvOSJob;
 import com.bluehouseinc.dataconverter.model.impl.CsvResource;
 import com.bluehouseinc.dataconverter.model.impl.CsvRuntimeUser;
+import com.bluehouseinc.dataconverter.parsers.esp.model.util.EspFileReaderUtils;
 import com.bluehouseinc.dataconverter.parsers.tivoli.data.cpu.CpuData;
 import com.bluehouseinc.dataconverter.parsers.tivoli.data.job.TivoliJobObject;
 import com.bluehouseinc.dataconverter.parsers.tivoli.data.schedule.JobRunTime;
@@ -78,6 +79,10 @@ public class TivoliTransformer implements ITransformer<List<TivoliJobObject>, Ti
 			throw new TidalException("BaseJobOrGroupObject is null");
 		}
 
+		if(job.getName().contains("HRELOAD2")) {
+			job.getName();
+		}
+		
 		BaseCsvJobObject tempjob = null;
 
 		if (job.isGroup()) {
@@ -137,12 +142,13 @@ public class TivoliTransformer implements ITransformer<List<TivoliJobObject>, Ti
 				CsvJobRerunLogic rerunlogic = new CsvJobRerunLogic();
 				rerunlogic.setRepeatEvery(reruncount);
 				rerunlogic.setRepeatType(RepeatType.SAME);
-				
+
 				out.setRerunLogic(rerunlogic);
-				
+
 			}
 
 		}
+
 		return out;
 	}
 
@@ -153,9 +159,26 @@ public class TivoliTransformer implements ITransformer<List<TivoliJobObject>, Ti
 		SchedualData schedata = in.getSchedualData();
 
 		if (schedata != null) {
-			setStartTime(out, schedata.getAtTime());
+			
+			//
+			if (schedata.getAtTime() != null) {
+				String attime = schedata.getAtTime().getAtTime();
 
-			setEndTime(out, schedata.getDeadline());
+				if (StringUtils.isInt(attime)) {
+					setStartTime(out, schedata.getAtTime());
+				} else {
+					// AT 1800 +1 DAYS
+					RunOnRunCycle runon = new RunOnRunCycle();
+					runon.setCalendarData("#"+attime.replace(" ", ""));
+					runon.setCalendarName("#"+attime.replace(" ", ""));
+					runon.setDescription("#"+attime.replace(" ", ""));
+					// Add to our calendar name so its appended.
+					// add to front due to limitations of TIDAL len.
+					schedata.getRunOn().add(0,runon);
+				}
+			}
+
+			setEndTime(out, schedata.getUntilTime());
 
 			schedata.getNeeds().forEach(n -> {
 				addResource(out, n.getName(), n.getAmount());
@@ -176,7 +199,7 @@ public class TivoliTransformer implements ITransformer<List<TivoliJobObject>, Ti
 						if (!StringUtils.isBlank(runcycle.getCalendarData())) {
 							calname.append(runcycle.getCalendarData().replace("\"", "").replace(";", "-"));
 						} else {
-							calname.append(runcycle.getCalendarName());
+							calname.append("-" + runcycle.getCalendarName());
 						}
 					} else {
 						// DOES NOT EXIST YET
@@ -194,8 +217,12 @@ public class TivoliTransformer implements ITransformer<List<TivoliJobObject>, Ti
 				});
 			}
 
+			String cleancalname = calname.toString();
+			
+			cleancalname = EspFileReaderUtils.trimCharBeginOrEnd('-', cleancalname);
+
 			if (!StringUtils.isBlank(calname.toString())) {
-				datamodel.addCalendarToJobOrGroup(out, new CsvCalendar(calname.toString()));
+				datamodel.addCalendarToJobOrGroup(out, new CsvCalendar(cleancalname));
 			}
 		}
 	}
@@ -239,13 +266,14 @@ public class TivoliTransformer implements ITransformer<List<TivoliJobObject>, Ti
 		setStartTime(out, in.getJobScheduleData().getAtTime());
 
 		setEndTime(out, in.getJobScheduleData().getUntilTime());
-		setEndTime(out, in.getJobScheduleData().getDeadline());
 
 		out.setInheritCalendar(true);
 
 		in.getJobScheduleData().getNeeds().forEach(n -> {
 			addResource(out, n.getName(), n.getAmount());
 		});
+		
+		in.getReturnCodeSucess();
 	}
 
 	private void addResource(BaseCsvJobObject job, String name, Integer limit) {
@@ -271,6 +299,7 @@ public class TivoliTransformer implements ITransformer<List<TivoliJobObject>, Ti
 			String runat = runtime.getAtTime();
 			if (!StringUtils.isBlank(runat)) {
 				out.setEndTime(runat);
+				//FIXME: One day we need to make setting the timeout a param to the program.
 			}
 
 		}

@@ -193,4 +193,19 @@ public class TivoliJobProcessor {
 		}
 		return jobdata.stream().filter(f -> f.getName().trim().equalsIgnoreCase(name.trim())).findFirst().orElse(null);
 	}
+	
+	public TivoliJobObject getFirstJobFoundByName(String name) {
+
+		for(String key : this.jobData.keySet()) {
+			TivoliJobObject isfound = getJobDataByGroupName(key).stream().filter(c -> c.getName().trim().equalsIgnoreCase(name.trim())).findFirst().orElse(null);
+		
+			if(isfound!=null) {
+				return isfound;
+			}
+		}
+
+		return null;
+	}
+			
+			
 }

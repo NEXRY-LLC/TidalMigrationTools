@@ -1,0 +1,14 @@
+NAME,NEWNAME
+".*(%AUTORUN%).*",<JobRuntime>
+".*(\\$\\$\\{MMDDYYYY\\}).*",<SysDate.mmddyyyy>
+".*(\\$\\$\\{YYYY\\}).*",<SysDate.yyyy>
+".*(\\$\\$\\{MM\\}).*",<SysDate.mm>
+".*(\\$\\$\\{DD\\}).*",<SysDate.dd>
+".*(\\$\\$BATCH_DATE).*",<ProdDate.mmddyyyy>
+".*(\\$\\$Run_period).*",$${Run_period}
+".*(\\$\\$\\{TODAY\\}).*",<SysDate.mmdd>
+\\$\\$\\{TODAY\\},<SysDate.mmdd>
+\\$\\$TODAY,<SysDate.mmdd>
+
+
+

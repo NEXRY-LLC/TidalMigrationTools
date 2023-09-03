@@ -70,6 +70,8 @@ public class TivoliDataModel extends BaseParserDataModel<TivoliJobObject, Tivoli
 			SchedualData data = job.getSchedualData();
 			JobScheduleData jobdata = job.getJobScheduleData();
 
+
+			
 			final List<JobFollows> follows = new ArrayList<>();
 			final List<String> filedeps = new ArrayList<>();
 			
@@ -119,9 +121,9 @@ public class TivoliDataModel extends BaseParserDataModel<TivoliJobObject, Tivoli
 					if (dependsonjob != null) {
 
 						if (followsjob.isPreviousDay()) {
-							getTidal().addJobDependencyForJobCompletedNormal(me, dependsonjob, 1);
+							addDepToModel(me, dependsonjob, 1, followsjob.isCompletedOnlyLogic());
 						} else {
-							getTidal().addJobDependencyForJobCompletedNormal(me, dependsonjob, null);
+							addDepToModel(me, dependsonjob, null,followsjob.isCompletedOnlyLogic());
 						}
 					}else {
 						log.info("doProcessJobDependency UNABLE TO BUILD DEPENDENCY FOR{}",followsjob);
@@ -143,6 +145,16 @@ public class TivoliDataModel extends BaseParserDataModel<TivoliJobObject, Tivoli
 		job.getChildren().forEach(c -> doProcessJobDependency((TivoliJobObject) c));
 	}
 
+	// Can be based on normal or just completed in Tivoli 
+	private void addDepToModel(BaseCsvJobObject me, BaseCsvJobObject dependsonjob, Integer offset, boolean iscompletedonlylogic) {
+		
+		if(iscompletedonlylogic) {
+			getTidal().addJobDependencyForJobCompleted(me, dependsonjob, offset);
+		}else {
+			getTidal().addJobDependencyForJobCompletedNormal(me, dependsonjob, offset);
+		}
+	}
+	
 	private BaseCsvJobObject findJobInList(List<BaseJobOrGroupObject> childs, String name) {
 		return (BaseCsvJobObject) childs.stream().filter(child -> child.getName().equalsIgnoreCase(name)).findFirst().orElse(null);
 	}

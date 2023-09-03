@@ -1,5 +1,7 @@
 package com.bluehouseinc.dataconverter.common.utils;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -7,14 +9,27 @@ import java.util.regex.Pattern;
 public final class RegexHelper {
 
 	public static boolean matchesRegexPattern(String line, String regexPattern) {
-		if(line == null) {
+		if (line == null) {
 			return false;
 		}
 		return Pattern.compile(regexPattern).matcher(line).find();
 	}
 
+	public static Collection<String> extractAllMatches(String line, String regex) {
+		Collection<String> data = new ArrayList<String>();
+
+		Pattern p = Pattern.compile(regex);
+		Matcher m = p.matcher(line);
+
+		while (m.find()) {
+			data.add(m.group());
+		}
+
+		return data;
+	}
+
 	public static String extractNthMatch(String line, String regexPattern, int nthMatch) {
-		if(line == null) {
+		if (line == null) {
 			return line;
 		}
 
@@ -32,7 +47,7 @@ public final class RegexHelper {
 	}
 
 	public static String replaceAllSameLength(String input, String regex, String ch) {
-		if(input == null) {
+		if (input == null) {
 			return input;
 		}
 

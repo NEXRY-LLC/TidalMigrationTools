@@ -5,6 +5,8 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.EnumSet;
 
+import org.jline.utils.Log;
+
 import com.bluehouseinc.dataconverter.parsers.bmc.xml.model.JobData;
 import com.bluehouseinc.tidal.utils.StringUtils;
 
@@ -52,7 +54,13 @@ public class JobRunTimeInfo {
 		// if (this.jobData.getCYCLICTYPE().equals("Interval")) {
 		String i = this.jobData.getCYCLICINTERVALSEQUENCE();
 		if (i.endsWith("M")) {
-			return Integer.parseInt(i.replace("M", ""));
+			i = i.replace("M", "");
+			if( StringUtils.isInt(i) ) {
+				return Integer.parseInt(i);
+			}else {
+				Log.info("getRerunIntervalSequence is not an int for job{}",this.jobData.getJOBNAME());
+			}
+			return 0;
 		} else if (i.endsWith("H")) {
 			return Integer.parseInt(i.replace("H", "")) * 60;
 		} else {
@@ -73,7 +81,10 @@ public class JobRunTimeInfo {
 			return Integer.parseInt(i.replace("M", ""));
 		} else if (i.endsWith("H")) {
 			return Integer.parseInt(i.replace("H", "")) * 60;
-		} else {
+		} else if (i.endsWith("D")) {
+			return Integer.parseInt(i.replace("D", "")) * 60 * 60 * 24;
+		}
+		 else {
 			throw new RuntimeException("Unknown getINTERVAL[" + i + "]");
 		}
 	}

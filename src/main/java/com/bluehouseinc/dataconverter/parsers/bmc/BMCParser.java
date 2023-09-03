@@ -48,6 +48,7 @@ import com.bluehouseinc.dataconverter.parsers.bmc.xml.model.SimpleFolder;
 import com.bluehouseinc.dataconverter.parsers.bmc.xml.model.SmartFolder;
 import com.bluehouseinc.dataconverter.parsers.bmc.xml.model.SubFolder;
 import com.bluehouseinc.dataconverter.parsers.bmc.xml.model.TagData;
+import com.bluehouseinc.dataconverter.parsers.bmc.xml.model.WorkspaceData;
 import com.bluehouseinc.dataconverter.parsers.bmc.xml.model.modified.RuleBasedCalendar;
 import com.bluehouseinc.dataconverter.providers.ConfigurationProvider;
 import com.bluehouseinc.dataconverter.util.ObjectUtils;
@@ -219,6 +220,9 @@ public class BMCParser extends AbstractParser<BMCDataModel> {
 		} else if (value instanceof DoSetVarData) {
 			DoSetVarData data = (DoSetVarData) value;
 			doProcessData(model, ajob, data);
+		} else if (value instanceof WorkspaceData) {
+			WorkspaceData data = (WorkspaceData) value;
+			//doProcessData(model, ajob, data);
 		} else {
 			throw new RuntimeException("Not Supported " + ((JAXBElement<?>) element).getDeclaredType().getName());
 		}

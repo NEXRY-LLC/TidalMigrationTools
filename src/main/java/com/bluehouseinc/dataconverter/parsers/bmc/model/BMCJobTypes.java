@@ -7,6 +7,8 @@ import com.bluehouseinc.dataconverter.parsers.bmc.model.jobs.BMCCommandLineJob;
 import com.bluehouseinc.dataconverter.parsers.bmc.model.jobs.BMCDataBaseJob;
 import com.bluehouseinc.dataconverter.parsers.bmc.model.jobs.BMCFileTransferJob;
 import com.bluehouseinc.dataconverter.parsers.bmc.model.jobs.BMCFileWatcher;
+import com.bluehouseinc.dataconverter.parsers.bmc.model.jobs.BMCHadoop;
+import com.bluehouseinc.dataconverter.parsers.bmc.model.jobs.BMCInformaticaETL;
 import com.bluehouseinc.dataconverter.parsers.bmc.model.jobs.BMCOS400AttachJob;
 import com.bluehouseinc.dataconverter.parsers.bmc.model.jobs.BMCOS400Job;
 import com.bluehouseinc.dataconverter.parsers.bmc.model.jobs.BMCOS400MultiCommand;
@@ -14,6 +16,7 @@ import com.bluehouseinc.dataconverter.parsers.bmc.model.jobs.BMCOracleEBSJob;
 import com.bluehouseinc.dataconverter.parsers.bmc.model.jobs.BMCPeopleSoftJob;
 import com.bluehouseinc.dataconverter.parsers.bmc.model.jobs.BMCSAPBOJob;
 import com.bluehouseinc.dataconverter.parsers.bmc.model.jobs.BMCSAPJob;
+import com.bluehouseinc.dataconverter.parsers.bmc.model.jobs.BMCSendEmailP;
 import com.bluehouseinc.dataconverter.parsers.bmc.model.jobs.BMCWebServiceJob;
 import com.bluehouseinc.dataconverter.parsers.bmc.model.jobs.BaseBMCJobOrFolder;
 
@@ -25,7 +28,8 @@ import com.bluehouseinc.dataconverter.parsers.bmc.model.jobs.BaseBMCJobOrFolder;
  */
 public enum BMCJobTypes {
 
-	OS, OS400, OS400ATTACH, OS400MULTICOMMAND, DATABASE, FILE_TRANS, OEBS, PS8, FileWatch, OAP_11I, BIM, AmazonEC2, WS, SAP_BO, SAP,
+	OS, OS400, OS400ATTACH, OS400MULTICOMMAND, DATABASE, FILE_TRANS, OEBS, PS8, FileWatch, OAP_11I, BIM, AmazonEC2
+	, WS, SAP_BO, SAP,HADOOP,SENDEMAILP,ETL_INFA,
 
 	// SPECIAL STUFF not build into BMC XML.
 	SMARTFOLDER, SIMPLEFOLDER, SUBFOLDER;
@@ -63,6 +67,12 @@ public enum BMCJobTypes {
 			return new BMCSAPBOJob();
 		case SAP:
 			return new BMCSAPJob();
+		case HADOOP:
+			return new BMCHadoop();
+		case SENDEMAILP:
+			return new BMCSendEmailP();
+		case ETL_INFA:
+			return new BMCInformaticaETL();
 
 		default:
 			throw new RuntimeException(types.name() + " Not Supported");

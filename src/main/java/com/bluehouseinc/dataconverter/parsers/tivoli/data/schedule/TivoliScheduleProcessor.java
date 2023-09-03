@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 
 import com.bluehouseinc.dataconverter.common.utils.RegexHelper;
 import com.bluehouseinc.dataconverter.parsers.esp.model.util.EspFileReaderUtils;
+import com.bluehouseinc.dataconverter.parsers.tivoli.data.cpu.TivoliCPUProcessor;
 import com.bluehouseinc.dataconverter.parsers.tivoli.data.job.TivoliJobObject;
 import com.bluehouseinc.dataconverter.parsers.tivoli.data.job.TivoliJobProcessor;
 import com.bluehouseinc.dataconverter.parsers.tivoli.data.schedule.job.JobScheduleData;
@@ -50,8 +51,13 @@ public class TivoliScheduleProcessor {
 
 	TivoliJobProcessor jobProcessor;
 
-	public TivoliScheduleProcessor(TivoliJobProcessor job) {
+	@Setter(value = AccessLevel.PRIVATE)
+	@Getter(value = AccessLevel.PRIVATE)
+	TivoliCPUProcessor cpuProcessor;
+	
+	public TivoliScheduleProcessor(TivoliJobProcessor job,TivoliCPUProcessor cpuprocessor) {
 		this.jobProcessor = job;
+		this.cpuProcessor = cpuprocessor;
 	}
 
 	public void doProcessFile(File datafile) {
@@ -116,6 +122,8 @@ public class TivoliScheduleProcessor {
 		schedule.setGroupName(groupname);
 		schedule.setWorkflowName(workflowname);
 
+		schedule.setCpuData(cpuProcessor.getCPUByName(groupname));
+		
 		List<String> lines = EspFileReaderUtils.parseJobLines(reader, END_PATTERN, null);
 
 		boolean isworkflowdata = false;
@@ -155,7 +163,16 @@ public class TivoliScheduleProcessor {
 					doSetOnData(value, schedule);
 					break;
 				case "AT":
-					schedule.setAtTime(new JobRunTime(value));
+					
+					if (value.contains("UNTIL")) {
+						String tmpat = value.substring(0, value.indexOf("UNTIL"));
+						String tmpuntil = value.substring(value.indexOf("UNTIL") + 6, value.length());
+						schedule.setAtTime(new JobRunTime(tmpat.trim()));
+						schedule.setUntilTime(new JobRunTime(tmpuntil.trim()));
+					} else {
+						schedule.setAtTime(new JobRunTime(value));
+					}
+
 					break;
 				case "CARRYFORWARD":
 					// Not needed
@@ -189,7 +206,7 @@ public class TivoliScheduleProcessor {
 					schedule.setCritical(true);
 					break;
 				case "DEADLINE":
-					schedule.setDeadline(new JobRunTime(value));
+					schedule.setUntilTime(new JobRunTime(value));
 					break;
 				case "EXCEPT":
 					schedule.getExceptOn().add(value);
@@ -344,8 +361,8 @@ public class TivoliScheduleProcessor {
 					if (value.contains("UNTIL")) {
 						String tmpat = value.substring(0, value.indexOf("UNTIL"));
 						String tmpuntil = value.substring(value.indexOf("UNTIL") + 6, value.length());
-						jobdetail.setAtTime(new JobRunTime(tmpat));
-						jobdetail.setUntilTime(new JobRunTime(tmpuntil));
+						jobdetail.setAtTime(new JobRunTime(tmpat.trim()));
+						jobdetail.setUntilTime(new JobRunTime(tmpuntil.trim()));
 					} else {
 						jobdetail.setAtTime(new JobRunTime(value));
 					}
@@ -357,7 +374,7 @@ public class TivoliScheduleProcessor {
 					jobdetail.setUntilTime(new JobRunTime(value));
 					break;
 				case "DEADLINE":
-					jobdetail.setDeadline(new JobRunTime(value));
+					jobdetail.setUntilTime(new JobRunTime(value));
 					break;
 				case "CRITICAL":
 					jobdetail.setCritical(true);
@@ -421,7 +438,7 @@ public class TivoliScheduleProcessor {
 //			jobfollows.setJobToFollow(value);
 //		}
 
-		
+
 		if(value.contains("#")) {
 			// Is external !! 
 			jobfollows.setIslocal(false);
@@ -436,16 +453,42 @@ public class TivoliScheduleProcessor {
 			String[] groupNjob = data[1].split("\\.");
 			
 			// ALWAYS GOING TO BE A GROUP IN POS 0
-			jobfollows.setInWorkflow(groupNjob[0]);
-			
+			String workflow = groupNjob[0];
+			jobfollows.setInWorkflow(workflow);
 			if(groupNjob[1].contains("@")) {
 				jobfollows.setDependsOnGroup(true);
 			}else {
-				jobfollows.setJobToFollow(groupNjob[1]);
+				String jobingroup = groupNjob[1];
+				jobfollows.setJobToFollow(jobingroup);
 			}
 			
 		}else {
 			jobfollows.setJobToFollow(value);
+		}
+		
+		// We are following a job so lets check if it definition is RECOVERY CONTINUE at the job object level
+		if(!StringUtils.isBlank(jobfollows.getJobToFollow())){
+			
+			String workflowname = null;
+			TivoliJobObject checkthisjob = null;
+			
+			if(!StringUtils.isBlank(jobfollows.getInWorkflow())) {
+				// Just a job in our group not another group
+				workflowname = jobfollows.getInWorkflow();
+				checkthisjob = getJobProcessor().getJobInGroupByName(workflowname, jobfollows.getJobToFollow());
+			}else {
+				// Local to this job, find this other job and get its value
+				checkthisjob = getJobProcessor().getFirstJobFoundByName(jobfollows.getJobToFollow());
+			}
+			
+			if(checkthisjob != null) {
+				if(!StringUtils.isBlank(checkthisjob.getRecovery())) {
+					if(checkthisjob.getRecovery().equalsIgnoreCase("CONTINUE")) {
+						// We must check upstream to determins our dep logic on our follows
+						jobfollows.setCompletedOnlyLogic(true);
+					}
+				}
+			}
 		}
 		
 		return jobfollows;

@@ -92,7 +92,7 @@ public class TivoliParser extends AbstractParser<TivoliDataModel> {
 		job_processor = new TivoliJobProcessor(cpu_processor, res_processor,var_processor);
 		job_processor.doProcessFile(job);
 
-		sch_processor = new TivoliScheduleProcessor(job_processor);
+		sch_processor = new TivoliScheduleProcessor(job_processor, cpu_processor);
 		sch_processor.doProcessFile(sch);
 
 		sch_processor.getScheduleData().keySet().forEach(key -> {
@@ -102,7 +102,7 @@ public class TivoliParser extends AbstractParser<TivoliDataModel> {
 
 	@Override
 	public IModelReport getModelReporter() {
-		return null;
+		return new TivoliReporter();
 	}
 
 	/*
@@ -130,6 +130,7 @@ public class TivoliParser extends AbstractParser<TivoliDataModel> {
 				group = new TivoliJobObject();
 				group.setName(groupname);
 				group.setGroupFlag(true);
+				group.setCpuData(sched.getCpuData());
 				// ALl our details about our group or schedule in tivoli
 				group.setSchedualData(sched);
 				container.addChild(group);

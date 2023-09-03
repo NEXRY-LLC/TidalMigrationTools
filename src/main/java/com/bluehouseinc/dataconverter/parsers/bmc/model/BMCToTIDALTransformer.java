@@ -33,6 +33,7 @@ import com.bluehouseinc.dataconverter.parsers.bmc.transformers.BMCOS400JobTransf
 import com.bluehouseinc.dataconverter.parsers.bmc.util.DateUtil;
 import com.bluehouseinc.dataconverter.parsers.bmc.util.FTPUtil;
 import com.bluehouseinc.dataconverter.util.VariableMapUtil;
+import com.bluehouseinc.tidal.api.exceptions.TidalException;
 import com.bluehouseinc.tidal.api.model.job.RepeatType;
 import com.bluehouseinc.tidal.utils.StringUtils;
 import com.bluehouseinc.transform.ITransformer;
@@ -75,7 +76,7 @@ public class BMCToTIDALTransformer implements ITransformer<List<BaseBMCJobOrFold
 		String accountfolder = this.getBmcDataModel().getConfigeProvider().getAccountFolder();
 
 		if (accountfolder == null) {
-			//throw new TidalException("Missing property " + BMC_AccountFileFolder);
+			throw new TidalException("Missing property " + accountfolder);
 		}else {
 			this.parser = new AccountParser(accountfolder);
 		}

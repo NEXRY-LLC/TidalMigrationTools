@@ -430,6 +430,10 @@ public class TidalDataModel {
 		return this.addJobDependencyForJob(myjob, depensonme, DepLogic.MATCH, Operator.EQUAL, DependentJobStatus.COMPLETED_NORMAL, dateOffset);
 	}
 
+	public CvsDependencyJob addJobDependencyForJobCompleted(BaseCsvJobObject myjob, BaseCsvJobObject depensonme, Integer dateOffset) {
+		return this.addJobDependencyForJob(myjob, depensonme, DepLogic.MATCH, Operator.EQUAL, DependentJobStatus.COMPLETED, dateOffset);
+	}
+
 	public CvsDependencyJob addJobDependencyForJob(BaseCsvJobObject myjob, BaseCsvJobObject depensonme, DepLogic logic, Operator operator, DependentJobStatus status, Integer dateOffset) {
 
 		// Do we not do it this way?

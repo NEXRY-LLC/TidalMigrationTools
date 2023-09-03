@@ -3,6 +3,8 @@ package com.bluehouseinc.dataconverter.parsers.tivoli.data.schedule;
 import java.util.LinkedList;
 import java.util.List;
 
+import com.bluehouseinc.dataconverter.parsers.tivoli.data.cpu.CpuData;
+import com.bluehouseinc.dataconverter.parsers.tivoli.data.cpu.TivoliCPUProcessor;
 import com.bluehouseinc.dataconverter.parsers.tivoli.data.schedule.job.JobScheduleData;
 import com.bluehouseinc.dataconverter.parsers.tivoli.data.schedule.on.RunOn;
 
@@ -23,9 +25,10 @@ public class SchedualData {
 	private List<String> exceptOn;
 	
 	private JobRunTime atTime;
+	private JobRunTime untilTime;
 	
 	private boolean critical = false;
-	private JobRunTime deadline;
+
 	
 	// Looks like a resource to me 
 	private List<NeedsResource> needs; //NEEDS 1 AMFINAN1#BONUS2DF
@@ -39,6 +42,8 @@ public class SchedualData {
 	private List<JobScheduleData> jobScheduleData;
 	
 	private List<String> filedepData;
+	
+	private CpuData cpuData;
 	
 	public SchedualData(){
 		this.needs = new LinkedList<>();

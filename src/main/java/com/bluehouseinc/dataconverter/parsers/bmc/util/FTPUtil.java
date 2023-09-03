@@ -415,8 +415,8 @@ public class FTPUtil {
 
 		dest.setFtpProtocol(protocol); // Set our protocol we are using.
 
-		String leftpath = command.getLocalPath().replace("\\", "/");
-		String rightpath = command.getRemotePath().replace("\\", "/");
+		String leftpath = StringUtils.getOr(command.getLocalPath(), "").replace("\\", "/");
+		String rightpath = StringUtils.getOr(command.getRemotePath(), "").replace("\\", "/");
 		FileParts leftparts = FileMapUtil.splitFileNameIntoParts(leftpath);
 		FileParts rightparts = FileMapUtil.splitFileNameIntoParts(rightpath);
 
@@ -487,7 +487,8 @@ public class FTPUtil {
 			}
 			break;
 		default:
-			throw new RuntimeException("Unsupported Direction Detected");
+			//throw new RuntimeException("Unsupported Direction Detected");
+			log.info("Unsupported Direction Detected");
 
 		}
 
