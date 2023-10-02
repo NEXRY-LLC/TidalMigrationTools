@@ -11,7 +11,7 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = true)
 public class AutosysVariableDependency extends AutosysBaseDependency {
 
-	public static final String VARIABLE_DEPENDENCY_REGEX = "(v)(\\((?>[^()]+)*\\))\\s=\\s(\\\"\\w+\")";
+	public static final String VARIABLE_DEPENDENCY_REGEX = "(v|value)(\\((?>[^()]+)*\\))\\s=\\s(\\\"\\w+\")";
 	public static final Pattern VARIABLE_DEPENDENCY_PATTERN = Pattern.compile(VARIABLE_DEPENDENCY_REGEX);
 
 	String variableValue;

@@ -28,6 +28,8 @@ public abstract class EspAbstractJob extends BaseJobOrGroupObject implements Esp
 	boolean containsRequestAttribute = false;
 	boolean containsScopeAttribute = false;
 	
+	List<String> groupsToDependOn = new ArrayList<>();
+	
 	public abstract EspJobType getJobType();
 	
 	EspStatementObject statementObject = new EspStatementObject();

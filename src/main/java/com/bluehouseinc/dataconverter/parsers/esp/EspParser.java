@@ -441,7 +441,10 @@ public class EspParser extends AbstractParser<EspDataModel> {
 			currentJob.setContainsRequestAttribute(true);
 		}
 		
-		
+		if (this.getParserDataModel().getConfigeProvider().isExcludedJobFromGroup(parent.getName(), jobName)) {
+			log.debug("isExcludedJobFromGroup Group{} Job{} is true, SKIPPPING", parent.getName(), jobName);
+			return;
+		}
 		// Go and do this visitor pattern stuff :) I rewrote this to work with my mind.
 		currentJob.processData(espJobVisitor, lines);
 

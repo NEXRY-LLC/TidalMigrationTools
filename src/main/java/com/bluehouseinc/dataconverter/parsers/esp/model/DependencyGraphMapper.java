@@ -297,6 +297,14 @@ public class DependencyGraphMapper {
 						return;
 					}
 
+				}else {
+					// Customer requested a report showing all groups that are dependent on other groups. 
+					
+					if(!esp.getChildren().isEmpty()) {
+						// We are a group that is dependent on a group.
+						esp.getGroupsToDependOn().add(jobgroup.getFullPath());
+						System.out.println(esp.getFullPath() + " Depends On Group "+jobgroup.getFullPath());
+					}
 				}
 			} else {
 				if (!StringUtils.isBlank(externjob)) {

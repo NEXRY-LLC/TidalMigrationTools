@@ -250,7 +250,9 @@ public class AutosysDependencyParserUtil {
 
 			String relationalOperatorString = matcher.group(3).trim();
 			AutosysExitCodeDependency.AutosysExitCodeDependencyOperator relationalOperator = AutosysExitCodeDependency.AutosysExitCodeDependencyOperator.getOperator(relationalOperatorString);
-			int value = Integer.parseInt(matcher.group(4).trim());
+			String exitcodeString = matcher.group(4).trim();
+			
+			int value = Integer.parseInt(exitcodeString);
 
 			AutosysExitCodeDependency exitCodeDependency = new AutosysExitCodeDependency(exitCodeDependencyName, relationalOperator, value);
 

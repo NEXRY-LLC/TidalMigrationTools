@@ -1,0 +1,2807 @@
+/* ----------------- imap_box_nt_nightly ----------------- */                                                                                 
+
+insert_job: imap_box_nt_nightly   job_type: BOX 
+owner: jp0imap@CGUSER
+permission: mx,gx
+date_conditions: 0
+condition: success(imap_nt_nightly_ref_data) AND value(imap_maintenance) = "off" AND success(imap_nt_delete_stagetables) AND success(imap_nt_box_prebatch)
+description: "Alarm NOCALL | BatchOps | IMAP nightly batch cycle"
+alarm_if_fail: 0
+alarm_if_terminated: 0
+
+
+ /* ----------------- imap_nt_mvmtf_trade_vm ----------------- */                                                                             
+
+ insert_job: imap_nt_mvmtf_trade_vm   job_type: CMD 
+ box_name: imap_box_nt_nightly
+ command: & "E:\IMAP\prod\MVMTF\Run_Mvmtf.bat TradeVMGeneratorJob"
+ machine: imap_Vmachine
+ owner: jp0imap@CGUSER
+ permission: mx,gx
+ date_conditions: 0
+ condition: success(imap_nt_empty_file_chk_cyc3_crmc_trade) AND success(imap_nt_prep_cyc3_crmc_alloc) AND success(imap_nt_prep_cyc3_crmc_ca) AND success(imap_nt_replace_mgrid_crmc_alloc)
+ description: "Alarm CALL | BatchOps | IMAP Trade Variation Margin Generator For MVMTF"
+ std_out_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.out"
+ std_err_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.err"
+ alarm_if_fail: 1
+ alarm_if_terminated: 1
+
+
+ /* ----------------- imap_nt_prep_cycle3_u2_shdr ----------------- */                                                                        
+
+ insert_job: imap_nt_prep_cycle3_u2_shdr   job_type: CMD 
+ box_name: imap_box_nt_nightly
+ command: & "E:\IMAP\prod\scripts\RunIdhTransactionDataPrep.bat isg_cstar_u2_transactions_shareholder -hasDigest"
+ machine: imap_Vmachine
+ owner: jp0imap@CGUSER
+ permission: mx,gx
+ date_conditions: 0
+ condition: success(imap_nt_fwtch_cycle3_u2_shdr)
+ description: "Alarm CALL | BatchOps | Validates if the file is ready for processing - isg_cstar_u2_transactions_shareholder"
+ n_retrys: 1
+ std_out_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.out"
+ std_err_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.err"
+ alarm_if_fail: 0
+ alarm_if_terminated: 1
+
+
+ /* ----------------- imap_nt_clear_suspects_nightly ----------------- */                                                                     
+
+ insert_job: imap_nt_clear_suspects_nightly   job_type: CMD 
+ box_name: imap_box_nt_nightly
+ command: "E:\IMAP\prod\Batch\Run_Query.bat" RunSupportQuery "'Automated Bulk Ack less than 1000 USD'"
+ machine: imap_Vmachine
+ owner: jp0imap@CGUSER
+ permission: mx,gx
+ date_conditions: 0
+ condition: success(imap_nt_clear_cancel_suspects_nightly)
+ description: "Alarm CALL | BatchOps | Cleans up low value suspect txns from IMAP"
+ n_retrys: 1
+ std_out_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.out"
+ std_err_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.err"
+ alarm_if_fail: 0
+ alarm_if_terminated: 1
+
+
+ /* ----------------- imap_nt_prep_cyc3_crmc_trade ----------------- */                                                                       
+
+ insert_job: imap_nt_prep_cyc3_crmc_trade   job_type: CMD 
+ box_name: imap_box_nt_nightly
+ command: & "E:\IMAP\prod\scripts\RunIdhTransactionDataPrep.bat idh_transaction_trades -hasMarkup"
+ machine: imap_Vmachine
+ owner: jp0imap@CGUSER
+ permission: mx,gx
+ date_conditions: 0
+ condition: success(imap_nt_fwtch_cyc3_crmc_trade)
+ description: "Alarm CALL | BatchOps | Merge and archive input files - idh_transaction_trades"
+ n_retrys: 1
+ std_out_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.out"
+ std_err_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.err"
+ alarm_if_fail: 0
+ alarm_if_terminated: 1
+
+
+ /* ----------------- imap_nt_mvmtf_transaction_writer ----------------- */                                                                   
+
+ insert_job: imap_nt_mvmtf_transaction_writer   job_type: CMD 
+ box_name: imap_box_nt_nightly
+ command: & "E:\IMAP\prod\MVMTF\Run_Mvmtf.bat TransactionWriterJob"
+ machine: imap_Vmachine
+ owner: jp0imap@CGUSER
+ permission: mx,gx
+ date_conditions: 0
+ condition: success(imap_nt_mvmtf_trade_vm) AND success(imap_nt_mvmtf_position_vm)
+ description: "Alarm CALL | BatchOps | IMAP Transaction Writer to EDA format For MVMTF"
+ std_out_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.out"
+ std_err_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.err"
+ alarm_if_fail: 1
+ alarm_if_terminated: 1
+
+
+ /* ----------------- imap_nt_prep_cycle3_g3_eda ----------------- */                                                                         
+
+ insert_job: imap_nt_prep_cycle3_g3_eda   job_type: CMD 
+ box_name: imap_box_nt_nightly
+ command: & "E:\IMAP\prod\scripts\RunIdhTransactionDataPrep.bat isg_cstar_g3_transactions_eda -hasDigest"
+ machine: imap_Vmachine
+ owner: jp0imap@CGUSER
+ permission: mx,gx
+ date_conditions: 0
+ condition: success(imap_nt_fwtch_cycle3_g3_eda)
+ description: "Alarm CALL | BatchOps | Validates if the file is ready for processing - isg_cstar_g3_transactions_shareholder"
+ n_retrys: 1
+ std_out_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.out"
+ std_err_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.err"
+ alarm_if_fail: 0
+ alarm_if_terminated: 1
+
+
+ /* ----------------- imap_nt_mvmtf_txn_eda_markup ----------------- */                                                                       
+
+ insert_job: imap_nt_mvmtf_txn_eda_markup   job_type: CMD 
+ box_name: imap_box_nt_nightly
+ command: & "E:\IMAP\prod\scripts\AddMarkUp.bat idh_transaction_eda 1.0"
+ machine: imap_Vmachine
+ owner: jp0imap@CGUSER
+ permission: mx,gx
+ date_conditions: 0
+ condition: success(imap_nt_mvmtf_transaction_writer) AND success(imap_nt_fwtch_cyc3_crmc_eda)
+ description: "Alarm CALL | BatchOps | Markup Add Markup to idh_transaction_eda file"
+ std_out_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.out"
+ std_err_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.err"
+ alarm_if_fail: 1
+ alarm_if_terminated: 1
+
+
+ /* ----------------- imap_nt_prep_cycle3_g3_alloc ----------------- */                                                                       
+
+ insert_job: imap_nt_prep_cycle3_g3_alloc   job_type: CMD 
+ box_name: imap_box_nt_nightly
+ command: & "E:\IMAP\prod\scripts\RunIdhTransactionDataPrep.bat isg_cstar_g3_transactions_manager_allocation -hasDigest"
+ machine: imap_Vmachine
+ owner: jp0imap@CGUSER
+ permission: mx,gx
+ date_conditions: 0
+ condition: success(imap_nt_fwtch_cycle3_g3_alloc)
+ description: "Alarm CALL | BatchOps | Validates if the file is ready for processing - isg_cstar_g3_transactions_manager_allocation"
+ n_retrys: 1
+ std_out_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.out"
+ std_err_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.err"
+ alarm_if_fail: 0
+ alarm_if_terminated: 1
+
+
+ /* ----------------- imap_nt_prep_cycle3_u2_ca ----------------- */                                                                          
+
+ insert_job: imap_nt_prep_cycle3_u2_ca   job_type: CMD 
+ box_name: imap_box_nt_nightly
+ command: & "E:\IMAP\prod\scripts\RunIdhTransactionDataPrep.bat isg_cstar_u2_transactions_corporate_action -hasDigest"
+ machine: imap_Vmachine
+ owner: jp0imap@CGUSER
+ permission: mx,gx
+ date_conditions: 0
+ condition: success(imap_nt_fwtch_cycle3_u2_ca)
+ description: "Alarm CALL | BatchOps | Validates if the file is ready for processing - isg_cstar_u2_transactions_corporate_action"
+ n_retrys: 1
+ std_out_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.out"
+ std_err_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.err"
+ alarm_if_fail: 0
+ alarm_if_terminated: 1
+
+
+ /* ----------------- imap_nt_prep_cycle3_g3_shdr ----------------- */                                                                        
+
+ insert_job: imap_nt_prep_cycle3_g3_shdr   job_type: CMD 
+ box_name: imap_box_nt_nightly
+ command: & "E:\IMAP\prod\scripts\RunIdhTransactionDataPrep.bat isg_cstar_g3_transactions_shareholder -hasDigest"
+ machine: imap_Vmachine
+ owner: jp0imap@CGUSER
+ permission: mx,gx
+ date_conditions: 0
+ condition: success(imap_nt_fwtch_cycle3_g3_shdr)
+ description: "Alarm CALL | BatchOps | Validates if the file is ready for processing - isg_cstar_g3_transactions_shareholder"
+ n_retrys: 1
+ std_out_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.out"
+ std_err_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.err"
+ alarm_if_fail: 0
+ alarm_if_terminated: 1
+
+
+ /* ----------------- imap_nt_mvmtf_prep_cycle3_u2_alloc ----------------- */                                                                 
+
+ insert_job: imap_nt_mvmtf_prep_cycle3_u2_alloc   job_type: CMD 
+ box_name: imap_box_nt_nightly
+ command: & "E:\IMAP\prod\scripts\RunMVMTFTransactionDataPrep.bat isg_cstar_u2_transactions_manager_allocation"
+ machine: imap_Vmachine
+ owner: jp0imap@CGUSER
+ permission: mx,gx
+ date_conditions: 0
+ condition: success(imap_nt_mvmtf_transaction_writer_u2)
+ description: "Alarm CALL | BatchOps | Merge and archive input files - isg_cstar_u2_transactions_manager_allocation"
+ n_retrys: 1
+ std_out_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.out"
+ std_err_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.err"
+ alarm_if_fail: 0
+ alarm_if_terminated: 1
+
+
+ /* ----------------- imap_nt_mvmtf_trade_vm_g3 ----------------- */                                                                          
+
+ insert_job: imap_nt_mvmtf_trade_vm_g3   job_type: CMD 
+ box_name: imap_box_nt_nightly
+ command: & "E:\IMAP\prod\MVMTF\Run_Mvmtf.bat TradeVMGeneratorJob_g3"
+ machine: imap_Vmachine
+ owner: jp0imap@CGUSER
+ permission: mx,gx
+ date_conditions: 0
+ condition: success(imap_nt_empty_file_chk_cyc3_g3_trade) AND success(imap_nt_prep_cycle3_g3_alloc) AND success(imap_nt_prep_cycle3_g3_ca) AND success(imap_nt_replace_mgrid_g3_alloc)
+ description: "Alarm CALL | BatchOps | IMAP Trade Variation Margin Generator For MVMTF FOR G3"
+ std_out_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.out"
+ std_err_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.err"
+ alarm_if_fail: 1
+ alarm_if_terminated: 1
+
+
+ /* ----------------- imap_nt_prep_cycle3_g3_trade ----------------- */                                                                       
+
+ insert_job: imap_nt_prep_cycle3_g3_trade   job_type: CMD 
+ box_name: imap_box_nt_nightly
+ command: & "E:\IMAP\prod\scripts\RunIdhTransactionDataPrep.bat isg_cstar_g3_transactions_trades -hasDigest"
+ machine: imap_Vmachine
+ owner: jp0imap@CGUSER
+ permission: mx,gx
+ date_conditions: 0
+ condition: success(imap_nt_fwtch_cycle3_g3_trade)
+ description: "Alarm CALL | BatchOps | Validates if the file is ready for processing - isg_cstar_g3_transactions_trades"
+ n_retrys: 1
+ std_out_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.out"
+ std_err_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.err"
+ alarm_if_fail: 0
+ alarm_if_terminated: 1
+
+
+ /* ----------------- imap_nt_mvmtf_trade_vm_u2 ----------------- */                                                                          
+
+ insert_job: imap_nt_mvmtf_trade_vm_u2   job_type: CMD 
+ box_name: imap_box_nt_nightly
+ command: & "E:\IMAP\prod\MVMTF\Run_Mvmtf.bat TradeVMGeneratorJob_u2"
+ machine: imap_Vmachine
+ owner: jp0imap@CGUSER
+ permission: mx,gx
+ date_conditions: 0
+ condition: success(imap_nt_empty_file_chk_cyc3_u2_trade) AND success(imap_nt_prep_cycle3_u2_alloc) AND success(imap_nt_prep_cycle3_u2_ca) AND success(imap_nt_replace_mgrid_u2_alloc)
+ description: "Alarm CALL | BatchOps | IMAP Trade Variation Margin Generator For MVMTF FOR U2"
+ std_out_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.out"
+ std_err_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.err"
+ alarm_if_fail: 1
+ alarm_if_terminated: 1
+
+
+ /* ----------------- imap_nt_process_cycle3_g3 ----------------- */                                                                          
+
+ insert_job: imap_nt_process_cycle3_g3   job_type: CMD 
+ box_name: imap_box_nt_nightly
+ command: & "E:\IMAP\prod\Batch\Run_IMap.bat EagleJobProcess_cycle3_g3"
+ machine: imap_Vmachine
+ owner: jp0imap@CGUSER
+ permission: mx,gx
+ date_conditions: 0
+ condition: success(imap_nt_empty_file_chk_cyc3_g3_trade) AND success(imap_nt_mvmtf_prep_cycle3_g3_alloc) AND success(imap_nt_prep_cycle3_g3_ca) AND success(imap_nt_prep_cycle3_g3_income) AND success(imap_nt_prep_cycle3_g3_shdr) AND success(imap_nt_mvmtf_prep_cycle3_g3_eda) AND success(imap_nt_box_financialtransaction_process_cycle_2_5) AND success(imap_box_nt_stage_etf_allocation_fi)
+ description: "Alarm CALL | BatchOps | IMAP transaction processing for cycle 3 u2"
+ n_retrys: 2
+ std_out_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.out"
+ std_err_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.err"
+ alarm_if_fail: 0
+ job_load: 1
+ priority: 1
+ alarm_if_terminated: 1
+
+
+ /* ----------------- imap_nt_process_cyc3_crmc ----------------- */                                                                          
+
+ insert_job: imap_nt_process_cyc3_crmc   job_type: CMD 
+ box_name: imap_box_nt_nightly
+ command: & "E:\IMAP\prod\Batch\Run_IMap.bat EagleJobProcess_cycle3"
+ machine: imap_Vmachine
+ owner: jp0imap@CGUSER
+ permission: mx,gx
+ date_conditions: 0
+ condition: success(imap_nt_empty_file_chk_cyc3_crmc_trade) AND success(imap_nt_mvmtf_prep_cyc3_crmc_alloc) AND success(imap_nt_prep_cyc3_crmc_ca) AND success(imap_nt_prep_cyc3_crmc_income) AND success(imap_nt_prep_cyc3_crmc_shdr) AND success(imap_nt_prep_cyc3_crmc_eda) AND success(imap_nt_box_financialtransaction_process_cycle_2_5) AND success(imap_box_nt_stage_etf_allocation_fi)
+ description: "Alarm CALL | BatchOps | IMAP transaction processing for cycle 3 crmc"
+ n_retrys: 2
+ std_out_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.out"
+ std_err_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.err"
+ alarm_if_fail: 0
+ job_load: 1
+ priority: 1
+ alarm_if_terminated: 1
+
+
+ /* ----------------- imap_nt_prep_cyc3_crmc_eda ----------------- */                                                                         
+
+ insert_job: imap_nt_prep_cyc3_crmc_eda   job_type: CMD 
+ box_name: imap_box_nt_nightly
+ command: & "E:\IMAP\prod\scripts\RunIdhTransactionDataPrep.bat idh_transaction_eda -hasMarkup -merge"
+ machine: imap_Vmachine
+ owner: jp0imap@CGUSER
+ permission: mx,gx
+ date_conditions: 0
+ condition: success(imap_nt_fwtch_cyc3_crmc_eda) AND success(imap_nt_mvmtf_txn_eda_markup)
+ description: "Alarm CALL | BatchOps | Merge and archive input files - idh_transaction_shareholder"
+ n_retrys: 1
+ std_out_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.out"
+ std_err_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.err"
+ alarm_if_fail: 0
+ alarm_if_terminated: 1
+
+
+ /* ----------------- imap_nt_archive_input_cyc3_crmc ----------------- */                                                                    
+
+ insert_job: imap_nt_archive_input_cyc3_crmc   job_type: CMD 
+ box_name: imap_box_nt_nightly
+ command: & "E:\IMAP\prod\Scripts\RunIMapArchiveInbound.bat idh_*.dat"
+ machine: imap_Vmachine
+ owner: jp0imap@CGUSER
+ permission: mx,gx
+ date_conditions: 0
+ condition: success(imap_nt_process_cyc3_crmc)
+ description: "Alarm CALL | BatchOps | Archives input files coming from MARS for CRMC cycle 3"
+ n_retrys: 1
+ std_out_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.out"
+ std_err_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.err"
+ alarm_if_fail: 0
+ alarm_if_terminated: 1
+
+
+ /* ----------------- imap_nt_mvmtf_prep_cycle3_u2_eda ----------------- */                                                                   
+
+ insert_job: imap_nt_mvmtf_prep_cycle3_u2_eda   job_type: CMD 
+ box_name: imap_box_nt_nightly
+ command: & "E:\IMAP\prod\scripts\RunMVMTFTransactionDataPrep.bat isg_cstar_u2_transactions_eda"
+ machine: imap_Vmachine
+ owner: jp0imap@CGUSER
+ permission: mx,gx
+ date_conditions: 0
+ condition: success(imap_nt_mvmtf_transaction_writer_u2) AND success(imap_nt_prep_cycle3_u2_eda)
+ description: "Alarm CALL | BatchOps | Merge and archive input files - isg_cstar_u2_transactions_eda"
+ n_retrys: 1
+ std_out_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.out"
+ std_err_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.err"
+ alarm_if_fail: 0
+ alarm_if_terminated: 1
+
+
+ /* ----------------- imap_nt_prep_cycle3_u2_income ----------------- */                                                                      
+
+ insert_job: imap_nt_prep_cycle3_u2_income   job_type: CMD 
+ box_name: imap_box_nt_nightly
+ command: & "E:\IMAP\prod\scripts\RunIdhTransactionDataPrep.bat isg_cstar_u2_transactions_income -hasDigest"
+ machine: imap_Vmachine
+ owner: jp0imap@CGUSER
+ permission: mx,gx
+ date_conditions: 0
+ condition: success(imap_nt_fwtch_cycle3_u2_income)
+ description: "Alarm CALL | BatchOps | Validates if the file is ready for processing - isg_cstar_u2_transactions_income"
+ n_retrys: 1
+ std_out_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.out"
+ std_err_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.err"
+ alarm_if_fail: 0
+ alarm_if_terminated: 1
+
+
+ /* ----------------- imap_nt_prep_cycle3_u2_eda ----------------- */                                                                         
+
+ insert_job: imap_nt_prep_cycle3_u2_eda   job_type: CMD 
+ box_name: imap_box_nt_nightly
+ command: & "E:\IMAP\prod\scripts\RunIdhTransactionDataPrep.bat isg_cstar_u2_transactions_eda -hasDigest"
+ machine: imap_Vmachine
+ owner: jp0imap@CGUSER
+ permission: mx,gx
+ date_conditions: 0
+ condition: success(imap_nt_fwtch_cycle3_u2_eda)
+ description: "Alarm CALL | BatchOps | Validates if the file is ready for processing - isg_cstar_u2_transactions_shareholder"
+ n_retrys: 1
+ std_out_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.out"
+ std_err_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.err"
+ alarm_if_fail: 0
+ alarm_if_terminated: 1
+
+
+ /* ----------------- imap_nt_mvmtf_prep_cycle3_g3_alloc ----------------- */                                                                 
+
+ insert_job: imap_nt_mvmtf_prep_cycle3_g3_alloc   job_type: CMD 
+ box_name: imap_box_nt_nightly
+ command: & "E:\IMAP\prod\scripts\RunMVMTFTransactionDataPrep.bat isg_cstar_g3_transactions_manager_allocation"
+ machine: imap_Vmachine
+ owner: jp0imap@CGUSER
+ permission: mx,gx
+ date_conditions: 0
+ condition: success(imap_nt_mvmtf_transaction_writer_g3)
+ description: "Alarm CALL | BatchOps | Merge and archive input files - isg_cstar_g3_transactions_manager_allocation"
+ n_retrys: 1
+ std_out_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.out"
+ std_err_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.err"
+ alarm_if_fail: 0
+ alarm_if_terminated: 1
+
+
+ /* ----------------- imap_nt_mvmtf_prep_cycle3_g3_eda ----------------- */                                                                   
+
+ insert_job: imap_nt_mvmtf_prep_cycle3_g3_eda   job_type: CMD 
+ box_name: imap_box_nt_nightly
+ command: & "E:\IMAP\prod\scripts\RunMVMTFTransactionDataPrep.bat isg_cstar_g3_transactions_eda"
+ machine: imap_Vmachine
+ owner: jp0imap@CGUSER
+ permission: mx,gx
+ date_conditions: 0
+ condition: success(imap_nt_mvmtf_transaction_writer_g3) AND success(imap_nt_prep_cycle3_g3_eda)
+ description: "Alarm CALL | BatchOps | Merge and archive input files - isg_cstar_g3_transactions_eda"
+ n_retrys: 1
+ std_out_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.out"
+ std_err_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.err"
+ alarm_if_fail: 0
+ alarm_if_terminated: 1
+
+
+ /* ----------------- imap_nt_prep_cyc3_crmc_alloc ----------------- */                                                                       
+
+ insert_job: imap_nt_prep_cyc3_crmc_alloc   job_type: CMD 
+ box_name: imap_box_nt_nightly
+ command: & "E:\IMAP\prod\scripts\RunIdhTransactionDataPrep.bat idh_manager_allocation -hasMarkup"
+ machine: imap_Vmachine
+ owner: jp0imap@CGUSER
+ permission: mx,gx
+ date_conditions: 0
+ condition: success(imap_nt_fwtch_cyc3_crmc_alloc)
+ description: "Alarm CALL | BatchOps | Merge and archive input files - idh_manager_allocation"
+ n_retrys: 1
+ std_out_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.out"
+ std_err_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.err"
+ alarm_if_fail: 0
+ alarm_if_terminated: 1
+
+
+ /* ----------------- imap_nt_prep_cycle3_g3_ca ----------------- */                                                                          
+
+ insert_job: imap_nt_prep_cycle3_g3_ca   job_type: CMD 
+ box_name: imap_box_nt_nightly
+ command: & "E:\IMAP\prod\scripts\RunIdhTransactionDataPrep.bat isg_cstar_g3_transactions_corporate_action -hasDigest"
+ machine: imap_Vmachine
+ owner: jp0imap@CGUSER
+ permission: mx,gx
+ date_conditions: 0
+ condition: success(imap_nt_fwtch_cycle3_g3_ca)
+ description: "Alarm CALL | BatchOps | Validates if the file is ready for processing - isg_cstar_g3_transactions_corporate_action"
+ n_retrys: 1
+ std_out_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.out"
+ std_err_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.err"
+ alarm_if_fail: 0
+ alarm_if_terminated: 1
+
+
+ /* ----------------- imap_nt_prep_cycle3_u2_alloc ----------------- */                                                                       
+
+ insert_job: imap_nt_prep_cycle3_u2_alloc   job_type: CMD 
+ box_name: imap_box_nt_nightly
+ command: & "E:\IMAP\prod\scripts\RunIdhTransactionDataPrep.bat isg_cstar_u2_transactions_manager_allocation -hasDigest"
+ machine: imap_Vmachine
+ owner: jp0imap@CGUSER
+ permission: mx,gx
+ date_conditions: 0
+ condition: success(imap_nt_fwtch_cycle3_u2_alloc)
+ description: "Alarm CALL | BatchOps | Validates if the file is ready for processing- isg_cstar_u2_transactions_manager_allocation"
+ n_retrys: 1
+ std_out_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.out"
+ std_err_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.err"
+ alarm_if_fail: 0
+ alarm_if_terminated: 1
+
+
+ /* ----------------- imap_nt_archive_input_cycle3_u2 ----------------- */                                                                    
+
+ insert_job: imap_nt_archive_input_cycle3_u2   job_type: CMD 
+ box_name: imap_box_nt_nightly
+ command: & "E:\IMAP\prod\Scripts\RunIMapArchiveInbound.bat isg_cstar_u2_transactions_*.*"
+ machine: imap_Vmachine
+ owner: jp0imap@CGUSER
+ permission: mx,gx
+ date_conditions: 0
+ condition: success(imap_nt_process_cycle3_u2)
+ description: "Alarm CALL | BatchOps | Archives input files coming from MARS for CGTC cycle 3"
+ n_retrys: 1
+ std_out_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.out"
+ std_err_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.err"
+ alarm_if_fail: 0
+ alarm_if_terminated: 1
+
+
+ /* ----------------- imap_nt_archive_input_cycle3_g3 ----------------- */                                                                    
+
+ insert_job: imap_nt_archive_input_cycle3_g3   job_type: CMD 
+ box_name: imap_box_nt_nightly
+ command: & "E:\IMAP\prod\Scripts\RunIMapArchiveInbound.bat isg_cstar_g3_transactions_*.*"
+ machine: imap_Vmachine
+ owner: jp0imap@CGUSER
+ permission: mx,gx
+ date_conditions: 0
+ condition: success(imap_nt_process_cycle3_g3)
+ description: "Alarm CALL | BatchOps | Archives input files coming from MARS for GIG cycle 3"
+ n_retrys: 1
+ std_out_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.out"
+ std_err_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.err"
+ alarm_if_fail: 0
+ alarm_if_terminated: 1
+
+
+ /* ----------------- imap_nt_delete_dup_txns ----------------- */                                                                            
+
+ insert_job: imap_nt_delete_dup_txns   job_type: CMD 
+ box_name: imap_box_nt_nightly
+ command: "E:\IMAP\prod\Batch\Run_Query.bat" RunSupportQuery "'Delete Duplicate Txns'"
+ machine: imap_Vmachine
+ owner: jp0imap@CGUSER
+ permission: mx,gx
+ date_conditions: 0
+ condition: value(imap_intraday) = "stop"
+ description: "Alarm CALL | BatchOps | Cleans up Source txns which span across multiple FTs"
+ n_retrys: 1
+ std_out_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.out"
+ std_err_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.err"
+ alarm_if_fail: 0
+ alarm_if_terminated: 1
+
+
+ /* ----------------- imap_nt_prep_cycle3_u2_trade ----------------- */                                                                       
+
+ insert_job: imap_nt_prep_cycle3_u2_trade   job_type: CMD 
+ box_name: imap_box_nt_nightly
+ command: & "E:\IMAP\prod\scripts\RunIdhTransactionDataPrep.bat isg_cstar_u2_transactions_trades -hasDigest"
+ machine: imap_Vmachine
+ owner: jp0imap@CGUSER
+ permission: mx,gx
+ date_conditions: 0
+ condition: success(imap_nt_fwtch_cycle3_u2_trade)
+ description: "Alarm CALL | BatchOps | Validates if the file is ready for processing - isg_cstar_u2_transactions_trades"
+ n_retrys: 1
+ std_out_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.out"
+ std_err_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.err"
+ alarm_if_fail: 0
+ alarm_if_terminated: 1
+
+
+ /* ----------------- imap_nt_mvmtf_prep_cyc3_crmc_alloc ----------------- */                                                                 
+
+ insert_job: imap_nt_mvmtf_prep_cyc3_crmc_alloc   job_type: CMD 
+ box_name: imap_box_nt_nightly
+ command: & "E:\IMAP\prod\scripts\RunMVMTFTransactionDataPrep.bat idh_manager_allocation"
+ machine: imap_Vmachine
+ owner: jp0imap@CGUSER
+ permission: mx,gx
+ date_conditions: 0
+ condition: success(imap_nt_mvmtf_transaction_writer)
+ description: "Alarm CALL | BatchOps | Merge and archive input files - idh_manager_allocation"
+ n_retrys: 1
+ std_out_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.out"
+ std_err_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.err"
+ alarm_if_fail: 0
+ alarm_if_terminated: 1
+
+
+ /* ----------------- imap_nt_prep_cyc3_crmc_shdr ----------------- */                                                                        
+
+ insert_job: imap_nt_prep_cyc3_crmc_shdr   job_type: CMD 
+ box_name: imap_box_nt_nightly
+ command: & "E:\IMAP\prod\scripts\RunIdhTransactionDataPrep.bat idh_transaction_shareholder -hasMarkup"
+ machine: imap_Vmachine
+ owner: jp0imap@CGUSER
+ permission: mx,gx
+ date_conditions: 0
+ condition: success(imap_nt_fwtch_cyc3_crmc_shdr)
+ description: "Alarm CALL | BatchOps | Merge and archive input files - idh_transaction_shareholder"
+ n_retrys: 1
+ std_out_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.out"
+ std_err_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.err"
+ alarm_if_fail: 0
+ alarm_if_terminated: 1
+
+
+ /* ----------------- imap_nt_prep_cyc3_crmc_income ----------------- */                                                                      
+
+ insert_job: imap_nt_prep_cyc3_crmc_income   job_type: CMD 
+ box_name: imap_box_nt_nightly
+ command: & "E:\IMAP\prod\scripts\RunIdhTransactionDataPrep.bat idh_transaction_income -hasMarkup"
+ machine: imap_Vmachine
+ owner: jp0imap@CGUSER
+ permission: mx,gx
+ date_conditions: 0
+ condition: success(imap_nt_fwtch_cyc3_crmc_income)
+ description: "Alarm CALL | BatchOps | Merge and archive input files - idh_transaction_income"
+ n_retrys: 1
+ std_out_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.out"
+ std_err_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.err"
+ alarm_if_fail: 0
+ alarm_if_terminated: 1
+
+
+ /* ----------------- imap_nt_mvmtf_transaction_writer_g3 ----------------- */                                                                
+
+ insert_job: imap_nt_mvmtf_transaction_writer_g3   job_type: CMD 
+ box_name: imap_box_nt_nightly
+ command: & "E:\IMAP\prod\MVMTF\Run_Mvmtf.bat TransactionWriterJob_g3"
+ machine: imap_Vmachine
+ owner: jp0imap@CGUSER
+ permission: mx,gx
+ date_conditions: 0
+ condition: success(imap_nt_mvmtf_trade_vm_g3) AND success(imap_nt_mvmtf_position_vm)
+ description: "Alarm CALL | BatchOps | IMAP Transaction Writer to EDA format For MVMTF For G3"
+ std_out_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.out"
+ std_err_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.err"
+ alarm_if_fail: 1
+ alarm_if_terminated: 1
+
+
+ /* ----------------- imap_nt_mvmtf_transaction_writer_u2 ----------------- */                                                                
+
+ insert_job: imap_nt_mvmtf_transaction_writer_u2   job_type: CMD 
+ box_name: imap_box_nt_nightly
+ command: & "E:\IMAP\prod\MVMTF\Run_Mvmtf.bat TransactionWriterJob_u2"
+ machine: imap_Vmachine
+ owner: jp0imap@CGUSER
+ permission: mx,gx
+ date_conditions: 0
+ condition: success(imap_nt_mvmtf_trade_vm_u2)
+ description: "Alarm CALL | BatchOps | IMAP Transaction Writer to EDA format For MVMTF For U2"
+ std_out_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.out"
+ std_err_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.err"
+ alarm_if_fail: 1
+ alarm_if_terminated: 1
+
+
+ /* ----------------- imap_nt_process_cycle3_u2 ----------------- */                                                                          
+
+ insert_job: imap_nt_process_cycle3_u2   job_type: CMD 
+ box_name: imap_box_nt_nightly
+ command: & "E:\IMAP\prod\Batch\Run_IMap.bat EagleJobProcess_cycle3_u2"
+ machine: imap_Vmachine
+ owner: jp0imap@CGUSER
+ permission: mx,gx
+ date_conditions: 0
+ condition: success(imap_nt_empty_file_chk_cyc3_u2_trade) AND success(imap_nt_mvmtf_prep_cycle3_u2_alloc) AND success(imap_nt_prep_cycle3_u2_ca) AND success(imap_nt_prep_cycle3_u2_income) AND success(imap_nt_prep_cycle3_u2_shdr) AND success(imap_nt_mvmtf_prep_cycle3_u2_eda) AND success(imap_nt_box_financialtransaction_process_cycle_2_5) AND success(imap_box_nt_stage_etf_allocation_fi)
+ description: "Alarm CALL | BatchOps | IMAP transaction processing for cycle 3 u2"
+ n_retrys: 2
+ std_out_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.out"
+ std_err_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.err"
+ alarm_if_fail: 0
+ job_load: 1
+ priority: 1
+ alarm_if_terminated: 1
+
+
+ /* ----------------- imap_nt_prep_cycle3_g3_income ----------------- */                                                                      
+
+ insert_job: imap_nt_prep_cycle3_g3_income   job_type: CMD 
+ box_name: imap_box_nt_nightly
+ command: & "E:\IMAP\prod\scripts\RunIdhTransactionDataPrep.bat isg_cstar_g3_transactions_income -hasDigest"
+ machine: imap_Vmachine
+ owner: jp0imap@CGUSER
+ permission: mx,gx
+ date_conditions: 0
+ condition: success(imap_nt_fwtch_cycle3_g3_income)
+ description: "Alarm CALL | BatchOps | Validates if the file is ready for processing - isg_cstar_g3_transactions_income"
+ n_retrys: 1
+ std_out_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.out"
+ std_err_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.err"
+ alarm_if_fail: 0
+ alarm_if_terminated: 1
+
+
+ /* ----------------- imap_nt_prep_cyc3_crmc_ca ----------------- */                                                                          
+
+ insert_job: imap_nt_prep_cyc3_crmc_ca   job_type: CMD 
+ box_name: imap_box_nt_nightly
+ command: & "E:\IMAP\prod\scripts\RunIdhTransactionDataPrep.bat idh_transaction_corporate_action -hasMarkup"
+ machine: imap_Vmachine
+ owner: jp0imap@CGUSER
+ permission: mx,gx
+ date_conditions: 0
+ condition: success(imap_nt_fwtch_cyc3_crmc_ca)
+ description: "Alarm CALL | BatchOps | Merge and archive input files - idh_transaction_corporate_action"
+ n_retrys: 1
+ std_out_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.out"
+ std_err_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.err"
+ alarm_if_fail: 0
+ alarm_if_terminated: 1
+
+
+ /* ----------------- imap_nt_prep_aladdin_cash_transfers ----------------- */                                                                
+
+ insert_job: imap_nt_prep_aladdin_cash_transfers   job_type: CMD 
+ box_name: imap_box_nt_nightly
+ command: & "E:\IMAP\prod\scripts\Digest.bat flcn_aldn_cash_entry_f1_v1_t1 MFT\Falcon\Inbound"
+ machine: imap_Vmachine
+ owner: jp0imap@CGUSER
+ permission: mx,gx
+ date_conditions: 0
+ condition: success(imap_box_nt_fwtch_aladdin_cash_transfers)
+ description: "Alarm CALL | BatchOps | Prep flcn_aldn_cash_entry_f1_v1_t1* file"
+ n_retrys: 1
+ std_out_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.out"
+ std_err_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.err"
+ alarm_if_fail: 0
+ alarm_if_terminated: 1
+
+
+ /* ----------------- imap_nt_empty_file_chk_cyc3_crmc_trade ----------------- */                                                             
+
+ insert_job: imap_nt_empty_file_chk_cyc3_crmc_trade   job_type: CMD 
+ box_name: imap_box_nt_nightly
+ command: & "E:\IMAP\prod\scripts\Utils\is-empty-file-any.bat E:\MFT\MARS\Inbound idh_transaction_trades.dat"
+ machine: imap_Vmachine
+ owner: jp0imap@CGUSER
+ permission: mx,gx
+ date_conditions: 0
+ condition: success(imap_nt_prep_cyc3_crmc_trade)
+ description: "Alarm CALL | BatchOps | Check for empty input file - idh_transaction_trades"
+ n_retrys: 1
+ std_out_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.out"
+ std_err_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.err"
+ alarm_if_fail: 0
+ alarm_if_terminated: 1
+
+
+ /* ----------------- imap_nt_empty_file_chk_cyc3_g3_trade ----------------- */                                                               
+
+ insert_job: imap_nt_empty_file_chk_cyc3_g3_trade   job_type: CMD 
+ box_name: imap_box_nt_nightly
+ command: & "E:\IMAP\prod\scripts\Utils\is-empty-file-any.bat E:\MFT\MARS\Inbound isg_cstar_g3_transactions_trades.dat"
+ machine: imap_Vmachine
+ owner: jp0imap@CGUSER
+ permission: mx,gx
+ date_conditions: 0
+ condition: success(imap_nt_prep_cycle3_g3_trade)
+ description: "Alarm CALL | BatchOps | Check for empty input file - isg_cstar_g3_transactions_trades"
+ n_retrys: 1
+ std_out_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.out"
+ std_err_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.err"
+ alarm_if_fail: 0
+ alarm_if_terminated: 1
+
+
+ /* ----------------- imap_nt_empty_file_chk_cyc3_u2_trade ----------------- */                                                               
+
+ insert_job: imap_nt_empty_file_chk_cyc3_u2_trade   job_type: CMD 
+ box_name: imap_box_nt_nightly
+ command: & "E:\IMAP\prod\scripts\Utils\is-empty-file-any.bat E:\MFT\MARS\Inbound isg_cstar_u2_transactions_trades.dat"
+ machine: imap_Vmachine
+ owner: jp0imap@CGUSER
+ permission: mx,gx
+ date_conditions: 0
+ condition: success(imap_nt_prep_cycle3_u2_trade)
+ description: "Alarm CALL | BatchOps | Check for empty input file - isg_cstar_u2_transactions_trades"
+ n_retrys: 1
+ std_out_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.out"
+ std_err_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.err"
+ alarm_if_fail: 0
+ alarm_if_terminated: 1
+
+
+ /* ----------------- imap_nt_box_rp_cash_position_eod ----------------- */                                                                   
+
+ insert_job: imap_nt_box_rp_cash_position_eod   job_type: BOX 
+ box_name: imap_box_nt_nightly
+ owner: jp0imap@CGUSER
+ permission: mx,gx
+ date_conditions: 0
+ condition: success(imap_nt_box_eod_rp_transaction_stage_cycle)
+ description: "Alarm CALL | BatchOps | RP Cash Position Sweep"
+ alarm_if_fail: 0
+ alarm_if_terminated: 0
+
+
+  /* ----------------- imap_nt_rp_cash_position_process ----------------- */                                                                  
+
+  insert_job: imap_nt_rp_cash_position_process   job_type: CMD 
+  box_name: imap_nt_box_rp_cash_position_eod
+  command: & "E:\IMAP\prod\Batch\Run_IMap.bat FinancialTransactionJobProcess"
+  machine: imapsingle_Vmachine
+  owner: jp0imap@CGUSER
+  permission: mx,gx
+  date_conditions: 0
+  condition: success(imap_nt_rp_cash_position_stage)
+  description: "Alarm CALL | BatchOps Run FinancialTransactionJobProcess|"
+  std_out_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.out"
+  std_err_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.err"
+  alarm_if_fail: 0
+  alarm_if_terminated: 0
+
+
+  /* ----------------- imap_nt_rp_cash_position_stage ----------------- */                                                                    
+
+  insert_job: imap_nt_rp_cash_position_stage   job_type: CMD 
+  box_name: imap_nt_box_rp_cash_position_eod
+  command: & "E:\IMAP\prod\Batch\Run_IMap.bat ResearchPortfolioCashPositionJobProcess"
+  machine: imap_Vmachine
+  owner: jp0imap@CGUSER
+  permission: mx,gx
+  date_conditions: 0
+  description: "Alarm CALL | BatchOps | IMAP transaction to sweep from reserve to cash owning analyst manager"
+  std_out_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.out"
+  std_err_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.err"
+  alarm_if_fail: 0
+  job_load: 1
+  priority: 1
+  alarm_if_terminated: 0
+
+
+ /* ----------------- imap_nt_clear_failed_pair_nightly ----------------- */                                                                  
+
+ insert_job: imap_nt_clear_failed_pair_nightly   job_type: CMD 
+ box_name: imap_box_nt_nightly
+ command: "E:\IMAP\prod\Batch\Run_Query.bat" RunSupportQuery "'Bulk Ack Failed Cancel and Failed Original'"
+ machine: imap_Vmachine
+ owner: jp0imap@CGUSER
+ permission: mx,gx
+ date_conditions: 0
+ condition: success(imap_nt_box_cmi_cycle_3_5_eod)
+ description: "Alarm CALL | BatchOps | Cleans up Failed Cancel and Failed Original txns from IMAP"
+ n_retrys: 1
+ std_out_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.out"
+ std_err_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.err"
+ alarm_if_fail: 0
+ alarm_if_terminated: 1
+
+
+ /* ----------------- imap_box_nt_mass_transfers_cycle1 ----------------- */                                                                  
+
+ insert_job: imap_box_nt_mass_transfers_cycle1   job_type: BOX 
+ box_name: imap_box_nt_nightly
+ owner: jp0imap@CGUSER
+ permission: mx,gx
+ date_conditions: 0
+ condition: success(imap_nt_box_mass_transfer_cutoff)
+ description: "Alarm NOCALL | BatchOps | IMAP mass transfers box"
+ alarm_if_fail: 0
+ alarm_if_terminated: 0
+
+
+  /* ----------------- imap_nt_explode_mass_transfers ----------------- */                                                                    
+
+  insert_job: imap_nt_explode_mass_transfers   job_type: CMD 
+  box_name: imap_box_nt_mass_transfers_cycle1
+  command: & "E:\IMAP\prod\Batch\Run_IMap.bat MassTransfersJobProcess"
+  machine: imap_Vmachine
+  owner: jp0imap@CGUSER
+  permission: mx,gx
+  date_conditions: 0
+  description: "Alarm CALL | BatchOps |  Mass transfer Explosion"
+  n_retrys: 1
+  std_out_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.out"
+  std_err_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.err"
+  alarm_if_fail: 0
+  alarm_if_terminated: 1
+
+
+  /* ----------------- imap_nt_process_mass_transfers ----------------- */                                                                    
+
+  insert_job: imap_nt_process_mass_transfers   job_type: CMD 
+  box_name: imap_box_nt_mass_transfers_cycle1
+  command: & "E:\IMAP\prod\Batch\Run_IMap.bat MassTransfersCycle1JobProcess"
+  machine: imap_Vmachine
+  owner: jp0imap@CGUSER
+  permission: mx,gx
+  date_conditions: 0
+  condition: success(imap_nt_write_mass_transfers)
+  description: "Alarm CALL | BatchOps | Processes Manager Transfers Triggered by Mass Transfer into IMAP"
+  n_retrys: 1
+  std_out_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.out"
+  std_err_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.err"
+  alarm_if_fail: 0
+  alarm_if_terminated: 1
+
+
+  /* ----------------- imap_nt_write_mass_transfers ----------------- */                                                                      
+
+  insert_job: imap_nt_write_mass_transfers   job_type: CMD 
+  box_name: imap_box_nt_mass_transfers_cycle1
+  command: & E\:\etltools\SSIS\CGDtExec imap-ssis-prod\cgsql PRD_IMAP IMAP Publish_ManagerTransfers.dtsx PRD_IMAP /par ""$Package\:\:IsUploadOnlyMassTransfer(String)";"Y""
+  machine: imap_nt_ssis_Vmachine
+  owner: jp0imap@CGUSER
+  permission: mx,gx
+  date_conditions: 0
+  condition: success(imap_nt_explode_mass_transfers)
+  description: "Alarm CALL | BatchOps | IMAP mass transfer file writer to be processed in IMAP"
+  n_retrys: 1
+  std_out_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.out"
+  std_err_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.err"
+  alarm_if_fail: 0
+  alarm_if_terminated: 1
+
+
+  /* ----------------- imap_nt_complete_mass_transfers ----------------- */                                                                   
+
+  insert_job: imap_nt_complete_mass_transfers   job_type: CMD 
+  box_name: imap_box_nt_mass_transfers_cycle1
+  command: & "date /T"
+  machine: imap_Vmachine
+  owner: jp0imap@CGUSER
+  permission: mx,gx
+  date_conditions: 0
+  condition: success(imap_nt_publish_position_clear_mass_transfers)
+  description: "Alarm CALL | BatchOps | Indicates completion of Mass Transfers."
+  n_retrys: 1
+  std_out_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.out"
+  std_err_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.err"
+  alarm_if_fail: 0
+  alarm_if_terminated: 1
+
+
+  /* ----------------- imap_nt_publish_position_clear_mass_transfers ----------------- */                                                     
+
+  insert_job: imap_nt_publish_position_clear_mass_transfers   job_type: CMD 
+  box_name: imap_box_nt_mass_transfers_cycle1
+  command: & "E:\IMAP\prod\MassTransferBatch\Run_MassTransfer.bat MassTransferPositionClearJobProcess"
+  machine: imap_Vmachine
+  owner: jp0imap@CGUSER
+  permission: mx,gx
+  date_conditions: 0
+  condition: success(imap_nt_process_mass_transfers)
+  description: "Alarm CALL | BatchOps | Publishes Mass Transfer Position Clear Event to RabbitMQ"
+  n_retrys: 1
+  std_out_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.out"
+  std_err_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.err"
+  alarm_if_fail: 0
+  alarm_if_terminated: 1
+
+
+  /* ----------------- imap_nt_archive_ftmt_file_cycle1 ----------------- */                                                                  
+
+  insert_job: imap_nt_archive_ftmt_file_cycle1   job_type: CMD 
+  box_name: imap_box_nt_mass_transfers_cycle1
+  command: & "E:\IMAP\prod\Scripts\RunIMapArchiveInbound.bat mgr_transfer_master_cycle1*.*"
+  machine: imap_Vmachine
+  owner: jp0imap@CGUSER
+  permission: mx,gx
+  date_conditions: 0
+  condition: success(imap_nt_process_mass_transfers)
+  description: "Alarm CALL | BatchOps | Archives ftmt files for cycle1"
+  n_retrys: 1
+  std_out_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.out"
+  std_err_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.err"
+  alarm_if_fail: 0
+  alarm_if_terminated: 1
+
+
+ /* ----------------- imap_nt_suppress_cashpilotaccount ----------------- */                                                                  
+
+ insert_job: imap_nt_suppress_cashpilotaccount   job_type: CMD 
+ box_name: imap_box_nt_nightly
+ command: "E:\IMAP\prod\Batch\Run_Query.bat" RunSupportQuery "'Suppress CashPilotAccount'"
+ machine: imap_Vmachine
+ owner: jp0imap@CGUSER
+ permission: mx,gx
+ date_conditions: 0
+ condition: success(imap_box_nt_portfolio_aladdin_decoder)
+ description: "Alarm CALL | BatchOps | This will insert CashPilotAccount PortfolioUid if not already present in AladdinPositionExceptionConfiguration and AladdinTransactionSuppressConfig, to suppress these account in Bank Statement and OPT"
+ n_retrys: 1
+ std_out_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.out"
+ std_err_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.err"
+ alarm_if_fail: 0
+ alarm_if_terminated: 1
+
+
+ /* ----------------- imap_nt_box_pre_dst_recon ----------------- */                                                                          
+
+ insert_job: imap_nt_box_pre_dst_recon   job_type: BOX 
+ box_name: imap_box_nt_nightly
+ owner: jp0imap@CGUSER
+ permission: mx,gx
+ date_conditions: 0
+ condition: success(imap_nt_box_rp_cash_position_eod)
+ description: "Alarm CALL | BatchOps | IMAP2MARS Pre dst recon nightly"
+ alarm_if_fail: 0
+ alarm_if_terminated: 1
+
+
+  /* ----------------- imap_nt_send_aladdin_cash_recon ----------------- */                                                                   
+
+  insert_job: imap_nt_send_aladdin_cash_recon   job_type: CMD 
+  box_name: imap_nt_box_pre_dst_recon
+  command: & "E:\IMAP\prod\scripts\MFT\IMAP_MFT_Script.bat /Broadcast E:\MFT\IS\Outbound\imap_aladdin_bank_stmt_f1_v1_t1*.dat.zip"
+  machine: imap_Vmachine
+  owner: jp0imap@CGUSER
+  permission: mx,gx
+  date_conditions: 0
+  condition: success(imap_nt_createhash_imap_cash_recon_aladdin) AND success(imap_nt_createhash_imap_cash_recon_aladdin_repair)
+  description: "Alarm CALL | BatchOps | Transfers cash recon transactions output file to mft for Aladdin"
+  n_retrys: 1
+  std_out_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.out"
+  std_err_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.err"
+  alarm_if_fail: 0
+  alarm_if_terminated: 1
+
+
+  /* ----------------- imap_nt_send_mars_offplatform_txn_aladdin_cyc1 ----------------- */                                                    
+
+  insert_job: imap_nt_send_mars_offplatform_txn_aladdin_cyc1   job_type: CMD 
+  box_name: imap_nt_box_pre_dst_recon
+  command: & "E:\IMAP\prod\scripts\MFT\IMAP_MFT_Script.bat /Broadcast E:\MFT\IS\Outbound\imap_cash_transfer_f1_v1_t1*.dat.zip"
+  machine: imap_Vmachine
+  owner: jp0imap@CGUSER
+  permission: mx,gx
+  date_conditions: 0
+  condition: success(imap_nt_createhash_imap_offplatform_txn_aladdin_cyc1)
+  description: "Alarm CALL | BatchOps | Transfers output files to mft for aladdinOffplatform transactions"
+  n_retrys: 1
+  std_out_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.out"
+  std_err_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.err"
+  alarm_if_fail: 0
+  alarm_if_terminated: 1
+
+
+  /* ----------------- imap_nt_createhash_imap_offplatform_txn_aladdin_cyc1 ----------------- */                                              
+
+  insert_job: imap_nt_createhash_imap_offplatform_txn_aladdin_cyc1   job_type: CMD 
+  box_name: imap_nt_box_pre_dst_recon
+  command: & "E:\IMAP\prod\scripts\RunCreateHashZipWithTimeStamp.bat E:\MFT\IS\Outbound\ imap_cash_transfer_f1_v1_t1"
+  machine: imap_Vmachine
+  owner: jp0imap@CGUSER
+  permission: mx,gx
+  date_conditions: 0
+  condition: success(imap_nt_publish_imap_offplatform_txn_aladdin_cyc1)
+  description: "Alarm CALL | BatchOps | Create Hash value for MFT file transfers for IMAP Offplatform transactions"
+  n_retrys: 1
+  std_out_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.out"
+  std_err_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.err"
+  alarm_if_fail: 0
+  alarm_if_terminated: 1
+
+
+  /* ----------------- imap_nt_publish_imap_offplatform_txn_aladdin_cyc1 ----------------- */                                                 
+
+  insert_job: imap_nt_publish_imap_offplatform_txn_aladdin_cyc1   job_type: CMD 
+  box_name: imap_nt_box_pre_dst_recon
+  command: & E\:\etltools\SSIS\CGDtExec imap-ssis-prod\cgsql PRD_IMAP IMAP Publish_IMAPCashTransfersForAladdin.dtsx PRD_IMAP /par ""$Project\:\:AladdinCycle(Int32)";"1""
+  machine: imap_nt_ssis_Vmachine
+  owner: jp0imap@CGUSER
+  permission: mx,gx
+  date_conditions: 0
+  condition: success(imap_nt_process_imap_offplatform_txn_aladdin_cyc1)
+  description: "Alarm CALL | BatchOps | Exports IMAP Offplatform transactions to aladdin for cycle1"
+  n_retrys: 1
+  std_out_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.out"
+  std_err_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.err"
+  alarm_if_fail: 0
+  alarm_if_terminated: 1
+
+
+  /* ----------------- imap_nt_box_market_value ----------------- */                                                                          
+
+  insert_job: imap_nt_box_market_value   job_type: BOX 
+  box_name: imap_nt_box_pre_dst_recon
+  owner: jp0imap@CGUSER
+  permission: mx,gx
+  date_conditions: 0
+  description: "Alarm CALL | BatchOps | Market Value Recon"
+  alarm_if_fail: 0
+  alarm_if_terminated: 1
+
+
+   /* ----------------- imap_nt_process_accrual_market_value ----------------- */                                                             
+
+   insert_job: imap_nt_process_accrual_market_value   job_type: CMD 
+   box_name: imap_nt_box_market_value
+   command: & "E:\IMAP\prod\MarketValue\Run_MarketValue.bat AccrualMarketValueJobProcess"
+   machine: imap_Vmachine
+   owner: jp0imap@CGUSER
+   permission: mx,gx
+   date_conditions: 0
+   description: "Alarm CALL | BatchOps | Process Market Value for Current Day Accrual"
+   n_retrys: 1
+   std_out_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.out"
+   std_err_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.err"
+   alarm_if_fail: 0
+   alarm_if_terminated: 1
+
+
+   /* ----------------- imap_nt_process_asof_accrual_market_value ----------------- */                                                        
+
+   insert_job: imap_nt_process_asof_accrual_market_value   job_type: CMD 
+   box_name: imap_nt_box_market_value
+   command: & "E:\IMAP\prod\MarketValue\Run_MarketValue.bat AccrualMarketValueAsOfJobProcess"
+   machine: imap_Vmachine
+   owner: jp0imap@CGUSER
+   permission: mx,gx
+   date_conditions: 0
+   condition: success(imap_nt_process_spendable_dc_accrual_market_value)
+   description: "Alarm CALL | BatchOps | Process Market Value for As Of Accrual"
+   n_retrys: 1
+   std_out_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.out"
+   std_err_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.err"
+   alarm_if_fail: 0
+   alarm_if_terminated: 1
+
+
+   /* ----------------- imap_nt_process_asof_position_market_value ----------------- */                                                       
+
+   insert_job: imap_nt_process_asof_position_market_value   job_type: CMD 
+   box_name: imap_nt_box_market_value
+   command: & "E:\IMAP\prod\MarketValue\Run_MarketValue.bat PositionMarketValueAsOfJobProcess"
+   machine: imap_Vmachine
+   owner: jp0imap@CGUSER
+   permission: mx,gx
+   date_conditions: 0
+   condition: success(imap_nt_process_position_market_value)
+   description: "Alarm CALL | BatchOps | Process Market Value for As Of Position"
+   n_retrys: 1
+   std_out_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.out"
+   std_err_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.err"
+   alarm_if_fail: 0
+   alarm_if_terminated: 1
+
+
+   /* ----------------- imap_nt_process_asof_price_position_market_value ----------------- */                                                 
+
+   insert_job: imap_nt_process_asof_price_position_market_value   job_type: CMD 
+   box_name: imap_nt_box_market_value
+   command: & "E:\IMAP\prod\MarketValue\Run_MarketValue.bat PositionMarketValueAsOfPriceChangeProcess"
+   machine: imap_Vmachine
+   owner: jp0imap@CGUSER
+   permission: mx,gx
+   date_conditions: 0
+   condition: success(imap_nt_process_asof_position_market_value)
+   description: "Alarm CALL | BatchOps | Process Market Value for As Of Price Change"
+   n_retrys: 1
+   std_out_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.out"
+   std_err_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.err"
+   alarm_if_fail: 0
+   alarm_if_terminated: 1
+
+
+   /* ----------------- imap_nt_process_position_market_value ----------------- */                                                            
+
+   insert_job: imap_nt_process_position_market_value   job_type: CMD 
+   box_name: imap_nt_box_market_value
+   command: & "E:\IMAP\prod\MarketValue\Run_MarketValue.bat PositionMarketValueJobProcess"
+   machine: imap_Vmachine
+   owner: jp0imap@CGUSER
+   permission: mx,gx
+   date_conditions: 0
+   description: "Alarm CALL | BatchOps | Process Market Value for Current Day Position"
+   n_retrys: 1
+   std_out_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.out"
+   std_err_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.err"
+   alarm_if_fail: 0
+   alarm_if_terminated: 1
+
+
+   /* ----------------- imap_nt_process_spendable_dc_accrual_market_value ----------------- */                                                
+
+   insert_job: imap_nt_process_spendable_dc_accrual_market_value   job_type: CMD 
+   box_name: imap_nt_box_market_value
+   command: & "E:\IMAP\prod\MarketValue\Run_MarketValue.bat AccrualMarketValueSpendableDCJobProcess"
+   machine: imap_Vmachine
+   owner: jp0imap@CGUSER
+   permission: mx,gx
+   date_conditions: 0
+   condition: success(imap_nt_process_accrual_market_value)
+   description: "Alarm CALL | BatchOps | Calculate Default committee adjustment for Current Day Market Value"
+   n_retrys: 1
+   std_out_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.out"
+   std_err_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.err"
+   alarm_if_fail: 0
+   alarm_if_terminated: 1
+
+
+   /* ----------------- imap_nt_process_spendable_dc_asof_accrual_market_value ----------------- */                                           
+
+   insert_job: imap_nt_process_spendable_dc_asof_accrual_market_value   job_type: CMD 
+   box_name: imap_nt_box_market_value
+   command: & "E:\IMAP\prod\MarketValue\Run_MarketValue.bat AccrualMarketValueAsOfSpendableDCJobProcess"
+   machine: imap_Vmachine
+   owner: jp0imap@CGUSER
+   permission: mx,gx
+   date_conditions: 0
+   condition: success(imap_nt_process_asof_accrual_market_value)
+   description: "Alarm CALL | BatchOps | Calculate Default committee adjustment for As Of Market Value"
+   n_retrys: 1
+   std_out_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.out"
+   std_err_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.err"
+   alarm_if_fail: 0
+   alarm_if_terminated: 1
+
+
+  /* ----------------- imap_nt_createhash_imap_cash_recon_aladdin ----------------- */                                                        
+
+  insert_job: imap_nt_createhash_imap_cash_recon_aladdin   job_type: CMD 
+  box_name: imap_nt_box_pre_dst_recon
+  command: & "E:\IMAP\prod\scripts\RunCreateHashZipWithTimeStamp.bat E:\MFT\IS\Outbound\ imap_aladdin_bank_stmt_f1_v1_t1"
+  machine: imap_Vmachine
+  owner: jp0imap@CGUSER
+  permission: mx,gx
+  date_conditions: 0
+  condition: success(imap_nt_publish_imap_cash_recon_aladdin)
+  description: "Alarm CALL | BatchOps | Create Hash value for MFT file transfers for IMAP Bank Statement"
+  n_retrys: 1
+  std_out_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.out"
+  std_err_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.err"
+  alarm_if_fail: 0
+  alarm_if_terminated: 1
+
+
+  /* ----------------- imap_nt_createhash_imap_cash_recon_aladdin_repair ----------------- */                                                 
+
+  insert_job: imap_nt_createhash_imap_cash_recon_aladdin_repair   job_type: CMD 
+  box_name: imap_nt_box_pre_dst_recon
+  command: & "E:\IMAP\prod\scripts\RunCreateHashZipWithTimeStamp.bat E:\MFT\IS\Outbound\ imap_aladdin_bank_stmt_repair_portfolios_f1_v1_t1"
+  machine: imap_Vmachine
+  owner: jp0imap@CGUSER
+  permission: mx,gx
+  date_conditions: 0
+  condition: success(imap_nt_createhash_imap_cash_recon_aladdin)
+  description: "Alarm CALL | BatchOps | Create Hash value for MFT file transfers for IMAP Bank Statement"
+  n_retrys: 1
+  std_out_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.out"
+  std_err_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.err"
+  alarm_if_fail: 0
+  alarm_if_terminated: 1
+
+
+  /* ----------------- imap_nt_publish_imap_cash_recon_aladdin ----------------- */                                                           
+
+  insert_job: imap_nt_publish_imap_cash_recon_aladdin   job_type: CMD 
+  box_name: imap_nt_box_pre_dst_recon
+  command: & "E:\etltools\SSIS\CGDtExec imap-ssis-prod\cgsql PRD_IMAP IMAP Publish_IMAPCashReconAladdin.dtsx PRD_IMAP
+  machine: imap_nt_ssis_Vmachine
+  owner: jp0imap@CGUSER
+  permission: mx,gx
+  date_conditions: 0
+  condition: success(imap_nt_process_imap_cash_recon_aladdin)
+  description: "Alarm CALL | BatchOps | Exports IMAP Bank statement transactions to aladdin"
+  n_retrys: 1
+  std_out_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.out"
+  std_err_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.err"
+  alarm_if_fail: 0
+  alarm_if_terminated: 1
+
+
+  /* ----------------- imap_nt_box_am_accrual_periodenddate ----------------- */                                                              
+
+  insert_job: imap_nt_box_am_accrual_periodenddate   job_type: BOX 
+  box_name: imap_nt_box_pre_dst_recon
+  owner: jp0imap@CGUSER
+  permission: mx,gx
+  date_conditions: 0
+  description: "Alarm CALL | BatchOps | AM_Accrual_PeriodEndDate data"
+  alarm_if_fail: 0
+  alarm_if_terminated: 1
+
+
+   /* ----------------- imap_nt_createhash_am_accrual_periodenddate ----------------- */                                                      
+
+   insert_job: imap_nt_createhash_am_accrual_periodenddate   job_type: CMD 
+   box_name: imap_nt_box_am_accrual_periodenddate
+   command: & "E:\IMAP\prod\scripts\RunCreateHashZip.bat E:\MFT\IS\Outbound\ imap_portfolio_am_accrual_periodenddate_f1_v1_t1_"
+   machine: imap_Vmachine
+   owner: jp0imap@CGUSER
+   permission: mx,gx
+   date_conditions: 0
+   condition: success(imap_nt_publish_am_accrual_periodenddate)
+   description: "Alarm CALL | BatchOps | Create Hash value for MFT file transfer: imap_portfolio_am_accrual_periodenddate_f1_v1_t1"
+   n_retrys: 1
+   std_out_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.out"
+   std_err_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.err"
+   alarm_if_fail: 0
+   alarm_if_terminated: 1
+
+
+   /* ----------------- imap_nt_publish_am_accrual_periodenddate ----------------- */                                                         
+
+   insert_job: imap_nt_publish_am_accrual_periodenddate   job_type: CMD 
+   box_name: imap_nt_box_am_accrual_periodenddate
+   command: & "E:\etltools\SSIS\CGDtExec imap-ssis-prod\cgsql PRD_IMAP IMAP Publish_AMAccrualPeriodEndDate.dtsx PRD_IMAP"
+   machine: imap_nt_ssis_Vmachine
+   owner: jp0imap@CGUSER
+   permission: mx,gx
+   date_conditions: 0
+   description: "Alarm CALL | BatchOps | Publish Accrual Market Value to LASR as of current day by period end date"
+   n_retrys: 1
+   std_out_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.out"
+   std_err_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.err"
+   alarm_if_fail: 0
+   alarm_if_terminated: 1
+
+
+   /* ----------------- imap_nt_send_am_accrual_periodenddate ----------------- */                                                            
+
+   insert_job: imap_nt_send_am_accrual_periodenddate   job_type: CMD 
+   box_name: imap_nt_box_am_accrual_periodenddate
+   command: & "E:\IMAP\prod\scripts\MFT\IMAP_MFT_Script.bat /Broadcast E:\MFT\IS\Outbound\imap_portfolio_am_accrual_periodenddate_f1_v1_t1*.dat.zip"
+   machine: imap_Vmachine
+   owner: jp0imap@CGUSER
+   permission: mx,gx
+   date_conditions: 0
+   condition: success(imap_nt_createhash_am_accrual_periodenddate)
+   description: "Alarm CALL | BatchOps | Transfer file via MFT: imap_portfolio_am_accrual_periodenddate_f1_v1_t1"
+   n_retrys: 1
+   std_out_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.out"
+   std_err_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.err"
+   alarm_if_fail: 0
+   alarm_if_terminated: 1
+
+
+   /* ----------------- imap_nt_cleanfile_am_accrual_periodenddate ----------------- */                                                       
+
+   insert_job: imap_nt_cleanfile_am_accrual_periodenddate   job_type: CMD 
+   box_name: imap_nt_box_am_accrual_periodenddate
+   command: & "E:\IMAP\prod\scripts\RunGenericCleanFile.bat imap_portfolio_am_accrual_periodenddate_f1_v1_t1* E:\MFT\IS\Outbound"
+   machine: imap_Vmachine
+   owner: jp0imap@CGUSER
+   permission: mx,gx
+   date_conditions: 0
+   condition: success(imap_nt_copy_am_accrual_periodenddate_for_recon)
+   description: "Alarm CALL | BatchOps | Deletes output files"
+   n_retrys: 1
+   std_out_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.out"
+   std_err_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.err"
+   alarm_if_fail: 0
+   alarm_if_terminated: 1
+
+
+   /* ----------------- imap_nt_copy_am_accrual_periodenddate_for_recon ----------------- */                                                  
+
+   insert_job: imap_nt_copy_am_accrual_periodenddate_for_recon   job_type: CMD 
+   box_name: imap_nt_box_am_accrual_periodenddate
+   command: & "E:\IMAP\prod\scripts\Copy_Recon_Files.bat imap_portfolio_am_accrual_periodenddate_f1_v1_t1"
+   machine: imap_Vmachine
+   owner: jp0imap@CGUSER
+   permission: mx,gx
+   date_conditions: 0
+   condition: success(imap_nt_send_am_accrual_periodenddate) AND success(imap_nt_createhash_am_accrual_periodenddate)
+   description: "Alarm CALL | BatchOps | Copy output files to \\IS\\Inbound for Recon"
+   n_retrys: 1
+   std_out_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.out"
+   std_err_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.err"
+   alarm_if_fail: 0
+   alarm_if_terminated: 1
+
+
+  /* ----------------- imap_nt_update_statistics_transaction_tables ----------------- */                                                      
+
+  insert_job: imap_nt_update_statistics_transaction_tables   job_type: CMD 
+  box_name: imap_nt_box_pre_dst_recon
+  command: & "E:\IMAP\prod\Batch\Run_Query.bat UpdateStatsForATTables"
+  machine: imap_Vmachine
+  owner: jp0imap@CGUSER
+  permission: mx,gx
+  date_conditions: 0
+  description: "Alarm CALL | BatchOps | Update statistics for AT tables"
+  std_out_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.out"
+  std_err_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.err"
+  alarm_if_fail: 1
+  alarm_if_terminated: 1
+
+
+  /* ----------------- imap_nt_box_am_position_daily ----------------- */                                                                     
+
+  insert_job: imap_nt_box_am_position_daily   job_type: BOX 
+  box_name: imap_nt_box_pre_dst_recon
+  owner: jp0imap@CGUSER
+  permission: mx,gx
+  date_conditions: 0
+  condition: success(imap_nt_box_market_value)
+  description: "Alarm CALL | BatchOps | Daily Non-Cash Positions"
+  alarm_if_fail: 0
+  alarm_if_terminated: 1
+
+
+   /* ----------------- imap_nt_cleanfile_am_position_daily ----------------- */                                                              
+
+   insert_job: imap_nt_cleanfile_am_position_daily   job_type: CMD 
+   box_name: imap_nt_box_am_position_daily
+   command: & "E:\IMAP\prod\scripts\RunGenericCleanFile.bat imap_portfolio_am_position_daily_f1_v1_t1* E:\MFT\IS\Outbound"
+   machine: imap_Vmachine
+   owner: jp0imap@CGUSER
+   permission: mx,gx
+   date_conditions: 0
+   condition: success(imap_nt_copy_am_position_daily_file_for_recon)
+   description: "Alarm CALL | BatchOps | Deletes output files"
+   n_retrys: 1
+   std_out_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.out"
+   std_err_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.err"
+   alarm_if_fail: 0
+   alarm_if_terminated: 1
+
+
+   /* ----------------- imap_nt_createhash_am_position_daily ----------------- */                                                             
+
+   insert_job: imap_nt_createhash_am_position_daily   job_type: CMD 
+   box_name: imap_nt_box_am_position_daily
+   command: & "E:\IMAP\prod\scripts\RunCreateHashZip.bat E:\MFT\IS\Outbound\ imap_portfolio_am_position_daily_f1_v1_t1"
+   machine: imap_Vmachine
+   owner: jp0imap@CGUSER
+   permission: mx,gx
+   date_conditions: 0
+   condition: success(imap_nt_publish_am_position_daily)
+   description: "Alarm CALL | BatchOps | Create Hash value for MFT file transfer: imap_portfolio_am_position_daily_f1_v1_t1"
+   n_retrys: 1
+   std_out_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.out"
+   std_err_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.err"
+   alarm_if_fail: 0
+   alarm_if_terminated: 1
+
+
+   /* ----------------- imap_nt_publish_am_position_daily ----------------- */                                                                
+
+   insert_job: imap_nt_publish_am_position_daily   job_type: CMD 
+   box_name: imap_nt_box_am_position_daily
+   command: & E\:\etltools\SSIS\CGDtExec imap-ssis-prod\cgsql PRD_IMAP IMAP Publish_AMNonCashPosition.dtsx PRD_IMAP /par ""$Package\:\:IsDailyFile(String)";"Y""
+   machine: imap_nt_ssis_Vmachine
+   owner: jp0imap@CGUSER
+   permission: mx,gx
+   date_conditions: 0
+   description: "Alarm CALL | BatchOps | Publish Daily Non Cash Positions  for RUBIX"
+   n_retrys: 1
+   std_out_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.out"
+   std_err_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.err"
+   alarm_if_fail: 0
+   alarm_if_terminated: 1
+
+
+   /* ----------------- imap_nt_send_am_position_daily ----------------- */                                                                   
+
+   insert_job: imap_nt_send_am_position_daily   job_type: CMD 
+   box_name: imap_nt_box_am_position_daily
+   command: & "E:\IMAP\prod\scripts\MFT\IMAP_MFT_Script.bat /Broadcast E:\MFT\IS\Outbound\imap_portfolio_am_position_daily_f1_v1_t1*.dat.zip"
+   machine: imap_Vmachine
+   owner: jp0imap@CGUSER
+   permission: mx,gx
+   date_conditions: 0
+   condition: success(imap_nt_createhash_am_position_daily)
+   description: "Alarm CALL | BatchOps | Transfer file via MFT: imap_portfolio_am_position_daily_f1_v1_t1"
+   n_retrys: 1
+   std_out_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.out"
+   std_err_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.err"
+   alarm_if_fail: 0
+   alarm_if_terminated: 1
+
+
+   /* ----------------- imap_nt_copy_am_position_daily_file_for_recon ----------------- */                                                    
+
+   insert_job: imap_nt_copy_am_position_daily_file_for_recon   job_type: CMD 
+   box_name: imap_nt_box_am_position_daily
+   command: & "E:\IMAP\prod\scripts\Copy_recon_files.bat imap_portfolio_am_position_daily_f1_v1_t1"
+   machine: imap_Vmachine
+   owner: jp0imap@CGUSER
+   permission: mx,gx
+   date_conditions: 0
+   condition: success(imap_nt_send_am_position_daily) AND success(imap_nt_createhash_am_position_daily)
+   description: "Alarm CALL | BatchOps |  Copy output files to \\IS\\Inbound for Recon"
+   n_retrys: 1
+   std_out_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.out"
+   std_err_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.err"
+   alarm_if_fail: 0
+   alarm_if_terminated: 1
+
+
+  /* ----------------- imap_nt_box_am_cash_position_daily ----------------- */                                                                
+
+  insert_job: imap_nt_box_am_cash_position_daily   job_type: BOX 
+  box_name: imap_nt_box_pre_dst_recon
+  owner: jp0imap@CGUSER
+  permission: mx,gx
+  date_conditions: 0
+  condition: success(imap_nt_box_market_value)
+  description: "Alarm CALL | BatchOps | AM CASH Position"
+  alarm_if_fail: 0
+  alarm_if_terminated: 1
+
+
+   /* ----------------- imap_nt_cleanfile_am_cash_position_daily ----------------- */                                                         
+
+   insert_job: imap_nt_cleanfile_am_cash_position_daily   job_type: CMD 
+   box_name: imap_nt_box_am_cash_position_daily
+   command: & "E:\IMAP\prod\scripts\RunGenericCleanFile.bat imap_portfolio_am_cash_position_daily* E:\MFT\IS\Outbound"
+   machine: imap_Vmachine
+   owner: jp0imap@CGUSER
+   permission: mx,gx
+   date_conditions: 0
+   condition: success(imap_nt_copy_am_cash_position_daily_for_recon)
+   description: "Alarm CALL | BatchOps | Deletes output files"
+   n_retrys: 1
+   std_out_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.out"
+   std_err_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.err"
+   alarm_if_fail: 0
+   alarm_if_terminated: 1
+
+
+   /* ----------------- imap_nt_createhash_am_cash_position_daily ----------------- */                                                        
+
+   insert_job: imap_nt_createhash_am_cash_position_daily   job_type: CMD 
+   box_name: imap_nt_box_am_cash_position_daily
+   command: & "E:\IMAP\prod\scripts\RunCreateHashZip.bat E:\MFT\IS\Outbound imap_portfolio_am_cash_position_daily_"
+   machine: imap_Vmachine
+   owner: jp0imap@CGUSER
+   permission: mx,gx
+   date_conditions: 0
+   condition: success(imap_nt_publish_am_cash_position_daily)
+   description: "Alarm CALL | BatchOps | Create Hash value for MFT file transfer: imap_portfolio_am_cash_position_daily_"
+   n_retrys: 1
+   std_out_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.out"
+   std_err_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.err"
+   alarm_if_fail: 0
+   alarm_if_terminated: 1
+
+
+   /* ----------------- imap_nt_publish_am_cash_position_daily ----------------- */                                                           
+
+   insert_job: imap_nt_publish_am_cash_position_daily   job_type: CMD 
+   box_name: imap_nt_box_am_cash_position_daily
+   command: & "E:\etltools\SSIS\CGDtExec imap-ssis-prod\cgsql PRD_IMAP IMAP Publish_AMCashPosition.dtsx PRD_IMAP"
+   machine: imap_nt_ssis_Vmachine
+   owner: jp0imap@CGUSER
+   permission: mx,gx
+   date_conditions: 0
+   description: "Alarm CALL | BatchOps | Publish Daily cash Positions for RUBIX"
+   n_retrys: 1
+   std_out_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.out"
+   std_err_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.err"
+   alarm_if_fail: 0
+   alarm_if_terminated: 1
+
+
+   /* ----------------- imap_nt_send_am_cash_position_daily ----------------- */                                                              
+
+   insert_job: imap_nt_send_am_cash_position_daily   job_type: CMD 
+   box_name: imap_nt_box_am_cash_position_daily
+   command: & "E:\IMAP\prod\scripts\MFT\IMAP_MFT_Script.bat /Broadcast E:\MFT\IS\Outbound\imap_portfolio_am_cash_position_daily_*.zip"
+   machine: imap_Vmachine
+   owner: jp0imap@CGUSER
+   permission: mx,gx
+   date_conditions: 0
+   condition: success(imap_nt_createhash_am_cash_position_daily)
+   description: "Alarm CALL | BatchOps | Transfer file via MFT: imap_portfolio_am_cash_position_daily_"
+   n_retrys: 1
+   std_out_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.out"
+   std_err_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.err"
+   alarm_if_fail: 0
+   alarm_if_terminated: 1
+
+
+   /* ----------------- imap_nt_copy_am_cash_position_daily_for_recon ----------------- */                                                    
+
+   insert_job: imap_nt_copy_am_cash_position_daily_for_recon   job_type: CMD 
+   box_name: imap_nt_box_am_cash_position_daily
+   command: & "E:\IMAP\prod\scripts\Copy_Recon_files.bat imap_portfolio_am_cash_position_daily"
+   machine: imap_Vmachine
+   owner: jp0imap@CGUSER
+   permission: mx,gx
+   date_conditions: 0
+   condition: success(imap_nt_send_am_cash_position_daily) AND success(imap_nt_createhash_am_cash_position_daily)
+   description: "Alarm CALL | BatchOps |  Copy output files to \\IS\\Inbound for Recon"
+   n_retrys: 1
+   std_out_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.out"
+   std_err_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.err"
+   alarm_if_fail: 0
+   alarm_if_terminated: 1
+
+
+  /* ----------------- imap_nt_process_imap_cash_recon_aladdin ----------------- */                                                           
+
+  insert_job: imap_nt_process_imap_cash_recon_aladdin   job_type: CMD 
+  box_name: imap_nt_box_pre_dst_recon
+  command: & "E:\etltools\SSIS\CGDtExec imap-ssis-prod\cgsql PRD_IMAP IMAP Process_IMAPCashReconAladdin.dtsx PRD_IMAP
+  machine: imap_nt_ssis_Vmachine
+  owner: jp0imap@CGUSER
+  permission: mx,gx
+  date_conditions: 0
+  condition: success(imap_nt_process_imap_offplatform_txn_aladdin_cyc1)
+  description: "Alarm CALL | BatchOps | Process IMAP Bank statement transactions to aladdin"
+  n_retrys: 1
+  std_out_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.out"
+  std_err_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.err"
+  alarm_if_fail: 0
+  alarm_if_terminated: 1
+
+
+  /* ----------------- imap_nt_process_imap_offplatform_txn_aladdin_cyc1 ----------------- */                                                 
+
+  insert_job: imap_nt_process_imap_offplatform_txn_aladdin_cyc1   job_type: CMD 
+  box_name: imap_nt_box_pre_dst_recon
+  command: & E\:\etltools\SSIS\CGDtExec imap-ssis-prod\cgsql PRD_IMAP IMAP Process_IMAPCashTransfersForAladdin.dtsx PRD_IMAP /par ""$Project\:\:AladdinCycle(Int32)";"1""
+  machine: imap_nt_ssis_Vmachine
+  owner: jp0imap@CGUSER
+  permission: mx,gx
+  date_conditions: 0
+  condition: success(imap_nt_suppress_cashpilotaccount) AND success(imap_nt_update_statistics_transaction_tables)
+  description: "Alarm CALL | BatchOps | Process IMAP Offplatform transactions to aladdin for cycle1"
+  n_retrys: 1
+  std_out_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.out"
+  std_err_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.err"
+  alarm_if_fail: 0
+  alarm_if_terminated: 1
+
+
+  /* ----------------- imap_nt_cleanfile_imap_cash_recon_aladdin ----------------- */                                                         
+
+  insert_job: imap_nt_cleanfile_imap_cash_recon_aladdin   job_type: CMD 
+  box_name: imap_nt_box_pre_dst_recon
+  command: & "E:\IMAP\prod\scripts\RunGenericCleanFile.bat imap_aladdin_bank_stmt_* E:\MFT\IS\Outbound"
+  machine: imap_Vmachine
+  owner: jp0imap@CGUSER
+  permission: mx,gx
+  date_conditions: 0
+  condition: success(imap_nt_send_aladdin_cash_recon)
+  description: "Alarm CALL | BatchOps | Removes output files"
+  n_retrys: 1
+  std_out_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.out"
+  std_err_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.err"
+  alarm_if_fail: 0
+  alarm_if_terminated: 1
+
+
+  /* ----------------- imap_nt_cleanfile_imap_offplatform_txn_aladdin_cyc1 ----------------- */                                               
+
+  insert_job: imap_nt_cleanfile_imap_offplatform_txn_aladdin_cyc1   job_type: CMD 
+  box_name: imap_nt_box_pre_dst_recon
+  command: & "E:\IMAP\prod\scripts\RunGenericCleanFile.bat imap_cash_transfer_f1_v1_t1* E:\MFT\IS\Outbound"
+  machine: imap_Vmachine
+  owner: jp0imap@CGUSER
+  permission: mx,gx
+  date_conditions: 0
+  condition: success(imap_nt_send_mars_offplatform_txn_aladdin_cyc1)
+  description: "Alarm CALL | BatchOps | Removes output files"
+  n_retrys: 1
+  std_out_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.out"
+  std_err_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.err"
+  alarm_if_fail: 0
+  alarm_if_terminated: 1
+
+
+ /* ----------------- imap_nt_box_failed_transaction_cycle3_126 ----------------- */                                                          
+
+ insert_job: imap_nt_box_failed_transaction_cycle3_126   job_type: BOX 
+ box_name: imap_box_nt_nightly
+ owner: jp0imap@CGUSER
+ permission: mx,gx
+ date_conditions: 0
+ condition: success(imap_nt_box_mvmtf_settlement_cycle3_125)
+ description: "Alarm CALL | BatchOps | Failed Transaction Processing cycle 3.126"
+ alarm_if_fail: 0
+ alarm_if_terminated: 1
+
+
+  /* ----------------- imap_nt_process_failed_txn ----------------- */                                                                        
+
+  insert_job: imap_nt_process_failed_txn   job_type: CMD 
+  box_name: imap_nt_box_failed_transaction_cycle3_126
+  command: & "E:\IMAP\prod\Batch\Run_IMap.bat EagleFailedTransactionsJobProcess"
+  machine: imap_Vmachine
+  owner: jp0imap@CGUSER
+  permission: mx,gx
+  date_conditions: 0
+  description: "Alarm CALL | BatchOps | IMAP transaction processing for some error transaction"
+  n_retrys: 1
+  std_out_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.out"
+  std_err_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.err"
+  alarm_if_fail: 0
+  job_load: 1
+  priority: 1
+  alarm_if_terminated: 1
+
+
+ /* ----------------- imap_nt_box_financialtransaction_process_cycle_2_5 ----------------- */                                                 
+
+ insert_job: imap_nt_box_financialtransaction_process_cycle_2_5   job_type: BOX 
+ box_name: imap_box_nt_nightly
+ owner: jp0imap@CGUSER
+ permission: mx,gx
+ date_conditions: 0
+ condition: success(imap_nt_box_mvmtf_position_vm)
+ description: "Alarm CALL | BatchOps | FinancialTransaction Processing cycle 2.5"
+ alarm_if_fail: 0
+ alarm_if_terminated: 1
+
+
+  /* ----------------- imap_nt_financial_transaction_process_cycle_2_5 ----------------- */                                                   
+
+  insert_job: imap_nt_financial_transaction_process_cycle_2_5   job_type: CMD 
+  box_name: imap_nt_box_financialtransaction_process_cycle_2_5
+  command: & "E:\IMAP\prod\Batch\Run_IMap.bat FinancialTransactionJobProcess"
+  machine: imap_Vmachine
+  owner: jp0imap@CGUSER
+  permission: mx,gx
+  date_conditions: 0
+  description: "Alarm CALL | BatchOps Run FinancialTransactionJobProcess|"
+  n_retrys: 1
+  std_out_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.out"
+  std_err_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.err"
+  alarm_if_fail: 0
+  alarm_if_terminated: 1
+
+
+ /* ----------------- imap_nt_box_mvmtf_position_vm ----------------- */                                                                      
+
+ insert_job: imap_nt_box_mvmtf_position_vm   job_type: BOX 
+ box_name: imap_box_nt_nightly
+ owner: jp0imap@CGUSER
+ permission: mx,gx
+ date_conditions: 0
+ condition: success(imap_box_nt_manager_transfer_cycle2) AND success(imap_nt_box_mvmtf_managertransfer_cycle2)
+ description: "Alarm NOCALL | BatchOps | IMAP position variation box"
+ alarm_if_fail: 0
+ alarm_if_terminated: 1
+
+
+  /* ----------------- imap_nt_mvmtf_position_vm ----------------- */                                                                         
+
+  insert_job: imap_nt_mvmtf_position_vm   job_type: CMD 
+  box_name: imap_nt_box_mvmtf_position_vm
+  command: & "E:\IMAP\prod\MVMTF\Run_Mvmtf.bat PositionVMGeneratorJob"
+  machine: imap_Vmachine
+  owner: jp0imap@CGUSER
+  permission: mx,gx
+  date_conditions: 0
+  description: "Alarm CALL | BatchOps | IMAP Position Variation Margin Generator For MVMTF"
+  std_out_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.out"
+  std_err_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.err"
+  alarm_if_fail: 1
+  alarm_if_terminated: 1
+
+
+  /* ----------------- imap_nt_mvmtf_position_vm_writer ----------------- */                                                                  
+
+  insert_job: imap_nt_mvmtf_position_vm_writer   job_type: CMD 
+  box_name: imap_nt_box_mvmtf_position_vm
+  command: "E:\IMAP\prod\MVMTF\Run_Mvmtf.bat" "PositionVMWriterJob"
+  machine: imap_Vmachine
+  owner: jp0imap@CGUSER
+  permission: mx,gx
+  date_conditions: 0
+  condition: success(imap_nt_mvmtf_position_vm)
+  description: "Alarm CALL | BatchOps | IMAP Transaction Writer to EDA format For Position MVMTF"
+  std_out_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.out"
+  std_err_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.err"
+  alarm_if_fail: 1
+  alarm_if_terminated: 1
+
+
+  /* ----------------- imap_nt_mvmtf_copy_cycle_2_5_position_vm_files ----------------- */                                                    
+
+  insert_job: imap_nt_mvmtf_copy_cycle_2_5_position_vm_files   job_type: CMD 
+  box_name: imap_nt_box_mvmtf_position_vm
+  command: & "E:\IMAP\prod\Scripts\IMAPcopy.bat PositionVMFiles"
+  machine: imap_Vmachine
+  owner: jp0imap@CGUSER
+  permission: mx,gx
+  date_conditions: 0
+  condition: success(imap_nt_mvmtf_position_vm_writer)
+  description: "Alarm CALL | BatchOps | Copy files for IMAP cycle_2_5 Position VM"
+  std_out_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.out"
+  std_err_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.err"
+  alarm_if_fail: 1
+  alarm_if_terminated: 1
+
+
+  /* ----------------- imap_nt_mvmtf_prep_cycle_2_5_position_vm_alloc ----------------- */                                                    
+
+  insert_job: imap_nt_mvmtf_prep_cycle_2_5_position_vm_alloc   job_type: CMD 
+  box_name: imap_nt_box_mvmtf_position_vm
+  command: & "E:\IMAP\prod\Scripts\RunMVMTFTransactionDataPrep.bat imap_position_vm_allocation"
+  machine: imap_Vmachine
+  owner: jp0imap@CGUSER
+  permission: mx,gx
+  date_conditions: 0
+  condition: success(imap_nt_mvmtf_copy_cycle_2_5_position_vm_files)
+  description: "Alarm CALL | BatchOps | Merges alloc files with existing files in folders"
+  std_out_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.out"
+  std_err_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.err"
+  alarm_if_fail: 1
+  alarm_if_terminated: 1
+
+
+  /* ----------------- imap_nt_mvmtf_prep_cycle_2_5_position_vm_eda ----------------- */                                                      
+
+  insert_job: imap_nt_mvmtf_prep_cycle_2_5_position_vm_eda   job_type: CMD 
+  box_name: imap_nt_box_mvmtf_position_vm
+  command: & "E:\IMAP\prod\Scripts\RunMVMTFTransactionDataPrep.bat imap_position_vm_eda"
+  machine: imap_Vmachine
+  owner: jp0imap@CGUSER
+  permission: mx,gx
+  date_conditions: 0
+  condition: success(imap_nt_mvmtf_copy_cycle_2_5_position_vm_files)
+  description: "Alarm CALL | BatchOps | Merges eda files with existing files in folders"
+  std_out_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.out"
+  std_err_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.err"
+  alarm_if_fail: 1
+  alarm_if_terminated: 1
+
+
+  /* ----------------- imap_nt_process_cycle_2_5_position_vm ----------------- */                                                             
+
+  insert_job: imap_nt_process_cycle_2_5_position_vm   job_type: CMD 
+  box_name: imap_nt_box_mvmtf_position_vm
+  command: & "E:\IMAP\prod\Batch\Run_IMap.bat PositionVMTransactionJobProcess"
+  machine: imap_Vmachine
+  owner: jp0imap@CGUSER
+  permission: mx,gx
+  date_conditions: 0
+  condition: success(imap_nt_mvmtf_prep_cycle_2_5_position_vm_alloc) AND success(imap_nt_mvmtf_prep_cycle_2_5_position_vm_eda)
+  description: "Alarm CALL | BatchOps |  IMAP post-cycle_2_5 position vm processing"
+  std_out_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.out"
+  std_err_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.err"
+  alarm_if_fail: 1
+  alarm_if_terminated: 1
+
+
+ /* ----------------- imap_box_nt_manager_transfer_cycle2 ----------------- */                                                                
+
+ insert_job: imap_box_nt_manager_transfer_cycle2   job_type: BOX 
+ box_name: imap_box_nt_nightly
+ owner: jp0imap@CGUSER
+ permission: mx,gx
+ date_conditions: 0
+ condition: success(imap_box_nt_post_mass_transfers_portfolio_dates) AND success(imap_box_nt_stage_manager_transfer) AND success(imap_box_nt_mass_transfers_cycle1)
+ description: "Alarm CALL | BatchOps | Manager Transfer Cycle 2"
+ alarm_if_fail: 0
+ alarm_if_terminated: 1
+
+
+  /* ----------------- imap_nt_process_cycle2 ----------------- */                                                                            
+
+  insert_job: imap_nt_process_cycle2   job_type: CMD 
+  box_name: imap_box_nt_manager_transfer_cycle2
+  command: & "E:\IMAP\prod\Batch\Run_IMap.bat Mtr1I11JobProcess_cycle2"
+  machine: imap_Vmachine
+  owner: jp0imap@CGUSER
+  permission: mx,gx
+  date_conditions: 0
+  condition: success(imap_nt_write_managertransfer)
+  description: "Alarm CALL | BatchOps | IMAP manager transfer Process for cycle2"
+  n_retrys: 1
+  std_out_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.out"
+  std_err_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.err"
+  alarm_if_fail: 0
+  alarm_if_terminated: 1
+
+
+  /* ----------------- imap_nt_archive_input_cycle2 ----------------- */                                                                      
+
+  insert_job: imap_nt_archive_input_cycle2   job_type: CMD 
+  box_name: imap_box_nt_manager_transfer_cycle2
+  command: & "E:\IMAP\prod\Scripts\RunIMapArchiveInbound.bat *_cycle2.*"
+  machine: imap_Vmachine
+  owner: jp0imap@CGUSER
+  permission: mx,gx
+  date_conditions: 0
+  condition: success(imap_nt_process_cycle2)
+  description: "Alarm CALL | BatchOps | Archives input files for cycle2"
+  n_retrys: 1
+  std_out_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.out"
+  std_err_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.err"
+  alarm_if_fail: 0
+  alarm_if_terminated: 1
+
+
+  /* ----------------- imap_nt_write_managertransfer ----------------- */                                                                     
+
+  insert_job: imap_nt_write_managertransfer   job_type: CMD 
+  box_name: imap_box_nt_manager_transfer_cycle2
+  command: & "E:\etltools\SSIS\CGDtExec imap-ssis-prod\cgsql PRD_IMAP IMAP Publish_ManagerTransfers.dtsx PRD_IMAP"
+  machine: imap_nt_ssis_Vmachine
+  owner: jp0imap@CGUSER
+  permission: mx,gx
+  date_conditions: 0
+  condition: success(imap_nt_import_aladdin_cash_transfers) AND success(imap_nt_import_aladdin_wbfcrp_transfers) AND success(imap_nt_import_tre_financialtransactionmanagertransfer)
+  description: "Alarm CALL | BatchOps | Writs MARS Transfers for cycle2 to application server"
+  n_retrys: 1
+  std_out_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.out"
+  std_err_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.err"
+  alarm_if_fail: 0
+  alarm_if_terminated: 1
+
+
+  /* ----------------- imap_nt_archive_aladdin_cash_transfers ----------------- */                                                            
+
+  insert_job: imap_nt_archive_aladdin_cash_transfers   job_type: CMD 
+  box_name: imap_box_nt_manager_transfer_cycle2
+  command: & "E:\IMAP\prod\scripts\RunArchive.bat flcn_aldn_cash_entry_f1_v1_t1.dat"
+  machine: imap_Vmachine
+  owner: jp0imap@CGUSER
+  permission: mx,gx
+  date_conditions: 0
+  condition: success(imap_nt_import_aladdin_cash_transfers)
+  description: "Alarm CALL | BatchOps | Archive and deletes flcn_aldn_cash_entry_f1_v1_t1.dat"
+  n_retrys: 1
+  std_out_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.out"
+  std_err_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.err"
+  alarm_if_fail: 0
+  alarm_if_terminated: 1
+
+
+  /* ----------------- imap_nt_import_aladdin_cash_transfers ----------------- */                                                             
+
+  insert_job: imap_nt_import_aladdin_cash_transfers   job_type: CMD 
+  box_name: imap_box_nt_manager_transfer_cycle2
+  command: & "E:\etltools\SSIS\CGDtExec imap-ssis-prod\cgsql PRD_IMAP IMAP Import_AladdinCashTransfer.dtsx PRD_IMAP"
+  machine: imap_nt_ssis_Vmachine
+  owner: jp0imap@CGUSER
+  permission: mx,gx
+  date_conditions: 0
+  condition: success(imap_nt_prep_aladdin_cash_transfers) AND success(imap_box_nt_mass_transfers_cycle1)
+  description: "Alarm CALL | BatchOps |DO NOT RESTART BEFORE MANUAL CLEANUP - Import Aladdin cash transfers into IMAP"
+  n_retrys: 1
+  std_out_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.out"
+  std_err_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.err"
+  alarm_if_fail: 0
+  alarm_if_terminated: 1
+
+
+  /* ----------------- imap_nt_import_aladdin_wbfcrp_transfers ----------------- */                                                           
+
+  insert_job: imap_nt_import_aladdin_wbfcrp_transfers   job_type: CMD 
+  box_name: imap_box_nt_manager_transfer_cycle2
+  command: & "E:\etltools\SSIS\CGDtExec imap-ssis-prod\cgsql PRD_IMAP IMAP Import_WBFCRPManagerTransfers.dtsx PRD_IMAP"
+  machine: imap_nt_ssis_Vmachine
+  owner: jp0imap@CGUSER
+  permission: mx,gx
+  date_conditions: 0
+  condition: success(imap_nt_import_aladdin_cash_transfers) AND success(imap_box_nt_mass_transfers_cycle1)
+  description: "Alarm CALL | BatchOps | Import Aladdin wbfcrp manager transfers into IMAP"
+  n_retrys: 1
+  std_out_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.out"
+  std_err_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.err"
+  alarm_if_fail: 0
+  alarm_if_terminated: 1
+
+
+  /* ----------------- imap_nt_import_tre_financialtransactionmanagertransfer ----------------- */                                            
+
+  insert_job: imap_nt_import_tre_financialtransactionmanagertransfer   job_type: CMD 
+  box_name: imap_box_nt_manager_transfer_cycle2
+  command: & "E:\etltools\SSIS\CGDtExec imap-ssis-prod\cgsql PRD_IMAP IMAP Import_TRE_FinancialTransactionManagerTransfer.dtsx PRD_IMAP"
+  machine: imap_nt_ssis_Vmachine
+  owner: jp0imap@CGUSER
+  permission: mx,gx
+  date_conditions: 0
+  condition: success(imap_box_nt_mass_transfers_cycle1)
+  description: "Alarm CALL | BatchOps | Writs MARS Transfers for cycle2 to application server"
+  n_retrys: 1
+  std_out_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.out"
+  std_err_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.err"
+  alarm_if_fail: 0
+  alarm_if_terminated: 1
+
+
+ /* ----------------- imap_nt_box_cmi_cycle_3_5_eod ----------------- */                                                                      
+
+ insert_job: imap_nt_box_cmi_cycle_3_5_eod   job_type: BOX 
+ box_name: imap_box_nt_nightly
+ owner: jp0imap@CGUSER
+ permission: mx,gx
+ date_conditions: 0
+ condition: success(imap_nt_box_pre_dst_recon)
+ description: "Alarm NOCALL | BatchOps | IMAP CMI Cycle 3 5 EOD box"
+ alarm_if_fail: 0
+ alarm_if_terminated: 0
+
+
+  /* ----------------- imap_nt_box_financialtransaction_process_cycle_3_5 ----------------- */                                                
+
+  insert_job: imap_nt_box_financialtransaction_process_cycle_3_5   job_type: BOX 
+  box_name: imap_nt_box_cmi_cycle_3_5_eod
+  owner: jp0imap@CGUSER
+  permission: mx,gx
+  date_conditions: 0
+  condition: success(imap_nt_box_financialtransaction_stage_cycle_3_5)
+  description: "Alarm CALL | BatchOps | FinancialTransaction Processing"
+  alarm_if_fail: 0
+  alarm_if_terminated: 0
+
+
+   /* ----------------- imap_nt_financial_transaction_process_cycle_3_5 ----------------- */                                                  
+
+   insert_job: imap_nt_financial_transaction_process_cycle_3_5   job_type: CMD 
+   box_name: imap_nt_box_financialtransaction_process_cycle_3_5
+   command: & "E:\IMAP\prod\Batch\Run_IMap.bat FinancialTransactionJobProcess"
+   machine: imap_Vmachine
+   owner: jp0imap@CGUSER
+   permission: mx,gx
+   date_conditions: 0
+   description: "Alarm CALL | BatchOps | Load FT from Stage"
+   n_retrys: 1
+   std_out_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.out"
+   std_err_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.err"
+   alarm_if_fail: 0
+   alarm_if_terminated: 1
+
+
+  /* ----------------- imap_nt_box_financialtransaction_stage_cycle_3_5 ----------------- */                                                  
+
+  insert_job: imap_nt_box_financialtransaction_stage_cycle_3_5   job_type: BOX 
+  box_name: imap_nt_box_cmi_cycle_3_5_eod
+  owner: jp0imap@CGUSER
+  permission: mx,gx
+  date_conditions: 0
+  description: "Alarm CALL | BatchOps | FinancialTransaction Processing"
+  alarm_if_fail: 0
+  alarm_if_terminated: 0
+
+
+   /* ----------------- imap_nt_stage_cmi_asof_sweep_cycle_3_5 ----------------- */                                                           
+
+   insert_job: imap_nt_stage_cmi_asof_sweep_cycle_3_5   job_type: CMD 
+   box_name: imap_nt_box_financialtransaction_stage_cycle_3_5
+   command: & "E:\IMAP\prod\Batch\Run_IMap.bat CMIAsOfSweepStageJobProcess"
+   machine: imap_Vmachine
+   owner: jp0imap@CGUSER
+   permission: mx,gx
+   date_conditions: 0
+   condition: success(imap_nt_stage_cmi_sweep_cycle_3_5)
+   description: "Alarm CALL | BatchOps | Load Stage from Mars for CMI AS Of"
+   n_retrys: 1
+   std_out_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.out"
+   std_err_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.err"
+   alarm_if_fail: 0
+   alarm_if_terminated: 1
+
+
+   /* ----------------- imap_nt_stage_cmi_sweep_cycle_3_5 ----------------- */                                                                
+
+   insert_job: imap_nt_stage_cmi_sweep_cycle_3_5   job_type: CMD 
+   box_name: imap_nt_box_financialtransaction_stage_cycle_3_5
+   command: & "E:\IMAP\prod\Batch\Run_IMap.bat CMISweepStageJobProcess"
+   machine: imap_Vmachine
+   owner: jp0imap@CGUSER
+   permission: mx,gx
+   date_conditions: 0
+   description: "Alarm CALL | BatchOps | Load Stage from Mars for CMI"
+   n_retrys: 1
+   std_out_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.out"
+   std_err_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.err"
+   alarm_if_fail: 0
+   alarm_if_terminated: 1
+
+
+ /* ----------------- imap_nt_box_eod_rp_transaction_stage_cycle ----------------- */                                                         
+
+ insert_job: imap_nt_box_eod_rp_transaction_stage_cycle   job_type: BOX 
+ box_name: imap_box_nt_nightly
+ owner: jp0imap@CGUSER
+ permission: mx,gx
+ date_conditions: 0
+ condition: success(imap_nt_box_failed_transaction_cycle3_126)
+ description: "Alarm CALL | BatchOps | FinancialTransaction Processing"
+ alarm_if_fail: 0
+ alarm_if_terminated: 1
+
+
+  /* ----------------- imap_nt_stage_eod_rp_sweep_cycle ----------------- */                                                                  
+
+  insert_job: imap_nt_stage_eod_rp_sweep_cycle   job_type: CMD 
+  box_name: imap_nt_box_eod_rp_transaction_stage_cycle
+  command: & "E:\IMAP\prod\Batch\Run_IMap.bat ResearchPortfolioEODStageJobProcess"
+  machine: imap_Vmachine
+  owner: jp0imap@CGUSER
+  permission: mx,gx
+  date_conditions: 0
+  description: "Alarm CALL | BatchOps | Load EOD RP sweeps to Stage"
+  n_retrys: 1
+  std_out_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.out"
+  std_err_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.err"
+  alarm_if_fail: 0
+  alarm_if_terminated: 1
+
+
+ /* ----------------- imap_nt_box_mvmtf_settlement_cycle3_125 ----------------- */                                                            
+
+ insert_job: imap_nt_box_mvmtf_settlement_cycle3_125   job_type: BOX 
+ box_name: imap_box_nt_nightly
+ owner: jp0imap@CGUSER
+ permission: mx,gx
+ date_conditions: 0
+ condition: success(imap_nt_process_cycle3_u2) AND success(imap_nt_process_cycle3_g3) AND success(imap_nt_process_cyc3_crmc)
+ description: "Alarm CALL | BatchOps | Process the MVMTF settlement cycle 3.125 transactions (MVMTF settlement)"
+ alarm_if_fail: 0
+ alarm_if_terminated: 1
+
+
+  /* ----------------- imap_nt_mvmtf_transaction_settlement ----------------- */                                                              
+
+  insert_job: imap_nt_mvmtf_transaction_settlement   job_type: CMD 
+  box_name: imap_nt_box_mvmtf_settlement_cycle3_125
+  command: & "E:\IMAP\prod\MVMTF\Run_Mvmtf.bat GenerateSettlementTransactionJob"
+  machine: imap_Vmachine
+  owner: jp0imap@CGUSER
+  permission: mx,gx
+  date_conditions: 0
+  description: "Alarm CALL | BatchOps | IMAP Settlement Generator For MVMTF"
+  std_out_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.out"
+  std_err_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.err"
+  alarm_if_fail: 1
+  alarm_if_terminated: 1
+
+
+  /* ----------------- imap_nt_archive_input_cyc3_settlement ----------------- */                                                             
+
+  insert_job: imap_nt_archive_input_cyc3_settlement   job_type: CMD 
+  box_name: imap_nt_box_mvmtf_settlement_cycle3_125
+  command: & "E:\IMAP\prod\Scripts\RunIMapArchiveInbound.bat imap_settlement_*.*"
+  machine: imap_Vmachine
+  owner: jp0imap@CGUSER
+  permission: mx,gx
+  date_conditions: 0
+  condition: success(imap_nt_process_cycle3_settlement)
+  description: "Alarm CALL | BatchOps | Archives input files coming from cycle3 settlement"
+  n_retrys: 1
+  std_out_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.out"
+  std_err_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.err"
+  alarm_if_fail: 0
+  alarm_if_terminated: 1
+
+
+  /* ----------------- imap_nt_mvmtf_copy_cycle3_settlement_files ----------------- */                                                        
+
+  insert_job: imap_nt_mvmtf_copy_cycle3_settlement_files   job_type: CMD 
+  box_name: imap_nt_box_mvmtf_settlement_cycle3_125
+  command: & "E:\IMAP\prod\Scripts\IMAPcopy.bat
+  machine: imap_Vmachine
+  owner: jp0imap@CGUSER
+  permission: mx,gx
+  date_conditions: 0
+  condition: success(imap_nt_mvmtf_transaction_settlement_writer)
+  description: "Alarm CALL | BatchOps | Copy files for IMAP cycle3 settlement"
+  n_retrys: 1
+  std_out_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.out"
+  std_err_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.err"
+  alarm_if_fail: 0
+  alarm_if_terminated: 1
+
+
+  /* ----------------- imap_nt_mvmtf_prep_cycle3_settlement_alloc ----------------- */                                                        
+
+  insert_job: imap_nt_mvmtf_prep_cycle3_settlement_alloc   job_type: CMD 
+  box_name: imap_nt_box_mvmtf_settlement_cycle3_125
+  command: & "E:\IMAP\prod\scripts\RunMVMTFTransactionDataPrep.bat imap_settlement_manager_allocation"
+  machine: imap_Vmachine
+  owner: jp0imap@CGUSER
+  permission: mx,gx
+  date_conditions: 0
+  condition: success(imap_nt_mvmtf_copy_cycle3_settlement_files)
+  description: "Alarm CALL | BatchOps | Merges alloc files with existing files in folders"
+  std_out_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.out"
+  std_err_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.err"
+  alarm_if_fail: 1
+  alarm_if_terminated: 1
+
+
+  /* ----------------- imap_nt_mvmtf_prep_cycle3_settlement_eda ----------------- */                                                          
+
+  insert_job: imap_nt_mvmtf_prep_cycle3_settlement_eda   job_type: CMD 
+  box_name: imap_nt_box_mvmtf_settlement_cycle3_125
+  command: & "E:\IMAP\prod\scripts\RunMVMTFTransactionDataPrep.bat imap_settlement_transaction_eda"
+  machine: imap_Vmachine
+  owner: jp0imap@CGUSER
+  permission: mx,gx
+  date_conditions: 0
+  condition: success(imap_nt_mvmtf_copy_cycle3_settlement_files)
+  description: "Alarm CALL | BatchOps | Merges eda files with existing files in folders"
+  std_out_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.out"
+  std_err_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.err"
+  alarm_if_fail: 1
+  alarm_if_terminated: 1
+
+
+  /* ----------------- imap_nt_mvmtf_transaction_settlement_writer ----------------- */                                                       
+
+  insert_job: imap_nt_mvmtf_transaction_settlement_writer   job_type: CMD 
+  box_name: imap_nt_box_mvmtf_settlement_cycle3_125
+  command: & "E:\IMAP\prod\MVMTF\Run_Mvmtf.bat TransactionWriterJob_Settlement"
+  machine: imap_Vmachine
+  owner: jp0imap@CGUSER
+  permission: mx,gx
+  date_conditions: 0
+  condition: success(imap_nt_mvmtf_transaction_settlement)
+  description: "Alarm CALL | BatchOps | IMAP Settlement writer"
+  n_retrys: 1
+  std_out_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.out"
+  std_err_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.err"
+  alarm_if_fail: 0
+  alarm_if_terminated: 1
+
+
+  /* ----------------- imap_nt_process_cycle3_settlement ----------------- */                                                                 
+
+  insert_job: imap_nt_process_cycle3_settlement   job_type: CMD 
+  box_name: imap_nt_box_mvmtf_settlement_cycle3_125
+  command: & "E:\IMAP\prod\Batch\Run_IMap.bat EagleMVMTFSettlementTransactionsJobProcess"
+  machine: imap_Vmachine
+  owner: jp0imap@CGUSER
+  permission: mx,gx
+  date_conditions: 0
+  condition: success(imap_nt_mvmtf_prep_cycle3_settlement_alloc) AND success(imap_nt_mvmtf_prep_cycle3_settlement_eda)
+  description: "Alarm CALL | BatchOps | IMAP post-cycle3 settlement processing"
+  n_retrys: 1
+  std_out_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.out"
+  std_err_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.err"
+  alarm_if_fail: 0
+  job_load: 1
+  priority: 1
+  alarm_if_terminated: 1
+
+
+ /* ----------------- imap_box_nt_stage_manager_transfer ----------------- */                                                                 
+
+ insert_job: imap_box_nt_stage_manager_transfer   job_type: BOX 
+ box_name: imap_box_nt_nightly
+ owner: jp0imap@CGUSER
+ permission: mx,gx
+ date_conditions: 0
+ description: "Alarm CALL | BatchOps | Manager Transfer Stage"
+ alarm_if_fail: 0
+ alarm_if_terminated: 1
+
+
+  /* ----------------- imap_nt_import_aladdin_asset_transfers ----------------- */                                                            
+
+  insert_job: imap_nt_import_aladdin_asset_transfers   job_type: CMD 
+  box_name: imap_box_nt_stage_manager_transfer
+  command: & "E:\etltools\SSIS\CGDtExec imap-ssis-prod\cgsql PRD_IMAP IMAP Import_AladdinAssetTransfers.dtsx PRD_IMAP"
+  machine: imap_nt_ssis_Vmachine
+  owner: jp0imap@CGUSER
+  permission: mx,gx
+  date_conditions: 0
+  description: "Alarm CALL | BatchOps | Import Aladdin asset transfers into IMAP"
+  n_retrys: 1
+  std_out_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.out"
+  std_err_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.err"
+  alarm_if_fail: 0
+  alarm_if_terminated: 1
+
+
+ /* ----------------- imap_nt_box_mvmtf_managertransfer_cycle2 ----------------- */                                                           
+
+ insert_job: imap_nt_box_mvmtf_managertransfer_cycle2   job_type: BOX 
+ box_name: imap_box_nt_nightly
+ owner: jp0imap@CGUSER
+ permission: mx,gx
+ date_conditions: 0
+ condition: success(imap_box_nt_manager_transfer_cycle2)
+ description: "Alarm NOCALL | BatchOps | IMAP manager transfer variation margin box"
+ alarm_if_fail: 0
+ alarm_if_terminated: 1
+
+
+  /* ----------------- imap_nt_mvmtf_copy_cycle2_managertransfer_files ----------------- */                                                   
+
+  insert_job: imap_nt_mvmtf_copy_cycle2_managertransfer_files   job_type: CMD 
+  box_name: imap_nt_box_mvmtf_managertransfer_cycle2
+  command: & "E:\IMAP\prod\Scripts\IMAPcopy.bat ManagerTransferVMFiles"
+  machine: imap_Vmachine
+  owner: jp0imap@CGUSER
+  permission: mx,gx
+  date_conditions: 0
+  condition: success(imap_nt_mvmtf_managertransfer_writer_cycle2)
+  description: "Alarm CALL | BatchOps | Copy files for IMAP cycle2 manager transfer VM"
+  std_out_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.out"
+  std_err_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.err"
+  alarm_if_fail: 1
+  alarm_if_terminated: 1
+
+
+  /* ----------------- imap_nt_mvmtf_managertransfer_cycle2 ----------------- */                                                              
+
+  insert_job: imap_nt_mvmtf_managertransfer_cycle2   job_type: CMD 
+  box_name: imap_nt_box_mvmtf_managertransfer_cycle2
+  command: & "E:\IMAP\prod\MVMTF\Run_Mvmtf.bat ManagerTransferVMGeneratorJob"
+  machine: imap_Vmachine
+  owner: jp0imap@CGUSER
+  permission: mx,gx
+  date_conditions: 0
+  description: "Alarm CALL | BatchOps | IMAP manager transfer variation margin Generator"
+  std_out_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.out"
+  std_err_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.err"
+  alarm_if_fail: 1
+  alarm_if_terminated: 1
+
+
+  /* ----------------- imap_nt_mvmtf_managertransfer_writer_cycle2 ----------------- */                                                       
+
+  insert_job: imap_nt_mvmtf_managertransfer_writer_cycle2   job_type: CMD 
+  box_name: imap_nt_box_mvmtf_managertransfer_cycle2
+  command: "E:\IMAP\prod\MVMTF\Run_Mvmtf.bat" "ManagerTransferVMWriterJob"
+  machine: imap_Vmachine
+  owner: jp0imap@CGUSER
+  permission: mx,gx
+  date_conditions: 0
+  condition: success(imap_nt_mvmtf_managertransfer_cycle2)
+  description: "Alarm CALL | BatchOps | IMAP Transaction Writer to EDA format For managertransfer VM"
+  std_out_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.out"
+  std_err_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.err"
+  alarm_if_fail: 1
+  alarm_if_terminated: 1
+
+
+  /* ----------------- imap_nt_mvmtf_prep_cycle_2_managertransfer_alloc ----------------- */                                                  
+
+  insert_job: imap_nt_mvmtf_prep_cycle_2_managertransfer_alloc   job_type: CMD 
+  box_name: imap_nt_box_mvmtf_managertransfer_cycle2
+  command: & "E:\IMAP\prod\Scripts\RunMVMTFTransactionDataPrep.bat imap_managertransfer_vm_allocation"
+  machine: imap_Vmachine
+  owner: jp0imap@CGUSER
+  permission: mx,gx
+  date_conditions: 0
+  condition: success(imap_nt_mvmtf_copy_cycle2_managertransfer_files)
+  description: "Alarm CALL | BatchOps | Merges alloc files with existing files in folders"
+  std_out_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.out"
+  std_err_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.err"
+  alarm_if_fail: 1
+  alarm_if_terminated: 1
+
+
+  /* ----------------- imap_nt_mvmtf_prep_cycle_2_managertransfer_eda ----------------- */                                                    
+
+  insert_job: imap_nt_mvmtf_prep_cycle_2_managertransfer_eda   job_type: CMD 
+  box_name: imap_nt_box_mvmtf_managertransfer_cycle2
+  command: & "E:\IMAP\prod\Scripts\RunMVMTFTransactionDataPrep.bat imap_managertransfer_vm_eda"
+  machine: imap_Vmachine
+  owner: jp0imap@CGUSER
+  permission: mx,gx
+  date_conditions: 0
+  condition: success(imap_nt_mvmtf_copy_cycle2_managertransfer_files)
+  description: "Alarm CALL | BatchOps | Merges eda files with existing files in folders"
+  std_out_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.out"
+  std_err_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.err"
+  alarm_if_fail: 1
+  alarm_if_terminated: 1
+
+
+  /* ----------------- imap_nt_process_cycle2_managertransfer_vm ----------------- */                                                         
+
+  insert_job: imap_nt_process_cycle2_managertransfer_vm   job_type: CMD 
+  box_name: imap_nt_box_mvmtf_managertransfer_cycle2
+  command: & "E:\IMAP\prod\Batch\Run_IMap.bat ManagerTransferVMTransactionJobProcess"
+  machine: imap_Vmachine
+  owner: jp0imap@CGUSER
+  permission: mx,gx
+  date_conditions: 0
+  condition: success(imap_nt_mvmtf_prep_cycle_2_managertransfer_eda) AND success(imap_nt_mvmtf_prep_cycle_2_managertransfer_alloc)
+  description: "Alarm CALL | BatchOps |  IMAP post-cycle2 managertransfer vm processing"
+  std_out_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.out"
+  std_err_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.err"
+  alarm_if_fail: 1
+  alarm_if_terminated: 1
+
+
+ /* ----------------- imap_box_nt_post_mass_transfers_portfolio_dates ----------------- */                                                    
+
+ insert_job: imap_box_nt_post_mass_transfers_portfolio_dates   job_type: BOX 
+ box_name: imap_box_nt_nightly
+ owner: jp0imap@CGUSER
+ permission: mx,gx
+ date_conditions: 0
+ condition: success(imap_nt_fwtch_post_mass_transfers_portfolio_dates) AND success(imap_box_nt_mass_transfers_cycle1)
+ description: "Alarm CALL | BatchOps | CMPS Portfolio dates data post mass transfer. This data is prerequisite for all IMAP cycles"
+ alarm_if_fail: 0
+ alarm_if_terminated: 1
+
+
+  /* ----------------- imap_nt_post_mass_transfers_archive_portfolio_file ----------------- */                                                
+
+  insert_job: imap_nt_post_mass_transfers_archive_portfolio_file   job_type: CMD 
+  box_name: imap_box_nt_post_mass_transfers_portfolio_dates
+  command: & "E:\IMAP\prod\scripts\RunIMapArchiveSSISInboundWithoutTimestamp.bat cmps_investmentportfolio E:\MFT\CMPS\Inbound"
+  machine: imap_Vmachine
+  owner: jp0imap@CGUSER
+  permission: mx,gx
+  date_conditions: 0
+  condition: success(imap_nt_post_mass_transfers_load_portfolio_dates)
+  description: "Alarm CALL | BatchOps | Archive original cmps_investmentportfolio XML file"
+  n_retrys: 1
+  std_out_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.out"
+  std_err_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.err"
+  alarm_if_fail: 0
+  alarm_if_terminated: 1
+
+
+  /* ----------------- imap_nt_post_mass_transfers_archive_tempinvestment_file ----------------- */                                           
+
+  insert_job: imap_nt_post_mass_transfers_archive_tempinvestment_file   job_type: CMD 
+  box_name: imap_box_nt_post_mass_transfers_portfolio_dates
+  command: & "E:\IMAP\prod\scripts\RunIMapArchiveSSISInboundWithoutTimestamp.bat TempInvestment E:\MFT\CMPS\Inbound"
+  machine: imap_Vmachine
+  owner: jp0imap@CGUSER
+  permission: mx,gx
+  date_conditions: 0
+  condition: success(imap_nt_post_mass_transfers_load_portfolio_dates)
+  description: "Alarm CALL | BatchOps | Archive TempInvestment files"
+  n_retrys: 1
+  std_out_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.out"
+  std_err_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.err"
+  alarm_if_fail: 0
+  alarm_if_terminated: 1
+
+
+  /* ----------------- imap_nt_post_mass_transfers_load_portfolio_dates ----------------- */                                                  
+
+  insert_job: imap_nt_post_mass_transfers_load_portfolio_dates   job_type: CMD 
+  box_name: imap_box_nt_post_mass_transfers_portfolio_dates
+  command: & "E:\etltools\SSIS\CGDtExec imap-ssis-prod\cgsql PRD_IMAP IMAP Import_InvestmentPortfolioDates.dtsx PRD_IMAP"
+  machine: imap_nt_ssis_Vmachine
+  owner: jp0imap@CGUSER
+  permission: mx,gx
+  date_conditions: 0
+  description: "Alarm CALL | BatchOps | Load portfolio dates into IMAP from Xml input files - cmps_investmentportfolio"
+  n_retrys: 1
+  std_out_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.out"
+  std_err_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.err"
+  alarm_if_fail: 0
+  alarm_if_terminated: 1
+
+
+ /* ----------------- imap_nt_replace_mgrid_crmc_alloc ----------------- */                                                                   
+
+ insert_job: imap_nt_replace_mgrid_crmc_alloc   job_type: CMD 
+ box_name: imap_box_nt_nightly
+ command: & E\:\etltools\SSIS\CGDtExec imap-ssis-prod\cgsql PRD_IMAP IMAP Process_CstarManagerIdReplacement.dtsx PRD_IMAP /par ""$Package\:\:FileName(String)";"idh_manager_allocation.dat""
+ machine: imap_nt_ssis_Vmachine
+ owner: jp0imap@CGUSER
+ permission: mx,gx
+ date_conditions: 0
+ condition: success(imap_nt_prep_cyc3_crmc_alloc)
+ description: "Alarm CALL | BatchOps | Replace legacy manager id with MR portfolio uid"
+ n_retrys: 1
+ std_out_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.out"
+ std_err_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.err"
+ alarm_if_fail: 0
+ alarm_if_terminated: 1
+
+
+ /* ----------------- imap_nt_replace_mgrid_g3_alloc ----------------- */                                                                     
+
+ insert_job: imap_nt_replace_mgrid_g3_alloc   job_type: CMD 
+ box_name: imap_box_nt_nightly
+ command: & E\:\etltools\SSIS\CGDtExec imap-ssis-prod\cgsql PRD_IMAP IMAP Process_CstarManagerIdReplacement.dtsx PRD_IMAP /par ""$Package\:\:FileName(String)";"isg_cstar_g3_transactions_manager_allocation.dat""
+ machine: imap_nt_ssis_Vmachine
+ owner: jp0imap@CGUSER
+ permission: mx,gx
+ date_conditions: 0
+ condition: success(imap_nt_prep_cycle3_g3_alloc)
+ description: "Alarm CALL | BatchOps | Replace legacy manager id with MR portfolio uid"
+ n_retrys: 1
+ std_out_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.out"
+ std_err_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.err"
+ alarm_if_fail: 0
+ alarm_if_terminated: 1
+
+
+ /* ----------------- imap_nt_replace_mgrid_u2_alloc ----------------- */                                                                     
+
+ insert_job: imap_nt_replace_mgrid_u2_alloc   job_type: CMD 
+ box_name: imap_box_nt_nightly
+ command: & E\:\etltools\SSIS\CGDtExec imap-ssis-prod\cgsql PRD_IMAP IMAP Process_CstarManagerIdReplacement.dtsx PRD_IMAP /par ""$Package\:\:FileName(String)";"isg_cstar_u2_transactions_manager_allocation.dat""
+ machine: imap_nt_ssis_Vmachine
+ owner: jp0imap@CGUSER
+ permission: mx,gx
+ date_conditions: 0
+ condition: success(imap_nt_prep_cycle3_u2_alloc)
+ description: "Alarm CALL | BatchOps | Replace legacy manager id with MR portfolio uid"
+ n_retrys: 1
+ std_out_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.out"
+ std_err_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.err"
+ alarm_if_fail: 0
+ alarm_if_terminated: 1
+
+
+ /* ----------------- imap_nt_box_mass_transfers_failure_notification ----------------- */                                                    
+
+ insert_job: imap_nt_box_mass_transfers_failure_notification   job_type: BOX 
+ box_name: imap_box_nt_nightly
+ owner: jp0imap@CGUSER
+ permission: mx,gx
+ date_conditions: 0
+ condition: success(imap_box_nt_post_mass_transfers_portfolio_dates)
+ description: "Alarm CALL | BatchOps | Send email notification of any failed mass transfers"
+ alarm_if_fail: 0
+ alarm_if_terminated: 1
+
+
+  /* ----------------- imap_nt_mass_transfers_failure_notification ----------------- */                                                       
+
+  insert_job: imap_nt_mass_transfers_failure_notification   job_type: CMD 
+  box_name: imap_nt_box_mass_transfers_failure_notification
+  command: & "E:\IMAP\prod\MassTransferBatch\Run_MassTransfer.bat MassTransferFailureNotificationJobProcess"
+  machine: imap_Vmachine
+  owner: jp0imap@CGUSER
+  permission: mx,gx
+  date_conditions: 0
+  description: "Alarm CALL | BatchOps | Send email notification of any failed mass transfers"
+  n_retrys: 1
+  std_out_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.out"
+  std_err_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.err"
+  alarm_if_fail: 0
+  alarm_if_terminated: 1
+
+
+ /* ----------------- imap_nt_clear_cancel_suspects_nightly ----------------- */                                                              
+
+ insert_job: imap_nt_clear_cancel_suspects_nightly   job_type: CMD 
+ box_name: imap_box_nt_nightly
+ command: "E:\IMAP\prod\Batch\Run_Query.bat" RunSupportQuery "'Automated Bulk Ack Cancels in suspect'"
+ machine: imap_Vmachine
+ owner: jp0imap@CGUSER
+ permission: mx,gx
+ date_conditions: 0
+ condition: success(imap_nt_box_cmi_cycle_3_5_eod)
+ description: "Alarm CALL | BatchOps | Cleans up low value suspect txns from IMAP"
+ n_retrys: 1
+ std_out_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.out"
+ std_err_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.err"
+ alarm_if_fail: 0
+ alarm_if_terminated: 1
+
+
+ /* ----------------- imap_box_nt_stage_etf_allocation_fi ----------------- */                                                                
+
+ insert_job: imap_box_nt_stage_etf_allocation_fi   job_type: BOX 
+ box_name: imap_box_nt_nightly
+ owner: jp0imap@CGUSER
+ permission: mx,gx
+ date_conditions: 0
+ condition: (value(imap_gbd) = "Y" OR success(imap_box_nt_stage_etf_allocation_eq)) AND success(imap_box_nt_stage_manager_transfer)
+ description: "Alarm CALL | BatchOps | Box for IMAP to Load ETF allocation details from  NEXUS"
+ alarm_if_fail: 0
+ alarm_if_terminated: 1
+
+
+  /* ----------------- imap_nt_stage_etf_fi_allocation ----------------- */                                                                   
+
+  insert_job: imap_nt_stage_etf_fi_allocation   job_type: CMD 
+  box_name: imap_box_nt_stage_etf_allocation_fi
+  command: & "E:\etltools\SSIS\CGDtExec imap-ssis-prod\cgsql PRD_IMAP IMAP Import_AladdinToImap.dtsx PRD_IMAP"
+  machine: imap_nt_ssis_Vmachine
+  owner: jp0imap@CGUSER
+  permission: mx,gx
+  date_conditions: 0
+  description: "Alarm CALL | BatchOps | Import ETF Allocation Details from NEXUS into IMAP"
+  n_retrys: 1
+  std_out_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.out"
+  std_err_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.err"
+  alarm_if_fail: 0
+  alarm_if_terminated: 1
+  
+  
+/* ----------------- imap_set_global_maintenance_off_od ----------------- */                                                                  
+
+insert_job: imap_set_global_maintenance_off_od   job_type: CMD 
+command: sendevent -E SET_GLOBAL -G "imap_maintenance=off"
+machine: autoserver_Vmachine
+owner: cpzinfbb00000016jp01
+permission: gx
+date_conditions: 0
+description: "No Alarm CALL | Manager_Allocation_L3 | This job sets a global variable for the MARS & IMAP intradays, manually ran."
+std_out_file: "/tmp/${AUTO_JOB_NAME}_${AUTORUN}.out"
+std_err_file: "/tmp/${AUTO_JOB_NAME}_${AUTORUN}.err"
+alarm_if_fail: 0
+alarm_if_terminated: 0
+
+
+/* ----------------- imap_set_global_maintenance_on_od ----------------- */                                                                   
+
+insert_job: imap_set_global_maintenance_on_od   job_type: CMD 
+command: sendevent -E SET_GLOBAL -G "imap_maintenance=on"
+machine: autoserver_Vmachine
+owner: cpzinfbb00000016jp01
+permission: gx
+date_conditions: 0
+description: "No Alarm CALL | Manager_Allocation_L3 | This job sets a global variable for the MARS & IMAP intradays, manually ran."
+std_out_file: "/tmp/${AUTO_JOB_NAME}_${AUTORUN}.out"
+std_err_file: "/tmp/${AUTO_JOB_NAME}_${AUTORUN}.err"
+alarm_if_fail: 0
+alarm_if_terminated: 0
+
+
+/* ----------------- imap_set_global_intraday_run ----------------- */                                                                        
+
+insert_job: imap_set_global_intraday_run   job_type: CMD 
+command: sendevent -E SET_GLOBAL -G "imap_intraday=run"
+machine: autoserver_Vmachine
+owner: cpzinfbb00000016jp01
+permission: gx
+date_conditions: 0
+condition: value(imap_maintenance) = "off" AND success(imap_box_nt_nightly) AND success(imap_nt_dst_complete) AND success(imap_nt_cycle4_complete) AND success(imap_nt_box_rubix_extract)
+description: "Alarm CALL | BatchOps | This job sets a global variable for the IMAP intradays."
+n_retrys: 1
+std_out_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.out"
+std_err_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.err"
+alarm_if_fail: 0
+alarm_if_terminated: 1
+
+
+/* ----------------- imap_set_global_intraday_stop ----------------- */                                                                       
+
+insert_job: imap_set_global_intraday_stop   job_type: CMD 
+box_name: imap_nt_box_prebatch
+command: sendevent -E SET_GLOBAL -G "imap_intraday=stop"
+machine: autoserver_Vmachine
+owner: cpzinfbb00000016jp01
+permission: gx
+date_conditions: 0
+description: "Alarm CALL | BatchOps | This job sets a global variable for the IMAP intradays."
+n_retrys: 1
+std_out_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.out"
+std_err_file: "\\%COMPUTERNAME%\autosys\logs\%AUTO_JOB_NAME%_%AUTOPID%.err"
+alarm_if_fail: 0
+alarm_if_terminated: 1
+
+
+/* ----------------- imap_set_global_gbd_off ----------------- */                                                                             
+
+insert_job: imap_set_global_gbd_off   job_type: CMD 
+command: sendevent -E SET_GLOBAL -G "imap_gbd=N"
+machine: autoserver_Vmachine
+owner: cpzinfbb00000016jp01
+permission: gx
+date_conditions: 1
+days_of_week: mo,tu,we,th,fr
+exclude_calendar: US_holidays
+start_times: "18:10"
+condition: success(imap_set_global_gbd_on)
+description: "Alarm CALL | BatchOps | This job sets a global variable IMAP_GBD to N"
+std_out_file: "/tmp/${AUTO_JOB_NAME}_${AUTORUN}.out"
+std_err_file: "/tmp/${AUTO_JOB_NAME}_${AUTORUN}.err"
+alarm_if_fail: 0
+alarm_if_terminated: 0
+
+
+/* ----------------- imap_set_global_gbd_on ----------------- */                                                                              
+
+insert_job: imap_set_global_gbd_on   job_type: CMD 
+command: sendevent -E SET_GLOBAL -G "imap_gbd=Y"
+machine: autoserver_Vmachine
+owner: cpzinfbb00000016jp01
+permission: gx
+date_conditions: 0
+condition: success(imap_nt_box_prebatch)
+description: "Alarm CALL | BatchOps | This job sets a global variable IMAP_GBD to Y"
+std_out_file: "/tmp/${AUTO_JOB_NAME}_${AUTORUN}.out"
+std_err_file: "/tmp/${AUTO_JOB_NAME}_${AUTORUN}.err"
+alarm_if_fail: 0
+alarm_if_terminated: 0
+
+
+/* ----------------- tps-g_fwtch_cstar_acct_file_move ----------------- */ 
+insert_job: tps-g_fwtch_cstar_acct_file_move   job_type: CMD 
+command: bl -g is_file_move.pl $TPSCOMMON/bin $BATCH_USER_NAME TPS -s /users/mft/cstar/inbound -t $PC_FILES_LOCAL --rem_ver -p '^egl_ENTITYLIST_v1.*dat' --fail_no_file -a /users/tps/common/archive/cstar_in --rem_trail --rem_pat '_\d{8,}_\d{8,}' --file_watch --fw_term_time 25 --fw_interval 30
+machine: tps-g_Vmachine
+owner: cpzprdaa00002376jp01
+permission: gx
+date_conditions: 1
+days_of_week: mo,tu,we,th,fr
+exclude_calendar: global_holidays
+start_times: "17:35"
+condition:
+description: "Alarm CALL | TPS-CGII | This job is to watch and move CSTAR account file to PowerCenter input file directory and archive it."
+std_out_file: "/$TPSLOG/$AUTO_JOB_NAME.out"
+std_err_file: "/$TPSLOG/$AUTO_JOB_NAME.err"
+alarm_if_fail: 1
+profile: "/usr/local/AutoSys/tps.profile"
+alarm_if_terminated: 1
+
+
+/* ----------------- tps-g_pc_cstar2tps_acct ----------------- */ 
+insert_job: tps-g_pc_cstar2tps_acct   job_type: CMD 
+command: bl -g tps_pc_sds2tps.sh $TPSCOMMON/bin $BATCH_USER_NAME_PM TPS_G_PM wf_tps_cstar2tps_acct 1
+machine: tps-g_Vmachine
+owner: cpzprdaa00002376jp01
+permission: gx
+date_conditions: 0
+condition: success(tps-g_fwtch_cstar_acct_file_move)
+description: "Alarm CALL | TPS-CGII | ETL job to load CSTAR Account numbers to TPS-GIG database."
+n_retrys: 1
+std_out_file: "/$TPSLOG/$AUTO_JOB_NAME.out"
+std_err_file: "/$TPSLOG/$AUTO_JOB_NAME.err"
+alarm_if_fail: 1
+profile: "/usr/local/AutoSys/tps.profile"
+alarm_if_terminated: 1
+
+
+/* ----------------- cstar_box_extract_startofday ----------------- */                                                                        
+
+insert_job: cstar_box_extract_startofday   job_type: BOX 
+owner: jp0cstar
+permission: gx
+date_conditions: 0
+condition: success(cstar_box_posts2p_daily) AND success(cstar_box_posts2p_daily_two) AND success(cstar_box_posts2p_1bd) AND success(cstar_box_posts2p_12345bd) AND success(cstar_box_posts2p_lastbd) AND success(cstar_box_posts2p_3bd) AND success(cstar_box_posts2p_3frijan) AND success(cstar_box_posts2p_10bdnovlbd) AND success(cstar_box_rpt_cash_projection) AND success(cstar_box_posts2p_lbd1234bd) AND success(cstar_box_posts2p_yelbd1234bd) AND success(cstar_box_posts2p_qelbd1234bd) AND success(cstar_box_extract_postdst) AND success(cstar_box_disclosure) AND success(cstar_box_posts2p_1and2_bd) AND success(cstar_box_posts2p_gbd) AND success(cstar_box_posts2p_friaft3bdqtrly) AND success(cstar_rpt_fx_oversight_qtr) AND success(cstar_box_posts2p_4lbd) AND success(cstar_box_extract_posts2p_two) AND success(cstar_box_posts2p_2nd_friday) AND success(cstar_box_posts2p_fri) AND success(cstar_box_post_transactions) AND success(cstar_box_rpt_ccf_st_trd_sum) AND success(cstar_cstar2paceplus_unsettled_trans_md)
+description: "Alarm CALL | App Support - Back Office | This box contains jobs that prepare for the next business day after all extracts and reports jobs are done."
+alarm_if_fail: 0
+alarm_if_terminated: 0
+
+
+ /* ----------------- cstar_update_system_date ----------------- */                                                                           
+
+ insert_job: cstar_update_system_date   job_type: CMD 
+ box_name: cstar_box_extract_startofday
+ command: bl -g runetl $CSTAR_SCR $BATCH_USER_NAME cstarkey UPDATE_SYSTEM_DATE $CSTAR_SCR/extracts_runetl.ctl
+ machine: cstar_1_Vmachine
+ owner: jp0cstar
+ permission: gx
+ date_conditions: 0
+ description: "Alarm CALL | App Support - Back Office | This job updates the system_date table."
+ std_out_file: "${CSTAR_AUTOSYS_LOG_DIR}/${AUTO_JOB_NAME}.${AUTORUN}.out"
+ std_err_file: "${CSTAR_AUTOSYS_LOG_DIR}/${AUTO_JOB_NAME}.${AUTORUN}.err"
+ alarm_if_fail: 1
+ profile: "/users/cstar/env/autosys_cstar.profile"
+ alarm_if_terminated: 1
+
+
+ /* ----------------- cstar_rpt_table_load_log_info ----------------- */                                                                      
+
+ insert_job: cstar_rpt_table_load_log_info   job_type: CMD 
+ box_name: cstar_box_extract_startofday
+ command: bl -g runetl $CSTAR_SCR $BATCH_USER_NAME cstarkey RPT_TABLE_LOAD_LOG_INFO $CSTAR_SCR/extracts_runetl.ctl
+ machine: cstar_1_Vmachine
+ owner: jp0cstar
+ permission: gx
+ date_conditions: 0
+ condition: success(cstar_update_system_date)
+ description: "Alarm CALL | App Support - Back Office | This job produces the table load log information report ."
+ std_out_file: "${CSTAR_AUTOSYS_LOG_DIR}/${AUTO_JOB_NAME}.${AUTORUN}.out"
+ std_err_file: "${CSTAR_AUTOSYS_LOG_DIR}/${AUTO_JOB_NAME}.${AUTORUN}.err"
+ alarm_if_fail: 1
+ profile: "/users/cstar/env/autosys_cstar.profile"
+ alarm_if_terminated: 1
+
+
+ /* ----------------- cstar_rpt_process_log_info ----------------- */                                                                         
+
+ insert_job: cstar_rpt_process_log_info   job_type: CMD 
+ box_name: cstar_box_extract_startofday
+ command: bl -g runetl $CSTAR_SCR $BATCH_USER_NAME cstarkey RPT_PROCESS_LOG_INFO $CSTAR_SCR/extracts_runetl.ctl
+ machine: cstar_1_Vmachine
+ owner: jp0cstar
+ permission: gx
+ date_conditions: 0
+ condition: success(cstar_update_system_date)
+ description: "Alarm CALL | App Support - Back Office | This job produces the process log information report ."
+ std_out_file: "${CSTAR_AUTOSYS_LOG_DIR}/${AUTO_JOB_NAME}.${AUTORUN}.out"
+ std_err_file: "${CSTAR_AUTOSYS_LOG_DIR}/${AUTO_JOB_NAME}.${AUTORUN}.err"
+ alarm_if_fail: 1
+ profile: "/users/cstar/env/autosys_cstar.profile"
+ alarm_if_terminated: 1
+ 
+ 
+/* ----------------- utl_box_inactivate_all_gbd ----------------- */ 
+insert_job: utl_box_inactivate_all_gbd   job_type: BOX 
+owner: cpzinfbb00000016jp01
+permission: gx
+date_conditions: 1
+days_of_week: mo,tu,we,th,fr
+exclude_calendar: global_holidays
+start_times: "10:05"
+condition: value(autosys_upgrade_r11.3.6) = "OFF"
+description: "ID=AG221753883400SI9S0AIy6C0A5uc5 | Alarm CALL | Production Control | This box contains all utl_inactivate jobs that run with gbd calendars.  If this box receives a max run alarm find out which jobs have not run and find out why by referencing the job dep"
+alarm_if_fail: 0
+alarm_if_terminated: 0
+ 
+
+ 
+ /* ----------------- utl_inactive_imap_box_nt_nightly ----------------- */ 
+insert_job: utl_inactive_imap_box_nt_nightly   job_type: CMD 
+box_name: utl_box_inactivate_all_gbd
+command: sendevent -E CHANGE_STATUS -p 10 -J imap_box_nt_nightly -s INACTIVE
+machine: utlinact_Vmachine
+owner: cpzinfbb00000016jp01
+permission: gx
+date_conditions: 0
+condition: success(imap_box_nt_nightly) AND success(utl_inactive_imap_nt_nightly_ref_data)
+description: "Alarm CALL | BatchOps | This job will inactivate the IMAP nightly box"
+std_out_file: "/tmp/${AUTO_JOB_NAME}_${AUTORUN}.out"
+std_err_file: "/tmp/${AUTO_JOB_NAME}_${AUTORUN}.err"
+alarm_if_fail: 1
+job_load: 1
+priority: 1
+alarm_if_terminated: 1
+ 
+
+ 
+#Machine JIL Definition example
+
+insert_machine: autoserver_Vmachine
+type: v
+machine: x590625
+max_load: 10        
+factor: 1.00  
+
+insert_machine: x590625
+type: a
+factor: 1.00  
+description: Created by the installer.
+port: 7520
+node_name: x590625
+agent_name: WA_AGENT
+encryption_type: DEFAULT
+character_code: ASCII
+
+
+
+

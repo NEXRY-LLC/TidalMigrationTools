@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.bluehouseinc.dataconverter.model.IModelReport;
 import com.bluehouseinc.dataconverter.model.IReporter;
+import com.bluehouseinc.dataconverter.parsers.tivoli.reporter.TivoliJobsWithConmanCommand;
 import com.bluehouseinc.dataconverter.parsers.tivoli.reporter.TivoliJobsWithDoCommandEnvVariables;
 import com.bluehouseinc.dataconverter.parsers.tivoli.reporter.TivoliJobsWithDoCommandLawsonToEsp;
 import com.bluehouseinc.dataconverter.parsers.tivoli.reporter.TivoliJobsWithDoCommandWithDollarVariable;
@@ -21,6 +22,7 @@ public class TivoliReporter implements IModelReport {
 		core.add(new TivoliJobsWithDoCommandEnvVariables());
 		core.add(new TivoliJobsWithDoCommandLawsonToEsp());
 		core.add(new TivoliJobsWithDoCommandWithDollarVariable());
+		core.add(new TivoliJobsWithConmanCommand());
 		return core;
 	}
 

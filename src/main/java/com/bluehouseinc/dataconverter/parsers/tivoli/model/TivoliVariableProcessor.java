@@ -8,6 +8,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import com.bluehouseinc.dataconverter.common.utils.RegexHelper;
 import com.bluehouseinc.dataconverter.model.BaseVariableProcessor;
 import com.bluehouseinc.dataconverter.model.TidalDataModel;
 import com.bluehouseinc.dataconverter.parsers.esp.model.EspAbstractJob;
@@ -20,6 +21,7 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class TivoliVariableProcessor extends BaseVariableProcessor<TivoliJobObject> {
 	final private static String VAR_PATTERN = ".*?(\\^.*?\\^).*?";
+	final private static String DOLLAR_PATTERN = "(\\$\\{?)(\\w+)(\\}?)";
 	private static final Pattern PATTERN = Pattern.compile(VAR_PATTERN);
 
 	public TivoliVariableProcessor(TidalDataModel model) {
@@ -91,7 +93,9 @@ public class TivoliVariableProcessor extends BaseVariableProcessor<TivoliJobObje
 	private String convertReplaceVariblesToTidal(String rawValue) {
 		String newValue = rawValue;
 		if (newValue != null) {
-			if (newValue.contains("^")) {
+			if(newValue.contains("$")) {
+				newValue = convertRegisterLocalVariablesToTidal(rawValue);
+			}else if (newValue.contains("^")) {
 				newValue = convertRegisterGlobalVariablesToTidal(rawValue);
 			}
 		}
@@ -114,5 +118,30 @@ public class TivoliVariableProcessor extends BaseVariableProcessor<TivoliJobObje
 		}
 
 		return expression;
+	}
+	
+	private String convertRegisterLocalVariablesToTidal(String data) {
+		
+		if( RegexHelper.matchesRegexPattern(data, DOLLAR_PATTERN)) {
+			
+
+			Pattern p = Pattern.compile(DOLLAR_PATTERN);
+			Matcher m = p.matcher(data);
+
+			while (m.find()) {
+				String variableName = m.group(2);
+				String repplacevariable = m.group(1)+m.group(2)+m.group(3);
+				addGlobalVariable(variableName);
+				//data = m.replaceAll("\\$\\$$2\\$\\$"); // Replace the pattern found with the second group with our $$ tokens for TIDAL
+				data = data.replace(repplacevariable, "$$"+variableName+"$$");
+				data.trim();
+			}
+
+			if(data.contains("$$$$")) {
+				// Hack.. 
+				data = data.replace("$$$$", "$$").replace("$$$", "$$");
+			}
+		}
+		return data;
 	}
 }
