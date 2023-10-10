@@ -1,9 +1,9 @@
 NAME,NEWNAME
 .*(\\!PID).*,<JobExternid>
-!TMSTMP,<SysDate.hh><SysDate.mm>/<SysDate.dd>/<SysDate.yyyy>
-!STMPTM,<SysDate.hh><SysDate.mm>/<SysDate.dd>/<SysDate.yyyy>
-"'!ESPSHH.:!ESPSMN.,!ESPSMM./!ESPSDD./!ESPSYY'","<SysDate.hh>,<SysDate.MM>/<SysDate.DD>/<SysDate.YYYY>"
-"'!ESPSMM./!ESPSDD./!ESPSYY.,!ESPSHH.:!ESPSMN'","<SysDate.hh>,<SysDate.MM>/<SysDate.DD>/<SysDate.YYYY>"
+!TMSTMP,"<SysDate.hh>:<SysDate.mm>,<SysDate.MM>/<SysDate.dd>/<SysDate.yy>"
+!STMPTM,"<SysDate.MM>/<SysDate.dd>/<SysDate.yy>,<SysDate.hh>:<SysDate.mm>"
+"'!ESPSHH.:!ESPSMN.,!ESPSMM./!ESPSDD./!ESPSYY'","<SysDate.hh>:<SysDate.mm>,<SysDate.MM>/<SysDate.dd>/<SysDate.yy>"
+"'!ESPSMM./!ESPSDD./!ESPSYY.,!ESPSHH.:!ESPSMN'","<SysDate.MM>/<SysDate.dd>/<SysDate.yy>,<SysDate.hh>:<SysDate.mm>"
 !ESPSYY,<SysDate.yy>
 !ESPSMN,<SysDate.mm>
 .*(\\!ESPSDD\\.).*,<SysDate.dd>

@@ -27,6 +27,8 @@ public abstract class EspAbstractJob extends BaseJobOrGroupObject implements Esp
 	boolean containsAdvancedDueOutLogic = false;
 	boolean containsRequestAttribute = false;
 	boolean containsScopeAttribute = false;
+	boolean containsREALNOWInEarlySub = false;
+	boolean containsRELDELAY= false;
 	
 	List<String> groupsToDependOn = new ArrayList<>();
 	

@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.bluehouseinc.dataconverter.parsers.esp.model.EspAbstractJob;
+import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.data.CcCheck;
 import com.bluehouseinc.dataconverter.parsers.esp.model.util.EspJobType;
 
 import lombok.Data;
@@ -18,8 +19,8 @@ public class EspZosJob extends EspAbstractJob {
 	boolean isLinkProcess; // contains LINK PROCESS clause as part of JOB Statement
 	boolean isHold; // contains HOLD keyword as part of JOB Statement
 	boolean isTask; // contains TASK keyword which indicates that JOB is a task
-	boolean isMultipleExitCodes;
-	boolean isComplexCcCheck;
+	boolean isMultipleExitCodes = false;
+	boolean isComplexCcCheck = false;
 	
 	String abandon;
 	List<String> echos = new ArrayList<>();

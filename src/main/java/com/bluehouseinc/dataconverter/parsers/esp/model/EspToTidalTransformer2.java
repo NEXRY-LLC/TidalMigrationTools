@@ -1,8 +1,14 @@
 package com.bluehouseinc.dataconverter.parsers.esp.model;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import org.apache.commons.lang3.math.NumberUtils;
 
@@ -23,7 +29,8 @@ import com.bluehouseinc.dataconverter.model.impl.CsvOSJob;
 import com.bluehouseinc.dataconverter.model.impl.CsvResource;
 import com.bluehouseinc.dataconverter.model.impl.CsvRuntimeUser;
 import com.bluehouseinc.dataconverter.model.impl.CsvSAPJob;
-import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.impl.CcCheck;
+import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.data.CcCheck;
+import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.data.CcCheckFileWriter;
 import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.impl.EspAgentMonitorJob;
 import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.impl.EspAs400Job;
 import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.impl.EspFileTriggerJob;
@@ -55,11 +62,14 @@ public class EspToTidalTransformer2 implements ITransformer<List<EspAbstractJob>
 
 	TidalDataModel datamodel;
 	EspDataModel espdatamodel;
-	
-	public EspToTidalTransformer2(TidalDataModel datamodel,EspDataModel espdatamodel) {
+	CcCheckFileWriter ccCheckwritter;
+
+	public EspToTidalTransformer2(TidalDataModel datamodel, EspDataModel espdatamodel) {
 		this.datamodel = datamodel;
 		this.espdatamodel = espdatamodel;
 		this.SAPImporter = new SapDataImporter(datamodel.getCfgProvider().getProvider());
+		this.ccCheckwritter = new CcCheckFileWriter(espdatamodel.getConfigeProvider().getCcodeDataFile());
+
 	}
 
 	@Override
@@ -71,15 +81,15 @@ public class EspToTidalTransformer2 implements ITransformer<List<EspAbstractJob>
 	private void doProcessObjects(EspAbstractJob job, CsvJobGroup parent) {
 
 		if (job.getFullPath().startsWith("\\DB0469A")) {
-			if(job.getName().contains("DB0469A.MON")) {
+			if (job.getName().contains("DB0469A.MON")) {
 				job.getName().toLowerCase();
 			}
-			
-			if(job.getFullPath().endsWith("DB0469A.MON")) {
+
+			if (job.getFullPath().endsWith("DB0469A.MON")) {
 				job.getName();
 			}
 		}
-		
+
 		if (job instanceof EspJobGroup) {
 
 			CsvJobGroup jobgroup = (CsvJobGroup) processJobObject(job);
@@ -137,10 +147,10 @@ public class EspToTidalTransformer2 implements ITransformer<List<EspAbstractJob>
 		} else if (job instanceof EspFileTriggerJob) {
 			newjob = new CsvFileWatcherJob();
 			processJob((EspFileTriggerJob) job, (CsvFileWatcherJob) newjob);
-		}  else if (job instanceof EspTaskProcessJob) {
+		} else if (job instanceof EspTaskProcessJob) {
 			newjob = new CsvMilestoneJob();
 			processJob((EspTaskProcessJob) job, (CsvMilestoneJob) newjob);
-		}else {
+		} else {
 			newjob = new CsvOSJob();
 
 			// Covers all our OS based Jobs
@@ -169,27 +179,28 @@ public class EspToTidalTransformer2 implements ITransformer<List<EspAbstractJob>
 
 	/**
 	 * Per Customer, this job type must be manually set.
+	 * 
 	 * @param in
 	 * @param out
 	 */
 	private void processJob(EspTaskProcessJob in, CsvMilestoneJob out) {
 		out.setRequireOperatorRelease(true);
 	}
-	
+
 	private void processJob(EspJobGroup in, CsvJobGroup out) {
 
 		// Set our rerun times if we have any data.
 		if (in.getRuntimes().size() > 1) {
-		
-			List<String> oftimes =  new ArrayList<>();
+
+			List<String> oftimes = new ArrayList<>();
 			in.getRuntimes().forEach(t -> {
-				// Change from 0100 to 01:00 because TIDAL is forever changing rules :) 
+				// Change from 0100 to 01:00 because TIDAL is forever changing rules :)
 				String milltime = t.replaceAll("..(?!$)", "$0:");
 				oftimes.add(milltime);
-			});	
-					//in.getRuntimes().stream().map(String::valueOf).collect(Collectors.toList());
+			});
+			// in.getRuntimes().stream().map(String::valueOf).collect(Collectors.toList());
 			String starttimes = String.join(",", oftimes);
-			//starttimes = starttimes.replace(".", ":");
+			// starttimes = starttimes.replace(".", ":");
 			APIDateUtils.setRerunSameStartTimes(starttimes, out, datamodel, true);
 		}
 	}
@@ -197,55 +208,59 @@ public class EspToTidalTransformer2 implements ITransformer<List<EspAbstractJob>
 	private void processJob(EspZosJob in, CsvOSJob out) {
 
 		out.setCommandLine(in.getCommandLine());
-		//out.setRuntimeUser(in.getUser());
-		if(StringUtils.isBlank(in.getAgent())) {
+		// out.setRuntimeUser(in.getUser());
+		if (StringUtils.isBlank(in.getAgent())) {
 			in.setAgent("NOTSET-Z");
-		}else {
+		} else {
 			in.setAgent(in.getAgent() + "-Z");
 		}
-		
-		
-		//String extract = "RC\\((\\S+)\\).*";
-		
-		if(!in.getCcchks().isEmpty()) {
-		 List<CcCheck>	data = in.getCcchks();
-			if(data.size()==1) {
-				CcCheck check = data.get(0);
-				// Single can handle
-				//String range = RegexHelper.extractFirstMatch(in.getCcchk().get(0), extract);
-				
-				CsvJobExitCode exitcode = new CsvJobExitCode();
 
-//				if(range.contains(":")) {
-//				exitcode.setExitStart(Integer.valueOf(range.split(":")[0]));
-//				exitcode.setExitEnd(Integer.valueOf(range.split(":")[1]));
-//				
-//				}else {
-//					exitcode.setExitStart(Integer.valueOf(range));
-//				}
-//				
-				if(check.isNotEquals()) {
-					exitcode.setExitLogic(ExitLogic.NE);
-				}else {
-					exitcode.setExitLogic(ExitLogic.EQ);
+		// String extract = "RC\\((\\S+)\\).*";
+
+		if (!in.getCcchks().isEmpty()) {
+			final List<CcCheck> data = in.getCcchks();
+			if (data.size() == 1) {
+				CcCheck check = data.get(0);
+
+				if (check.isSingleCheck()) {
+					// Single can handle
+					// String range = RegexHelper.extractFirstMatch(in.getCcchk().get(0), extract);
+
+					CsvJobExitCode exitcode = new CsvJobExitCode();
+
+					if (check.isOkContinue()) {
+						exitcode.setExitLogic(ExitLogic.EQ);
+					} else {
+						exitcode.setExitLogic(ExitLogic.NE);
+					}
+
+					exitcode.setExitStart(check.getSingleReturnCode());
+					exitcode.setExitEnd(check.getSingleReturnCode());
+
+					out.setExitcode(exitcode);
+
 				}
+			} else {
+				// We need to write our data to file.
+
+
+				// is our list of ranges to check.
+				List<CcCheck> rangedata = data.stream().filter(f -> f.isRangeCheck()).collect(Collectors.toList());
+				this.ccCheckwritter.processCcChecksRanges(rangedata, in);
 				
-				exitcode.setExitStart(check.getStartcode());		
-				exitcode.setExitEnd(check.getEndcode());
-				
-				out.setExitcode(exitcode);
-				
-			}else {
-				in.setMultipleExitCodes(true);
+				// is our list of process steps to process
+				List<CcCheck> stepprocessdata = data.stream().filter(f -> f.isStepProcessCheck()).collect(Collectors.toList());
+				this.ccCheckwritter.processCcCheckStepProcess(stepprocessdata, in);
 			}
+
 		}
-		
+
 	}
 
 	private void processJob(EspOSJOb in, CsvOSJob out) {
 		out.setCommandLine(in.getCommand());
 		out.setParamaters(in.getParams());
-		
+
 		out.setSourceProfile(true);
 	}
 
@@ -274,13 +289,13 @@ public class EspToTidalTransformer2 implements ITransformer<List<EspAbstractJob>
 		}
 
 		String agent = in.getAgent();
-	
+
 		String mapuser = espdatamodel.getConfigeProvider().getAS400RuntimeUserByAgentName(agent);
-		
+
 		CsvRuntimeUser rte = new CsvRuntimeUser(mapuser);
 		rte.setPasswordForFtpOrAS400("tidal");
 		this.datamodel.addRunTimeUserToJobOrGroup(out, rte);
-		
+
 	}
 
 	private void processJob(EspSAPBwpcJob in, CsvSAPJob out) {
@@ -329,7 +344,7 @@ public class EspToTidalTransformer2 implements ITransformer<List<EspAbstractJob>
 			out.setPrintColumns(in.getPrintColumns());
 			out.setPrintSpoolName(in.getPrintSpoolName());
 			out.setJobSAPClass(in.getSapJobClass());
-			
+
 			out.setJobMode("RUN_COPY"); // Force to this job type
 			log.debug("doHandleSAP Processing data for Job[" + in.getFullPath() + "]");
 		} else {
@@ -448,7 +463,7 @@ public class EspToTidalTransformer2 implements ITransformer<List<EspAbstractJob>
 		if (in.getName().contains("SUNMAINT")) {
 			in.getName().toCharArray();
 		}
-		
+
 		out.setName(in.getName());
 
 		if (StringUtils.isBlank(in.getAgent())) {
@@ -463,14 +478,14 @@ public class EspToTidalTransformer2 implements ITransformer<List<EspAbstractJob>
 		}
 
 		// earlysub is the same as delaysub
-		//RFCHKU00_CHECK_NUMBER
-		String earlysub = 	in.getEarlySubmission();
+		// RFCHKU00_CHECK_NUMBER
+		String earlysub = in.getEarlySubmission();
 		String startime = in.getDelaySubmission();
 
-		if(StringUtils.isBlank(startime)) {
+		if (StringUtils.isBlank(startime)) {
 			startime = earlysub;
 		}
-		
+
 		if (!StringUtils.isBlank(startime)) {
 			startime = startime.replace(".", "").replace(":", ""); // esp uses a dot ?? This should be 0700 format
 			// only.
@@ -494,12 +509,12 @@ public class EspToTidalTransformer2 implements ITransformer<List<EspAbstractJob>
 		if (in.getDueout() != null) {
 			String endtime = in.getDueout().replace("EXEC ", "").replace(".", "").replace(":", "");
 
-			if(endtime.contains("AM") || endtime.contains("PM")) {
+			if (endtime.contains("AM") || endtime.contains("PM")) {
 				endtime = endtime.replace("AM", "00").replace("PM", "00");
 				// Make 0600 vs 6 AM => 600
 				endtime = String.format("%1$" + 4 + "s", endtime).replace(' ', '0');
 			}
-			
+
 			if (NumberUtils.isParsable(endtime)) {
 				out.setEndTime(endtime); // Delay Sub is ESP way of saying dont run until this
 			} else {
@@ -517,12 +532,12 @@ public class EspToTidalTransformer2 implements ITransformer<List<EspAbstractJob>
 			// out.setEndTime(endtime);
 		}
 
-		if(!in.getTags().isEmpty()) {
-			in.getTags().forEach(t ->{
+		if (!in.getTags().isEmpty()) {
+			in.getTags().forEach(t -> {
 				datamodel.addJobTagToJob(out, new CsvJobTag(t));
 			});
 		}
-		
+
 	}
 
 	private void doSetCalendarPlaceHolder(EspAbstractJob in, BaseCsvJobObject out) {

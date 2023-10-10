@@ -24,6 +24,7 @@ import lombok.extern.log4j.Log4j2;
 public class EspConfigProvider extends AbstractConfigProvider {
 	private static String DATAFILE = "esp.event.datafile";
 	private static String EXCLUDE_FILE = "esp.exclude.job.datafile";
+	private static String CCDODE_DATA_FILE = "esp.zos.ccode.datafile";
 
 	public EspConfigProvider(ConfigurationProvider provider) {
 		super(provider);
@@ -149,5 +150,11 @@ public class EspConfigProvider extends AbstractConfigProvider {
 		return false;
 
 	}
+
+	
+	public String getCcodeDataFile() {
+		return getProvider().get(CCDODE_DATA_FILE);
+	}
+	
 
 }

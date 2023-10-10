@@ -2,12 +2,12 @@ package com.bluehouseinc.dataconverter.parsers.esp.model.jobs;
 
 import com.bluehouseinc.dataconverter.common.utils.RegexHelper;
 import com.bluehouseinc.dataconverter.parsers.esp.model.EspDataModel;
+import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.data.CcCheck;
 import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.data.EspAppEndData;
 import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.data.EspExternalApplicationData;
 import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.data.EspLIEData;
 import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.data.EspLISData;
 import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.data.EspLinkProcessData;
-import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.impl.CcCheck;
 import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.impl.EspAgentMonitorJob;
 import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.impl.EspAixJob;
 import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.impl.EspAs400Job;
@@ -282,7 +282,7 @@ public class EspJobVisitorHelper {
 				job.setEncParam(statementParameters);
 				break;
 			case "CCCHK":
-				job.getCcchks().add(extractCheck(statementParameters,job));
+				job.getCcchks().add(extractCheck(statementParameters, job));
 				break;
 			case "ESP_SUBJECT":
 			case "ESP_BG_COLOR":
@@ -302,47 +302,48 @@ public class EspJobVisitorHelper {
 		};
 	}
 
-	private CcCheck extractCheck(String data,EspZosJob job) {
+	private CcCheck extractCheck(String data, EspZosJob job) {
 		CcCheck check = new CcCheck();
 
+		String regexstep = "^STEP\\((.+)\\) PROC\\((.+)\\) RC\\((.+)\\) .*";
 		String regexrange = "^RC\\((\\d+):(\\d+)\\).*";
 		String regexsingle = "^RC\\((\\d+)\\).*";
 
-		if (data.contains("FAIL CONTINUE")) {
-			check.setNotEquals(true);
+		if (data.contains("OK CONTINUE")) {
+			check.setOkContinue(true);
+		} else {
+			check.setOkContinue(false);
 		}
 
-		String start = "0";
-		String end = "0";
+		if (RegexHelper.matchesRegexPattern(data, regexstep)) {
+			// CCCHK STEP(STEP20) PROC(STEP01) RC(1) OK CONTINUE
 
-		if(RegexHelper.matchesRegexPattern(data, regexrange) | RegexHelper.matchesRegexPattern(data, regexsingle)) {
-			// One or the other. 
+			String stepname = RegexHelper.extractNthMatch(data, regexstep, 0);
+			String procename = RegexHelper.extractNthMatch(data, regexstep, 1);
+			String returncode = RegexHelper.extractNthMatch(data, regexstep, 2);
 
-			if (data.contains(":")) {
-				// Range data;
-				if (RegexHelper.matchesRegexPattern(data, regexrange)) {
-					 start = RegexHelper.extractNthMatch(data, regexrange, 0);
-					 end = RegexHelper.extractNthMatch(data, regexrange, 1);
-				}else {
-					job.setComplexCcCheck(true);
-				}
-			}else {
-				// Better be single
-				if (RegexHelper.matchesRegexPattern(data, regexsingle)) {
-					start = RegexHelper.extractNthMatch(data, regexsingle, 0);
-					end = start;
-				}else {
-					job.setComplexCcCheck(true);
-				}
-			}
-			
-		}else {
+			check.setProcessStepName(stepname);
+			check.setProccessName(procename);
+			check.setProcessReturnCode(Integer.valueOf(returncode));
+			check.setStepProcessCheck(true);
+		} else if (RegexHelper.matchesRegexPattern(data, regexrange)) {
+			// CCCHK RC(1:4095) FAIL CONTINUE
+			String rangestart = RegexHelper.extractNthMatch(data, regexrange, 0);
+			String rangeendend = RegexHelper.extractNthMatch(data, regexrange, 1);
+			check.setRangeStartCode((Integer.valueOf(rangestart)));
+			check.setRangeEndCode(Integer.valueOf(rangeendend));
+			check.setRangeCheck(true);
+		} else if (RegexHelper.matchesRegexPattern(data, regexsingle)) {
+			// CCCHK RC(1) OK CONTINUE
+			// singleReturnCode
+			String singlecode = RegexHelper.extractNthMatch(data, regexsingle, 0);
+			check.setSingleReturnCode(Integer.valueOf(singlecode));
+			check.setSingleCheck(true);
+		} else {
+			// Not handled
 			job.setComplexCcCheck(true);
 		}
-		
-		check.setStartcode(Integer.valueOf(start));
-		check.setEndcode(Integer.valueOf(end));
-		
+
 		return check;
 	}
 	// EspSAPBwpcJob
@@ -389,9 +390,9 @@ public class EspJobVisitorHelper {
 		return (statementType, statementParameters) -> {
 			switch (statementType) {
 			case "ABAPNAME":
-				if(StringUtils.isBlank(job.getAbapName())) {
+				if (StringUtils.isBlank(job.getAbapName())) {
 					job.setAbapName(statementParameters);
-				}else {
+				} else {
 					job.setMultiplePrograms(true);
 				}
 				break;
@@ -408,9 +409,9 @@ public class EspJobVisitorHelper {
 				job.setSapJobName(statementParameters);
 				break;
 			case "VARIANT":
-				if(StringUtils.isBlank(job.getVariant())) {
+				if (StringUtils.isBlank(job.getVariant())) {
 					job.setVariant(statementParameters);
-				}else {
+				} else {
 					job.setMultiplePrograms(true);
 				}
 				break;

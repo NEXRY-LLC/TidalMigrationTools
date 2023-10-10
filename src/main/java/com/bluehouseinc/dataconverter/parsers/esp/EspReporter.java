@@ -8,6 +8,8 @@ import com.bluehouseinc.dataconverter.model.IModelReport;
 import com.bluehouseinc.dataconverter.model.IReporter;
 import com.bluehouseinc.dataconverter.parsers.esp.reporter.EspAgentsByJobType;
 import com.bluehouseinc.dataconverter.parsers.esp.reporter.EspComplexSchedEventData;
+import com.bluehouseinc.dataconverter.parsers.esp.reporter.EspJobsContainsREALNOWInEarlySub;
+import com.bluehouseinc.dataconverter.parsers.esp.reporter.EspJobsContainsRELDELAY;
 import com.bluehouseinc.dataconverter.parsers.esp.reporter.EspJobsWithAdvancedDelaySubLogic;
 import com.bluehouseinc.dataconverter.parsers.esp.reporter.EspJobsWithAdvancedDueOutLogic;
 import com.bluehouseinc.dataconverter.parsers.esp.reporter.EspJobsWithComplexCccchk;
@@ -34,6 +36,8 @@ public class EspReporter implements IModelReport {
 		core.add(new EspSAPJobsWithMultipleJobSteps());
 		core.add(new EspJobsWithRequestAttribute());
 		core.add(new EspJobsWithScopeAttribute());
+		core.add(new EspJobsContainsREALNOWInEarlySub());
+		core.add(new EspJobsContainsRELDELAY());
 		return core;
 	}
 

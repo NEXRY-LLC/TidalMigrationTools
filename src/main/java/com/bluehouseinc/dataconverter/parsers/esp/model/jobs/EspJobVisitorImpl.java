@@ -449,6 +449,9 @@ public class EspJobVisitorImpl implements EspJobVisitor {
 				break;
 			case EARLYSUB:
 				espJob.setEarlySubmission(statementParameters);
+				if(statementParameters != null && statementParameters.contains("REALNOW")) {
+					espJob.setContainsREALNOWInEarlySub(true);
+				}
 				break;
 			case OPTIONS:
 				espJob.setOptions(statementParameters);
@@ -461,6 +464,7 @@ public class EspJobVisitorImpl implements EspJobVisitor {
 				break;
 			case RELDELAY:
 				espJob.setRelDelay(Integer.parseInt(statementParameters));
+				espJob.setContainsRELDELAY(true);
 				break;
 			case STARTMODE:
 				espJob.setStartMode(statementParameters);
