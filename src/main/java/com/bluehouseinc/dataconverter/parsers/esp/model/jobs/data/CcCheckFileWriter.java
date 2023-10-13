@@ -48,6 +48,7 @@ public class CcCheckFileWriter {
 				fullrangecheck.remove(Integer.valueOf(s));
 			});
 
+			fullrangecheck.remove(Integer.valueOf(0)); // Just remove this, not sure why we are picking up zero
 		});
 
 		if (fullrangecheck.size() != rangesize) {
@@ -65,7 +66,7 @@ public class CcCheckFileWriter {
 			}
 		}
 	}
-	
+
 	public void processCcCheckStepProcess(List<CcCheck> checks, EspZosJob job) {
 		// Was modified so we need to process this list.
 		checks.forEach(ccchk -> {
@@ -79,8 +80,22 @@ public class CcCheckFileWriter {
 			}
 
 		});
-		
+
 	}
-	
-	
+
+	public void processCcCheckSingleCheck(CcCheck check, EspZosJob job) {
+		// Was modified so we need to process this list.
+
+		String linetowrite = job.getName() + ".*=" + check.getSingleReturnCode();
+		
+		try {
+			ccodeWriter.append(linetowrite);
+			ccodeWriter.append(System.lineSeparator());
+			ccodeWriter.flush();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+	}
+
 }

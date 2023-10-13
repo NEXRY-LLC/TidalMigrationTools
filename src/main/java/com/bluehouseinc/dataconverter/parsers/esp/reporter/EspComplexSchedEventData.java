@@ -21,8 +21,12 @@ public class EspComplexSchedEventData implements IReporter {
 
 		espmodel.getScheduleEventDataProcessor().getAdvancedEventData().forEach(f -> {
 
+			
 			log.trace("{}", f.getRawEventLine());
-
+			f.getRawDataLines().forEach( d -> {
+				log.trace(d);
+				});
+			log.trace("\n");
 		});
 
 		log.trace("Advance Schedule Data Total {}", totalcount);

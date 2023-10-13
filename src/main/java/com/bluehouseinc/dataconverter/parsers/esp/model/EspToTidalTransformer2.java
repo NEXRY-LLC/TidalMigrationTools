@@ -207,6 +207,10 @@ public class EspToTidalTransformer2 implements ITransformer<List<EspAbstractJob>
 
 	private void processJob(EspZosJob in, CsvOSJob out) {
 
+		if(in.getFullPath().contains("PC101B")) {
+			in.getFullPath();
+		}
+		
 		out.setCommandLine(in.getCommandLine());
 		// out.setRuntimeUser(in.getUser());
 		if (StringUtils.isBlank(in.getAgent())) {
@@ -234,20 +238,27 @@ public class EspToTidalTransformer2 implements ITransformer<List<EspAbstractJob>
 						exitcode.setExitLogic(ExitLogic.NE);
 					}
 
-					exitcode.setExitStart(check.getSingleReturnCode());
-					exitcode.setExitEnd(check.getSingleReturnCode());
+					int exitvalue = check.getSingleReturnCode();
+
+
+					if (exitvalue == 0) {
+						exitcode.setExitStart(check.getSingleReturnCode());
+						exitcode.setExitEnd(check.getSingleReturnCode());
+					}else {
+						exitcode.setExitStart(0);
+						exitcode.setExitEnd(0);
+						this.ccCheckwritter.processCcCheckSingleCheck(check, in);
+					}
 
 					out.setExitcode(exitcode);
-
+					
 				}
 			} else {
 				// We need to write our data to file.
-
-
 				// is our list of ranges to check.
 				List<CcCheck> rangedata = data.stream().filter(f -> f.isRangeCheck()).collect(Collectors.toList());
 				this.ccCheckwritter.processCcChecksRanges(rangedata, in);
-				
+
 				// is our list of process steps to process
 				List<CcCheck> stepprocessdata = data.stream().filter(f -> f.isStepProcessCheck()).collect(Collectors.toList());
 				this.ccCheckwritter.processCcCheckStepProcess(stepprocessdata, in);

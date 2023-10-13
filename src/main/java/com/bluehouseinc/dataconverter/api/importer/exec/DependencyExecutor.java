@@ -62,11 +62,11 @@ public class DependencyExecutor extends AbstractAPIExecutor {
 			int me = adep.getJobObject().getId();
 			Integer depson;
 			String mepath = adep.getJobObject().getFullPath();
-			
+
 			if (mepath.toUpperCase().contains("ISBONUSL")) {
 				mepath.getBytes();
 			}
-			
+
 			String deppath;
 			if (adep instanceof CvsDependencyJob) {
 				CvsDependencyJob jdep = ((CvsDependencyJob) adep);
@@ -97,20 +97,27 @@ public class DependencyExecutor extends AbstractAPIExecutor {
 					dep.setIngroup(YesNoType.NO);
 				}
 
-				if(jdep.hasExitCodeLogic()) {
+				if (jdep.hasExitCodeLogic()) {
 					dep.setExitCode(jdep.getExitCodeOperator(), jdep.getExitcodeStart(), jdep.getExitcodeEnd());
 				}
 
 				try {
 
 					log.debug("doProcessDep[" + mepath + "] depends on  [" + deppath + "]");
-					TesResult res = getTidalApi().getSession().getServiceFactory().jobDependency().create(dep);
-					int id = res.getResult().getTesObjectid();
-					dep.setId(id);
-					getDataModel().updateBaseCsvDependencyID(jdep, id);
-					getTidalApi().getJobdeps().add(dep);
 
-					log.debug("doProcessDep[" + mepath + "] depends on  [" + deppath + "] ID[" + id + "] Response[" + res.getTesMessage() + "]");
+					boolean loopdetected = getTidalApi().getSession().getServiceFactory().job().dependencyLoopDetected(me, depson);
+
+					if (loopdetected) {
+						log.error("doProcessDep dependencyLoopDetected Job[" + mepath + "] depends on Job[" + deppath + "]");
+					} else {
+						TesResult res = getTidalApi().getSession().getServiceFactory().jobDependency().create(dep);
+						int id = res.getResult().getTesObjectid();
+						dep.setId(id);
+						getDataModel().updateBaseCsvDependencyID(jdep, id);
+						getTidalApi().getJobdeps().add(dep);
+
+						log.debug("doProcessDep[" + mepath + "] depends on  [" + deppath + "] ID[" + id + "] Response[" + res.getTesMessage() + "]");
+					}
 				} catch (Exception e) {
 					String localmessage = e.getLocalizedMessage();
 					// String data = Arrays.toString(e.getStackTrace());
@@ -119,19 +126,18 @@ public class DependencyExecutor extends AbstractAPIExecutor {
 						log.error("doProcessDep ERROR CREATING DEPENDENCY => JOB[" + mepath + "] HAS DEPENDENCY ON [" + deppath + "] LOOP DETECTED");
 					} else {
 						log.error("ERROR doProcessDep[" + mepath + "] depends on  [" + deppath + "]");
-						log.error(localmessage );
+						log.error(localmessage);
 					}
 				}
-			}else if (adep instanceof CvsDependencyFile) {
+			} else if (adep instanceof CvsDependencyFile) {
 				FileDependency filedep = new FileDependency();
-				CvsDependencyFile cdep = (CvsDependencyFile)adep;
-				
+				CvsDependencyFile cdep = (CvsDependencyFile) adep;
+
 				filedep.setJobid(me);
 				filedep.setFilename(cdep.getFilename());
 				filedep.setFiletype(DepType.EXISTS);
 				filedep.setInheritagent(YesNoType.YES);
 
-				
 				try {
 
 					log.debug("doProcessDep[" + mepath + "] depends on  File[" + cdep.getFilename() + "]");
@@ -145,8 +151,8 @@ public class DependencyExecutor extends AbstractAPIExecutor {
 				} catch (Exception e) {
 					String localmessage = e.getLocalizedMessage();
 
-						log.error("ERROR doProcessDep[" + mepath + "] depends on  File[" + cdep.getFilename() + "]");
-						log.error(localmessage );
+					log.error("ERROR doProcessDep[" + mepath + "] depends on  File[" + cdep.getFilename() + "]");
+					log.error(localmessage);
 				}
 			}
 		} finally {
