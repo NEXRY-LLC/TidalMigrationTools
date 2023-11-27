@@ -15,7 +15,10 @@ public class CcCheckFileWriter {
 	private static FileWriter ccodeWriter;
 
 	public CcCheckFileWriter(String file) {
-		init(file);
+
+		if (file != null) {
+			init(file);
+		}
 	}
 
 	private static void init(String file) {
@@ -87,7 +90,7 @@ public class CcCheckFileWriter {
 		// Was modified so we need to process this list.
 
 		String linetowrite = job.getName() + ".*=" + check.getSingleReturnCode();
-		
+
 		try {
 			ccodeWriter.append(linetowrite);
 			ccodeWriter.append(System.lineSeparator());

@@ -50,6 +50,10 @@ public class APIJobUtils {
 				newjob.setInherittimewindow(YesNoType.NO);
 			}
 
+			if(job.getMaxRunTime() != null) {
+				newjob.setDurationmaximum(job.getMaxRunTime());
+			}
+			
 		} catch (NumberFormatException e) {
 			log.error("##################### Unable to set start[" + job.getStartTime() + "] or end time[" + job.getEndTime() + "] for job[" + job.getFullPath() + "] #########################");
 		}

@@ -34,6 +34,7 @@ NOTIFY ABEND FAILURE ALERT(REMD)
 /*09/16/2022 -VV - held job STASPOP - CTASK0036063
 /*11/11/2022 -VV - bypassed job stasbfp6 and popapp - CTASK0038852
 /*23/06/2023 -PS - RITM0303284 - HOLD BFPSTOPD.SAPBFPDB JOB          */
+/*07/09/2023 -SS - CTASK0053726- CHANGED USERNAME                    */
 /*********************************************************************/
 
 
@@ -343,7 +344,7 @@ UNIX_JOB STASBFP3.ISBFP1X
     AGENT CYBA_ISBFP1
     SCRIPTNAME /local/bin/start_sap_remote.sh
     ARGS isbfp3 BFP
-    USER root
+    USER svc_bfp3srvs
      TAG SUNMAINT
     RUN SUN
     RELEASE ADD(BFP_STARTUP_IS_COMPLETE)
@@ -366,7 +367,7 @@ ENDJOB
 
 AIX_JOB START_SCHEDULING_AGENT
    AGENT CYBA_BKPNBU05
-   USER root
+   USER svc_bfp3srvs
    SCRIPTNAME /local/bin/start_remote_cyb_process.sh
    ARGS isbfp3
    RUN SUN

@@ -460,7 +460,7 @@ ENDJOB
 
 NT_JOB JAPAN_GDC_FROM_JAPAN_TRLTN_GDC_ATTRBT_CNTRL_MSTCMD
    AGENT CYBA_PPIWPROD
-   CMDNAME X:\cmd_scripts\japan_gdc_from_japan_trltn_gdc_attrbt_cntrl_mst.cmd
+   CMDNAME X:\cmd_scripts\japan_gdc_from_japan_trltn_gdc_attrbt_cntrl_ mst.cmd
    USER maestro
    RUN WEEKDAYS
    RELEASE ADD(JAPAN_GDC_FROM_JAPAN_TRLTN_GDC_CNTRL_MSTCMD)

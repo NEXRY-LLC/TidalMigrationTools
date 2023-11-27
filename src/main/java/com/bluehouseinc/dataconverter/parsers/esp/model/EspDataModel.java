@@ -22,6 +22,7 @@ public class EspDataModel extends BaseParserDataModel<EspAbstractJob, EspConfigP
 	private ScheduleEventDataProcessor schedDataProcessor;
 	private MailListDataProcessor mailProcessor;
 
+	
 	public EspDataModel(ConfigurationProvider cfgProvider, ScheduleEventDataProcessor schedDataProcessor, MailListDataProcessor mailProcessor) {
 		super(new EspConfigProvider(cfgProvider));
 		this.depgraph = new DependencyGraphMapper(getConfigeProvider(), getTidal(), this);
@@ -47,6 +48,7 @@ public class EspDataModel extends BaseParserDataModel<EspAbstractJob, EspConfigP
 
 	@Override
 	public void doProcessJobDependency(List<EspAbstractJob> jobs) {
+		this.depgraph.setupSleepDependency();
 		jobs.forEach(jobGroupObject -> doProcessJobDepsForJob(jobGroupObject));
 
 	}

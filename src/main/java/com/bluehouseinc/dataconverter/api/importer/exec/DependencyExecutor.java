@@ -63,7 +63,7 @@ public class DependencyExecutor extends AbstractAPIExecutor {
 			Integer depson;
 			String mepath = adep.getJobObject().getFullPath();
 
-			if (mepath.toUpperCase().contains("ISBONUSL")) {
+			if (mepath.toUpperCase().contains("BRMDLYOFF.AKNITS")) {
 				mepath.getBytes();
 			}
 
@@ -76,7 +76,7 @@ public class DependencyExecutor extends AbstractAPIExecutor {
 				JobDependency existing = getTidalApi().findDependencyByJobId(me, depson);
 
 				if (existing != null) {
-					log.debug("doProcessDep DEPID[" + existing.getId() + "] JOB ID[" + me + "] JOB[" + mepath + "] depends on  ID[" + existing.getDepjobid() + "][" + deppath + "] Skipping");
+					log.debug("doProcessDep Existing DEPID[" + existing.getId() + "] JOB ID[" + me + "] JOB[" + mepath + "] depends on  ID[" + existing.getDepjobid() + "][" + deppath + "] Skipping");
 					getDataModel().updateBaseCsvDependencyID(jdep, existing.getId());
 					return;
 				}

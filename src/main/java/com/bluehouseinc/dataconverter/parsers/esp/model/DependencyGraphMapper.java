@@ -1,7 +1,9 @@
 package com.bluehouseinc.dataconverter.parsers.esp.model;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import com.bluehouseinc.dataconverter.common.utils.RegexHelper;
@@ -10,6 +12,7 @@ import com.bluehouseinc.dataconverter.model.TidalDataModel;
 import com.bluehouseinc.dataconverter.model.impl.BaseCsvJobObject;
 import com.bluehouseinc.dataconverter.model.impl.CsvJobGroup;
 import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.impl.EspJobGroup;
+import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.impl.EspOSJOb;
 import com.bluehouseinc.dataconverter.parsers.esp.model.statements.EspAfterStatement;
 import com.bluehouseinc.dataconverter.parsers.esp.model.statements.EspPrereqStatement;
 import com.bluehouseinc.dataconverter.parsers.esp.model.statements.EspReleaseStatement;
@@ -30,6 +33,7 @@ public class DependencyGraphMapper {
 	private TidalDataModel datamodel;
 	private EspConfigProvider cfgProvider;
 	private EspDataModel espmodel;
+
 
 	public DependencyGraphMapper(EspConfigProvider cfgProvider, TidalDataModel datamodel, EspDataModel espmodel) {
 		this.cfgProvider = cfgProvider;
@@ -60,6 +64,7 @@ public class DependencyGraphMapper {
 		doHandleNotWithStatements(me, esp);
 
 		doHandleAfterStatements(me, esp);
+
 	}
 
 	private void doHandlePrereq(BaseCsvJobObject me, EspAbstractJob esp) {
@@ -81,6 +86,8 @@ public class DependencyGraphMapper {
 			BaseCsvJobObject jobDependency = this.getDatamodel().findFirstJobByFullPath(foundDepjob.getFullPath());
 			log.debug("doHandlePrereq Registering Dependency for Job[" + me.getFullPath() + "] that depends on [" + jobDependency.getFullPath() + "]");
 			this.getDatamodel().addJobDependencyForJobCompletedNormal(me, jobDependency, null);
+
+			handleSleepjob(me, jobDependency);
 		} else {
 			log.debug("doHandlePrereq ERROR Unable to set Dependency for Job[" + me.getFullPath() + "] that depends on [" + depjobName + "]");
 		}
@@ -127,6 +134,9 @@ public class DependencyGraphMapper {
 							} else {
 								this.getDatamodel().addJobDependencyForJob(dependsOnMeDep, me, DepLogic.MATCH, Operator.EQUAL, DependentJobStatus.COMPLETED_ABNORMAL, null);
 							}
+
+							handleSleepjob(dependsOnMeDep, me);
+
 						} else {
 							log.debug("doHandlePrereq ERROR Unable to set Dependency for Job[" + me.getFullPath() + "] unable to locate [" + dependsOnMe.getFullPath() + "]");
 						}
@@ -197,8 +207,8 @@ public class DependencyGraphMapper {
 				// No group, just jobs so this should be my jobs in my group. not any other location
 
 				final EspJobGroup myparent = (EspJobGroup) esp.getParent();
-				EspAbstractJob esplocal = esp;
-				// ONLY jobs. 
+
+				// ONLY jobs.
 				EspAbstractJob foundjob = (EspAbstractJob) myparent.getChildren().stream().filter(c -> c.getName().equalsIgnoreCase(lookfor)).findFirst().orElse(null);
 
 				if (foundjob == null) {
@@ -222,6 +232,8 @@ public class DependencyGraphMapper {
 
 					this.getDatamodel().addJobDependencyForJob(me, jobDependency, DepLogic.MATCH, Operator.NOT_EQUAL, DependentJobStatus.ACTIVE, null);
 
+					handleSleepjob(me, jobDependency);
+
 				} else {
 					throw new TidalException("doHandleNotWithStatements ERROR Unable to set Dependency for Job[" + me.getFullPath() + "] unable to locate [" + mydep.getFullPath() + "]");
 				}
@@ -234,12 +246,16 @@ public class DependencyGraphMapper {
 
 	private void doHandleAfterStatements(BaseCsvJobObject me, EspAbstractJob esp) {
 
+		if (me.getName().contains("BRMDLYOFF.AKNITS")) {
+			me.getName();
+		}
+
 		List<EspAfterStatement> espAfterStatements = esp.getStatementObject().getEspAfterStatements();
 
 		if (espAfterStatements != null && !espAfterStatements.isEmpty()) {
 
 			espAfterStatements.forEach(jobDepName -> {
-				if(esp.getParent()== null) {
+				if (esp.getParent() == null) {
 					return;
 				}
 				BaseJobOrGroupObject matchingEspJob = esp.getParent().getChildren().stream().filter(job -> job.getName().equals(jobDepName.getJobName())).findFirst().orElse(null);
@@ -254,6 +270,8 @@ public class DependencyGraphMapper {
 
 						this.getDatamodel().addJobDependencyForJob(jobDependency, me, DepLogic.MATCH, Operator.EQUAL, DependentJobStatus.COMPLETED, null);
 
+						handleSleepjob(jobDependency, me);
+
 					} else {
 						log.debug("doHandleAfterStatements ERROR Unable to set Dependency for Job[" + me.getFullPath() + "] unable to locate [" + matchingEspJob.getFullPath() + "]");
 					}
@@ -262,7 +280,6 @@ public class DependencyGraphMapper {
 
 		}
 	}
-
 
 	private void doHandleExternalAppIDLogic(BaseCsvJobObject me, EspAbstractJob esp) {
 
@@ -297,13 +314,13 @@ public class DependencyGraphMapper {
 						return;
 					}
 
-				}else {
-					// Customer requested a report showing all groups that are dependent on other groups. 
-					
-					if(!esp.getChildren().isEmpty()) {
+				} else {
+					// Customer requested a report showing all groups that are dependent on other groups.
+
+					if (!esp.getChildren().isEmpty()) {
 						// We are a group that is dependent on a group.
 						esp.getGroupsToDependOn().add(jobgroup.getFullPath());
-						System.out.println(esp.getFullPath() + " Depends On Group "+jobgroup.getFullPath());
+						// System.out.println(esp.getFullPath() + " Depends On Group " + jobgroup.getFullPath());
 					}
 				}
 			} else {
@@ -330,9 +347,73 @@ public class DependencyGraphMapper {
 
 				this.getDatamodel().addJobDependencyForJob(me, jobDependency, DepLogic.MATCH, Operator.EQUAL, DependentJobStatus.COMPLETED_NORMAL, null);
 
+				handleSleepjob(me, jobDependency);
 			}
 
 		});
 
 	}
+
+	private void handleSleepjob(BaseCsvJobObject currentjob, BaseCsvJobObject targetjob) {
+
+		// We are adding this job to the mix and registarting the target, so we need to exclude this to prevent a loop.
+		if (currentjob.getName().startsWith("RELDELAY-")) {
+			return;
+		}
+
+		// The current job depends on a job that has a sleep job registered, then add that to the dependency too.
+		EspOSJOb sleepjob = sleepJobKeyMap.getOrDefault(targetjob.getFullPath(), null);
+
+		if (sleepjob != null) {
+			// Add our sleep job to our dep for completed.
+
+			BaseCsvJobObject sleepdepson = this.getDatamodel().findFirstJobByFullPath(sleepjob.getFullPath());
+
+			if (sleepdepson != null) {
+				log.debug("handleSleepjob Current Job[" + currentjob.getFullPath() + "] Depends on Target Job[" + targetjob.getFullPath() + "] Has a Dependency on RELDELAY Sleep Job[" + sleepdepson.getFullPath() + "]");
+
+				this.getDatamodel().addJobDependencyForJob(currentjob, sleepdepson, DepLogic.MATCH, Operator.EQUAL, DependentJobStatus.COMPLETED, null);
+
+			}
+		}
+
+	}
+
+	
+	/*
+	 * We need to add a depenency to each job that has a sleep job.
+	 */
+	public void setupSleepDependency() {
+		sleepJobKeyMap.keySet().forEach(espkey -> {
+
+			EspOSJOb espsleep = sleepJobKeyMap.get(espkey);
+
+			BaseCsvJobObject keyjob = this.getDatamodel().findFirstJobByFullPath(espkey);
+			BaseCsvJobObject mysleepjob = this.getDatamodel().findFirstJobByFullPath(espsleep.getFullPath());
+
+			log.debug("setupSleepDependency Registering Dependency for RELDELAY Sleep Job[" + mysleepjob.getFullPath() + "] depends on [" + keyjob.getFullPath() + "]");
+
+			this.getDatamodel().addJobDependencyForJob(mysleepjob, keyjob, DepLogic.MATCH, Operator.EQUAL, DependentJobStatus.COMPLETED, null);
+
+		});
+	}
+
+	private static Map<String, EspOSJOb> sleepJobKeyMap = new HashMap<>();
+
+	
+	/**
+	 * We need to register our sleep jobs to our actual job so we can build a dependency for them where Sleep Job dependes on Job
+	 * and when another job depends on a job that now has a sleep job, add it to be dependent on the sleep job too.
+	 * 
+	 * @param job
+	 * @param ref
+	 */
+	public static void registerSleepJobToMap(EspAbstractJob job, EspOSJOb sleepjob) {
+		sleepJobKeyMap.put(job.getFullPath(), sleepjob);
+
+		
+		log.debug("registerSleepJobToMap Registering RELDELAY Sleep Job[" + sleepjob.getFullPath() + "] for Job[" + job.getFullPath() + "]");
+
+	}
+
 }

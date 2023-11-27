@@ -47,7 +47,8 @@ public abstract class EspAbstractJob extends BaseJobOrGroupObject implements Esp
 	String abandonSubmission;
 	String delaySubmission;
 	//String reDelaySubmission;
-	String dueout; // use it for SLAs in TIDAL if and only if necessary for conversion
+	Integer dueout; // use it for SLAs in TIDAL if and only if necessary for conversion
+	Integer dueoutMaxrun;
 	String earlySubmission;
 	String lateSubmission;
 	String espStatement;

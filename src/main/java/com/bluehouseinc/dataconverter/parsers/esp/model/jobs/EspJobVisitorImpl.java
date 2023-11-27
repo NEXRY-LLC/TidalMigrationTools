@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.stereotype.Component;
 
 import com.bluehouseinc.dataconverter.common.utils.RegexHelper;
@@ -59,6 +60,7 @@ public class EspJobVisitorImpl implements EspJobVisitor {
 	EspDataModel model;
 	EspJobVisitorHelper helper;
 	private static final String IF_ELSE_ACTION_STATEMENT = "IF\\s(.*?)\\sTHEN\\s(\\S+)\\s(.*)";
+	private final static String DUEOUT_NOW_PLUS = "(?:EXEC NOW PLUS)|(?:EXEC REALNOW PLUS) (\\d+) (?:MINUTES|HOURS)";
 
 	public EspJobVisitorImpl(EspDataModel model) {
 		this.model = model;
@@ -180,8 +182,6 @@ public class EspJobVisitorImpl implements EspJobVisitor {
 
 	}
 
-
-	
 	// Function2 is dynamic function that accepts 2 params and returns a boolean value
 	// whether a second invoked switch hit a statement or not
 	private void visitCommon(EspAbstractJob job, List<String> lines, Function2<String, String, Boolean> lambdaFunction) {
@@ -293,11 +293,11 @@ public class EspJobVisitorImpl implements EspJobVisitor {
 		// RELEASE ADD(LIE.!ESPAPPL)
 		// jobs/jobNames containing LIE/LIS (dummy jobs)
 		EspReleaseStatement espReleaseStatement = new EspReleaseStatement();
-		
+
 		if (!statementParameters.contains("(")) {
 			espReleaseStatement.getClass();
 		} else {
-			//EspReleaseStatement espReleaseStatement = new EspReleaseStatement();
+			// EspReleaseStatement espReleaseStatement = new EspReleaseStatement();
 			String joinedDependencies = statementParameters.substring(statementParameters.indexOf("(") + 1, statementParameters.indexOf(")"));
 			List<String> jobNames = Arrays.asList(joinedDependencies.split(","));
 			espReleaseStatement.setReleaseJobs(jobNames);
@@ -445,11 +445,12 @@ public class EspJobVisitorImpl implements EspJobVisitor {
 				espJob.setDelaySubmission(statementParameters);
 				break;
 			case DUEOUT:
-				espJob.setDueout(statementParameters);
+				processDueOutLogic(espJob, statementParameters);
+				// espJob.setDueout(statementParameters);
 				break;
 			case EARLYSUB:
 				espJob.setEarlySubmission(statementParameters);
-				if(statementParameters != null && statementParameters.contains("REALNOW")) {
+				if (statementParameters != null && statementParameters.contains("REALNOW")) {
 					espJob.setContainsREALNOWInEarlySub(true);
 				}
 				break;
@@ -498,4 +499,58 @@ public class EspJobVisitorImpl implements EspJobVisitor {
 
 		}
 	}
+
+	private void processDueOutLogic(EspAbstractJob espJob, String data) {
+
+		// (?:EXEC NOW PLUS)|(?:EXEC REALNOW PLUS) (\d+) (?:MINUTES|HOURS)
+		// No time to mess with the Regex , it should work but isnt.
+		// boolean isDueOutMaxRun = RegexHelper.matchesRegexPattern(DUEOUT_NOW_PLUS, data);
+
+		boolean isDueOutMaxRun = data.trim().contains("EXEC REALNOW") | data.contains("EXEC NOW");
+
+		if (isDueOutMaxRun) {
+			String maxrunstring = data.replace("EXEC REALNOW PLUS", "").replace("EXEC NOW PLUS ", "");
+			boolean isHours = false;
+
+			if (data.endsWith("HOUR") | data.endsWith("HOURS")) {
+				isHours = true;
+			} // Assume Minutes if not set to hours.
+			
+			maxrunstring = maxrunstring.replace("HOURS", "").replace("HOUR", "").replace("MINUTES","").replace("MIN","").trim();
+			
+			if (NumberUtils.isParsable(maxrunstring)) {
+				Integer maxruntime = Integer.valueOf(maxrunstring);
+
+				if (isHours) {
+					maxruntime = maxruntime * 60;
+				}
+				
+				// This is our duoutMaxRuntime
+				espJob.setDueoutMaxrun(maxruntime);
+				log.info("processDueOutLogic() Job[" + espJob.getFullPath() + "] setting max run to  [" + maxruntime + "]");
+
+			} else {
+				log.error("processDueOutLogic() Job[" + espJob.getFullPath() + "] unable to parse data [" + data + "]");
+				espJob.setContainsAdvancedDueOutLogic(true);
+			}
+
+		} else {
+			// End time on a job
+			String endtime = data.replace("EXEC ", "").replace(".", "").replace(":", "");
+
+			if (endtime.contains("AM") || endtime.contains("PM") || endtime.contains("am") || endtime.contains("pm")) {
+				endtime = endtime.replace("AM", "00").replace("am", "00").replace("PM", "00").replace("pm", "00");
+				// Make 0600 vs 6 AM => 600
+				endtime = String.format("%1$" + 4 + "s", endtime).replace(' ', '0');
+			}
+
+			if (NumberUtils.isParsable(endtime)) {
+				espJob.setDueout(Integer.valueOf(endtime));
+			} else {
+				log.error("processDueOutLogic() Job[" + espJob.getFullPath() + "] unable to parse data [" + data + "]");
+				espJob.setContainsAdvancedDueOutLogic(true);
+			}
+		}
+	}
+
 }

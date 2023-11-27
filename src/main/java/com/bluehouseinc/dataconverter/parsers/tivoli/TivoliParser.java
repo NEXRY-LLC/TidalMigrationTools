@@ -56,13 +56,13 @@ public class TivoliParser extends AbstractParser<TivoliDataModel> {
 		// Map<String, String> params = this.parseParams();
 		// this.parseJobs();
 
-		File cpu = getParserDataModel().getConfigeProvider().getCPUFile();
-		File cal = getParserDataModel().getConfigeProvider().getCalendarFile();
-		File job = getParserDataModel().getConfigeProvider().getJobFile();
-		File par = getParserDataModel().getConfigeProvider().getParamsFile();
-		File res = getParserDataModel().getConfigeProvider().getResourceFile();
-		File sch = getParserDataModel().getConfigeProvider().getScheduleFile();
-		File var = getParserDataModel().getConfigeProvider().getVariableFile();
+		File cpu;
+		File cal;
+		File job;
+		File par;
+		File res;
+		File sch;
+		File var;
 
 		File foldername = getParserDataModel().getConfigeProvider().getFolderName();
 
@@ -75,6 +75,15 @@ public class TivoliParser extends AbstractParser<TivoliDataModel> {
 			res = toFile(foldername, "resource");
 			sch = toFile(foldername, "schedule");
 			var = toFile(foldername, "var");
+		} else {
+			cpu = getParserDataModel().getConfigeProvider().getCPUFile();
+			cal = getParserDataModel().getConfigeProvider().getCalendarFile();
+			job = getParserDataModel().getConfigeProvider().getJobFile();
+			par = getParserDataModel().getConfigeProvider().getParamsFile();
+			res = getParserDataModel().getConfigeProvider().getResourceFile();
+			sch = getParserDataModel().getConfigeProvider().getScheduleFile();
+			var = getParserDataModel().getConfigeProvider().getVariableFile();
+
 		}
 
 		cpu_processor = new TivoliCPUProcessor();
@@ -89,7 +98,7 @@ public class TivoliParser extends AbstractParser<TivoliDataModel> {
 		res_processor = new TivoliResourceProcessor();
 		res_processor.doProcessFile(res);
 
-		job_processor = new TivoliJobProcessor(cpu_processor, res_processor,var_processor);
+		job_processor = new TivoliJobProcessor(cpu_processor, res_processor, var_processor);
 		job_processor.doProcessFile(job);
 
 		sch_processor = new TivoliScheduleProcessor(job_processor, cpu_processor);
@@ -113,10 +122,9 @@ public class TivoliParser extends AbstractParser<TivoliDataModel> {
 		TivoliJobObject container = new TivoliJobObject();
 		container.setName(containername);
 
-		
 		this.getParserDataModel().addDataDuplicateLevelCheck(container);
 		log.info("Added Container{} to model", container.getFullPath());
-		
+
 		data.forEach(sched -> {
 			String groupname = sched.getWorkflowName();
 
@@ -134,8 +142,8 @@ public class TivoliParser extends AbstractParser<TivoliDataModel> {
 				// ALl our details about our group or schedule in tivoli
 				group.setSchedualData(sched);
 				container.addChild(group);
-				log.info("Added Group {} to container{}", group.getFullPath(),container.getName());
-				//this.getParserDataModel().addDataDuplicateLevelCheck(group);
+				log.info("Added Group {} to container{}", group.getFullPath(), container.getName());
+				// this.getParserDataModel().addDataDuplicateLevelCheck(group);
 			}
 
 			doProcessJobScheduleDetails(group, sched.getJobScheduleData());
@@ -156,7 +164,7 @@ public class TivoliParser extends AbstractParser<TivoliDataModel> {
 				tivoli.setJobScheduleData(jobdetail);
 				// Add to our group
 				group.addChild(tivoli);
-				
+
 				log.debug("Added Job {} to Group{}", tivoli.getFullPath(), group.getName());
 
 			} catch (IllegalAccessException e) {

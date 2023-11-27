@@ -116,6 +116,9 @@ public abstract class BaseCsvJobObject extends BaseJobOrGroupObject {
 	@CsvRecurse
 	ConcurrentType concurrentIfActiveLogic = ConcurrentType.RUNANYWAY;
 	
+	@CsvBindByName
+	Integer maxRunTime;
+	
 	@Setter(value = AccessLevel.PRIVATE)
 	DependencyBuilder compoundDependencyBuilder = new DependencyBuilder();
 

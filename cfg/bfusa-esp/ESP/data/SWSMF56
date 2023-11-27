@@ -4,6 +4,7 @@ INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
 
 /*********************************************************************/
 /*01/14/2019 -JFC- CLEANED UP PROC - ADDED LIE - NO OTHER CHANGES
+/*10/24/2023 - SS - MODIFIED TO DAILY AS PER JAVIER - RITM0347011
 /*********************************************************************/
 
 /*********************************************************************/
@@ -27,7 +28,7 @@ ENDJOB
 
 JOB SWSMF56
   CCCHK RC(1:4095) FAIL CONTINUE
-  RUN WEEKDAYS SAT
+  RUN DAILY
   RELEASE ADD(SWSMF56B)
   RELEASE ADD(SWCOBUS5)
 ENDJOB

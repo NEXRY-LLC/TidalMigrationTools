@@ -9,6 +9,7 @@ INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
 /* 03/05/2020 -DSG- ADDED RESOURCE TO AS400 JOBS - INC000002178397
 /*09/12/2022-for agent CYBA_CDC1AKFIS user maestro changed to
 /*           bfusa\maestro - INC0353221
+/*07/27/2022 - RITM0316021- PS - AGENTNAME AND CMD MODIFIED PER JOHN*/
 /*********************************************************************/
 
 NOTIFY FAILURE ABEND ALERT(REMD)
@@ -92,8 +93,8 @@ NT_JOB BOSSCUREBUILD_WN_LOADBAT
 ENDJOB
 
 NT_JOB BOSSCOMP_WN_LOADBAT
-  AGENT CYBA_CDC1AKFIS
-  CMDNAME D:\dts_run\batchfiles\boss\COMPLOAD\BOSSComp_WN_Load.bat
+  AGENT WEB3AKATC
+  CMDNAME D:\TESS_TO_BOSS\batch_files\ExecCompLoad_WN.bat
   ARGS
   USER bfusa\maestro
   RUN DAILY

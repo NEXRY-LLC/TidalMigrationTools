@@ -256,7 +256,7 @@ public class EspParser extends AbstractParser<EspDataModel> {
 					}
 
 					line = EspFileReaderUtils.readLineMerged(reader, line, '-', true);
-					line = EspFileReaderUtils.readLineMerged(reader, line, '+' , false);
+					line = EspFileReaderUtils.readLineMerged(reader, line, '+', false);
 
 					if (skipLine(line)) {
 						continue;
@@ -437,10 +437,10 @@ public class EspParser extends AbstractParser<EspDataModel> {
 			throw new TidalException("Unknown Job Type[" + jobType.name() + "]");
 		}
 
-		if(rawdata.contains("REQUEST")) {
+		if (rawdata.contains("REQUEST")) {
 			currentJob.setContainsRequestAttribute(true);
 		}
-		
+
 		if (this.getParserDataModel().getConfigeProvider().isExcludedJobFromGroup(parent.getName(), jobName)) {
 			log.debug("isExcludedJobFromGroup Group{} Job{} is true, SKIPPPING", parent.getName(), jobName);
 			return;
@@ -495,10 +495,10 @@ public class EspParser extends AbstractParser<EspDataModel> {
 				exj.setExternJobName(jobName);
 			}
 
-			if(rawdata.contains("SCOPE(")) {
+			if (rawdata.contains("SCOPE(")) {
 				parent.setContainsScopeAttribute(true);
 			}
-			
+
 			parent.getExternalApplicationDep().add(exj);
 			return;
 		} else {
@@ -765,13 +765,11 @@ public class EspParser extends AbstractParser<EspDataModel> {
 		if (data != null) {
 
 			String desub = data.getDelaySubmission();
-			String duout = data.getDueout();
+			Integer duout = data.getDueout();
 
-			if (!StringUtils.isBlank(duout)) {
-				if (StringUtils.isBlank(in.getDueout())) {
+			if (duout != null) {
+				if (in.getDueout() == null) {
 					in.setDueout(duout);
-				} else {
-					in.getName();
 				}
 			}
 
@@ -783,12 +781,13 @@ public class EspParser extends AbstractParser<EspDataModel> {
 				}
 
 			}
+			
 			in.addEspStatementObject(data.getStatementObject());
 
 			in.getTags().addAll(data.getTags());
-			
+
 			in.setContainsScopeAttribute(data.isContainsScopeAttribute());
-			
+
 			in.setContainsRequestAttribute(data.isContainsRequestAttribute());
 		}
 	}

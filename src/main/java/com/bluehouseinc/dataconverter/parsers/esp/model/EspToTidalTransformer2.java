@@ -207,10 +207,10 @@ public class EspToTidalTransformer2 implements ITransformer<List<EspAbstractJob>
 
 	private void processJob(EspZosJob in, CsvOSJob out) {
 
-		if(in.getFullPath().contains("PC101B")) {
+		if (in.getFullPath().contains("PC101B")) {
 			in.getFullPath();
 		}
-		
+
 		out.setCommandLine(in.getCommandLine());
 		// out.setRuntimeUser(in.getUser());
 		if (StringUtils.isBlank(in.getAgent())) {
@@ -240,18 +240,17 @@ public class EspToTidalTransformer2 implements ITransformer<List<EspAbstractJob>
 
 					int exitvalue = check.getSingleReturnCode();
 
-
 					if (exitvalue == 0) {
 						exitcode.setExitStart(check.getSingleReturnCode());
 						exitcode.setExitEnd(check.getSingleReturnCode());
-					}else {
+					} else {
 						exitcode.setExitStart(0);
 						exitcode.setExitEnd(0);
 						this.ccCheckwritter.processCcCheckSingleCheck(check, in);
 					}
 
 					out.setExitcode(exitcode);
-					
+
 				}
 			} else {
 				// We need to write our data to file.
@@ -518,30 +517,10 @@ public class EspToTidalTransformer2 implements ITransformer<List<EspAbstractJob>
 		out.setNotes(String.join("\n", in.getNotesData()));
 
 		if (in.getDueout() != null) {
-			String endtime = in.getDueout().replace("EXEC ", "").replace(".", "").replace(":", "");
-
-			if (endtime.contains("AM") || endtime.contains("PM")) {
-				endtime = endtime.replace("AM", "00").replace("PM", "00");
-				// Make 0600 vs 6 AM => 600
-				endtime = String.format("%1$" + 4 + "s", endtime).replace(' ', '0');
-			}
-
-			if (NumberUtils.isParsable(endtime)) {
-				out.setEndTime(endtime); // Delay Sub is ESP way of saying dont run until this
-			} else {
-				// Not parsing likely more than just a time.
-				// E.G DUEOUT EXEC NOW PLUS 4 HOURS vs DUEOUT EXEC 10AM
-				in.setContainsAdvancedDueOutLogic(true);
-				String stmsg = out.getNotes() + "\nEndTime: " + endtime;
-				out.setNotes(stmsg);
-				log.error("doHandleGenericData Incorrect End Time [" + endtime + "] for Job: " + in.getFullPath());
-			}
-
-			//
-			// String delsubdata = APIDateUtils.convertToTidalMiltary(deldata, ':');
-			// String endtime = RegexHelper.extractFirstMatch(delsubdata, "(\\d{2}:\\d{2})");
-			// out.setEndTime(endtime);
+			out.setEndTime(Integer.toString(in.getDueout())); 
 		}
+		
+		out.setMaxRunTime(in.getDueoutMaxrun());
 
 		if (!in.getTags().isEmpty()) {
 			in.getTags().forEach(t -> {
