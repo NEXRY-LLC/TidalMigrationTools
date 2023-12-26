@@ -79,10 +79,10 @@ public class TivoliTransformer implements ITransformer<List<TivoliJobObject>, Ti
 			throw new TidalException("BaseJobOrGroupObject is null");
 		}
 
-		if(job.getName().contains("HRELOAD2")) {
+		if (job.getName().contains("HRELOAD2")) {
 			job.getName();
 		}
-		
+
 		BaseCsvJobObject tempjob = null;
 
 		if (job.isGroup()) {
@@ -113,24 +113,9 @@ public class TivoliTransformer implements ITransformer<List<TivoliJobObject>, Ti
 			CsvRuntimeUser rte = new CsvRuntimeUser(runtime);
 			datamodel.addRunTimeUserToJobOrGroup(tempjob, rte);
 
-		} else {
-
-			//
-			// // but do we do this for groups?
-			// // user CPU user.
-			// String domain = cpu.getDomain();
-			// runtime = cpu.getForUser();
-			//
-			// if (!StringUtils.isBlank(runtime)) {
-			// CsvRuntimeUser rte = new CsvRuntimeUser(runtime, domain);
-			// datamodel.addRunTimeUserToJobOrGroup(tempjob, rte);
-			// } else {
-			// datamodel.addRunTimeUserToJobOrGroup(out, new CsvRuntimeUser("runtime-notset"));
-			// }
-
 		}
 
-		String typenum = datamodel.getCfgProvider().getTidalConcurrentType();
+		String typenum = datamodel.getCfgProvider().getTidalConcurrentTypes();
 		out.setConcurrentIfActiveLogic(ConcurrentType.valueOf(typenum));
 
 		datamodel.addOwnerToJobOrGroup(out, datamodel.getDefaultOwner());
@@ -149,6 +134,11 @@ public class TivoliTransformer implements ITransformer<List<TivoliJobObject>, Ti
 
 		}
 
+		// Need to set OR status.
+		if(job.isOperatorRelease()) {
+			out.setRequireOperatorRelease(true);
+		}
+		
 		return out;
 	}
 
@@ -159,7 +149,7 @@ public class TivoliTransformer implements ITransformer<List<TivoliJobObject>, Ti
 		SchedualData schedata = in.getSchedualData();
 
 		if (schedata != null) {
-			
+
 			//
 			if (schedata.getAtTime() != null) {
 				String attime = schedata.getAtTime().getAtTime();
@@ -169,12 +159,12 @@ public class TivoliTransformer implements ITransformer<List<TivoliJobObject>, Ti
 				} else {
 					// AT 1800 +1 DAYS
 					RunOnRunCycle runon = new RunOnRunCycle();
-					runon.setCalendarData("#"+attime.replace(" ", ""));
-					runon.setCalendarName("#"+attime.replace(" ", ""));
-					runon.setDescription("#"+attime.replace(" ", ""));
+					runon.setCalendarData("#" + attime.replace(" ", ""));
+					runon.setCalendarName("#" + attime.replace(" ", ""));
+					runon.setDescription("#" + attime.replace(" ", ""));
 					// Add to our calendar name so its appended.
 					// add to front due to limitations of TIDAL len.
-					schedata.getRunOn().add(0,runon);
+					schedata.getRunOn().add(0, runon);
 				}
 			}
 
@@ -218,7 +208,7 @@ public class TivoliTransformer implements ITransformer<List<TivoliJobObject>, Ti
 			}
 
 			String cleancalname = calname.toString();
-			
+
 			cleancalname = EspFileReaderUtils.trimCharBeginOrEnd('-', cleancalname);
 
 			if (!StringUtils.isBlank(calname.toString())) {
@@ -231,38 +221,47 @@ public class TivoliTransformer implements ITransformer<List<TivoliJobObject>, Ti
 
 		String cmddata = in.getDoCommand() == null ? in.getScriptName().trim() : in.getDoCommand().trim();
 
-		if (StringUtils.isBlank(cmddata)) {
+		if (cmddata == null || StringUtils.isBlank(cmddata)) {
 			log.info("Missing command line data for JOB{}", in.getFullPath());
-			cmddata = "NOTSET";
-		}
-
-		if (cmddata.startsWith("\"") & cmddata.endsWith("\"")) {
-			cmddata = cmddata.substring(1, cmddata.length() - 1);
-			cmddata = cmddata.trim();
-		}
-
-		if (cmddata.startsWith("\"")) {
-			cmddata = cmddata.substring(1);
-		}
-
-		if (cmddata.endsWith("\"")) {
-			cmddata = cmddata.substring(0, cmddata.length() - 1);
-		}
-
-		String[] cmddata_split = cmddata.trim().split("\\s+", 2);
-
-		if (cmddata_split.length == 2) {
-			out.setCommandLine(cmddata_split[0]);
-			out.setParamaters(cmddata_split[1]);
-		} else {
-			out.setCommandLine(cmddata_split[0]);
-		}
-
-		if (StringUtils.isBlank(out.getCommandLine())) {
 			out.setCommandLine("NOTSET");
-			;
+			in.setDoCommand("NOTSET");
+		} else {
+
+			if (cmddata.startsWith("\"") & cmddata.endsWith("\"")) {
+				cmddata = cmddata.substring(1, cmddata.length() - 1);
+				cmddata = cmddata.trim();
+			}
+
+			if (cmddata.startsWith("\"")) {
+				cmddata = cmddata.substring(1);
+			}
+
+			if (cmddata.endsWith("\"")) {
+				cmddata = cmddata.substring(0, cmddata.length() - 1);
+			}
+
+			in.setDoCommand(cmddata);
+			
+			doProcessCommandData(in, out);
 		}
 
+		if (this.datamodel.getCfgProvider().bfusaFixSqlplus()) {
+
+			String cli = out.getCommandLine().trim();
+
+			if (cli.endsWith("sqlplus")) {
+
+				String prm = out.getParamaters().trim();
+
+				if (prm.startsWith("/")) {
+					// Special case for BFUSA
+					prm = prm.substring(1).trim(); // Remove our character
+					out.setParamaters(prm);
+					out.setCommandLine(cli + " /");
+				}
+			}
+
+		}
 		setStartTime(out, in.getJobScheduleData().getAtTime());
 
 		setEndTime(out, in.getJobScheduleData().getUntilTime());
@@ -272,8 +271,8 @@ public class TivoliTransformer implements ITransformer<List<TivoliJobObject>, Ti
 		in.getJobScheduleData().getNeeds().forEach(n -> {
 			addResource(out, n.getName(), n.getAmount());
 		});
-		
-		in.getReturnCodeSucess();
+
+
 	}
 
 	private void addResource(BaseCsvJobObject job, String name, Integer limit) {
@@ -299,9 +298,48 @@ public class TivoliTransformer implements ITransformer<List<TivoliJobObject>, Ti
 			String runat = runtime.getAtTime();
 			if (!StringUtils.isBlank(runat)) {
 				out.setEndTime(runat);
-				//FIXME: One day we need to make setting the timeout a param to the program.
+				// FIXME: One day we need to make setting the timeout a param to the program.
 			}
 
 		}
+	}
+
+	private void doProcessCommandData(TivoliJobObject in, CsvOSJob out) {
+
+		String cmddata = in.getDoCommand();
+		
+		if(cmddata == null) {
+			out.setCommandLine("NOTSET");
+			return;
+		}
+		
+		String[] cmddata_split = cmddata.trim().split("\\s+", 2);
+
+		if (cmddata_split.length == 2) {
+			out.setCommandLine(cmddata_split[0]);
+			out.setParamaters(cmddata_split[1]);
+		} else {
+			out.setCommandLine(cmddata_split[0]);
+		}
+
+		String paramtest = out.getParamaters();
+		
+		if (paramtest!= null && paramtest.contains("UNISON")) {
+			// We have a UNISON variable, in tivoli these represent a few different things.
+
+			if(paramtest.contains("$$UNISON_SCHED$$")) {
+				paramtest = paramtest.replace("$$UNISON_SCHED$$", in.getParent().getName());
+			}else if(paramtest.contains("$$UNISON_SCHED_ID$$")) {
+				paramtest = paramtest.replace("$$UNISON_SCHED_ID$$", in.getParent().getName());
+			}else if(paramtest.contains("$$UNISON_JOB$$")) {
+				paramtest = paramtest.replace("$$UNISON_JOB$$", in.getName());
+			}else {
+				throw new TidalException("Unknown UNISON variable found");
+			}
+	
+			out.setParamaters(paramtest);
+			
+		}
+
 	}
 }

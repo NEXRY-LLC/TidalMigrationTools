@@ -51,7 +51,7 @@ public class TidalImporter {
 	private static final String TIDAL_USE_CONTAINER = "TIDAL.UseContainer";
 	private static final String TIDAL_USE_CONTAINER_AGENT = "TIDAL.UseContainer.DefaultAgent";
 	private static final String TIDAL_USE_CONTAINER_CALENDAR = "TIDAL.UseContainer.DefaultCalendar";
-	private static final AtomicInteger jobtagcounter =  new AtomicInteger(0);
+	private static final AtomicInteger jobtagcounter = new AtomicInteger(0);
 	static final StopWatch sw = new StopWatch();
 	// static final ProgressBarBuilder pbb = new ProgressBarBuilder();
 	private TidalAPI tidal;
@@ -128,17 +128,7 @@ public class TidalImporter {
 			if (!validateNodeExist(nodename)) {
 				// Doesn't mater for now we want the system to add the connections
 				// TODO: Fix this to be based on a type but our importer tool does not have a type, so all unix in our labs
-
-				UnixNode unx = new UnixNode();
-				unx.setName(nodename);
-				unx.setPort("5912");
-				unx.setMachine(nodename);
-				TesResult res = tidal.getSf().unixNode().create(unx);
-				int id = res.getResult().getTesObjectid();
-				unx.setId(id);
-				tidal.getNodes().add(unx);
-
-				log.info("Installing Unix Agent - {}", nodename);
+				installAgent(nodename);
 			}
 
 		});
@@ -170,43 +160,75 @@ public class TidalImporter {
 
 	}
 
-	public void processDataModel(TidalDataModel model) {
+	private void installAgent(String name) {
 
-		doProcessContainer(model);
+		UnixNode unx = new UnixNode();
+		unx.setName(name);
+		unx.setPort("5912");
+		unx.setMachine(name);
+		TesResult res = tidal.getSf().unixNode().create(unx);
+		int id = res.getResult().getTesObjectid();
+		unx.setId(id);
+		tidal.getNodes().add(unx);
 
-		doInitgetTidal();
+		log.info("Installing Unix Agent - {}", name);
+	}
+
+	private void doProcessAgentHandler(TidalDataModel model) {
+		boolean installagents = model.getCfgProvider().getTidalAddAgentsOnImport();
+
 		// Need to think through functionality of importer.
 		// TODO: Add variable replacement functionality.
 		// Look too some older project that used reflection to locate variables, I have
-		// code for this in the utility project
+		// code gefor this in the utility project
 		// 1. We need to first add or update our dependent objects such as users,
 		// variables calendars
 		// 2. We need to then build our api model objects using the csv model objects
 		// 3. Then we need to process the api model objects
 
-		log.debug("Checking Agents are present in TIDAL");
-		StringBuilder b = new StringBuilder();
+		if (installagents) {
+			log.debug("Installing UNIX Agents NOT are present in TIDAL");
+			model.getNodes().stream().sorted().forEach(n -> {
+				if (!validateNodeExist(n)) {
+					installAgent(n);
+				}
 
-		model.getNodes().stream().sorted().forEach(n -> {
+			});
 
-			if (!validateNodeExist(n)) {
-				b.append("\n" + n);
+			return;
+			
+		} else {
+
+			log.debug("Checking Agents are present in TIDAL");
+			StringBuilder b = new StringBuilder();
+
+			model.getNodes().stream().sorted().forEach(n -> {
+				if (!validateNodeExist(n)) {
+					b.append("\n" + n);
+				}
+			});
+
+			model.getAgentList().stream().sorted().forEach(l -> {
+				if (!validateAgentListExist(l)) {
+					b.append("\nLIST -> " + l);
+				}
+			});
+
+			if (!StringUtils.isBlank(b.toString())) {
+				throw new TidalException("The following nodes or agentlist must be added prior to running this migration process\n" + b.toString());
 			}
 
-		});
-
-		model.getAgentList().stream().sorted().forEach(l -> {
-
-			if (!validateAgentListExist(l)) {
-				b.append("\nLIST -> " + l);
-			}
-		});
-
-		if (!StringUtils.isBlank(b.toString())) {
-			throw new TidalException("The following nodes or agentlist must be added prior to running this migration process" + b.toString());
+			log.debug("Checking Agents and Agent List are present in TIDAL - Completed");
 		}
+	}
 
-		log.debug("Checking Agents and Agent List are present in TIDAL - Completed");
+	public void processDataModel(TidalDataModel model) {
+
+		doProcessContainer(model);
+
+		doInitgetTidal();
+
+		doProcessAgentHandler(model);
 
 		new TimeZoneExecutor(tidal, model, cp).execute();
 
@@ -340,7 +362,6 @@ public class TidalImporter {
 		log.info("Job Tag Objects To Process [" + model.getJobTags().size() + "]");
 		log.info("Job TagMap Objects To Process [" + model.getJobTagsMapCounter() + "]");
 
-		
 		TidalModelReporterData.getReporters().forEach(f -> {
 
 			log.trace("#####################################" + f.getClass().getSimpleName() + "#####################################");

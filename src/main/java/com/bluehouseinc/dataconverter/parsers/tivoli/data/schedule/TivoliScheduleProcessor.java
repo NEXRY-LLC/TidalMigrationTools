@@ -201,6 +201,7 @@ public class TivoliScheduleProcessor {
 					}
 					break;
 				case "PRIORITY":
+					schedule.setPriority(value);
 					break;
 				case "CRITICAL":
 					schedule.setCritical(true);

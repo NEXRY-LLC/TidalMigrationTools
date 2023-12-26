@@ -331,18 +331,24 @@ public class AutosysJobVisitorImpl implements AutosysJobVisitor {
 			//model.getBaseObjectByName(value.trim());
 
 			if (StringUtils.isBlank(value)) {
-				break;
+				throw new TidalException("Missing Box Name element defined with no value ");
 			} else {
 				AutosysAbstractJob parent = model.getBaseObjectByName(value);
 
+				//TODO: Add switch in property file for this.
+				if(true) {
+					if(parent == null) {
+						log.info("ERROR in locating Parent[{}] for Job[{}]; object.name={} Adding placeholder", value, job.getFullPath(), job.getName());
+						parent = new AutosysBoxJob(value);
+						parent.setMachine("MISSING_GROUP");
+						model.addDataDuplicateLevelCheck(parent);
+					}
+				}
 				// parents.stream().filter(f -> f.getName().trim().toLowerCase().equals(value.trim().toLowerCase())).findAny().orElse(null);
 
 				if (parent != null) {
 					parent.addChild(job);
 					//log.debug("Added Job[{}] to parent[{}]", job.getFullPath(), parent.getFullPath());
-				} else {
-					log.info("ERROR in locating Parent[{}] for Job[{}]; object.name={}", value, job.getFullPath(), job.getName());
-					//throw new RuntimeException("ERROR in locating Parent[" + value + "] for Job["+ job.getFullPath() + "]");
 				}
 			}
 			

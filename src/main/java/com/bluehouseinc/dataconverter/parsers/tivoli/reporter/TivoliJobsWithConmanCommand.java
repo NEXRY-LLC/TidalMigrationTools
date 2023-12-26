@@ -47,7 +47,7 @@ public class TivoliJobsWithConmanCommand implements IReporter {
 			data.stream().forEach(f -> {
 
 				if (!jobcount.contains(f)) {
-					jobcount.add(f);
+					jobcount.add(job.getFullPath() + " => " +f);
 				}
 			});
 

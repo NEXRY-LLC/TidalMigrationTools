@@ -28,7 +28,7 @@ public class SchedualData {
 	private JobRunTime untilTime;
 	
 	private boolean critical = false;
-
+	private String priority;
 	
 	// Looks like a resource to me 
 	private List<NeedsResource> needs; //NEEDS 1 AMFINAN1#BONUS2DF

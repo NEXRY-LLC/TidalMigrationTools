@@ -42,7 +42,7 @@ public abstract class BaseVariableProcessor<E extends BaseJobOrGroupObject> {
 	@SuppressWarnings("unchecked")
 	public void processJob(E job) {
 
-		if(job.getName().contains("DB0469A.MON")) {
+		if(job.getName().contains("LAWEXP_RTI_APPMT_LX")) {
 			job.getName();
 		}
 		

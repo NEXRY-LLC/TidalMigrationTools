@@ -25,7 +25,7 @@ public class TivoliJobObject extends BaseJobOrGroupObject {
 	private String scriptName;
 	private String afterJob;
 	private String abendPrompt;
-	
+	private boolean operatorRelease = false; // Priority = 0
 	/*
 	 * This object represents the tivoli schedule details in the schedule file. AKA everyting before the defining 
 	 * workflow that contains all our job schedule details. 

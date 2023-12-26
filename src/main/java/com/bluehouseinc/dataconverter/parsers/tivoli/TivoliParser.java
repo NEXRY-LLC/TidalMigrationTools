@@ -146,6 +146,12 @@ public class TivoliParser extends AbstractParser<TivoliDataModel> {
 				// this.getParserDataModel().addDataDuplicateLevelCheck(group);
 			}
 
+			// If priority is zero then we need to issue operator release.
+			if(sched.getPriority() != null) {
+				if(sched.getPriority().trim().equals("0")) {
+					group.setOperatorRelease(true);
+				}
+			}
 			doProcessJobScheduleDetails(group, sched.getJobScheduleData());
 		});
 	}

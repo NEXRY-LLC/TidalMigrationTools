@@ -95,7 +95,8 @@ public class TivoliVariableProcessor extends BaseVariableProcessor<TivoliJobObje
 		if (newValue != null) {
 			if(newValue.contains("$")) {
 				newValue = convertRegisterLocalVariablesToTidal(rawValue);
-			}else if (newValue.contains("^")) {
+			}
+			if (newValue.contains("^")) {
 				newValue = convertRegisterGlobalVariablesToTidal(rawValue);
 			}
 		}

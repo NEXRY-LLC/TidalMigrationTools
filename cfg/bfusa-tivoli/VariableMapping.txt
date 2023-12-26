@@ -1,6 +1,1 @@
 NAME,NEWNAME
-.*(\\$STAMPDIR).*,<sysdata.mmddyyyy>
-.*(\\$\\{UNISON_SCHED\\}).*,<JobName..p>
-.*(\\$UNISON_SCHED).*,<JobName..p>
-.*(\\$\\{UNISON_SCHED_ID\\}).*,<JobName..p>
-.*(\\$UNISON_SCHED_ID).*,<JobName..p>

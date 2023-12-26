@@ -24,6 +24,7 @@ import com.bluehouseinc.dataconverter.parsers.autosys.model.jobs.util.AutosysYes
 import com.bluehouseinc.dataconverter.parsers.autosys.model.statements.AutosysResourceStatement;
 import com.bluehouseinc.tidal.api.exceptions.TidalException;
 import com.bluehouseinc.tidal.api.model.TrueFalse;
+import com.bluehouseinc.tidal.api.model.job.ConcurrentType;
 import com.bluehouseinc.tidal.utils.DateParser;
 import com.bluehouseinc.tidal.utils.StringUtils;
 import com.bluehouseinc.toolkit.CommandLine;
@@ -114,6 +115,9 @@ public class AutosysToTidalTransformer implements ITransformer<List<AutosysAbstr
 			}
 		}
 
+		String typenum = getTidalDataModel().getCfgProvider().getTidalConcurrentTypes();
+		baseCsvJobObject.setConcurrentIfActiveLogic(ConcurrentType.valueOf(typenum));
+		
 		return baseCsvJobObject;
 	}
 
