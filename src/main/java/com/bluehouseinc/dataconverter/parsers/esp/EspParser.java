@@ -300,7 +300,7 @@ public class EspParser extends AbstractParser<EspDataModel> {
 								jobName = jobName.replace("!", "");
 							}
 
-							if (jobName.contains("DB0469A.MON")) {
+							if (jobName.contains("RMMRP000_PLANT_3090")) {
 								line.toLowerCase();
 							}
 							EspJobType jobType = extractJobType(jobTypeString, line);
@@ -351,7 +351,7 @@ public class EspParser extends AbstractParser<EspDataModel> {
 
 	private void extractJob(final BufferedReader reader, String jobName, EspJobType jobType, EspJobGroup parent, String rawdata) throws Exception {
 
-		if (jobName.equals("SMTPNOTE.SWESP6SC")) {
+		if (jobName.equals("RLLL04SE_DTRMN_CRITICAL_DLVS_141")) {
 			jobName.getBytes();
 		}
 
@@ -445,6 +445,14 @@ public class EspParser extends AbstractParser<EspDataModel> {
 			log.debug("isExcludedJobFromGroup Group{} Job{} is true, SKIPPPING", parent.getName(), jobName);
 			return;
 		}
+
+		// Per customer if they commented out the run statement or a job does not have a run statement it should not be in the schedule
+		// Currently only doing what I am asked which is only exclude the jobs with a commented out run statement.
+		if (lines.stream().filter(f -> f.contains("/*RUN")).count() > 0) {
+			log.debug("isExcludedJobFromGroup Group{} Job{} is true, SKIPPPING COMMENTED OUT RUN STATEMENT", parent.getName(), jobName);
+			return;
+		}
+
 		// Go and do this visitor pattern stuff :) I rewrote this to work with my mind.
 		currentJob.processData(espJobVisitor, lines);
 
@@ -503,12 +511,8 @@ public class EspParser extends AbstractParser<EspDataModel> {
 			return;
 		} else {
 
-			if (parent != null) {
-				parent.addChild(currentJob);
-				log.debug("Adding Child[" + currentJob.getFullPath() + "] to Parent");
-			} else {
-				getParserDataModel().addDataDuplicateLevelCheck(currentJob);
-			}
+			parent.addChild(currentJob);
+			log.debug("Adding Child[" + currentJob.getFullPath() + "] to Parent");
 
 		}
 
@@ -781,7 +785,7 @@ public class EspParser extends AbstractParser<EspDataModel> {
 				}
 
 			}
-			
+
 			in.addEspStatementObject(data.getStatementObject());
 
 			in.getTags().addAll(data.getTags());

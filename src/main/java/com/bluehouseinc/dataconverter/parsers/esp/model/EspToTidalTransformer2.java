@@ -31,6 +31,7 @@ import com.bluehouseinc.dataconverter.model.impl.CsvRuntimeUser;
 import com.bluehouseinc.dataconverter.model.impl.CsvSAPJob;
 import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.data.CcCheck;
 import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.data.CcCheckFileWriter;
+import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.data.EspAppEndData;
 import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.impl.EspAgentMonitorJob;
 import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.impl.EspAs400Job;
 import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.impl.EspFileTriggerJob;
@@ -203,6 +204,8 @@ public class EspToTidalTransformer2 implements ITransformer<List<EspAbstractJob>
 			// starttimes = starttimes.replace(".", ":");
 			APIDateUtils.setRerunSameStartTimes(starttimes, out, datamodel, true);
 		}
+		
+
 	}
 
 	private void processJob(EspZosJob in, CsvOSJob out) {
