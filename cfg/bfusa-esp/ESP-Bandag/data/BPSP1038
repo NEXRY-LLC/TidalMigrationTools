@@ -1,0 +1,30 @@
+APPL BPSP1038 JOB_ANCESTOR_WAIT
+  RESOURCE ADD(1,BANDAG)
+
+INVOKE 'BANDAG.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/**********************************************************************/
+/* 2/27/2017 -JFC-ADDED GENTIME FOR DATE VARIABLE                     */
+/**********************************************************************/
+/* WE NEED TO PASS A DATE FORMAT YYYYMMDD TO JOB BPSP1038             */
+/* EASIEST WAY IS TO                                                  */
+/*    - TRIGGER THIS APPL USING THE DATE REQUESTED TO RUN             */
+/* OR - YOU COULD TRIGGER THE EVENT WITH YYYYMMDD IN USER 4 PARAMETER */
+/* -EITHER WAY WILL WORK - IT WILL PASS  REQUESTED YYYYMMDD           */
+/*  TO THE JCL IN JOB BPSP1038                                        */
+/**********************************************************************/
+IF USER4 = '' THEN !USER4 = 'TODAY'
+GENTIME DATE1 !USER4
+DATE2 = '!DATE1YEAR!DATE1MM!DATE1DD'
+/**********************************************************************/
+
+NOTIFY FAILURE ABEND ALERT(REMD)
+TAG '!DATE2'
+
+JOB BPSP1038
+  /*@@ SYSTEM=BANDAG
+  ECHO !DATE2
+  CCCHK RC(1:4095) FAIL CONTINUE
+  RUN TODAY
+ENDJOB
+

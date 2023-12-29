@@ -1,0 +1,35 @@
+APPL SCTESTSM
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+TAG 'DOCUMENTUM'
+
+/**********************************************************************/
+/*10/03/2018 -JFC- APPL TO MONITOR SERVICES DOCUMENTUM ON DEV SERVERS*/
+/**********************************************************************/
+/* status needs to be one of these:
+   /*STATUS running
+   /*STATUS stopped
+   /*STATUS continue_pending
+   /*STATUS pause_pending
+   /*STATUS paused
+   /*STATUS start_pending
+   /*STATUS stop_pending
+   /*STATUS exists
+   /*STATUS notexists
+          /*return state must be NOW or WAIT
+          /*now returns the state now and will fail if not correct
+          /*wait will monitor the status and complete when state is met
+
+SERVICE_MON CYBAGENT_APPCYB02PPD_RUNNING
+   AGENT APPCYB02PPD
+   SERVICENAME cybAgent.exe
+   STATUS running now
+   RUN daily
+   RELEASE ADD(LIE.!ESPAPPL)
+ENDJOB
+
+JOB LIE.!ESPAPPL LINK PROCESS
+   RUN DAILY
+ENDJOB
+
+

@@ -1,0 +1,282 @@
+APPL CF01
+
+/**********************************************************************/
+/* CREATED 01/16/2016 - JFC                                           */
+/**********************************************************************/
+/* -ALERT CREATED TO USE WITH APPLS CFTBAOP* AND CFDBAOP*             */
+/* -THIS ALERT TRAPS THE OUTPUT OF THE SPOOLFILE AND PASSES IT TO THE */
+/*  NEXT APPL AS A VARIABLE JOB ID TO GET THE STATUS OF THE JOB       */
+/* -ADD NEW JOBS TO THE TABLE AT THE END OF THIS ALERT                */
+/**********************************************************************/
+
+JOB_ID = 'DUMMY'
+
+REXXON GEN PROC
+
+X = TRAPOUT('LINE.')
+  "ESP WOBSF APPL("!MNAPPL".."!MNAPPLGEN") JOB("!MNFULLNAME")"
+X = TRAPOUT('OFF')
+
+/*********************************************************/
+/* DISPLAY THE SPOOL                                     */
+/*********************************************************/
+
+SAY 'LINE.0 IS' LINE.0
+
+DO I = 1 TO LINE.0
+ SAY LINE.I
+END
+
+/*********************************************************/
+/* GET THE FIRST WORD IN THE LAST LINE                  */
+/*********************************************************/
+
+J = LINE.0
+LAST_LINE = LINE.J
+
+JOB_ID = WORD(LAST_LINE,1)
+
+SAY '+++++ THE MAGIC NUMBER IS' JOB_ID '+++++'
+
+"JOB_ID='"JOB_ID"'"
+
+REXXOFF
+
+/***********************************************************/
+/* - JOB ENTRIES START HERE                                */
+/* - EACH ENTRY WILL CHECK THE RC OF THE JOB AND TRIGGER   */
+/*   APPL CFTGSTAT WITH THE USER1 AND 2 VARIABLES          */
+/* - DO NOT CHANGE THE USER1 VARIABLE!!! - JUST USER2      */
+/***********************************************************/
+
+/***********************************************************/
+/*   JOB ENTRIES FOR CFTBAOP1 - JOBS ON THE DEV SERVERS    */
+/***********************************************************/
+/*05/31/2016 - JFC- COMMENTED THIS SECTION OUT PER VINAY*/
+/*
+/*IF !JOB_ID <= 99 THEN -
+/* DO
+/*  ESP AJ SWFAILIT.!MNFULLNAME INSERT APPL(!MNAPPL..!MNAPPLGEN) -
+/*   DATASET(FTRF.PRDJOBS) MEMBER(SWFAILIT) SUCCESSORS(!MNFULLNAME)
+/* ENDDO
+/*
+/*IF !JOB_ID > 99 THEN -
+/* DO
+/***********************************************************/
+
+  IF (!MNAPPL EQ 'CFTBAOP1' AND -
+    !MNFULLNAME EQ 'POST_DAILY_TRANS_TO_GL' AND -
+    !MNRC EQ '0') THEN -
+  DO
+    ESP TR CF01.CFTGET1A USER1(!JOB_ID) USER2(A1)
+  ENDDO
+
+  IF (!MNAPPL EQ 'CFTBAOPA' AND -
+    !MNFULLNAME EQ 'POST_DAILY_TRANS_TO_GL' AND -
+    !MNRC EQ '0') THEN -
+  DO
+    ESP TR CF01.CFTGSTAT USER1(!JOB_ID) USER2(A1)
+  ENDDO
+
+  IF (!MNAPPL EQ 'CFTBAOPA' AND -
+    !MNFULLNAME EQ 'ETL_NEW_TRANS_INBOUND' AND -
+    !MNRC EQ '0') THEN -
+  DO
+    ESP TR CF01.CFTGSTAT USER1(!JOB_ID) USER2(A3)
+  ENDDO
+
+  IF (!MNAPPL EQ 'CFTBAOPA' AND -
+    !MNFULLNAME EQ 'PROCESS_INBOUND_TRANS' AND -
+    !MNRC EQ '0') THEN -
+  DO
+    ESP TR CF01.CFTGSTAT USER1(!JOB_ID) USER2(A4)
+  ENDDO
+
+  IF (!MNAPPL EQ 'CFTBAOPA' AND -
+    !MNFULLNAME EQ 'PROCESS_DAILY_TRANS' AND -
+    !MNRC EQ '0') THEN -
+  DO
+    ESP TR CF01.CFTGSTAT USER1(!JOB_ID) USER2(A5)
+  ENDDO
+
+  IF (!MNAPPL EQ 'CFTBAOPA' AND -
+    !MNFULLNAME EQ 'POST_DAILY_TRANS' AND -
+    !MNRC EQ '0') THEN -
+  DO
+    ESP TR CF01.CFTGSTAT USER1(!JOB_ID) USER2(A6)
+  ENDDO
+
+  IF (!MNAPPL EQ 'CFTBAOPA' AND -
+    !MNFULLNAME EQ 'STAGE_LAWSON' AND -
+    !MNRC EQ '0') THEN -
+  DO
+    ESP TR CF01.CFTGSTAT USER1(!JOB_ID) USER2(A7)
+  ENDDO
+
+  IF (!MNAPPL EQ 'CFTBAOPA' AND -
+    !MNFULLNAME EQ 'CREATE_LAWSON_FILE' AND -
+    !MNRC EQ '0') THEN -
+  DO
+    ESP TR CF01.CFTGSTAT USER1(!JOB_ID) USER2(A8)
+  ENDDO
+
+
+  IF (!MNAPPL EQ 'CFTBAOPA' AND -
+    !MNFULLNAME EQ 'ETL_PAST_DUE_TRANS' AND -
+    !MNRC EQ '0') THEN -
+  DO
+    ESP TR CF01.CFTGSTAT USER1(!JOB_ID) USER2(A9)
+  ENDDO
+
+/***********************************************************/
+/*   JOB ENTRIES FOR CFTBAOPB - JOBS RUNNING ON STAGING    */
+/***********************************************************/
+  IF (!MNAPPL EQ 'CFTBAOPB' AND -
+    !MNFULLNAME EQ 'PROCESS_CYCLE_BILLING' AND -
+    !MNRC EQ '0') THEN -
+  DO
+    ESP TR CF01.CFTGSTAT USER1(!JOB_ID) USER2(B1)
+  ENDDO
+
+  IF (!MNAPPL EQ 'CFTBAOPB' AND -
+    !MNFULLNAME EQ 'LEGACY_CIRCLE_FINE_GENERATION' AND -
+    !MNRC EQ '0') THEN -
+  DO
+    ESP TR CF01.CFTGETB2 USER1(!JOB_ID)
+  ENDDO
+
+  IF (!MNAPPL EQ 'CFTBAOPB' AND -
+    !MNFULLNAME EQ 'LEGACY_ACCOUNT_HIST_UPDATES' AND -
+    !MNRC EQ '0') THEN -
+  DO
+    ESP TR CF01.CFTGSTAT USER1(!JOB_ID) USER2(B3)
+  ENDDO
+
+  IF (!MNAPPL EQ 'CFTBAOPB' AND -
+    !MNFULLNAME EQ 'LEGACY_BEHAVIORAL_SCORING' AND -
+    !MNRC EQ '0') THEN -
+  DO
+    ESP TR CF01.CFTGSTAT USER1(!JOB_ID) USER2(B4)
+  ENDDO
+
+  IF (!MNAPPL EQ 'CFTBAOPB' AND -
+    !MNFULLNAME EQ 'LEGACY_COLLECTIONS_SCORING' AND -
+    !MNRC EQ '0') THEN -
+  DO
+    ESP TR CF01.CFTGSTAT USER1(!JOB_ID) USER2(B5)
+  ENDDO
+
+  IF (!MNAPPL EQ 'CFTBAOPB' AND -
+    !MNFULLNAME EQ 'STATEMENT_DATA_STAGING' AND -
+    !MNRC EQ '0') THEN -
+  DO
+    ESP TR CF01.CFTGSTAT USER1(!JOB_ID) USER2(B6)
+  ENDDO
+
+  IF (!MNAPPL EQ 'CFTBAOPB' AND -
+    !MNFULLNAME EQ 'STATEMENT_XML_GENERATION' AND -
+    !MNRC EQ '0') THEN -
+  DO
+    ESP TR CF01.CFTGSTAT USER1(!JOB_ID) USER2(B7)
+  ENDDO
+
+/***********************************************************/
+/*   JOB ENTRIES FOR PRODUCTION APPLS                      */
+/***********************************************************/
+
+  IF (!MNAPPL EQ 'CFDBAOPA' AND -
+    !MNFULLNAME EQ 'POST_DAILY_TRANS_TO_GL' AND -
+    !MNRC EQ '0') THEN -
+  DO
+    ESP TR CF01.CFDGSTAT USER1(!JOB_ID) USER2(A1)
+  ENDDO
+
+  IF (!MNAPPL EQ 'CFDBAOPA' AND -
+    !MNFULLNAME EQ 'ETL_NEW_TRANS_INBOUND' AND -
+    !MNRC EQ '0') THEN -
+  DO
+    ESP TR CF01.CFDGSTAT USER1(!JOB_ID) USER2(A3)
+  ENDDO
+
+  IF (!MNAPPL EQ 'CFDBAOPA' AND -
+    !MNFULLNAME EQ 'PROCESS_INBOUND_TRANS' AND -
+    !MNRC EQ '0') THEN -
+  DO
+    ESP TR CF01.CFDGSTAT USER1(!JOB_ID) USER2(A4)
+  ENDDO
+
+  IF (!MNAPPL EQ 'CFDBAOPA' AND -
+    !MNFULLNAME EQ 'PROCESS_DAILY_TRANS' AND -
+    !MNRC EQ '0') THEN -
+  DO
+    ESP TR CF01.CFDGSTAT USER1(!JOB_ID) USER2(A5)
+  ENDDO
+
+  IF (!MNAPPL EQ 'CFDBAOPA' AND -
+    !MNFULLNAME EQ 'POST_DAILY_TRANS' AND -
+    !MNRC EQ '0') THEN -
+  DO
+    ESP TR CF01.CFDGSTAT USER1(!JOB_ID) USER2(A6)
+  ENDDO
+
+  IF (!MNAPPL EQ 'CFDBAOPA' AND -
+    !MNFULLNAME EQ 'ETL_PAST_DUE_TRANS' AND -
+    !MNRC EQ '0') THEN -
+  DO
+    ESP TR CF01.CFDGSTAT USER1(!JOB_ID) USER2(A7)
+  ENDDO
+
+/***********************************************************/
+/*   JOB ENTRIES FOR CFDBAOPB PRODUCTION                   */
+/***********************************************************/
+
+  IF (!MNAPPL EQ 'CFDBAOPB' AND -
+    !MNFULLNAME EQ 'PROCESS_CYCLE_BILLING' AND -
+    !MNRC EQ '0') THEN -
+  DO
+    ESP TR CF01.CFDGSTAT USER1(!JOB_ID) USER2(B1)
+  ENDDO
+
+  IF (!MNAPPL EQ 'CFDBAOPB' AND -
+    !MNFULLNAME EQ 'LEGACY_CIRCLE_FINE_GENERATION' AND -
+    !MNRC EQ '0') THEN -
+  DO
+    ESP TR CF01.CFDGETB2 USER1(!JOB_ID)
+  ENDDO
+
+  IF (!MNAPPL EQ 'CFDBAOPB' AND -
+    !MNFULLNAME EQ 'LEGACY_ACCOUNT_HIST_UPDATES' AND -
+    !MNRC EQ '0') THEN -
+  DO
+    ESP TR CF01.CFDGSTAT USER1(!JOB_ID) USER2(B3)
+  ENDDO
+
+  IF (!MNAPPL EQ 'CFDBAOPB' AND -
+    !MNFULLNAME EQ 'LEGACY_BEHAVIORAL_SCORING' AND -
+    !MNRC EQ '0') THEN -
+  DO
+    ESP TR CF01.CFDGSTAT USER1(!JOB_ID) USER2(B4)
+  ENDDO
+
+  IF (!MNAPPL EQ 'CFDBAOPB' AND -
+    !MNFULLNAME EQ 'LEGACY_COLLECTIONS_SCORING' AND -
+    !MNRC EQ '0') THEN -
+  DO
+    ESP TR CF01.CFDGSTAT USER1(!JOB_ID) USER2(B5)
+  ENDDO
+
+  IF (!MNAPPL EQ 'CFDBAOPB' AND -
+    !MNFULLNAME EQ 'STATEMENT_DATA_STAGING' AND -
+    !MNRC EQ '0') THEN -
+  DO
+    ESP TR CF01.CFDGSTAT USER1(!JOB_ID) USER2(B6)
+  ENDDO
+
+  IF (!MNAPPL EQ 'CFDBAOPB' AND -
+    !MNFULLNAME EQ 'STATEMENT_XML_GENERATION' AND -
+    !MNRC EQ '0') THEN -
+  DO
+    ESP TR CF01.CFDGSTAT USER1(!JOB_ID) USER2(B7)
+  ENDDO
+
+ENDDO

@@ -1,0 +1,24 @@
+APPL POD302T WAIT                                                       00010000
+
+INVOKE 'SWS.ESP.APPL.TESTLIB(#DISTRIT)'
+
+/*********************************************************************/ 00030000
+/*08/18/2021 - TEST JOB FOR POD302                                   */ 00040000
+/*********************************************************************/ 00050000
+                                                                        00050000
+NOTIFY FAILURE ABEND ALERT(REMD)                                        00070000
+
+JOB LIS.!ESPAPPL LINK PROCESS
+  RUN DAILY
+  RELEASE ADD(POD302)
+ENDJOB
+                                                                        00110000
+
+JOB POD302                                                              00166000
+  RUN DAILY
+  RELEASE ADD(LIE.!ESPAPPL)
+ENDJOB
+
+JOB LIE.!ESPAPPL LINK PROCESS
+  RUN DAILY
+ENDJOB

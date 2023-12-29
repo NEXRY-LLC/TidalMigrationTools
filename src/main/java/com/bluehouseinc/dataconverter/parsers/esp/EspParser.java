@@ -22,7 +22,9 @@ import org.apache.commons.lang3.math.NumberUtils;
 import com.bluehouseinc.dataconverter.common.utils.RegexHelper;
 import com.bluehouseinc.dataconverter.model.BaseJobOrGroupObject;
 import com.bluehouseinc.dataconverter.model.IModelReport;
+import com.bluehouseinc.dataconverter.model.impl.CsvVariable;
 import com.bluehouseinc.dataconverter.parsers.AbstractParser;
+import com.bluehouseinc.dataconverter.parsers.esp.model.DependencyGraphMapper;
 import com.bluehouseinc.dataconverter.parsers.esp.model.EspAbstractJob;
 import com.bluehouseinc.dataconverter.parsers.esp.model.EspDataModel;
 import com.bluehouseinc.dataconverter.parsers.esp.model.MailListDataProcessor;
@@ -43,6 +45,7 @@ import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.impl.EspFileTrigger
 import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.impl.EspFtpJob;
 import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.impl.EspJobGroup;
 import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.impl.EspLinuxJob;
+import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.impl.EspOSJOb;
 import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.impl.EspSAPBwpcJob;
 import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.impl.EspSapEventJob;
 import com.bluehouseinc.dataconverter.parsers.esp.model.jobs.impl.EspSapJob;
@@ -224,7 +227,7 @@ public class EspParser extends AbstractParser<EspDataModel> {
 					}
 				}
 
-				EspAbstractJob currentJob;
+				// EspAbstractJob currentJob;
 
 				String filename = filePath.getFileName().toString();
 
@@ -351,7 +354,7 @@ public class EspParser extends AbstractParser<EspDataModel> {
 
 	private void extractJob(final BufferedReader reader, String jobName, EspJobType jobType, EspJobGroup parent, String rawdata) throws Exception {
 
-		if (jobName.equals("RLLL04SE_DTRMN_CRITICAL_DLVS_141")) {
+		if (jobName.equals("CDSTAT.ZFIARI02CD")) {
 			jobName.getBytes();
 		}
 
@@ -511,8 +514,23 @@ public class EspParser extends AbstractParser<EspDataModel> {
 			return;
 		} else {
 
-			parent.addChild(currentJob);
-			log.debug("Adding Child[" + currentJob.getFullPath() + "] to Parent");
+			if (currentJob.isContainsRELDELAY()) {
+				// Add a sleep job here.
+				EspOSJOb sleep = new EspOSJOb("RELDELAY-" + currentJob.getName());
+				CsvVariable csvVariable = new CsvVariable("ReldelaySleepCommand");
+				this.getParserDataModel().getTidal().addVariable(csvVariable);
+				sleep.setCommand("$$ReldelaySleepCommand$$"); // allow to be a variable
+				sleep.setParams(currentJob.getRelDelay() + "s");
+				sleep.setAgent("SLEEP_AGENT");
+				parent.addChild(sleep);
+				parent.addChild(currentJob);
+				log.debug("Adding Child[" + currentJob.getFullPath() + "] to Parent with sleep Job["+sleep.getFullPath()+"]");
+				DependencyGraphMapper.registerSleepJobToMap(currentJob, sleep);
+			} else {
+				parent.addChild(currentJob);
+				log.debug("Adding Child[" + currentJob.getFullPath() + "] to Parent");
+			}
+			
 
 		}
 
@@ -613,7 +631,7 @@ public class EspParser extends AbstractParser<EspDataModel> {
 			if (currentGroup.getTags() == null) {
 				currentGroup.setTags(new ArrayList<>());
 			}
-			currentGroup.getTags().add(line.split(" ", 2)[1]);
+			currentGroup.getTags().add(line.split(" ", 2)[1].replace("'", "").replace("=", "").trim());
 		}
 
 		if (line.startsWith("RESOURCE")) {

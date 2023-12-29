@@ -1,0 +1,57 @@
+APPL LEM002 WAIT                                                        00010013
+NOTIFY ABEND FAILURE ALERT(REMD)                                        00020013
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'                                 00030013
+IF !ESPAPSUB# > 1 THEN JCLLIB 'SWS.ESP.COPYLIB'                         00040013
+                                                                        00050013
+SAP_JOB ZSDLEI11_RMA_MATL_CHARS                                         00120013
+   AGENT CYBB_BFP030                                                    00130013
+   SAPJOBNAME ZSDLEI11_RMA_MATL_CHARS                                   00140013
+   SAPJOBCLASS A                                                        00150013
+   STARTMODE ASAP                                                       00160013
+   ABAPNAME ZSDLEI11                                                    00170013
+   VARIANT OTC_SD_INT_44                                                00180013
+   STEPUSER SAPADM                                                      00190013
+   LANGUAGE E                                                           00200013
+   PRINTDEST CP21                                                       00210013
+   PRINTCOPIES 001                                                      00220013
+   EXPIRATION 8                                                         00230013
+   LINES 65                                                             00240013
+   COLUMNS 80                                                           00250013
+   BANNER D                                                             00260013
+   RECIPIENT FEEGARY                                                    00270013
+   ARCMODE PRINT                                                        00280013
+   RUN 1ST DAY OF MONTH                                                 00290017
+   DELAYSUB 03.00                                                       00300013
+   RELEASE ADD(WPS_ZSDLEI11)                                            00310013
+   RELEASE ADD(ZSDLEI11M_NONREPORT_MATL_UPD)                            00320013
+ENDJOB                                                                  00330013
+                                                                        00340013
+SAP_JOB ZSDLEI11M_NONREPORT_MATL_UPD                                    00540013
+   AGENT CYBB_BFP030                                                    00550013
+   SAPJOBNAME ZSDLEI11M_NONREPORT_MATL_UPD                              00560013
+   SAPJOBCLASS C                                                        00570013
+   STARTMODE ASAP                                                       00580013
+   ABAPNAME ZSDLEI11M                                                   00590013
+   VARIANT REP_0006_JOB                                                 00600013
+   STEPUSER SAPADM                                                      00610013
+   LANGUAGE E                                                           00620013
+   PRINTDEST CP21                                                       00630013
+   PRINTCOPIES 001                                                      00640013
+   EXPIRATION 8                                                         00650013
+   COLUMNS 255                                                          00660013
+   BANNER D                                                             00670013
+   RECIPIENT FEEGARY                                                    00680013
+   ARCMODE PRINT                                                        00690013
+   RUN 1ST DAY OF MONTH                                                 00700017
+   RELEASE ADD(LEM002.COMPLETE)                                         00710013
+ENDJOB                                                                  00720013
+                                                                        00730013
+AIX_JOB LEM002.COMPLETE                                                 00930016
+   AGENT CYBA_ISBFP3                                                    00941015
+   COMMAND /bin/sleep                                                   00942015
+   ARGS 3                                                               00943015
+   USER bfpadm                                                          00944015
+   RUN 1ST DAY OF MONTH                                                 00950017
+   NOTIFY JOBEND MAILBOX(RMAGROUP)                                      00960013
+ENDJOB                                                                  00970013
+                                                                        00980013

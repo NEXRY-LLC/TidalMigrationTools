@@ -1,0 +1,16 @@
+APPL JCTEST28 WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/*****************************************************/
+/* TESTING WA215C PROCESS
+/*****************************************************/
+
+TAG TEST
+
+JOB SWSEPJC2 AGE TASK PROCESS DOCMEM(JCTEST28)
+   RUN TODAY
+ENDJOB
+
+
+

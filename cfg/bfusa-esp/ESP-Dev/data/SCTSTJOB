@@ -1,0 +1,28 @@
+APPL SCTSTJOB WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/*********************************************************************/
+/*- USE THIS APPL TO RUN MVS JOBS OUT OF FTRF.TSTJOBS                */
+/*- JUST ENTER THE JOB NAME INTO USER 1 PARAMETER  FIELD             */
+/*-                             WHEN TRIGGEREING THE EVENT           */
+/*********************************************************************/
+
+JOB LIS.!ESPAPPL link process
+  RUN DAILY
+  RELEASE ADD(!USER1..TSTJOBS)
+ENDJOB
+
+JOB !USER1..TSTJOBS
+  ECHO !USER1
+  CCCHK RC(1:4095) FAIL CONTINUE
+  DATASET 'FTRF.TSTJOBS'
+  RUN DAILY
+  RELEASE ADD(LIE.!ESPAPPL)
+ENDJOB
+
+JOB LIE.!ESPAPPL link process
+  RUN DAILY
+ENDJOB
+
+

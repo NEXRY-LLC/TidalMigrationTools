@@ -1,0 +1,295 @@
+APPL CF04
+
+PERFORM_COMPIT   = 'NO'
+PERFORM_FAILIT   = 'NO'
+PERFORM_NOACTION = 'NO'
+PERFORM_POSTTASK = 'NO'
+PERFORM_RERUNIT  = 'NO'
+PERFORM_WAIT     = 1
+ESP_MESSAGE_1    = 'NONE'
+ESP_MESSAGE_2    = 'NONE'
+
+REXXON GEN PROC
+
+PERFORM_COMPIT   = 'NO'
+PERFORM_FAILIT   = 'NO'
+PERFORM_NOACTION = 'NO'
+PERFORM_POSTTASK = 'NO'
+PERFORM_RERUNIT  = 'NO'
+PERFORM_WAIT     = 1
+ESP_MESSAGE_1    = 'NONE'
+ESP_MESSAGE_2    = 'NONE'
+
+/********************************************************************/
+/* THE VALUES TO BE ENTERED FOR EACH TABLE ARE AS FOLLOWS:          */
+/*                                                                  */
+/* FOR ALL ENTRIES - XXXXXXXX.YYYYYYYY. IS THE APPLNAME.JOBNAME     */
+/*                                                                  */
+/* XXXXXXXX.YYYYYYYY. = ''                                          */
+/*   THIS IS A DUMMY ENTRY TO INITIALIZE NON-EXISTENT ENTRIES.      */
+/*   *** REQUIRED - IT MUST BE PRESENT.                             */
+/*                                                                  */
+/* XXXXXXXX.YYYYYYYY.APPLJOB = 'XXXXXXXX.YYYYYYYY'                  */
+/*   THIS IS A CHECK ENTRY WHERE THE APPLNAME.JOBNAME SHOLULD BE    */
+/*   THE SAME ON BOTH SIDES OF THE = SIGN                           */
+/*   *** REQUIRED - IT MUST BE PRESENT.                             */
+/*                                                                  */
+/* XXXXXXXX.YYYYYYYY.RETRYS = 999                                   */
+/*   THIS IS THE NUMBER OF RERUNS TO ATTEMPT.                       */
+/*   IT CAN BE ANY NUMBER FROM 1 TO 999.                            */
+/*   LEADING ZEROS ARE NOT REQUIRED                                 */
+/*   *** REQUIRED - IT MUST BE PRESENT.                             */
+/*                                                                  */
+/* XXXXXXXX.YYYYYYYY.WAIT = 999                                     */
+/*   THIS IS THE NUMBER OF MINUTES TO WAIT BETWEEN RERUN ATTEMPTS   */
+/*   IT CAN BE ANY # FROM 1 TO 99 - LEADING ZEROS NOT REQUIRED      */
+/*   *** REQUIRED - IT MUST BE PRESENT.                             */
+/*                                                                  */
+/* XXXXXXXX.YYYYYYYY.GIVEUP = 'ZZZZZZZZ'                            */
+/*   THIS IS THE ACTION TO BE TAKEN WHEN THE # OF RETRYS IS EXCEEDED*/
+/*   *** IT MUST BE EITHER 'COMPIT' OR 'FAILIT' AS DESCRIBED BELOW  */
+/*   *** REQUIRED - IT MUST BE PRESENT.                             */
+/*                                                                  */
+/* XXXXXXXX.YYYYYYYY.4      = 'ZZZZZZZZ'                            */
+/*   THIS ACTION TO BE TAKEN WHEN RETURN CODE IS 4                  */
+/*   THE .4 CAN BE ANY # FROM 0 TO 99                               */
+/*   THE ACTION MUST BE 1 OF THE 5 VALID ACTIONS LISTED BELOW       */
+/*   THERE MAY BE NONE TO DOZENS OF THESE STATEMENTS                */
+/*                                                                  */
+/* XXXXXXXX.YYYYYYYY.OTHER  = 'ZZZZZZZZ'                            */
+/*   THIS IS THE ACTION TO BE TAKEN WHEN THE RC DOES NOT MATCH ANY  */
+/*        OF THE PRECEDING RETURN CODES.                            */
+/*   THE ACTION MUST BE 1 OF THE 5 VALID ACTIONS LISTED BELOW       */
+/*   *** REQUIRED - IT MUST BE PRESENT.                             */
+/*                                                                  */
+/* VALID ACTIONS:                                                   */
+/*                                                                  */
+/* 'COMPIT' -  ISSUE AN 'AJ' COMMAND TO COMPLETE THE APPL           */
+/*                                                                  */
+/* 'FAILIT' -  ISSUE AN 'AJ SWFAILIT.!MNFULLNAME' COMMAND.          */
+/*             THIS WILL INSERT INSERT JOB 'SWFAILIT' INTO THE APPL */
+/*             WHICH WILL FAIL AND ALERT OPS THAT THERE'S A PROB    */
+/*                                                                  */
+/* 'NOACTION' -  THE ALERT WILL TAKE NO ACTION. APPL WILL CONT ON   */
+/*               THIS IS A WAY TO LET CCCHKS IN THE APPL WORK       */
+/*                                                                  */
+/* 'POSTTASK' -  ISSUE AN 'AJ TASK.!MNFULLNAME' COMMAND TO POST THE */
+/*               TASK WHICH IS HOLDING UP FURTHER PROCESSING        */
+/*               I.E. - THE APPLICATION CONTINUES ON AS NORMAL      */
+/*                                                                  */
+/* 'RERUNIT' -  ISSUE THE FOLLOWING TWO COMMANDS:                   */
+/*                EARLYSUB NOW PLUS XXX MINUTES                     */
+/*                AJ !MNFULLNAME RESUBMIT APPLNAME(!MNFULLNAME)     */
+/*                WHERE XXX IS THE VALUE FROM THE WAIT ENTRY ABOVE  */
+/*              THIS WILL RERUN THE JOB WITH THE BAD RC             */
+/*              THE RETRYS ENTRY WILL DETERMINE HOW MANY RERUNS ARE */
+/*              ATTEMPTED BEFORE THE GIVEUP ACTION IS PERFORMED     */
+/*                                                                  */
+/****************************************************************** */
+
+/****************************************************************** */
+/*        APPLICATION TABLES START HERE                             */
+/****************************************************************** */
+
+JCTEST06.SWESPJC_%%%.          = ''
+JCTEST06.SWESPJC_%%%.APPLJOB   = 'JCTEST06.SWESPJC_%%%'
+JCTEST06.SWESPJC_%%%.RETRYS    = 2
+JCTEST06.SWESPJC_%%%.WAIT      = 1
+JCTEST06.SWESPJC_%%%.GIVEUP    = 'COMPIT'
+JCTEST06.SWESPJC_%%%.0         = 'RERUNIT'
+JCTEST06.SWESPJC_%%%.OTHER     = 'RERUNIT'
+
+JCTEST06.THIS_JOBNAME_IS_REALLY_LONG_MAX_CHAR_040.          = ''
+JCTEST06.THIS_JOBNAME_IS_REALLY_LONG_MAX_CHAR_040.APPLJOB   = ,
+                 'JCTEST06.THIS_JOBNAME_IS_REALLY_LONG_MAX_CHAR_040'
+JCTEST06.THIS_JOBNAME_IS_REALLY_LONG_MAX_CHAR_040.RETRYS    = 2
+JCTEST06.THIS_JOBNAME_IS_REALLY_LONG_MAX_CHAR_040.WAIT      = 1
+JCTEST06.THIS_JOBNAME_IS_REALLY_LONG_MAX_CHAR_040.GIVEUP    = 'COMPIT'
+JCTEST06.THIS_JOBNAME_IS_REALLY_LONG_MAX_CHAR_040.4         = 'RERUNIT'
+JCTEST06.THIS_JOBNAME_IS_REALLY_LONG_MAX_CHAR_040.0         = 'RERUNIT'
+JCTEST06.THIS_JOBNAME_IS_REALLY_LONG_MAX_CHAR_040.OTHER     = 'RERUNIT'
+
+/****************************************************************** */
+/*        APPLICATION TABLES END HERE                             */
+/****************************************************************** */
+
+/****************************************************************** */
+/* GET MONITOR APPLICATION, JOB NAME AND MAX RETURN CODE  */
+/****************************************************************** */
+
+MON_APPL    = CLANGVAR('!MNAPPL')
+MON_JOB     = CLANGVAR('!MNFULLNAME')
+MON_MXRC    = CLANGVAR('!MNMXRC')
+
+/* SAY 'MON_APPL =' MON_APPL  */
+/* SAY 'MON_JOB  =' MON_JOB   */
+/* SAY 'MON_MXRC =' MON_MXRC */
+
+/* CHECK TO SEE IF THERE IS A TABLE ENTRY FOR THIS APPL & JOB */
+
+NO_TABLE_ENTRY = MON_APPL || '.' || MON_JOB || '.APPLJOB'
+
+INTERPRET "TABLE_APPLJOB =" MON_APPL"."MON_JOB".APPLJOB"
+
+/* SAY 'TABLE_APPLJOB IS' TABLE_APPLJOB   */
+/* SAY 'NO_TABLE_ENTRY IS' NO_TABLE_ENTRY */
+
+IF TABLE_APPLJOB = NO_TABLE_ENTRY THEN
+  DO
+    ESP_MESSAGE_1 = 'NO TABLE ENTRY FOUND FOR APPL' -
+                     MON_APPL 'JOB' MON_JOB
+    PERFORM_FAILIT   = 'YES'
+    SIGNAL ALL_DONE
+  END
+
+/***************************************************************/
+/*                 FIND THE RUN#                               */
+/***************************************************************/
+
+MON_RUN#    = CLANGVAR('!MNSUB#')
+/* SAY 'MON_RUN# =' MON_RUN# */
+
+/***************************************************************/
+/*           GET TABLE VALUES FOR THIS APPL                    */
+/***************************************************************/
+
+INTERPRET "TABLE_RETRYS =" MON_APPL"."MON_JOB".RETRYS"
+INTERPRET "TABLE_WAIT   =" MON_APPL"."MON_JOB".WAIT"
+INTERPRET "TABLE_GIVEUP =" MON_APPL"."MON_JOB".GIVEUP"
+INTERPRET "TABLE_ACTION =" MON_APPL"."MON_JOB"."MON_MXRC
+
+/* SAY 'TABLE_APPLJOB IS' TABLE_APPLJOB */
+/* SAY 'TABLE_RETRYS IS' TABLE_RETRYS   */
+/* SAY 'TABLE_WAIT IS' TABLE_WAIT       */
+/* SAY 'TABLE_GIVEUP IS' TABLE_GIVEUP   */
+/* SAY 'TABLE_ACTION IS' TABLE_ACTION   */
+
+/* IF THE MXRC IS NOT IN THE TABLE FOR THIS APPL, */
+/*   USE THE 'OTHER' ACTION FOR THIS APPL         */
+
+IF TABLE_ACTION = 'COMPIT' |,
+   TABLE_ACTION = 'FAILIT' |,
+   TABLE_ACTION = 'NOACTION' |,
+   TABLE_ACTION = 'POSTTASK' |,
+   TABLE_ACTION = 'RERUNIT' THEN
+  DO
+    NOP
+  END
+ELSE
+  DO
+    INTERPRET "TABLE_ACTION =" MON_APPL"."MON_JOB".OTHER"
+  END
+
+SELECT
+  WHEN TABLE_ACTION = 'COMPIT' THEN
+    PERFORM_COMPIT   = 'YES'
+  WHEN TABLE_ACTION = 'FAILIT' THEN
+    PERFORM_FAILIT   = 'YES'
+  WHEN TABLE_ACTION = 'NOACTION' THEN
+    PERFORM_NOACTION = 'YES'
+  WHEN TABLE_ACTION = 'POSTTASK' THEN
+    PERFORM_POSTTASK = 'YES'
+  WHEN TABLE_ACTION = 'RERUNIT' THEN
+    DO
+      IF MON_RUN# <= TABLE_RETRYS THEN
+        DO
+        /* RERUNS WITHIN LIMIT, SO RERUN IT */
+          NEW_RUN# = MON_RUN# + 1
+          ESP_MESSAGE_1 = 'RERUNNING APPL' -
+                           MON_APPL 'JOB' MON_JOB
+          ESP_MESSAGE_2 = 'THIS WILL BE RUN#' NEW_RUN#
+          PERFORM_RERUNIT  = 'YES'
+          PERFORM_WAIT = TABLE_WAIT
+        END
+      ELSE
+        DO
+        /* RERUN EXCEED LIMIT, SO GIVEUP */
+          SELECT
+            WHEN TABLE_GIVEUP = 'COMPIT' THEN
+              DO
+                ESP_MESSAGE_1 = 'RERUN LIMIT EXCEEDED FOR APPL' -
+                                 MON_APPL 'JOB' MON_JOB
+                ESP_MESSAGE_2 = 'COMPLETING APPL' -
+                                 MON_APPL 'JOB' MON_JOB
+                PERFORM_COMPIT   = 'YES'
+              END
+            WHEN TABLE_GIVEUP = 'FAILIT' THEN
+              DO
+                ESP_MESSAGE_1 = 'RERUN LIMIT EXCEEDED FOR APPL' -
+                                 MON_APPL 'JOB' MON_JOB
+                ESP_MESSAGE_2 = 'FAILING APPL' -
+                                 MON_APPL 'JOB' MON_JOB
+                PERFORM_FAILIT   = 'YES'
+              END
+            OTHERWISE
+              DO
+                ESP_MESSAGE_1 = 'INVALID GIVEUP VALUE FOR APPL' -
+                                 MON_APPL 'JOB' MON_JOB
+                ESP_MESSAGE_2 = 'THE INVALID VALUE IS' TABLE_GIVEUP
+                PERFORM_FAILIT   = 'YES'
+                SIGNAL ALL_DONE
+              END
+            END
+        END
+    END
+  OTHERWISE
+    DO
+    /* BAD TABLE_ACTION FOUND */
+      ESP_MESSAGE_1 = 'INVALID TABLE ACTION FOUND FOR APPL' -
+                       MON_APPL
+      ESP_MESSAGE_2 = 'THE INVALID VALUE IS' TABLE_ACTION
+    END
+  END
+
+ALL_DONE:
+
+"PERFORM_COMPIT='"PERFORM_COMPIT"'"
+"PERFORM_FAILIT='"PERFORM_FAILIT"'"
+"PERFORM_NOACTION='"PERFORM_NOACTION"'"
+"PERFORM_POSTTASK='"PERFORM_POSTTASK"'"
+"PERFORM_RERUNIT='"PERFORM_RERUNIT"'"
+"PERFORM_WAIT='"PERFORM_WAIT"'"
+"ESP_MESSAGE_1='"ESP_MESSAGE_1"'"
+"ESP_MESSAGE_2='"ESP_MESSAGE_2"'"
+
+REXXOFF
+
+IF PERFORM_FAILIT = 'YES' THEN -
+  DO
+    JOB SWFAILIT.!MNAPPL LINK PROCESS
+      ESP AJ SWFAILIT.!MNFULLNAME INSERT APPL(!MNAPPL..!MNAPPLGEN) -
+             DATASET(FTRF.PRDJOBS) MEMBER(SWFAILIT)
+      RUN NOW
+    ENDJOB
+  ENDDO
+
+IF PERFORM_POSTTASK = 'YES' THEN -
+  DO
+    JOB POSTTASK.!MNAPPL LINK PROCESS
+      ESP AJ TASK.!MNFULLNAME APPL(!MNAPPL..!MNAPPLGEN) COMPLETE
+      RUN NOW
+    ENDJOB
+  ENDDO
+
+IF PERFORM_COMPIT = 'YES' THEN -
+  DO
+    JOB COMPIT.!MNAPPL LINK PROCESS
+      ESP AJ ALL APPL(!MNAPPL..!MNAPPLGEN) COMPLETE
+      RUN NOW
+    ENDJOB
+  ENDDO
+
+IF PERFORM_RERUNIT = 'YES' THEN -
+  DO
+    JOB RERUNIT.!MNAPPL LINK PROCESS
+      EARLYSUB NOW PLUS !PERFORM_WAIT MINUTES
+      ESP AJ !MNFULLNAME RESUBMIT APPL(!MNAPPL..!MNAPPLGEN)
+      RUN NOW
+    ENDJOB
+  ENDDO
+
+IF ESP_MESSAGE_1 NE 'NONE' THEN -
+  SEND 'CF04-!ESP_MESSAGE_1'
+IF ESP_MESSAGE_2 NE 'NONE' THEN -
+  SEND 'CF04-!ESP_MESSAGE_2'
+

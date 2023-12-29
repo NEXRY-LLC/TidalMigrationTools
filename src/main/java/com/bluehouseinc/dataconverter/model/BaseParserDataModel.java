@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 
 import com.bluehouseinc.dataconverter.model.impl.BaseCsvJobObject;
 import com.bluehouseinc.dataconverter.parsers.IParserModel;
+import com.bluehouseinc.dataconverter.parsers.esp.model.EspAbstractJob;
 import com.bluehouseinc.dataconverter.util.ObjectUtils;
 import com.bluehouseinc.tidal.api.exceptions.TidalException;
 import com.bluehouseinc.transform.ITransformer;
@@ -41,6 +42,9 @@ public abstract class BaseParserDataModel<E extends BaseJobOrGroupObject, P exte
 
 	@Override
 	public TidalDataModel convertToDomainDataModel() {
+		// We do not want empty groups to be included.
+
+		this.doProcessEmptyGroupLogic();
 
 		if (this.variableProcessor != null) {
 
@@ -85,7 +89,7 @@ public abstract class BaseParserDataModel<E extends BaseJobOrGroupObject, P exte
 			long jobDependencyProcessingTime = (endTime - startTime) / 1000; // debugging
 			log.info("doProcessJobDependency Time={} seconds", jobDependencyProcessingTime); // debugging
 		}
-		
+
 		return this.getTidal();
 	}
 
@@ -210,8 +214,46 @@ public abstract class BaseParserDataModel<E extends BaseJobOrGroupObject, P exte
 		return ObjectUtils.toFlatStream(this.getDataObjects()).filter(f -> f.getId() == id).findAny().orElse(null);
 	}
 
+	@SuppressWarnings("unchecked")
 	public <T extends E> List<T> getObjectsByType(Class<T> type) {
 		return (List<T>) ObjectUtils.toFlatStream(this.getDataObjects()).filter(f -> type.isInstance(f)).collect(Collectors.toList());
 	}
 
+	protected void doProcessEmptyGroupLogic() {
+		if (getConfigeProvider().isSkipEmptyGroups()) {
+			int cnt = ObjectUtils.toFlatStream(this.getDataObjects()).collect(Collectors.toList()).size();
+
+			log.info("tidal.skip.empty.groupsr=true List Size{}", cnt); // debugging
+			List<E> cleaned = new ArrayList<>();
+
+			for (E obj : this.dataObjects) {
+				List<E>  tmp = doProcessEmptyGroupData(obj);
+				cleaned.addAll(tmp);
+			}
+			this.dataObjects.clear();
+			this.dataObjects.addAll(cleaned);
+			
+			cnt = ObjectUtils.toFlatStream(this.getDataObjects()).collect(Collectors.toList()).size();
+			log.info("tidal.skip.empty.groupsr=true List New Size{}", cnt); // debugging
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	private List<E> doProcessEmptyGroupData(E obj) {
+		List<E> cleaned = new ArrayList<>();
+
+		if (obj.isGroup()) {
+			if (obj.getChildren().isEmpty()) {
+				// Do nothing , we are skipping this one.
+				log.debug("tidal.skip.empty.groupsr=true Skipping group {} , has no children", obj.getFullPath()); // debugging
+			} else {
+				cleaned.add(obj);
+				obj.getChildren().forEach(c -> doProcessEmptyGroupData((E) c));
+			}
+		} else {
+			cleaned.add(obj);
+		}
+
+		return cleaned;
+	}
 }

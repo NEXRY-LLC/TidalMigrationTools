@@ -1,0 +1,39 @@
+/**********************************************************************/
+/*08/12/2016 -JFC- CREATED                                            */
+/*THESE DATES REPRESENT THE CFNA CYCLE DATES THAT ARE DELAYED BY ONE  */
+/*OR MORE DAYS, AS OPPOSED TO THE NORMAL 'TODAY'                      */
+/**********************************************************************/
+/*THESE ARE NOT "RUN" DATES                                           */
+/*-THESE ARE DATES NEEDED TO PASS ALONG TO THE LINUX JOBS FOR -       */
+/*--POSTING TRANSACTIONS AND BALANCE AGE.                             */
+/*--THESE ARE "RUN-AS-DATES" AND NOT RUN DATES                        */
+/**********************************************************************/
+/*DO NOT CHANGE ANY OF THE 'IF', 'AND', 'OR' STATEMENTS - JUST DATES  */
+/**********************************************************************/
+/*GENTIME DATES FOR 'TODAY LESS 1 DAY                                 */
+/*SPECIAL DATES FOR THE YEAR WHEN CYCLE IS DELAYED ONE DAY            */
+/*APPLS CFMCYC05 - CFMCYC27 USE THESE DATES                           */
+/**********************************************************************/
+
+IF TODAY('JAN 25 2016') -
+OR TODAY('FEB 15 2016') -
+OR TODAY('FEB 22 2016') -
+OR TODAY('FEB 29 2016') -
+OR TODAY('MAR 07 2016') -
+OR TODAY('APR 25 2016') -
+OR TODAY('JUN 20 2016') -
+OR TODAY('JUN 27 2016') -
+OR TODAY('JUL 25 2016') -
+OR TODAY('AUG 15 2016') -
+OR TODAY('AUG 22 2016') -
+OR TODAY('AUG 29 2016') -
+OR TODAY('SEP 12 2016') -
+OR TODAY('OCT 10 2016') -
+OR TODAY('OCT 17 2016') -
+OR TODAY('NOV 07 2016') -
+OR TODAY('DEC 12 2016') -
+AND USER4 = '' THEN !USER4 = '!L2DYEAR-!L2DMM-!L2DDD'
+
+
+
+

@@ -1,0 +1,47 @@
+APPL CF05
+
+JOB_ID = 'DUMMY'
+
+REXXON GEN PROC
+
+X = TRAPOUT('LINE.')
+  "ESP WOBSF APPL(CFTBAOP3."!MNAPPLGEN") JOB("!MNJOB")"
+X = TRAPOUT('OFF')
+
+/*********************************************************/
+/* DISPLAY THE SPOOL                                     */
+/*********************************************************/
+
+SAY 'LINE.0 IS' LINE.0
+
+DO I = 1 TO LINE.0
+ SAY LINE.I
+END
+
+/*********************************************************/
+/* GET THE FIRST WORD IN THE LAST LINE                  */
+/*********************************************************/
+
+J = LINE.0
+LAST_LINE = LINE.J
+
+JOB_ID = WORD(LAST_LINE,1)
+
+SAY '+++++ THE MAGIC NUMBER IS' JOB_ID '+++++'
+
+"JOB_ID='"JOB_ID"'"
+
+REXXOFF
+
+/*********************************************************/
+/* CHECK CC AND CONTINUE OR END                          */
+/* TRIGGER AN APPL AND PASS IT THE MAGIC NUMBER          */
+/*********************************************************/
+
+IF (!MNAPPL EQ 'CFTBAOP3' AND -
+    !MNFULLNAME EQ 'CALLREST' AND -
+    !MNRC EQ '0') THEN -
+  DO
+    ESP TR CF01.CFTGET03 USER1(!JOB_ID)
+  ENDDO
+

@@ -1,0 +1,112 @@
+APPL MMW16T WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/*********************************************************************/
+/*INT-412 Post MRP Reservations
+/*05/16/2019 -JFC- CLEANED UP PROC - ADDED LIE - NO OTHER CHANGES
+/*********************************************************************/
+
+NOTIFY FAILURE ABEND ALERT(REMD)
+
+
+JOB LIS.!ESPAPPL LINK PROCESS
+  RUN TODAY
+  RELEASE ADD(SAPRESERVATIONSBAT)
+ENDJOB
+
+DATA_OBJECT PARMSET.!ESPAPPL
+   /*Create a timestamp in hhmmMMDDYY format*/
+   SETVAR TMSTMP='!ESPSHH.:!ESPSMN.,!ESPSMM./!ESPSDD./!ESPSYY'
+   SETVAR PID=''
+   SETVAR STMPTM='!ESPSMM./!ESPSDD./!ESPSYY.,!ESPSHH.:!ESPSMN'
+ENDJOB
+
+NT_JOB SAPRESERVATIONSBAT
+    AGENT CYBA_CDC1AKFIS
+    USER maestro
+    CMDNAME D:\dts_run\BatchFiles\SAPReservations\SAPReservations.bat
+    ARGS
+    RUN TODAY
+    RELEASE ADD(ZMMIMI26CD)
+ENDJOB
+
+JOB SETPID.!ESPAPPL LINK PROCESS
+   /*get the next PID number from the ConnectDirect*/
+   /*Process ID table (CDPROD).  Save the value into*/
+   /*the applications DataObject for use by the C:D*/
+   /*job and the CDSTAT job (if needed).*/
+   VINCR (PID) TABLE(CDPROD) CLANG
+   VGET  (PID) TABLE(CDPROD) CLANG
+   ESP MGRMSG * . . . PARMSET.!ESPAPPL/!ESPAPPL..!ESPAPGEN/MAIN +
+   ACTION SET PID(!PID)
+   RUN TODAY
+   RELEASE ADD(ZMMIMI26CD)
+ENDJOB
+
+UNIX_JOB ZMMIMI26CD
+    AGENT CYBA_ISBFP3
+    EARLYSUB REALNOW PLUS 20 SECONDS
+    PID= WOBDATA('PARMSET.!ESPAPPL','PID')
+    TMSTMP= WOBDATA('PARMSET.!ESPAPPL','TMSTMP')
+    SCRIPTNAME /apps/condir/bfsbin/submitcd.sh
+    ARGS zmmimi26.cd 5 !PID !TMSTMP
+    RESOURCE ADD(1,ISBFP3CD)
+    USER cdprod
+    RUN TODAY
+    RELEASE ADD(CDSTAT.ZMMIMI26(a))
+    RELEASE ADD(ZMMIMI26_MRP_RESERVATIONS_POST)
+ENDJOB
+
+AIX_JOB CDSTAT.ZMMIMI26     CONDITIONAL
+   AGENT CYBA_ISBFP3
+   /*This job only runs if the C:D job does not end with*/
+   /*a EXITCODE of 0.  It can be rerun as often as*/
+   /*required to check the status of the C:D process.*/
+   /*When the C:D process finishes, complete the job*/
+   /*to release the successors.*/
+   USER cduser
+   STMPTM= WOBDATA('PARMSET.!ESPAPPL','STMPTM')
+   PID= WOBDATA('PARMSET.!ESPAPPL','PID')
+   CMDNAME /apps/condir/bfsbin/cdstat.sh
+   ARGS !STMPTM  j!PID
+   RUN TODAY
+ENDJOB
+
+SAP_JOB ZMMIMI26_MRP_RESERVATIONS_POST
+    AGENT CYBB_BFT030
+    SAPJOBNAME ZMMIMI26_MRP_RESERVATIONS_POST
+    SAPUSER SAPADM
+    SAPJOBCLASS C
+    ABAPNAME ZMMIMI26
+    VARIANT PROD_F191
+    LANGUAGE E
+    PRINTDEST LP01
+    PRINTCOPIES 001
+    PRINTIMMED YES
+    EXPIRATION 8
+    COLUMNS 170
+    BANNER D
+    RECIPIENT MANY
+    ARCMODE PRINT
+    RUN TODAY
+    RELEASE ADD(ARZMMIMI26_IID_RESERVATIONS)
+ENDJOB
+
+UNIX_JOB ARZMMIMI26_IID_RESERVATIONS
+    AGENT CYBA_ISBFP3
+    USER bfpadm
+    SCRIPTNAME /local/bin/arcfile.sh
+    ARGS interfaces/input/datain/zmmimi26_iid_reservations.txt W
+    RUN TODAY
+    RELEASE ADD(LIE.!ESPAPPL)
+ENDJOB
+
+AIX_JOB LIE.!ESPAPPL
+   AGENT CYBA_ISBFP3
+   USER bfpadm
+   COMMAND /bin/sleep
+   ARGS 3
+   RUN TODAY
+ENDJOB
+

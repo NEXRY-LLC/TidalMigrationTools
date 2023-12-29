@@ -1,0 +1,25 @@
+REXXON GEN
+    X=TRAPOUT('LINE.')
+    "ESPNOMSG LAP TESTAPPL.0"
+    X=TRAPOUT('OFF')
+    STATUS=SUBWORD(LINE.1,5)
+    IF STATUS='' THEN "QUIT"
+REXXOFF
+APPL TESTAPPL WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/*********************************************************************/
+/*    THIS IS A TEST OF THE ESP SCHEDULING SYSTEM                    */
+/*********************************************************************/
+/* - TESTING FILE READING JOBS                                       */
+/*********************************************************************/
+
+NOTIFY FAILURE ABEND OVERDUE MAILBOX(SCHEDULERS)
+TAG TEST
+
+JOB TESTJOB1 LINK PROCESS
+  RUN TODAY
+  RELDELAY 20
+ENDJOB
+

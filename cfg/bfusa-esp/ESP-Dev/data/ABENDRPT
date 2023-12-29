@@ -1,0 +1,16 @@
+APPL ABENDRPT WAIT NOPOST_WHILE_WAITING
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/**********************************************************************/
+/* TESTING IN THIS APPL:                                              */
+/* - TAGS                                                             */
+/* - RUN STATEMENTS USING THE PARAMETERS                              */
+/* - NOTIFY JOB USING EVENT AND THE 4 PARAMETERS                      */
+/**********************************************************************/
+
+/*NOTIFY END MAILBOX(OPSTEST)
+
+JOB ABENDRPT
+  RUN DAILY
+ENDJOB

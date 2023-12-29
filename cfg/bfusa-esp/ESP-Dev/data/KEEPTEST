@@ -1,0 +1,15 @@
+APPL KEEPTEST
+
+INVOKE 'SWS.ESP.APPL.TESTLIB(#DISTRIB)'
+
+/*********************************************************************/
+/* KEEPTEST APPL IS USED TO RUN MF TEST JOBS                         */
+/*********************************************************************/
+
+CCCHK RC(1:4095) FAIL CONTINUE
+
+JOB KEEPTEST LINK
+  RUN DAILY
+  DELAYSUB 5:59
+ENDJOB
+

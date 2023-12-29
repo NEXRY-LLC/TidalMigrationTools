@@ -1,0 +1,11 @@
+APPL RKPTESTA
+
+/* to test AS400 communications  */
+/* run the following appls:      */
+/*                               */
+/*     AK01.ROBOTAKD             */
+/*     AK01.ROBOTAKN             */
+/*     DM01.ROBOTDM              */
+/*     LV01.ROBOTLVD             */
+/*     WN01.ROBOTWN              */
+

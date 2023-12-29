@@ -40,7 +40,7 @@ public class EspJobGroup extends EspAbstractJob {
 
 	@Override
 	public boolean isGroup() {
-		return !this.children.isEmpty();
+		return true;
 	}
 
 	@Override

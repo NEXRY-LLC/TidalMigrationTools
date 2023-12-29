@@ -1,0 +1,55 @@
+ APPL NET2STER
+
+ JOB LIS.NET2STER LINK PROCESS
+    RUN DAILY EXCEPT SUN
+    DELAYSUB 05.30
+    RELEASE (FTP_USRPRF_2STERPROD)
+ ENDJOB
+
+ JOB LIE.NET2STER LINK PROCESS
+    RUN DAILY EXCEPT SUN
+ ENDJOB
+
+ LINUX_JOB FTP_USRPRF_2STERPROD
+    AGENT CYBA_PGP2AKFIS
+    SCRIPTNAME /usr/local/scripts/sendftp.sh
+    RUN DAILY EXCEPT SUN
+    USER ceadmin
+    ARGS user_preference_*.dat transfers.bfentirenet.com EXHRSAP2 +
+XngwVPDN /
+    RELEASE (FTP_GRP_2STERPROD)
+ ENDJOB
+
+ LINUX_JOB FTP_USR_2STERPROD
+    AGENT CYBA_PGP2AKFIS
+    SCRIPTNAME /usr/local/scripts/sendftp.sh
+    RUN DAILY EXCEPT SUN
+    USER ceadmin
+    ARGS user_*.dat transfers.bfentirenet.com EXHRSAP XngwVPDN /
+    RELEASE (FTP_HDR_2STERPROD)
+ ENDJOB
+
+ LINUX_JOB FTP_GRP_2STERPROD
+    AGENT CYBA_PGP2AKFIS
+    SCRIPTNAME /usr/local/scripts/sendftp.sh
+    RUN DAILY EXCEPT SUN
+    USER ceadmin
+    ARGS groups_*.dat transfers.bfentirenet.com EXHRSAP XngwVPDN /
+    RELEASE (FTP_USR_2STERPROD)
+ ENDJOB
+
+ LINUX_JOB FTP_HDR_2STERPROD
+    AGENT CYBA_PGP2AKFIS
+    SCRIPTNAME /usr/local/scripts/sendftp.sh
+    USER ceadmin
+    ARGS Hrdatafeed.txt transfers.bfentirenet.com HRBCDTVL d7c6dXr /
+    RELEASE (LIE.NET2STER)
+    INTEGER DAYS1
+    DAYS1 = DAYS_FROM('2009.005')
+    IF DAYS1 // 14 * 14 = DAYS1 THEN DO
+    RUN TODAY
+    ENDDO
+    DELAYSUB 19.30
+ ENDJOB
+
+

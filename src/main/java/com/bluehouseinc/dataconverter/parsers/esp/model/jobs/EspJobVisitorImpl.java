@@ -527,7 +527,7 @@ public class EspJobVisitorImpl implements EspJobVisitor {
 				
 				// This is our duoutMaxRuntime
 				espJob.setDueoutMaxrun(maxruntime);
-				log.info("processDueOutLogic() Job[" + espJob.getFullPath() + "] setting max run to  [" + maxruntime + "]");
+				log.debug("processDueOutLogic() Job[" + espJob.getFullPath() + "] setting max run to  [" + maxruntime + "]");
 
 			} else {
 				log.error("processDueOutLogic() Job[" + espJob.getFullPath() + "] unable to parse data [" + data + "]");

@@ -1,0 +1,109 @@
+APPL JCTEST06 WAIT NOPOST_WHILE_WAITING
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/*****************************************************/
+/* THIS IS A TEST OF THE ESP SCHEDULING SYSTEM       */
+/*****************************************************/
+/* - JUST TESTING ALERT RERUNS USING TAGS  ***********/
+/* - OVERDUE STATEMENTS USING MAXRUNTIMES  ***********/
+/*****************************************************/
+
+NOTIFY FAILURE ABEND MAILBOX(SCHEDULERS)
+TAG TEST
+
+S201 = 'YESTERDAY'
+S202 = 'YESTERDAY'
+S203 = 'YESTERDAY'
+S204 = 'YESTERDAY'
+S205 = 'YESTERDAY'
+S206 = 'YESTERDAY'
+IF !USER2 = 201 THEN S201 = 'TODAY'
+IF !USER2 = 202 THEN S202 = 'TODAY'
+IF !USER2 = 203 THEN S203 = 'TODAY'
+IF !USER2 = 204 THEN S204 = 'TODAY'
+IF !USER2 = 205 THEN S205 = 'TODAY'
+IF !USER2 = 206 THEN S206 = 'TODAY'
+
+/*********************************************************************/
+/*********************************************************************/
+/* APPLICATION 1 - ENTER 201 IN PARAMETER 2 FOR THIS TEMPLATE        */
+/*********************************************************************/
+/*********************************************************************/
+
+JOB SWESPJC2
+   TAG 'RUN#!ESPAPSUB#'
+  RUN !S201
+  MAXRUNTIME=1
+  CCCHK RC(1:4095) FAIL CONTINUE
+  /*RELEASE ADD(TASK.SWESPJC2) /*don't think this is needed*/
+ENDJOB
+
+JOB REEXEC01 TASK
+  RUN !S201
+  PREREQ (SWESPJC2) COND(RC(04))
+  ESP AJ !ESPAPPL RESUBMIT JOBNAME(SWESPJC2)
+  REEXEC IN(1) MAXIMUM(1)
+ENDJOB
+
+JOB CMPLTC01 TASK
+  RUN !S201
+  PREREQ (REEXEC01) COND(RC(00))
+  ESP AJ COMPLETE APPL(!ESPAPPL.!ESPAPGEN)
+ENDJOB
+
+JOB TASK.SWESPJC2 TASK /*don't think this is needed*/
+/*  RUN !S201
+ENDJOB
+
+/*********************************************************************/
+/*********************************************************************/
+/* APPLICATION 2 - ENTER 202 IN PARAMETER 2 FOR THIS TEMPLATE        */
+/*********************************************************************/
+/*********************************************************************/
+
+/*********************************************************************/
+/*********************************************************************/
+/* APPLICATION 3 - ENTER 203 IN PARAMETER 2 FOR THIS TEMPLATE        */
+/*********************************************************************/
+/*********************************************************************/
+
+NT_JOB SWESPJC3
+  TAG 'RUN#!ESPAPSUB#'
+  AGENT CYBA_PPIWPROD
+  CMDNAME X:\cmd_scripts\LinkedInEnd.cmd
+  ARGS
+  USER maestro
+  EXITCODE 0 fail
+  RUN !S203
+/*if !mncond = 'fail' then REEXEC IN(1) MAXIMUM(1)
+  IF !MNCMPC = '00' THEN REEXEC IN(1) MAXIMUM(1)
+  RELEASE ADD(CMPLTC03)
+  RELEASE ADD(REEXEC03)
+  RELEASE ADD(TASK.SWESPJC3)
+ENDJOB
+
+JOB TASK.SWESPJC1 TASK
+  RUN !S203
+ENDJOB
+
+JOB CMPLTC03 TASK
+  RUN !S203
+  PREREQ (SWESPJC2NT) COND(RC(04))
+  ESP AJ COMPLETE APPL(!ESPAPPL.!ESPAPGEN)
+ENDJOB
+
+JOB REEXEC02 TASK
+  RUN !S203
+  PREREQ (SWESPJC2NT) COND(RC(00))
+  ESP AJ !ESPAPPL RESUBMIT JOBNAME(SWESPJC2)
+  REEXEC IN(1) MAXIMUM(1)
+ENDJOB
+
+/*********************************************************************/
+/*********************************************************************/
+/* APPLICATION 4 - ENTER 204 IN PARAMETER 2 FOR THIS TEMPLATE        */
+/*********************************************************************/
+/*********************************************************************/
+
+

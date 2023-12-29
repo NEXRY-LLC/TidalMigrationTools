@@ -1,0 +1,36 @@
+APPL IZQAUD01 WAIT
+NOTIFY ABEND FAILURE ALERT(REMD)
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+/**********************************************************************/
+/* 09/20/21 -VV- Created for report send via mail*/
+/**********************************************************************/
+/**********************************************************************/
+
+JOB LIS.IZQAUD01 LINK PROCESS
+   RUN DAILY
+   RELEASE (Z_AUD_FD01_RSUSR002)
+ENDJOB
+
+SAP_JOB Z_AUD_FD01_RSUSR002
+   AGENT SAP_IZQ100
+   SAPJOBNAME Z_AUD_FD01_RSUSR002
+   SAPJOBCLASS C
+   STARTMODE ASAP
+   ABAPNAME RSUSR002
+   VARIANT Z_AUD_FD01
+   STEPUSER CYBERM
+   LANGUAGE E
+   PRINTSPOOLNAME RSUSR002_CYB
+   PRINTNEWSPOOL YES
+   EXPIRATION 8
+   LINES 65
+   COLUMNS 190
+   PRINTFORMAT X_PAPER
+   RECIPIENT S_BC_CYBERM
+   SAPEMAILADDR 'velmuruganvimalaraja@contractor.bfusa.com'
+   ARCMODE PRINT
+   PRINTCOPIES 001
+   RUN DAILY
+ENDJOB
+
+

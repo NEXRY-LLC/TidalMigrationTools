@@ -1,0 +1,142 @@
+/* REXX */
+
+/*********************************************************/
+/* TEST TO TRY AND READ DATASET                          */
+/*********************************************************/
+
+/*********************************************************/
+/* ISSUE COMMAND                                         */
+/*********************************************************/
+
+/* TRAP OUTPUT FROM COMMAND                              */
+  X=OUTTRAP('TRAPIT.')
+  QUEUE WOBCMD APPL(JCTEST07.!MNAPPLGEN) JOB(CALLREST) COMMAND(WSF)
+  QUEUE 'END'
+  'ESP,SUBSYS(ESPM)'
+  X=OUTTRAP('OFF')
+
+  TRAPCOUNT=TRAPIT.0
+
+/*********************************************************/
+/* DISPLAY THE LAST LINE                              */
+/*********************************************************/
+
+/*  Z = LAST_ONE - 19                                    */
+
+/*  DO I = 1 TO 20                                       */
+/*    SAY DATA.Z                                         */
+/*    Z = Z + 1                                          */
+/*  END                                                  */
+
+/*********************************************************/
+/* DISPLAY ALL THE LINES                                 */
+/*********************************************************/
+
+DO Z = 1 TO LAST_ONE
+  SAY DATA.Z
+END
+
+/*********************************************************/
+/* NOW LOOK FOR THE 'job_id' MESSAGE                */
+/*********************************************************/
+
+X = LAST_ONE
+Y = LAST_ONE - 25   /* stop after 25 lines  */
+
+HOLD_EXIT_CODE = 0
+
+LOOP_1:
+
+/* Read backwards through the messages.                         */
+
+
+/* This should be the last scheduled event line.                */
+/* If not, issue an error message and set the return code to 4. */
+/* If it is, issue a "good" message.                            */
+
+FIND_IT = POS(' JOB_ID ',DATA.X)
+
+IF FIND_IT = 0
+  THEN
+    DO
+      BOX = '!'
+      MSG.0 = 8
+      MSG.1 = 'THE LAST SCHEDULED EVENT FROM THE ''LSCHED DATE'''
+      MSG.2 = 'COMMAND (AS SHOWN ABOVE) IS NOT ''SCAN EVENT1''.'
+      MSG.3 = ' '
+      MSG.4 = '1) LOCATE THE ''SCAN EVENT1'' ENTRY ABOVE.'
+      MSG.5 = '2) MAKE NOTE OF THE APPL OR APPLS LISTED'
+      MSG.6 = '   AFTER THE ''SCAN EVENT1'' ENTRY.'
+      MSG.7 = '3) ALERT THE SCHEDULER RESPONSIBLE FOR THE'
+      MSG.8 = '   APPLICATION(S) FOUND IN STEP 2 ABOVE.'
+      MSG.9 = '4) COMPLETE THE SWESPLSD JOB.'
+      HOLD_EXIT_CODE = 4
+      SIGNAL DONE_LOOKING
+    END
+  ELSE
+    DO
+      BOX = '+'
+      MSG.0 = 2
+      MSG.1 = 'JOB_ID = '
+      MSG.2 = 'THE OUTPUT IS SHOWN ABOVE.'
+    END
+
+DONE_LOOKING:
+
+/* Build a box for the message (good or bad) and put it out.     */
+
+CALL BUILD_BOX
+
+DO BB = 1 TO OUTMSG.0
+  SAY OUTMSG.BB
+END
+
+ALL_DONE:
+
+/*********************************************************/
+/* FINISH WITH APPROPRIATE RETURN CODE                   */
+/*********************************************************/
+
+EXIT HOLD_EXIT_CODE
+
+/*********************************************************/
+/* SUBROUTINES                                           */
+/*********************************************************/
+
+BUILD_BOX:
+
+/*********************************************************/
+/* BUILD A STANDARDIZED MESSAGE BOX                      */
+/*********************************************************/
+
+LMAX = 0
+
+DO LCHK = 1 TO MSG.0
+  L1 = LENGTH(MSG.LCHK)
+  IF L1 > LMAX THEN
+    LMAX = L1
+END
+
+IF LMAX = 0 THEN
+  DO
+    MSG.0 = 1
+    MSG.1 = 'NO MESSAGE PASSED'
+  END
+
+OM = 1
+OUTMSG.OM = '    ' || LEFT(BOX,LMAX + 4,BOX)
+
+DO IM = 1 TO MSG.0
+  OM = OM + 1
+  MSG.IM = LEFT(MSG.IM,LMAX)
+  OUTMSG.OM = '    ' || BOX || ' ' || MSG.IM|| ' ' || BOX
+  END
+
+OM = OM + 1
+OUTMSG.OM = OUTMSG.1
+OUTMSG.0 = OM
+
+IF BOX = '!' THEN
+  HOLD_EXIT_CODE = 4
+
+RETURN

@@ -1,0 +1,69 @@
+APPL SWESP9TS JOB_ANCESTOR_WAIT
+
+TAG 'BANDAG'
+
+NOTIFY FAILURE ABEND ALERT(REMD)
+
+/*   ENCPARM FORCE YES              */
+/*   ENCPARM IGNOREDS DDNAME(ROY9)  */
+/*   ENCPARM PREDICT DCB(NO)        */
+
+JCLLIB 'BANDAG.MVS.JCLLIB'
+COPYJCL 'SYS3.ESP.COPYLIB'
+TEMPLIB 'SYS3.ESP.TEMPLIB'
+DOCLIB 'SYS3.ESP.DOCLIB'
+
+IF !ESPAPSUB# > 1 THEN JCLLIB 'SYS3.ESP.COPYLIB'
+
+OPTIONS RESTARTSTEP
+
+/* IF !ESPAHH EQ '14' AND !ESPAMN EQ '35' THEN - */
+/* ESP AJ ALL COMPLETE APPL(SWESP9TS.0)          */
+
+/* INVOKE 'SWS.ESP.APPL.PROCLIB(#CHKDR)' CACHE */
+
+JOB SWESP9TS.THIS_IS_A_TEST_OF_A_LONG_NAME_FOR_ROY
+  RESOURCE ADD(1,BANDAG)
+  /* DOCMEM(ROYTEST)                    */
+  /* RESOURCE ADD(1,BF02)               */
+  /* CCCHK STEP(STEP3) RC(8) OK CONTINUE  */
+     CCCHK STEP(STEP3) RC(12) FAIL CONTINUE
+  /* CCCHK RC(1:4095) FAIL              */
+  /* CCCHK RC(12) FAIL                  */
+  /* NOTIFY JOBEND MAILBOX(RKPREECE1)   */
+  /* NOTIFY JOBSTART MAILBOX(RKPREECE2) */
+  /* NOTIFY JOBSTART USER(BS07579)      */
+  /* NOTIFY FAILURE MAILBOX(RKPREECE1)  */
+  /* NOTIFY FAILURE USER(BS07579)       */
+  /* NOTIFY FAILURE ABEND ALERT(REMX)   */
+  /* NOTIFY JOBEND ALERT(SW03)          */
+  /*   NOTIFY JOBEND ALERT(PP03)        */
+  TAG 'SWTEST RUN#!ESPAPSUB#'
+  RUN ANY
+  /* RELEASE ADD(SWESP5TS)              */
+ENDJOB
+
+/*  INVOKE 'BS07579.PDS.CNTL(RUNSW)'   */
+
+/*  JOB SWESP5TS                                                  */
+/*    DELAYSUB NOW PLUS 1 MINUTE                                  */
+    /*   IF RUN_SWITCH = 'YES' THEN  */
+/*    DO                                                          */
+/*      RUN ANY                                                   */
+/*    ENDDO                                                       */
+/*  ENDJOB                                                        */
+/*                                                                */
+/*  APPLEND SWESPTST                                              */
+/*    IF !ESPAHH GE 09 AND !ESPAMN GE 33 THEN DO                  */
+/*      ESP APPLJOB ALL APPL(!ESPAPPL..!ESPAPGEN) COMPLETE        */
+/*    ENDDO                                                       */
+/*    ELSE ESP TRIGGER !ESPEVENT ADD                              */
+/*  ENDJOB                                                        */
+/*                                                                */
+/*  DO_IT = 'N'                                                   */
+/*                                                                */
+/*  JOB SWESP6TS                                                  */
+/*      IF TODAY('TUE') AND  ESPSHH GE 08 THEN DO_IT = 'Y'        */
+/*      IF TODAY('NOT TUE') AND ESPSHH GE 09 THEN DO_IT = 'Y'     */
+/*      IF DO_IT EQ 'Y' THEN RUN NOW                              */
+/*  ENDJOB                                                        */

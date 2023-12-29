@@ -10,6 +10,7 @@ public abstract class AbstractConfigProvider {
 
 	private ConfigurationProvider provider;
 	private String SKIPDEPS = "tidal.skipdeps";
+	private String SKIPEMPTYGROUPS = "tidal.skip.empty.groups";
 	private String APPEND_JOB_TYPE = "tidal.agent.appendjobtype";
 	private String TIDAL_CONTYPE ="tidal.job.concurrenttype";
 	private String TIDAL_ADD_AGENTS_ON_IMPORT ="tidal.add.agents.on.import";
@@ -38,6 +39,11 @@ public abstract class AbstractConfigProvider {
 	
 	public boolean getTidalAddAgentsOnImport() {
 		String tf = this.getProvider().getConfigurations().getOrDefault(TIDAL_ADD_AGENTS_ON_IMPORT, "false");
+		return Boolean.valueOf(tf);
+	}
+	
+	public boolean isSkipEmptyGroups() {
+		String tf = this.getProvider().getConfigurations().getOrDefault(SKIPEMPTYGROUPS, "true");
 		return Boolean.valueOf(tf);
 	}
 	

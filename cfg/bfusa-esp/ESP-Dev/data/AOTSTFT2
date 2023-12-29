@@ -1,0 +1,14 @@
+APPL AOTSTFT2 WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/**********************************************************************/
+/*03/21/2018 -JFC= APPL TO TEST FILE TRANSFERS FROM STERLING INTEGRATOR
+/**********************************************************************/
+
+FILE_TRIGGER BOM1C_F191
+   AGENT CYBA_ISBFT
+   FILENAME /data/BFT/interfaces/input/datain/bom1c_f191.txt CREATE
+   RUN TODAY
+ENDJOB
+

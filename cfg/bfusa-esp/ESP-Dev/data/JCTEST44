@@ -1,0 +1,31 @@
+APPL JCTEST44 WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/*****************************************************/
+/*- isbft sleep
+/*****************************************************/
+
+TAG TEST
+
+
+JOB LIS.!ESPAPPL LINK PROCESS
+   RUN DAILY
+   RELEASE ADD(SLEEP.!ESPAPPL)
+ENDJOB
+
+AIX_JOB SLEEP.!ESPAPPL
+  AGENT CYBA_ISBFT
+  USER bftadm
+  COMMAND /bin/sleep
+  ARGS 3
+  RUN DAILY
+  RELEASE ADD(LIE.!ESPAPPL)
+ENDJOB
+
+JOB LIE.!ESPAPPL LINK PROCESS
+   RUN DAILY
+   DUEOUT EXEC NOW PLUS 4 HOURS
+ENDJOB
+
+

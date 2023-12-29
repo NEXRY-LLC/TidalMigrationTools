@@ -1,0 +1,18 @@
+APPL DGTEST07 WAIT NOPOST_WHILE_WAITING
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/*****************************************************/
+/*****************************************************/
+/*- TEST OF MVS JOB THAT WILL RETURN ANY CC FROM 0 - 16  */
+/*****************************************************/
+
+TAG TEST
+
+
+JOB DGTESTCC
+  DATASET 'FTRF.TSTJOBS'
+  CCCHK RC(1:4095) FAIL CONTINUE
+  RUN TODAY
+ENDJOB
+

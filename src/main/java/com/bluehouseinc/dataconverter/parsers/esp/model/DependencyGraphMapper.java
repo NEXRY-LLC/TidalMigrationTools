@@ -52,9 +52,11 @@ public class DependencyGraphMapper {
 		// This job must exists in the system
 		if (me == null) {
 			// log.error("Unable to locate job[" + esp.getFullPath() + "]");
-			throw new RuntimeException("Unable to locate job[" + esp.getFullPath() + "]");
+			throw new RuntimeException("DependencyGraphMapper - Unable to locate job[" + esp.getFullPath() + "]");
 		}
 
+		setupSleepDependency();
+		
 		doHandleExternalAppIDLogic(me, esp);
 
 		doHandlePrereq(me, esp);
@@ -84,12 +86,12 @@ public class DependencyGraphMapper {
 
 		if (foundDepjob != null) {
 			BaseCsvJobObject jobDependency = this.getDatamodel().findFirstJobByFullPath(foundDepjob.getFullPath());
-			log.debug("doHandlePrereq Registering Dependency for Job[" + me.getFullPath() + "] that depends on [" + jobDependency.getFullPath() + "]");
+			log.debug("DependencyGraphMapper.doHandlePrereq Registering Dependency for Job[" + me.getFullPath() + "] that depends on [" + jobDependency.getFullPath() + "]");
 			this.getDatamodel().addJobDependencyForJobCompletedNormal(me, jobDependency, null);
 
 			handleSleepjob(me, jobDependency);
 		} else {
-			log.debug("doHandlePrereq ERROR Unable to set Dependency for Job[" + me.getFullPath() + "] that depends on [" + depjobName + "]");
+			log.error("DependencyGraphMapper.doHandlePrereq ERROR Unable to set Dependency for Job[" + me.getFullPath() + "] that depends on [" + depjobName + "]");
 		}
 	}
 
@@ -125,7 +127,7 @@ public class DependencyGraphMapper {
 						BaseCsvJobObject dependsOnMeDep = this.getDatamodel().findFirstJobByFullPath(dependsOnMe.getFullPath());
 
 						if (dependsOnMeDep != null) {
-							log.debug("doHandleReleaseStatements Registering Dependency for Job[" + me.getFullPath() + "] This job depends on me [" + dependsOnMeDep.getFullPath() + "]");
+							log.debug("DependencyGraphMapper.doHandleReleaseStatements Registering Dependency for Job[" + me.getFullPath() + "] This job depends on me [" + dependsOnMeDep.getFullPath() + "]");
 
 							// We are assuming that if any data is listed its abnormal.
 							// Current examples are like this: RELEASE ADD(CDSTAT.BOM1_FOR_F191_CFSCD(A))
@@ -138,7 +140,7 @@ public class DependencyGraphMapper {
 							handleSleepjob(dependsOnMeDep, me);
 
 						} else {
-							log.debug("doHandlePrereq ERROR Unable to set Dependency for Job[" + me.getFullPath() + "] unable to locate [" + dependsOnMe.getFullPath() + "]");
+							log.error("DependencyGraphMapper.doHandlePrereq ERROR Unable to set Dependency for Job[" + me.getFullPath() + "] unable to locate [" + dependsOnMe.getFullPath() + "]");
 						}
 
 					});
@@ -172,7 +174,7 @@ public class DependencyGraphMapper {
 					EspAbstractJob foundjob = (EspAbstractJob) foundgroup.getChildren().stream().filter(c -> c.getName().equalsIgnoreCase(findme)).findFirst().orElse(null);
 					mydeps.add(foundjob);
 				} else {
-					log.debug("doHandleNotWithStatements ERROR Unable to set Dependency for Job[" + me.getFullPath() + "] unable to locate Job[" + lookfor + "] in group[" + ingroup + "]");
+					log.error("DependencyGraphMapper.doHandleNotWithStatements ERROR Unable to set Dependency for Job[" + me.getFullPath() + "] unable to locate Job[" + lookfor + "] in group[" + ingroup + "]");
 				}
 
 			} else if (lookfor.contains("-")) {
@@ -200,7 +202,7 @@ public class DependencyGraphMapper {
 				if (!matchingdata.isEmpty()) {
 					mydeps.addAll(matchingdata);
 				} else {
-					log.debug("doHandleNotWithStatements ERROR Unable to set Dependency for Job[" + me.getFullPath() + "] unable to locate Jobs starting with [" + startswith + "]");
+					log.error("DependencyGraphMapper.doHandleNotWithStatements ERROR Unable to set Dependency for Job[" + me.getFullPath() + "] unable to locate Jobs starting with [" + startswith + "]");
 				}
 			} else {
 
@@ -218,7 +220,7 @@ public class DependencyGraphMapper {
 				if (foundjob != null) {
 					mydeps.add(foundjob);
 				} else {
-					log.debug("doHandleNotWithStatements ERROR Unable to set Dependency for Job[" + me.getFullPath() + "] unable to locate [" + lookfor + "]");
+					log.error("DependencyGraphMapper.doHandleNotWithStatements ERROR Unable to set Dependency for Job[" + me.getFullPath() + "] unable to locate [" + lookfor + "]");
 				}
 
 			}
@@ -228,14 +230,14 @@ public class DependencyGraphMapper {
 				BaseCsvJobObject jobDependency = this.getDatamodel().findFirstJobByFullPath(mydep.getFullPath());
 
 				if (jobDependency != null) {
-					log.debug("doHandleNotWithStatements Registering Dependency for Job[" + me.getFullPath() + "] the ohter job must not be active [" + jobDependency.getFullPath() + "]");
+					log.debug("DependencyGraphMapper.doHandleNotWithStatements Registering Dependency for Job[" + me.getFullPath() + "] the ohter job must not be active [" + jobDependency.getFullPath() + "]");
 
 					this.getDatamodel().addJobDependencyForJob(me, jobDependency, DepLogic.MATCH, Operator.NOT_EQUAL, DependentJobStatus.ACTIVE, null);
 
 					handleSleepjob(me, jobDependency);
 
 				} else {
-					throw new TidalException("doHandleNotWithStatements ERROR Unable to set Dependency for Job[" + me.getFullPath() + "] unable to locate [" + mydep.getFullPath() + "]");
+					log.error("DependencyGraphMapper.doHandleNotWithStatements ERROR Unable to set Dependency for Job[" + me.getFullPath() + "] unable to locate [" + mydep.getFullPath() + "]");
 				}
 
 			});
@@ -266,14 +268,14 @@ public class DependencyGraphMapper {
 					// this.getTidal().addJobDependencyForJobCompletedNormal(me, jobDependency,
 					// null);
 					if (jobDependency != null) {
-						log.debug("doHandleAfterStatements Registering Dependency for Job[" + me.getFullPath() + "] this job must be completed [" + jobDependency.getFullPath() + "]");
+						log.debug("DependencyGraphMapper.doHandleAfterStatements Registering Dependency for Job[" + me.getFullPath() + "] this job must be completed [" + jobDependency.getFullPath() + "]");
 
 						this.getDatamodel().addJobDependencyForJob(jobDependency, me, DepLogic.MATCH, Operator.EQUAL, DependentJobStatus.COMPLETED, null);
 
 						handleSleepjob(jobDependency, me);
 
 					} else {
-						log.debug("doHandleAfterStatements ERROR Unable to set Dependency for Job[" + me.getFullPath() + "] unable to locate [" + matchingEspJob.getFullPath() + "]");
+						log.error("DependencyGraphMapper.doHandleAfterStatements ERROR Unable to set Dependency for Job[" + me.getFullPath() + "] unable to locate [" + matchingEspJob.getFullPath() + "]");
 					}
 				}
 			});
@@ -298,7 +300,7 @@ public class DependencyGraphMapper {
 				jobDependency = jobgroup;
 
 				if (jobDependency == null) {
-					log.info("doHandleExternalAppIDLogic Missing Group[" + externgroup + "] Reference for Job[" + me.getFullPath() + "]");
+					log.error("DependencyGraphMapper.doHandleExternalAppIDLogic Missing Group[" + externgroup + "] Reference for Job[" + me.getFullPath() + "]");
 					return;
 				}
 
@@ -310,7 +312,7 @@ public class DependencyGraphMapper {
 					if (jobdepingroup != null) {
 						jobDependency = jobdepingroup;
 					} else {
-						log.error("doHandleExternalAppIDLogic Missing Job[" + externgroup + "]  In Group Reference for Job[" + me.getFullPath() + "]");
+						log.error("DependencyGraphMapper.doHandleExternalAppIDLogic Missing Job[" + externgroup + "]  In Group Reference for Job[" + me.getFullPath() + "]");
 						return;
 					}
 
@@ -332,7 +334,7 @@ public class DependencyGraphMapper {
 					if (jobinagroup != null) {
 						jobDependency = jobinagroup;
 					} else {
-						log.error("doHandleExternalAppIDLogic Missing Job[" + jobinagroup + "] No APPID REF");
+						log.error("DependencyGraphMapper.doHandleExternalAppIDLogic Missing Job[" + jobinagroup + "] No APPID REF");
 						return;
 					}
 				}
@@ -343,7 +345,7 @@ public class DependencyGraphMapper {
 			// this.getTidal().addJobDependencyForJobCompletedNormal(me, jobDependency,
 			// null);
 			if (jobDependency != null) {
-				log.debug("doHandleAfterStatements Registering Dependency for Job[" + me.getFullPath() + "] this job must be completed [" + jobDependency.getFullPath() + "]");
+				log.debug("DependencyGraphMapper.doHandleAfterStatements Registering Dependency for Job[" + me.getFullPath() + "] this job must be completed [" + jobDependency.getFullPath() + "]");
 
 				this.getDatamodel().addJobDependencyForJob(me, jobDependency, DepLogic.MATCH, Operator.EQUAL, DependentJobStatus.COMPLETED_NORMAL, null);
 
@@ -370,9 +372,12 @@ public class DependencyGraphMapper {
 			BaseCsvJobObject sleepdepson = this.getDatamodel().findFirstJobByFullPath(sleepjob.getFullPath());
 
 			if (sleepdepson != null) {
-				log.debug("handleSleepjob Current Job[" + currentjob.getFullPath() + "] Depends on Target Job[" + targetjob.getFullPath() + "] Has a Dependency on RELDELAY Sleep Job[" + sleepdepson.getFullPath() + "]");
+				log.debug("DependencyGraphMapper.handleSleepjob Current Job[" + currentjob.getFullPath() + "] Depends on Target Job[" + targetjob.getFullPath() + "] Has a Dependency on RELDELAY Sleep Job[" + sleepdepson.getFullPath() + "]");
 
 				this.getDatamodel().addJobDependencyForJob(currentjob, sleepdepson, DepLogic.MATCH, Operator.EQUAL, DependentJobStatus.COMPLETED, null);
+
+			}else {
+				log.error("DependencyGraphMapper.handleSleepjob Sleep Job[" + sleepjob.getFullPath() + "] Depends on Target Job[" + targetjob.getFullPath() + "] Unable to locate Sleep Job");
 
 			}
 		}
@@ -391,7 +396,7 @@ public class DependencyGraphMapper {
 			BaseCsvJobObject keyjob = this.getDatamodel().findFirstJobByFullPath(espkey);
 			BaseCsvJobObject mysleepjob = this.getDatamodel().findFirstJobByFullPath(espsleep.getFullPath());
 
-			log.debug("setupSleepDependency Registering Dependency for RELDELAY Sleep Job[" + mysleepjob.getFullPath() + "] depends on [" + keyjob.getFullPath() + "]");
+			log.debug("DependencyGraphMapper.setupSleepDependency Registering Dependency for RELDELAY Sleep Job[" + mysleepjob.getFullPath() + "] depends on [" + keyjob.getFullPath() + "]");
 
 			this.getDatamodel().addJobDependencyForJob(mysleepjob, keyjob, DepLogic.MATCH, Operator.EQUAL, DependentJobStatus.COMPLETED, null);
 
@@ -410,9 +415,7 @@ public class DependencyGraphMapper {
 	 */
 	public static void registerSleepJobToMap(EspAbstractJob job, EspOSJOb sleepjob) {
 		sleepJobKeyMap.put(job.getFullPath(), sleepjob);
-
-		
-		log.debug("registerSleepJobToMap Registering RELDELAY Sleep Job[" + sleepjob.getFullPath() + "] for Job[" + job.getFullPath() + "]");
+		log.debug("DependencyGraphMapper.registerSleepJobToMap Registering RELDELAY Sleep Job[" + sleepjob.getFullPath() + "] for Job[" + job.getFullPath() + "]");
 
 	}
 

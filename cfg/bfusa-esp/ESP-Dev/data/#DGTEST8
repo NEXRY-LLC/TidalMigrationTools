@@ -1,0 +1,10 @@
+/********************************************/
+/* DATASET CONTAINING RUN DATES FOR TESTING */
+/* DATES ARE USED IN TEST APPL JCTEST03     */
+/********************************************/
+
+RUN OCT 12 2015
+RUN JUL 19 2017
+
+RUN TODAY
+

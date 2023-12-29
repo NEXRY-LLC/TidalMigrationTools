@@ -1,0 +1,25 @@
+APPL SFQTST01 WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/**********************************************************************/
+/* 08/30/2018 -JFC - CREATED PER INCXXXXXXXXXXXX
+/**********************************************************************/
+
+JOB LIS.!ESPAPPL LINK PROCESS
+  RUN TODAY
+  RELEASE ADD(HTTP_AS2_CHECK)
+ENDJOB
+
+LINUX_JOB HTTP_AS2_CHECK
+  AGENT SFGINT02P_LNX
+  USER siadmin
+  SCRIPTNAME /mnt/shared/scripts/HTTP_AS2_CHECK
+  RUN TODAY
+  RELEASE ADD(LIE.!ESPAPPL)
+ENDJOB
+
+JOB LIE.!ESPAPPL LINK PROCESS
+  RUN TODAY
+ENDJOB
+

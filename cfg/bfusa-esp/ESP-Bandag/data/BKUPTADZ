@@ -1,0 +1,16 @@
+APPL BKUPTADZ JOB_ANCESTOR_WAIT
+
+INVOKE 'BANDAG.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/**********************************************************************/
+/*1/19/2017-JFC-CHANGED JOB FROM RUN ANY TO RUN SUNDAY TO MATCH EVENT */
+/*1/19/2017-JFC-ADDED DELAYSUB AND SET EVENT BACK 2 HOURS             */
+/**********************************************************************/
+
+/* NOTIFY FAILURE ABEND ALERT(REMD)
+
+JOB BKUPTADZ
+  RUN SUN
+  DELAYSUB 15.00 CENTRAL
+ENDJOB
+

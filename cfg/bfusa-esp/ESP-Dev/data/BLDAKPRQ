@@ -1,0 +1,20 @@
+APPL BLDAKPRQ WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/*********************************************************************/
+/*11/07/2018 -JFC- CHANGED DUMMY ZOS TO LINK JOBS                    */
+/*********************************************************************/
+
+NOTIFY ABEND FAILURE ALERT(REMD)
+
+AIX_JOB TRANSFER_INVOICES_TO_PRINTSHOP
+   AGENT CYBA_ISBFQ
+   USER root
+   SCRIPTNAME /local/bin/prtshp_transfer.sh
+   ARGS BFQ INV
+   RUN NOW
+ENDJOB
+
+
+

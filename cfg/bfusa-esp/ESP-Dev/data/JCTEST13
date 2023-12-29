@@ -1,0 +1,51 @@
+APPL JCTEST13 WAIT NOPOST_WHILE_WAITING
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/*****************************************************/
+/* TESTING EMAIL AND CONSOLE MESSAGING JOBS          */
+/*****************************************************/
+
+/**********************************************************************/
+/* PASS NUMBER OF MINUTES TO SHUTDOWN USING USER1
+/* PARAMETER WHEN TRIGGERING EVENT
+/*
+/* SEND MESSAGE, DECREMENT TIME AND RE-TRIGGER EVENT IN
+/* 1 MINUTE IF TIME >= 0
+/*
+/**********************************************************************/
+
+/*INTEGER TIME
+/*TIME=USER1
+/*SEND 'SYSTEM COMING DOWN IN !TIME MINUTES' USER(TSO5964)
+/*OPER RESDEF ELAPSE SET AVAIL(!TIME)
+/*TIME=TIME-1
+/*IF TIME>=0 THEN ESP TRIGGER OPER.SHUTDOWN +
+/*USER1('!TIME') AT('REALNOW PLUS 1 MINUTE')
+
+/**********************************************************************/
+
+JOB COSTELLO.TEST1 LINK PROCESS REQUEST
+  RUN TODAY
+  RELEASE ADD(COSTELLO.TEST2)
+ENDJOB
+
+JOB COSTELLO.TEST2 LINK PROCESS
+  RUN TODAY
+  RELEASE ADD(JCEMAIL1)
+ENDJOB
+
+JOB JCEMAIL1
+  /*USER1 =
+  /*USRE2 = EMAIL ADDRESS
+  /*USER3 = SUBJECT
+  /*USER4 =
+  ECHO !USER1
+  ECHO !USER2
+  ECHO !USER3
+  ECHO !USER4
+  RUN TODAY
+ENDJOB
+
+
+

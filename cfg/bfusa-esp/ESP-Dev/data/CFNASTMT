@@ -1,0 +1,71 @@
+APPL CFNASTMT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/**********************************************************************/
+/*06/15/2017 -JFC- APPL BUILT FOR SENDING STATEMENT FILES             */
+/**********************************************************************/
+/**********************************************************************/
+VGET (devuser) TABLE(cfnavars) CLANG              /* Get the variable */
+VGET (devpswd) TABLE(cfnavars) CLANG             /* Get the variable */
+VGET (stguser) TABLE(cfnavars) CLANG              /* Get the variable */
+VGET (stgpswd2) TABLE(cfnavars) CLANG             /* Get the variable /*
+/**********************************************************************/
+/**********************************************************************/
+
+JOB CFNA_STATEMENT_FILE_TRANSFER_BEGIN LINK PROCESS
+   RUN DAILY
+   RELEASE ADD(CFNA_BAOP_STMT_TO_PRINT_01 HOLD)
+   RELEASE ADD(CFNA_STATEMENT_XML_FILE_GENERATION)
+ENDJOB
+
+FILE_TRIGGER FILE_EXISTS_ON_CFNA_FILXFER001
+   AGENT CFNA_FILXFER001
+   FILENAME '/home/ceadmin/statement_file_test.txt' CREATE
+ /*RUN DAILY
+   DUEOUT EXEC NOW PLUS 5 MIN
+   RELEASE ADD(CFNA_BAOP_STMT_TO_PRINT_01 HOLD)
+   RELEASE ADD(CFNA_STATEMENT_XML_FILE_GENERATION)
+ENDJOB
+
+LINUX_JOB CFNA_BAOP_STMT_TO_PRINT_01 HOLD
+   AGENT CFNA_FILXFER001
+   USER xferuser1
+   SCRIPTNAME /opt/CA/agent-scripts/baop/dev/xferFile.py
+   ARGS statementsConfig put
+   SHELL /usr/bin/python3
+   EXITCODE 0 SUCCESS
+   RUN DAILY
+   RELEASE ADD(CFNA_STATEMENT_FILE_TRANSFER_COMPLETE)
+ENDJOB
+
+LINUX_JOB CFNA_STATEMENT_XML_FILE_GENERATION hold
+   AGENT CFNA_FILXFER001
+   USER root
+   SCRIPTNAME /opt/CA/agent-scripts/baop/baop-wrapper-script.sh
+   ARGS --env=stg --service STATEMENT_XML_FILE_GENERATION+
+   --host baoplbs1-bp-div --port 80 +
+   --username !stguser --password !stgpswd2 --runAsDate !USER4
+   EXITCODE 0 SUCCESS
+   RUN DAILY
+   RELEASE ADD(CFNA_STATEMENT_FILE_TRANSFER_COMPLETE)
+ENDJOB
+
+JOB CFNA_STATEMENT_FILE_TRANSFER_COMPLETE LINK PROCESS
+   RUN DAILY
+ENDJOB
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

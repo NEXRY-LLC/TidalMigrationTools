@@ -1,0 +1,23 @@
+APPL CADELIVR WAIT
+
+INVOKE 'SWS.ESP.APPL.PROCLIB(#DISTRIB)'
+
+/*********************************************************************/
+/*04/27/2017 -JFC- NEW APPL CREATION                                 */
+/*********************************************************************/
+/*THIS APPL RUNS A JOB TO CREATE REPORTS IN CA DELIVER               */
+/* -TRIGGER THE EVENT WITH THE JOB NAME IN THE USER1 PARAMETER       */
+/*********************************************************************/
+
+NOTIFY FAILURE ABEND MAILBOX(SCHEDULERS)
+
+JOB CADELIVR
+  ECHO !USER1
+  CCCHK RC(1:4095) FAIL
+  RUN TODAY
+ENDJOB
+
+
+
+
+

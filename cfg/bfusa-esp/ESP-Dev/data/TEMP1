@@ -1,0 +1,40 @@
+JOB SETPID.!ESPAPPL LINK PROCESS
+   /*get the next PID number from the ConnectDirect*/
+   /*Process ID table (CDPROD).  Save the value into*/
+   /*the applications DataObject for use by the C:D*/
+   /*job and the CDSTAT job (if needed).*/
+   VINCR (PID) TABLE(CDPROD) CLANG
+   VGET  (PID) TABLE(CDPROD) CLANG
+   ESP MGRMSG * . . . PARMSET.!ESPAPPL/!ESPAPPL..!ESPAPGEN/MAIN +
+ACTION SET PID(!PID)
+   RUN TODAY
+   RELEASE ADD(ZFILMI09CD)
+ENDJOB
+
+UNIX_JOB ZFILMI09CD
+   AGENT CYBA_ISBFM2
+   PID= WOBDATA('PARMSET.!ESPAPPL','PID')
+   TMSTMP= WOBDATA('PARMSET.!ESPAPPL','TMSTMP')
+   SCRIPTNAME /apps/condir/bfsbin/submitcd.sh
+   ARGS zfilmi09.cd 5 !PID !TMSTMP
+   USER cdtest
+   RUN TODAY
+   RELDELAY 1
+   RELEASE ADD(CDSTAT.ZFILMI09CD(A))
+   RELEASE ADD(AR_ZFILMI09)
+ENDJOB
+
+AIX_JOB CDSTAT.ZFILMI09CD CONDITIONAL
+   AGENT CYBA_ISBFM2
+   /*This job only runs if the C:D job does not end with*/
+   /*a EXITCODE of 0.  It can be rerun as often as*/
+   /*required to check the status of the C:D process.*/
+   /*When the C:D process finishes, complete the job*/
+   /*to release the successors.*/
+   USER cduser
+   STMPTM= WOBDATA('PARMSET.!ESPAPPL','STMPTM')
+   PID= WOBDATA('PARMSET.!ESPAPPL','PID')
+   CMDNAME /apps/condir/bfsbin/cdstat.sh
+   ARGS !STMPTM  J!PID
+   RUN TODAY
+ENDJOB
