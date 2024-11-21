@@ -85,10 +85,10 @@ public class EspToTidalTransformer2 implements ITransformer<List<EspAbstractJob>
 			if (job.getName().contains("DB0469A.MON")) {
 				job.getName().toLowerCase();
 			}
+		}
 
-			if (job.getFullPath().endsWith("DB0469A.MON")) {
-				job.getName();
-			}
+		if (job.getName().equals("BSRO_FILE_HCM_EMP_ADW_COMPLETE")) {
+			job.getName();
 		}
 
 		if (job instanceof EspJobGroup) {
@@ -204,7 +204,6 @@ public class EspToTidalTransformer2 implements ITransformer<List<EspAbstractJob>
 			// starttimes = starttimes.replace(".", ":");
 			APIDateUtils.setRerunSameStartTimes(starttimes, out, datamodel, true);
 		}
-		
 
 	}
 
@@ -320,6 +319,12 @@ public class EspToTidalTransformer2 implements ITransformer<List<EspAbstractJob>
 		if (in.getName().contains("ZRV60SBAT_FINAL_2355")) {
 			in.getName();
 		}
+
+		// All SAP jobs must have a runtime user so lets just set it to the agent name as that is manditory too.
+		if (in.getSapUser() == null) {
+			in.setSapUser(in.getAgent());
+		}
+
 		String uppername = in.getName().toUpperCase();
 		out.setName(uppername); // Must be upper, if not already
 
@@ -410,6 +415,10 @@ public class EspToTidalTransformer2 implements ITransformer<List<EspAbstractJob>
 	}
 
 	private void processJob(EspFileTriggerJob in, CsvFileWatcherJob out) {
+
+		if (in.getName().equals("BSRO_FILE_HCM_EMP_ADW_COMPLETE")) {
+			in.getName();
+		}
 
 		String fn = in.getFileName().trim();
 		String data[] = fn.split(" ");
@@ -520,9 +529,9 @@ public class EspToTidalTransformer2 implements ITransformer<List<EspAbstractJob>
 		out.setNotes(String.join("\n", in.getNotesData()));
 
 		if (in.getDueout() != null) {
-			out.setEndTime(Integer.toString(in.getDueout())); 
+			out.setEndTime(Integer.toString(in.getDueout()));
 		}
-		
+
 		out.setMaxRunTime(in.getDueoutMaxrun());
 
 		if (!in.getTags().isEmpty()) {
@@ -552,36 +561,44 @@ public class EspToTidalTransformer2 implements ITransformer<List<EspAbstractJob>
 					}
 				}
 			});
-		}
-		/*
-		 * RUN DAILY NORUN 1st JAN DAILY EXCEPT 1st JAN
-		 */
 
-		if (noRunStatements != null && !in.getStatementObject().getEspNoRunStatements().isEmpty()) {
-			noRunStatements.forEach(noRunStatement -> {
-				String criteria = noRunStatement.getCriteria();
-				if (criteria != null) {
-					if (stringBuffer.toString().contains(criteria)) {
-						// Do nothing, its a duplicate
-					} else {
-						stringBuffer.append(" EXCEPT ").append(criteria);
+			// Cant have a NORUN without a RUN statement!!!
+			/*
+			 * RUN DAILY NORUN 1st JAN DAILY EXCEPT 1st JAN
+			 */
+
+			if (noRunStatements != null && !in.getStatementObject().getEspNoRunStatements().isEmpty()) {
+				noRunStatements.forEach(noRunStatement -> {
+					String criteria = noRunStatement.getCriteria();
+					if (criteria != null) {
+						if (stringBuffer.toString().contains(criteria)) {
+							// Do nothing, its a duplicate
+						} else {
+							stringBuffer.append(" EXCEPT ").append(criteria);
+						}
+
 					}
+				});
+			}
 
-				}
-			});
+			String calendarString = stringBuffer.toString();
+
+			if (calendarString.endsWith("-")) {
+				calendarString = calendarString.substring(0, calendarString.length() - 1);
+			}
+
+			// Per rules of ESP if there is no run statement then this is disabled or in TIDAL world , manual run.
+			if (StringUtils.isBlank(calendarString)) {
+				calendarString = "Daily"; // Set a default for all jobs.
+			}
+
+			this.datamodel.addCalendarToJobOrGroup(out, new CsvCalendar(calendarString));
+
+		} else {
+			// RUN Statement is commented out so add a ADHOC Calendar
+			this.datamodel.addCalendarToJobOrGroup(out, new CsvCalendar("AdHocCalender"));
 		}
 
-		String calendarString = stringBuffer.toString();
-
-		if (calendarString.endsWith("-")) {
-			calendarString = calendarString.substring(0, calendarString.length() - 1);
-		}
-
-		if (StringUtils.isBlank(calendarString)) {
-			calendarString = "Daily"; // Set a default for all jobs.
-		}
-
-		this.datamodel.addCalendarToJobOrGroup(out, new CsvCalendar(calendarString));
 	}
 
 	private void doProcessJobResources(EspAbstractJob espAbstractJob, BaseCsvJobObject tidalNewJob) {

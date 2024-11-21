@@ -1,0 +1,2311 @@
+
+
+/* ----------------- EMB_CAE_UPG_0100__Batch_Initiator ----------------- */ 
+
+insert_job: EMB_CAE_UPG_0100__Batch_Initiator   job_type: BOX 
+owner: batchprod.service@B73
+permission: 
+date_conditions: 1
+run_calendar: EMB_CAE.UPG_Special
+start_times: "09:55"
+alarm_if_fail: 1
+alarm_if_terminated: 1
+group: EMB_CAE_UPG
+application: BOX-NOTCOUNTED.H
+
+
+ /* ----------------- EMB_CAE_UPG_0100_010.Batch_Start ----------------- */ 
+
+ insert_job: EMB_CAE_UPG_0100_010.Batch_Start   job_type: CMD 
+ box_name: EMB_CAE_UPG_0100__Batch_Initiator
+ command: dir
+ machine: EMB_CAE.B73PRODBAT0015
+ owner: batchprod.service@B73
+ permission: 
+ date_conditions: 1
+ run_calendar: EMB_CAE.UPG_Special
+ start_times: "10:00"
+ description: "Holding this job will hold batch, but allow prebatch backups to run. To begin batch, take this job off hold, by selecting Off Hold from the drop down and pressing go. Please confirm that this job runs to success and batch jobs have begun running."
+ alarm_if_fail: 1
+ job_load: 2
+ priority: 50
+ alarm_if_terminated: 1
+ group: EMB_CAE_UPG
+ application: UTILITY-NOTCOUNTED.H
+ send_notification: F
+ notification_template: "STG1_ZAYO"
+ resources: (EMB_CAE_UPG.RC_BatchControl,QUANTITY=10,FREE=A)
+ notification_emailaddress_on_failure: Naga.Gella@cognizant.com
+ notification_emailaddress_on_failure: LakshmiPrasanna.Poturi@cognizant.com
+ notification_emailaddress_on_failure: Kaviya.K2@cognizant.com
+ notification_emailaddress_on_failure: Deepak.Jandhyala@cognizant.com
+ notification_emailaddress_on_failure: PavanKumar.L@cognizant.com
+ notification_emailaddress_on_failure: Kodamasimham.Manisri@cognizant.com
+ notification_emailaddress_on_failure: Naga.Lakshmi2@cognizant.com
+
+
+/* ----------------- EMB_CAE_UPG_0120__Daily ----------------- */ 
+
+insert_job: EMB_CAE_UPG_0120__Daily   job_type: BOX 
+owner: batchprod.service@B73
+permission: 
+date_conditions: 1
+run_calendar: EMB_CAE.UPG_Special
+start_times: "09:55"
+alarm_if_fail: 1
+alarm_if_terminated: 1
+group: EMB_CAE_UPG
+application: BOX-NOTCOUNTED.H
+
+
+ /* ----------------- EMB_CAE_UPG_0120_001.Batch_Marker_Start ----------------- */ 
+
+ insert_job: EMB_CAE_UPG_0120_001.Batch_Marker_Start   job_type: CMD 
+ box_name: EMB_CAE_UPG_0120__Daily
+ command: $${CAEParmS} HBA_CAE_EMB_BatchMarker_Start.xml $${EMB_CAEParmE}$${CAEParmE2}
+ machine: EMB_CAE.B73PRODBAT0015
+ owner: batchprod.service@B73
+ permission: 
+ date_conditions: 1
+ run_calendar: EMB_CAE.UPG_Special
+ start_times: "10:00"
+ condition: s(EMB_CAE_UPG_0100_010.Batch_Start)
+ description: "Operator Notes: Escalations: EMBCAEProdSupport  EMBCAEProdSupport@cognizant.com\""
+ std_out_file: "$${EMB_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.out"
+ std_err_file: "$${EMB_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.err"
+ alarm_if_fail: 1
+ job_load: 2
+ priority: 50
+ alarm_if_terminated: 1
+ group: EMB_CAE_UPG
+ application: CAE-COUNTED.H
+ send_notification: F
+ notification_template: "STG1_ZAYO"
+ resources: (EMB_CAE_UPG.RC_BatchControl,QUANTITY=10,FREE=A)
+ notification_emailaddress_on_failure: Naga.Gella@cognizant.com
+ notification_emailaddress_on_failure: LakshmiPrasanna.Poturi@cognizant.com
+ notification_emailaddress_on_failure: Kaviya.K2@cognizant.com
+ notification_emailaddress_on_failure: Deepak.Jandhyala@cognizant.com
+ notification_emailaddress_on_failure: PavanKumar.L@cognizant.com
+ notification_emailaddress_on_failure: Kodamasimham.Manisri@cognizant.com
+ notification_emailaddress_on_failure: Naga.Lakshmi2@cognizant.com
+
+
+ /* ----------------- EMB_CAE_UPG_0120_010.Deactivate_Campaigns ----------------- */ 
+
+ insert_job: EMB_CAE_UPG_0120_010.Deactivate_Campaigns   job_type: CMD 
+ box_name: EMB_CAE_UPG_0120__Daily
+ command: $${CAEParmS} HBA_CAE_Deactivate_Campaign_Agent.xml $${EMB_CAEParmE}$${CAEParmE2}
+ machine: EMB_CAE.B73PRODBAT0015
+ owner: batchprod.service@B73
+ permission: 
+ date_conditions: 0
+ condition: s(EMB_CAE_UPG_0120_001.Batch_Marker_Start) & s(EMB_CAE_UPG_0100_010.Batch_Start)
+ description: "Operator Notes: Escalations: EMBCAEProdSupport  EMBCAEProdSupport@cognizant.com\""
+ std_out_file: "$${EMB_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.out"
+ std_err_file: "$${EMB_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.err"
+ alarm_if_fail: 1
+ job_load: 2
+ priority: 50
+ alarm_if_terminated: 1
+ group: EMB_CAE_UPG
+ application: CAE-COUNTED.H
+ send_notification: F
+ notification_template: "STG1_ZAYO"
+ resources: (EMB_CAE_UPG.RC_BatchControl,QUANTITY=10,FREE=A)
+ notification_emailaddress_on_failure: Naga.Gella@cognizant.com
+ notification_emailaddress_on_failure: LakshmiPrasanna.Poturi@cognizant.com
+ notification_emailaddress_on_failure: Kaviya.K2@cognizant.com
+ notification_emailaddress_on_failure: Deepak.Jandhyala@cognizant.com
+ notification_emailaddress_on_failure: PavanKumar.L@cognizant.com
+ notification_emailaddress_on_failure: Kodamasimham.Manisri@cognizant.com
+ notification_emailaddress_on_failure: Naga.Lakshmi2@cognizant.com
+
+
+ /* ----------------- EMB_CAE_UPG_0120_015.BannerUpdate_BeforeDI ----------------- */ 
+
+ insert_job: EMB_CAE_UPG_0120_015.BannerUpdate_BeforeDI   job_type: CMD 
+ box_name: EMB_CAE_UPG_0120__Daily
+ command: $${CAEParmS} HBA_CAE_BannerUpdate_BeforeDI.xml $${EMB_CAEParmE}$${CAEParmE2}
+ machine: EMB_CAE.B73PRODBAT0015
+ owner: batchprod.service@B73
+ permission: 
+ date_conditions: 0
+ condition: s(EMB_CAE_UPG_0120_010.Deactivate_Campaigns) & s(EMB_CAE_UPG_0120_050.LOB_Indicator)
+ description: "Operator Notes: Escalations: EMBCAEProdSupport  EMBCAEProdSupport@cognizant.com\""
+ std_out_file: "$${EMB_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.out"
+ std_err_file: "$${EMB_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.err"
+ alarm_if_fail: 1
+ job_load: 2
+ priority: 50
+ alarm_if_terminated: 1
+ group: EMB_CAE_UPG
+ application: CAE-COUNTED.H
+ send_notification: F
+ notification_template: "STG1_ZAYO"
+ resources: (EMB_CAE_UPG.RC_BatchControl,QUANTITY=10,FREE=A)
+ notification_emailaddress_on_failure: Naga.Gella@cognizant.com
+ notification_emailaddress_on_failure: LakshmiPrasanna.Poturi@cognizant.com
+ notification_emailaddress_on_failure: Kaviya.K2@cognizant.com
+ notification_emailaddress_on_failure: Deepak.Jandhyala@cognizant.com
+ notification_emailaddress_on_failure: PavanKumar.L@cognizant.com
+ notification_emailaddress_on_failure: Kodamasimham.Manisri@cognizant.com
+ notification_emailaddress_on_failure: Naga.Lakshmi2@cognizant.com
+
+
+ /* ----------------- EMB_CAE_UPG_0120_020.Execute_DI_1 ----------------- */ 
+
+ insert_job: EMB_CAE_UPG_0120_020.Execute_DI_1   job_type: CMD 
+ box_name: EMB_CAE_UPG_0120__Daily
+ command: $${CAEParmS} HBA_CAE_Execute_Startup_DI.xml $${EMB_CAEParmE}$${CAEParmE2}
+ machine: EMB_CAE.B73PRODBAT0015
+ owner: batchprod.service@B73
+ permission: 
+ date_conditions: 0
+ condition: s(EMB_CAE_UPG_0120_010.Deactivate_Campaigns) & s(EMB_CAE_UPG_0120_050.LOB_Indicator) & s(EMB_CAE_UPG_0120_015.BannerUpdate_BeforeDI)
+ description: "Operator Notes: Escalations: EMBCAEProdSupport  EMBCAEProdSupport@cognizant.com\""
+ std_out_file: "$${EMB_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.out"
+ std_err_file: "$${EMB_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.err"
+ alarm_if_fail: 1
+ job_load: 2
+ priority: 50
+ alarm_if_terminated: 1
+ group: EMB_CAE_UPG
+ application: CAE-COUNTED.H
+ send_notification: F
+ notification_template: "STG1_ZAYO"
+ resources: (EMB_CAE_UPG.RC_BatchControl,QUANTITY=10,FREE=A)
+ notification_emailaddress_on_failure: Naga.Gella@cognizant.com
+ notification_emailaddress_on_failure: LakshmiPrasanna.Poturi@cognizant.com
+ notification_emailaddress_on_failure: Kaviya.K2@cognizant.com
+ notification_emailaddress_on_failure: Deepak.Jandhyala@cognizant.com
+ notification_emailaddress_on_failure: PavanKumar.L@cognizant.com
+ notification_emailaddress_on_failure: Kodamasimham.Manisri@cognizant.com
+ notification_emailaddress_on_failure: Naga.Lakshmi2@cognizant.com
+
+
+ /* ----------------- EMB_CAE_UPG_0120_021.Manifest_Minute_Delay ----------------- */ 
+
+ insert_job: EMB_CAE_UPG_0120_021.Manifest_Minute_Delay   job_type: CMD 
+ box_name: EMB_CAE_UPG_0120__Daily
+ command: sleep 60
+ machine: a02tidexp0005.a02.cishoc.com
+ owner: tidalprd.service@A02
+ permission: 
+ date_conditions: 0
+ condition: s(EMB_CAE_UPG_0120_050.LOB_Indicator) & s(EMB_CAE_UPG_0120_010.Deactivate_Campaigns)
+ description: "Scheduling Notes: #Operator Notes: Please rerun job upon first failure before paging oncall##Title: Generate Letters ##Purpose:##Special Instructions:###Escalations:"
+ alarm_if_fail: 1
+ job_load: 2
+ priority: 50
+ alarm_if_terminated: 1
+ group: EMB_CAE_UPG
+ application: CAE-COUNTED.H
+
+
+ /* ----------------- EMB_CAE_UPG_0120_022.UMCaseAutoClose ----------------- */ 
+
+ insert_job: EMB_CAE_UPG_0120_022.UMCaseAutoClose   job_type: CMD 
+ box_name: EMB_CAE_UPG_0120__Daily
+ command: $${HBA_ParmS} $${CAEParmS} HBA_EMB_CAE_UMCaseAutoClose.xml $${EMB_CAEParmE}
+ machine: EMB_CAE.B73PRODBAT0036
+ owner: batchprod.service@B73
+ permission: 
+ date_conditions: 0
+ condition: s(EMB_CAE_UPG_0120_020.Execute_DI_1)
+ description: "Operator Notes: Escalations: EMBCAEProdSupport  EMBCAEProdSupport@cognizant.com\""
+ std_out_file: "$${EMB_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.out"
+ std_err_file: "$${EMB_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.err"
+ alarm_if_fail: 1
+ job_load: 2
+ priority: 50
+ alarm_if_terminated: 1
+ group: EMB_CAE_UPG
+ application: CAE-COUNTED.H
+ send_notification: F
+ notification_template: "STG1_ZAYO"
+ resources: (EMB_CAE_UPG.RC_BatchControl,QUANTITY=10,FREE=A)
+ notification_emailaddress_on_failure: Naga.Gella@cognizant.com
+ notification_emailaddress_on_failure: LakshmiPrasanna.Poturi@cognizant.com
+ notification_emailaddress_on_failure: Kaviya.K2@cognizant.com
+ notification_emailaddress_on_failure: Deepak.Jandhyala@cognizant.com
+ notification_emailaddress_on_failure: PavanKumar.L@cognizant.com
+ notification_emailaddress_on_failure: Kodamasimham.Manisri@cognizant.com
+ notification_emailaddress_on_failure: Naga.Lakshmi2@cognizant.com
+
+
+ /* ----------------- EMB_CAE_UPG_0120_023.BannerUpdate_AfterDI ----------------- */ 
+
+ insert_job: EMB_CAE_UPG_0120_023.BannerUpdate_AfterDI   job_type: CMD 
+ box_name: EMB_CAE_UPG_0120__Daily
+ command: $${HBA_ParmS} $${CAEParmS} HBA_CAE_BannerUpdate_AfterDI.xml $${EMB_CAEParmE}
+ machine: EMB_CAE.B73PRODBAT0015
+ owner: batchprod.service@B73
+ permission: 
+ date_conditions: 0
+ condition: s(EMB_CAE_UPG_0120_020.Execute_DI_1)
+ description: "Operator Notes: Escalations: EMBCAEProdSupport  EMBCAEProdSupport@cognizant.com\""
+ std_out_file: "$${EMB_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.out"
+ std_err_file: "$${EMB_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.err"
+ alarm_if_fail: 1
+ job_load: 2
+ priority: 50
+ alarm_if_terminated: 1
+ group: EMB_CAE_UPG
+ application: CAE-COUNTED.H
+ send_notification: F
+ notification_template: "STG1_ZAYO"
+ resources: (EMB_CAE_UPG.RC_BatchControl,QUANTITY=10,FREE=A)
+ notification_emailaddress_on_failure: Naga.Gella@cognizant.com
+ notification_emailaddress_on_failure: LakshmiPrasanna.Poturi@cognizant.com
+ notification_emailaddress_on_failure: Kaviya.K2@cognizant.com
+ notification_emailaddress_on_failure: Deepak.Jandhyala@cognizant.com
+ notification_emailaddress_on_failure: PavanKumar.L@cognizant.com
+ notification_emailaddress_on_failure: Kodamasimham.Manisri@cognizant.com
+ notification_emailaddress_on_failure: Naga.Lakshmi2@cognizant.com
+
+
+ /* ----------------- EMB_CAE_UPG_0120_026.EH_CCI_custom_Mbr_CarePlan_Task ----------------- */ 
+
+ insert_job: EMB_CAE_UPG_0120_026.EH_CCI_custom_Mbr_CarePlan_Task   job_type: CMD 
+ box_name: EMB_CAE_UPG_0120__Daily
+ command: $${HBA_ParmS} $${CAEParmS} HBA_CAE_EH_CCI_custom_Mbr_CarePlan_Task.xml $${EMB_CAEParmE}
+ machine: EMB_CAE.B73PRODBAT0015
+ owner: batchprod.service@B73
+ permission: 
+ date_conditions: 0
+ condition: s(EMB_CAE_UPG_0120_020.Execute_DI_1)
+ description: "Operator Notes: Escalations: EMBCAEProdSupport (Cognizant) EMBCAEProdSupport@cognizant.com, (Cognizant) <GlobalOperation-ProdSupport-Oncall@Cognizant.com>,embcaeprodsupport@cognizant.com RITM1335451"
+ std_out_file: "$${EMB_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.out"
+ std_err_file: "$${EMB_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.err"
+ alarm_if_fail: 1
+ job_load: 2
+ priority: 50
+ alarm_if_terminated: 1
+ group: EMB_CAE_UPG
+ application: CAE-COUNTED.H
+ resources: (EMB_CAE_UPG.RC_BatchControl,QUANTITY=10,FREE=A)
+
+
+ /* ----------------- EMB_CAE_UPG_0120_028.EH_CCI_custom_Mbr_Termed_CmCase_Task ----------------- */ 
+
+ insert_job: EMB_CAE_UPG_0120_028.EH_CCI_custom_Mbr_Termed_CmCase_Task   job_type: CMD 
+ box_name: EMB_CAE_UPG_0120__Daily
+ command: $${HBA_ParmS} $${CAEParmS} HBA_CAE_EH_CCI_custom_Mbr_Termed_CmCase_Task.xml $${EMB_CAEParmE}
+ machine: EMB_CAE.B73PRODBAT0015
+ owner: batchprod.service@B73
+ permission: 
+ date_conditions: 0
+ condition: s(EMB_CAE_UPG_0120_020.Execute_DI_1) & s(EMB_CAE_UPG_0120_026.EH_CCI_custom_Mbr_CarePlan_Task)
+ description: "Operator Notes: Escalations: EMBCAEProdSupport (Cognizant) EMBCAEProdSupport@cognizant.com, (Cognizant) <GlobalOperation-ProdSupport-Oncall@Cognizant.com>,embcaeprodsupport@cognizant.com RITM1375231"
+ std_out_file: "$${EMB_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.out"
+ std_err_file: "$${EMB_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.err"
+ alarm_if_fail: 1
+ job_load: 2
+ priority: 50
+ alarm_if_terminated: 1
+ group: EMB_CAE_UPG
+ application: CAE-COUNTED.H
+ resources: (EMB_CAE_UPG.RC_BatchControl,QUANTITY=10,FREE=A)
+
+
+ /* ----------------- EMB_CAE_UPG_0120_030.UpdateIsEligible ----------------- */ 
+
+ insert_job: EMB_CAE_UPG_0120_030.UpdateIsEligible   job_type: CMD 
+ box_name: EMB_CAE_UPG_0120__Daily
+ command: $${HBA_ParmS} $${CAEParmS} HBA_CAE_UpdateIsEligible.xml $${EMB_CAEParmE}
+ machine: EMB_CAE.B73PRODBAT0015
+ owner: batchprod.service@B73
+ permission: 
+ date_conditions: 0
+ condition: s(EMB_CAE_UPG_0120_020.Execute_DI_1)
+ description: "Operator Notes: Please rerun job upon first failure before paging oncall; Escalations: EMBCAEProdSupport  EMBCAEProdSupport@cognizant.com\""
+ std_out_file: "$${EMB_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.out"
+ std_err_file: "$${EMB_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.err"
+ alarm_if_fail: 1
+ job_load: 2
+ priority: 50
+ alarm_if_terminated: 1
+ group: EMB_CAE_UPG
+ application: CAE-COUNTED.H
+ send_notification: F
+ notification_template: "STG1_ZAYO"
+ resources: (EMB_CAE_UPG.RC_BatchControl,QUANTITY=10,FREE=A)
+ notification_emailaddress_on_failure: Naga.Gella@cognizant.com
+ notification_emailaddress_on_failure: LakshmiPrasanna.Poturi@cognizant.com
+ notification_emailaddress_on_failure: Kaviya.K2@cognizant.com
+ notification_emailaddress_on_failure: Deepak.Jandhyala@cognizant.com
+ notification_emailaddress_on_failure: PavanKumar.L@cognizant.com
+ notification_emailaddress_on_failure: Kodamasimham.Manisri@cognizant.com
+ notification_emailaddress_on_failure: Naga.Lakshmi2@cognizant.com
+
+
+ /* ----------------- EMB_CAE_UPG_0120_035.Concept_503047_Reset ----------------- */ 
+
+ insert_job: EMB_CAE_UPG_0120_035.Concept_503047_Reset   job_type: CMD 
+ box_name: EMB_CAE_UPG_0120__Daily
+ command: $${HBA_ParmS} $${CAEParmS} HBA_CAE_Concept_503047_Reset.xml $${EMB_CAEParmE}
+ machine: EMB_CAE.B73PRODBAT0015
+ owner: batchprod.service@B73
+ permission: 
+ date_conditions: 0
+ condition: s(EMB_CAE_UPG_0120_030.UpdateIsEligible)
+ std_out_file: "$${EMB_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.out"
+ std_err_file: "$${EMB_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.err"
+ alarm_if_fail: 1
+ job_load: 2
+ priority: 50
+ alarm_if_terminated: 1
+ group: EMB_CAE_UPG
+ application: CAE-COUNTED.H
+ send_notification: F
+ notification_template: "STG1_ZAYO"
+ resources: (EMB_CAE_UPG.RC_BatchControl,QUANTITY=10,FREE=A)
+ notification_emailaddress_on_failure: Naga.Gella@cognizant.com
+ notification_emailaddress_on_failure: LakshmiPrasanna.Poturi@cognizant.com
+ notification_emailaddress_on_failure: Kaviya.K2@cognizant.com
+ notification_emailaddress_on_failure: Deepak.Jandhyala@cognizant.com
+ notification_emailaddress_on_failure: PavanKumar.L@cognizant.com
+ notification_emailaddress_on_failure: Kodamasimham.Manisri@cognizant.com
+ notification_emailaddress_on_failure: Naga.Lakshmi2@cognizant.com
+
+
+ /* ----------------- EMB_CAE_UPG_0120_040.MeterDate ----------------- */ 
+
+ insert_job: EMB_CAE_UPG_0120_040.MeterDate   job_type: CMD 
+ box_name: EMB_CAE_UPG_0120__Daily
+ command: $${HBA_ParmS} $${CAEParmS} HBA_EMB_CAE_MeterDate.xml $${EMB_CAEParmE}
+ machine: EMB_CAE.B73PRODBAT0036
+ owner: batchprod.service@B73
+ permission: 
+ date_conditions: 0
+ condition: s(EMB_CAE_UPG_0120_010.Deactivate_Campaigns)
+ description: "Operator Notes: Escalations: EMBCAEProdSupport  EMBCAEProdSupport@cognizant.com\""
+ std_out_file: "$${EMB_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.out"
+ std_err_file: "$${EMB_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.err"
+ alarm_if_fail: 1
+ job_load: 2
+ priority: 50
+ alarm_if_terminated: 1
+ group: EMB_CAE_UPG
+ application: CAE-COUNTED.H
+ send_notification: F
+ notification_template: "STG1_ZAYO"
+ resources: (EMB_CAE_UPG.RC_BatchControl,QUANTITY=10,FREE=A)
+ notification_emailaddress_on_failure: Naga.Gella@cognizant.com
+ notification_emailaddress_on_failure: LakshmiPrasanna.Poturi@cognizant.com
+ notification_emailaddress_on_failure: Kaviya.K2@cognizant.com
+ notification_emailaddress_on_failure: Deepak.Jandhyala@cognizant.com
+ notification_emailaddress_on_failure: PavanKumar.L@cognizant.com
+ notification_emailaddress_on_failure: Kodamasimham.Manisri@cognizant.com
+ notification_emailaddress_on_failure: Naga.Lakshmi2@cognizant.com
+
+
+ /* ----------------- EMB_CAE_UPG_0120_045.CCI_60DayCaseConcept ----------------- */ 
+
+ insert_job: EMB_CAE_UPG_0120_045.CCI_60DayCaseConcept   job_type: CMD 
+ box_name: EMB_CAE_UPG_0120__Daily
+ command: $${HBA_ParmS} $${CAEParmS} HBA_EMB_CAE_CCI_60DayCaseConcept.xml $${EMB_CAEParmE}
+ machine: EMB_CAE.B73PRODBAT0015
+ owner: batchprod.service@B73
+ permission: 
+ date_conditions: 0
+ condition: s(EMB_CAE_UPG_0120_020.Execute_DI_1)
+ description: "Operator Notes: Please rerun job upon first failure before paging oncall; Escalations: EMBCAEProdSupport (Cognizant) EMBCAEProdSupport@cognizant.com,RITM1257267"
+ std_out_file: "$${EMB_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.out"
+ std_err_file: "$${EMB_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.err"
+ alarm_if_fail: 1
+ job_load: 2
+ priority: 50
+ alarm_if_terminated: 1
+ group: EMB_CAE_UPG
+ application: CAE-COUNTED.H
+ resources: (EMB_CAE_UPG.RC_BatchControl,QUANTITY=10,FREE=A)
+
+
+ /* ----------------- EMB_CAE_UPG_0120_047.Interface_Daily ----------------- */ 
+
+ insert_job: EMB_CAE_UPG_0120_047.Interface_Daily   job_type: CMD 
+ box_name: EMB_CAE_UPG_0120__Daily
+ command: $${HBA_ParmS} $${CAEParmS} HBA_EMB_CAE_Interface_Daily.xml $${EMB_CAEParmE}
+ machine: EMB_CAE.B73PRODBAT0015
+ owner: batchprod.service@B73
+ permission: 
+ date_conditions: 0
+ condition: s(EMB_CAE_UPG_0120_040.MeterDate)
+ description: "Operator Notes: Please rerun job upon first failure before paging oncall; Escalations: EMBCAEProdSupport EMBCAEProdSupport@cognizant.com\" RITM1675480"
+ std_out_file: "$${EMB_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.out"
+ std_err_file: "$${EMB_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.err"
+ alarm_if_fail: 1
+ job_load: 2
+ priority: 50
+ alarm_if_terminated: 1
+ group: EMB_CAE_UPG
+ application: CAE-COUNTED.H
+ send_notification: F
+ notification_template: "STG1_ZAYO"
+ resources: (EMB_CAE_UPG.RC_BatchControl,QUANTITY=10,FREE=A)
+ notification_emailaddress_on_failure: Naga.Gella@cognizant.com
+ notification_emailaddress_on_failure: LakshmiPrasanna.Poturi@cognizant.com
+ notification_emailaddress_on_failure: Kaviya.K2@cognizant.com
+ notification_emailaddress_on_failure: Deepak.Jandhyala@cognizant.com
+ notification_emailaddress_on_failure: PavanKumar.L@cognizant.com
+ notification_emailaddress_on_failure: Kodamasimham.Manisri@cognizant.com
+ notification_emailaddress_on_failure: Naga.Lakshmi2@cognizant.com
+
+
+ /* ----------------- EMB_CAE_UPG_0120_050.LOB_Indicator ----------------- */ 
+
+ insert_job: EMB_CAE_UPG_0120_050.LOB_Indicator   job_type: CMD 
+ box_name: EMB_CAE_UPG_0120__Daily
+ command: $${HBA_ParmS} $${CAEParmS} HBA_EMB_CAE_LOB_Indicators.xml $${EMB_CAEParmE}
+ machine: EMB_CAE.B73PRODBAT0015
+ owner: batchprod.service@B73
+ permission: 
+ date_conditions: 0
+ condition: s(EMB_CAE_UPG_0120_040.MeterDate)
+ description: "Operator Notes: Please rerun job upon first failure before paging oncall; Escalations: EMBCAEProdSupport  EMBCAEProdSupport@cognizant.com\" RITM1675480"
+ std_out_file: "$${EMB_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.out"
+ std_err_file: "$${EMB_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.err"
+ alarm_if_fail: 1
+ job_load: 2
+ priority: 50
+ alarm_if_terminated: 1
+ group: EMB_CAE_UPG
+ application: CAE-COUNTED.H
+ send_notification: F
+ notification_template: "STG1_ZAYO"
+ resources: (EMB_CAE_UPG.RC_BatchControl,QUANTITY=10,FREE=A)
+ notification_emailaddress_on_failure: Naga.Gella@cognizant.com
+ notification_emailaddress_on_failure: LakshmiPrasanna.Poturi@cognizant.com
+ notification_emailaddress_on_failure: Kaviya.K2@cognizant.com
+ notification_emailaddress_on_failure: Deepak.Jandhyala@cognizant.com
+ notification_emailaddress_on_failure: PavanKumar.L@cognizant.com
+ notification_emailaddress_on_failure: Kodamasimham.Manisri@cognizant.com
+ notification_emailaddress_on_failure: Naga.Lakshmi2@cognizant.com
+
+
+ /* ----------------- EMB_CAE_UPG_0120_060.member_lookup ----------------- */ 
+
+ insert_job: EMB_CAE_UPG_0120_060.member_lookup   job_type: CMD 
+ box_name: EMB_CAE_UPG_0120__Daily
+ command: $${HBA_ParmS} $${CAEParmS} HBA_EMB_CAE_embp_custom_Insert_CKOLTP_MemberData.xml $${EMB_CAEParmE}
+ machine: EMB_CAE.B73PRODBAT0015
+ owner: batchprod.service@B73
+ permission: 
+ date_conditions: 0
+ condition: s(EMB_CAE_UPG_0120_030.UpdateIsEligible) & s(EMB_CAE_UPG_0120_035.Concept_503047_Reset)
+ description: "Operator Notes: Please rerun job upon first failure before paging oncall; Escalations: EMBCAEProdSupport  EMBCAEProdSupport@cognizant.com\""
+ std_out_file: "$${EMB_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.out"
+ std_err_file: "$${EMB_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.err"
+ alarm_if_fail: 1
+ job_load: 2
+ priority: 50
+ alarm_if_terminated: 1
+ group: EMB_CAE_UPG
+ application: CAE-COUNTED.H
+ send_notification: F
+ notification_template: "STG1_ZAYO"
+ resources: (EMB_CAE_UPG.RC_BatchControl,QUANTITY=10,FREE=A)
+ notification_emailaddress_on_failure: Naga.Gella@cognizant.com
+ notification_emailaddress_on_failure: LakshmiPrasanna.Poturi@cognizant.com
+ notification_emailaddress_on_failure: Kaviya.K2@cognizant.com
+ notification_emailaddress_on_failure: Deepak.Jandhyala@cognizant.com
+ notification_emailaddress_on_failure: PavanKumar.L@cognizant.com
+ notification_emailaddress_on_failure: Kodamasimham.Manisri@cognizant.com
+ notification_emailaddress_on_failure: Naga.Lakshmi2@cognizant.com
+
+
+ /* ----------------- EMB_CAE_UPG_0120_070.PCPDataSync ----------------- */ 
+
+ insert_job: EMB_CAE_UPG_0120_070.PCPDataSync   job_type: CMD 
+ box_name: EMB_CAE_UPG_0120__Daily
+ command: $${HBA_ParmS} $${CAEParmS} HBA_CAE_PCPDataSync.xml $${EMB_CAEParmE}
+ machine: EMB_CAE.B73PRODBAT0015
+ owner: batchprod.service@B73
+ permission: 
+ date_conditions: 0
+ condition: s(EMB_CAE_UPG_0120_060.member_lookup)
+ description: "Operator Notes: Please rerun job upon first failure before paging oncall; Escalations: EMBCAEProdSupport  EMBCAEProdSupport@cognizant.com\""
+ std_out_file: "$${EMB_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.out"
+ std_err_file: "$${EMB_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.err"
+ alarm_if_fail: 1
+ job_load: 2
+ priority: 50
+ alarm_if_terminated: 1
+ group: EMB_CAE_UPG
+ application: CAE-COUNTED.H
+ send_notification: F
+ notification_template: "STG1_ZAYO"
+ resources: (EMB_CAE_UPG.RC_BatchControl,QUANTITY=10,FREE=A)
+ notification_emailaddress_on_failure: Naga.Gella@cognizant.com
+ notification_emailaddress_on_failure: LakshmiPrasanna.Poturi@cognizant.com
+ notification_emailaddress_on_failure: Kaviya.K2@cognizant.com
+ notification_emailaddress_on_failure: Deepak.Jandhyala@cognizant.com
+ notification_emailaddress_on_failure: PavanKumar.L@cognizant.com
+ notification_emailaddress_on_failure: Kodamasimham.Manisri@cognizant.com
+ notification_emailaddress_on_failure: Naga.Lakshmi2@cognizant.com
+
+
+ /* ----------------- EMB_CAE_UPG_0120_075.Custom_PHIFax_UpdateBatch ----------------- */ 
+
+ insert_job: EMB_CAE_UPG_0120_075.Custom_PHIFax_UpdateBatch   job_type: CMD 
+ box_name: EMB_CAE_UPG_0120__Daily
+ command: $${HBA_ParmS} $${CAEParmS} HBA_EMB_CAE_embp_custom_PHIFax_UpdateBatch.xml $${EMB_CAEParmE}
+ machine: EMB_CAE.B73PRODBAT0015
+ owner: batchprod.service@B73
+ permission: 
+ date_conditions: 0
+ condition: s(EMB_CAE_UPG_0120_070.PCPDataSync)
+ description: "Operator Notes: Escalations: EMBCAEProdSupport  EMBCAEProdSupport@cognizant.com\""
+ std_out_file: "$${EMB_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.out"
+ std_err_file: "$${EMB_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.err"
+ alarm_if_fail: 1
+ job_load: 2
+ priority: 50
+ alarm_if_terminated: 1
+ group: EMB_CAE_UPG
+ application: CAE-COUNTED.H
+ send_notification: F
+ notification_template: "STG1_ZAYO"
+ resources: (EMB_CAE_UPG.RC_BatchControl,QUANTITY=10,FREE=A)
+ notification_emailaddress_on_failure: Naga.Gella@cognizant.com
+ notification_emailaddress_on_failure: LakshmiPrasanna.Poturi@cognizant.com
+ notification_emailaddress_on_failure: Kaviya.K2@cognizant.com
+ notification_emailaddress_on_failure: Deepak.Jandhyala@cognizant.com
+ notification_emailaddress_on_failure: PavanKumar.L@cognizant.com
+ notification_emailaddress_on_failure: Kodamasimham.Manisri@cognizant.com
+ notification_emailaddress_on_failure: Naga.Lakshmi2@cognizant.com
+
+
+ /* ----------------- EMB_CAE_UPG_0120_080.UpdateMedCenterUDF ----------------- */ 
+
+ insert_job: EMB_CAE_UPG_0120_080.UpdateMedCenterUDF   job_type: CMD 
+ box_name: EMB_CAE_UPG_0120__Daily
+ command: $${HBA_ParmS} $${CAEParmS} HBA_EMB_CAE_embp_custom_Member_UpdateMedCtrUDF.xml $${EMB_CAEParmE}
+ machine: EMB_CAE.B73PRODBAT0015
+ owner: batchprod.service@B73
+ permission: 
+ date_conditions: 0
+ condition: s(EMB_CAE_UPG_0120_075.Custom_PHIFax_UpdateBatch)
+ description: "Operator Notes: Escalations: EMBCAEProdSupport  EMBCAEProdSupport@cognizant.com\""
+ std_out_file: "$${EMB_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.out"
+ std_err_file: "$${EMB_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.err"
+ alarm_if_fail: 1
+ job_load: 2
+ priority: 50
+ alarm_if_terminated: 1
+ group: EMB_CAE_UPG
+ application: CAE-COUNTED.H
+ send_notification: F
+ notification_template: "STG1_ZAYO"
+ resources: (EMB_CAE_UPG.RC_BatchControl,QUANTITY=10,FREE=A)
+ notification_emailaddress_on_failure: Naga.Gella@cognizant.com
+ notification_emailaddress_on_failure: LakshmiPrasanna.Poturi@cognizant.com
+ notification_emailaddress_on_failure: Kaviya.K2@cognizant.com
+ notification_emailaddress_on_failure: Deepak.Jandhyala@cognizant.com
+ notification_emailaddress_on_failure: PavanKumar.L@cognizant.com
+ notification_emailaddress_on_failure: Kodamasimham.Manisri@cognizant.com
+ notification_emailaddress_on_failure: Naga.Lakshmi2@cognizant.com
+
+
+ /* ----------------- EMB_CAE_UPG_0120_090a.SDOH_Assessment_Task_Creation ----------------- */ 
+
+ insert_job: EMB_CAE_UPG_0120_090a.SDOH_Assessment_Task_Creation   job_type: CMD 
+ box_name: EMB_CAE_UPG_0120__Daily
+ command: $${HBA_ParmS} $${CAEParmS} HBA_CAE_custom_Mbr_SDOH_Task.xml $${EMB_CAEParmE}
+ machine: EMB_CAE.B73PRODBAT0015
+ owner: batchprod.service@B73
+ permission: 
+ date_conditions: 0
+ description: "Operator Notes: Escalations: EMBCAEProdSupport  EMBCAEProdSupport@cognizant.com\" RITM1675461"
+ std_out_file: "$${EMB_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.out"
+ std_err_file: "$${EMB_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.err"
+ alarm_if_fail: 1
+ job_load: 2
+ priority: 50
+ alarm_if_terminated: 1
+ group: EMB_CAE_UPG
+ application: CAE-COUNTED.H
+ send_notification: F
+ notification_template: "STG1_ZAYO"
+ resources: (EMB_CAE_UPG.RC_BatchControl,QUANTITY=10,FREE=A)
+ notification_emailaddress_on_failure: Naga.Gella@cognizant.com
+ notification_emailaddress_on_failure: LakshmiPrasanna.Poturi@cognizant.com
+ notification_emailaddress_on_failure: Kaviya.K2@cognizant.com
+ notification_emailaddress_on_failure: Deepak.Jandhyala@cognizant.com
+ notification_emailaddress_on_failure: PavanKumar.L@cognizant.com
+ notification_emailaddress_on_failure: Kodamasimham.Manisri@cognizant.com
+ notification_emailaddress_on_failure: Naga.Lakshmi2@cognizant.com
+
+
+ /* ----------------- EMB_CAE_UPG_0120_091.Activate_And_Check_Evaluators ----------------- */ 
+
+ insert_job: EMB_CAE_UPG_0120_091.Activate_And_Check_Evaluators   job_type: CMD 
+ box_name: EMB_CAE_UPG_0120__Daily
+ command: $${HBA_ParmS} $${CAEParmS} HBA_CAE_Check_Evaluators_AgentTable.xml $${EMB_CAEParmE}
+ machine: EMB_CAE.B73PRODBAT0015
+ owner: batchprod.service@B73
+ permission: 
+ date_conditions: 0
+ condition: s(EMB_CAE_UPG_0120_080.UpdateMedCenterUDF)
+ description: "Operator Notes: Please rerun job upon first failure before paging oncall; Escalations: EMBCAEProdSupport  EMBCAEProdSupport@cognizant.com\""
+ std_out_file: "$${EMB_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.out"
+ std_err_file: "$${EMB_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.err"
+ alarm_if_fail: 1
+ job_load: 2
+ priority: 50
+ alarm_if_terminated: 1
+ group: EMB_CAE_UPG
+ application: CAE-COUNTED.H
+ send_notification: F
+ notification_template: "STG1_ZAYO"
+ resources: (EMB_CAE_UPG.RC_BatchControl,QUANTITY=10,FREE=A)
+ notification_emailaddress_on_failure: Naga.Gella@cognizant.com
+ notification_emailaddress_on_failure: LakshmiPrasanna.Poturi@cognizant.com
+ notification_emailaddress_on_failure: Kaviya.K2@cognizant.com
+ notification_emailaddress_on_failure: Deepak.Jandhyala@cognizant.com
+ notification_emailaddress_on_failure: PavanKumar.L@cognizant.com
+ notification_emailaddress_on_failure: Kodamasimham.Manisri@cognizant.com
+ notification_emailaddress_on_failure: Naga.Lakshmi2@cognizant.com
+
+
+ /* ----------------- EMB_CAE_UPG_0120_092.Activate_And_Check_Runners ----------------- */ 
+
+ insert_job: EMB_CAE_UPG_0120_092.Activate_And_Check_Runners   job_type: CMD 
+ box_name: EMB_CAE_UPG_0120__Daily
+ command: $${HBA_ParmS} $${CAEParmS} HBA_CAE_Check_Runners_AgentTable.xml $${EMB_CAEParmE}
+ machine: EMB_CAE.B73PRODBAT0015
+ owner: batchprod.service@B73
+ permission: 
+ date_conditions: 0
+ condition: s(EMB_CAE_UPG_0120_091.Activate_And_Check_Evaluators)
+ description: "Operator Notes: Please rerun job upon first failure before paging oncall; Escalations: EMBCAEProdSupport  EMBCAEProdSupport@cognizant.com\""
+ std_out_file: "$${EMB_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.out"
+ std_err_file: "$${EMB_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.err"
+ alarm_if_fail: 1
+ auto_hold: 1
+ job_load: 2
+ priority: 50
+ alarm_if_terminated: 1
+ group: EMB_CAE_UPG
+ application: CAE-COUNTED.H
+ send_notification: F
+ notification_template: "STG1_ZAYO"
+ resources: (EMB_CAE_UPG.RC_BatchControl,QUANTITY=10,FREE=A)
+ notification_emailaddress_on_failure: Naga.Gella@cognizant.com
+ notification_emailaddress_on_failure: LakshmiPrasanna.Poturi@cognizant.com
+ notification_emailaddress_on_failure: Kaviya.K2@cognizant.com
+ notification_emailaddress_on_failure: Deepak.Jandhyala@cognizant.com
+ notification_emailaddress_on_failure: PavanKumar.L@cognizant.com
+ notification_emailaddress_on_failure: Kodamasimham.Manisri@cognizant.com
+ notification_emailaddress_on_failure: Naga.Lakshmi2@cognizant.com
+
+
+ /* ----------------- EMB_CAE_UPG_0120_094.DefaultProvProg_notes ----------------- */ 
+
+ insert_job: EMB_CAE_UPG_0120_094.DefaultProvProg_notes   job_type: CMD 
+ box_name: EMB_CAE_UPG_0120__Daily
+ command: $${HBA_ParmS} $${CAEParmS} HBA_CAE_DefaultProvProg_notes.xml $${EMB_CAEParmE}
+ machine: EMB_CAE.B73PRODBAT0020
+ owner: batchprod.service@B73
+ permission: 
+ date_conditions: 0
+ description: "Operator Notes: Please rerun job upon first failure before paging oncall; Escalations: EMBCAEProdSupport  EMBCAEProdSupport@cognizant.com\""
+ std_out_file: "$${EMB_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.out"
+ std_err_file: "$${EMB_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.err"
+ alarm_if_fail: 1
+ job_load: 2
+ priority: 50
+ alarm_if_terminated: 1
+ group: EMB_CAE_UPG
+ application: CAE-COUNTED.H
+ send_notification: F
+ notification_template: "STG1_ZAYO"
+ resources: (EMB_CAE_UPG.RC_BatchControl,QUANTITY=10,FREE=A)
+ notification_emailaddress_on_failure: Naga.Gella@cognizant.com
+ notification_emailaddress_on_failure: LakshmiPrasanna.Poturi@cognizant.com
+ notification_emailaddress_on_failure: Kaviya.K2@cognizant.com
+ notification_emailaddress_on_failure: Deepak.Jandhyala@cognizant.com
+ notification_emailaddress_on_failure: PavanKumar.L@cognizant.com
+ notification_emailaddress_on_failure: Kodamasimham.Manisri@cognizant.com
+ notification_emailaddress_on_failure: Naga.Lakshmi2@cognizant.com
+
+
+ /* ----------------- EMB_CAE_UPG_0120_095.embp_custom_Mbr_CMopen_NoProg ----------------- */ 
+
+ insert_job: EMB_CAE_UPG_0120_095.embp_custom_Mbr_CMopen_NoProg   job_type: CMD 
+ box_name: EMB_CAE_UPG_0120__Daily
+ command: $${HBA_ParmS} $${CAEParmS} HBA_EMB_CAE_embp_custom_Mbr_CMopen_NoProg.xml $${EMB_CAEParmE}
+ machine: EMB_CAE.B73PRODBAT0015
+ owner: batchprod.service@B73
+ permission: 
+ date_conditions: 0
+ description: "Operator Notes: Please rerun job upon first failure before paging oncall; Escalations: EMBCAEProdSupport  EMBCAEProdSupport@cognizant.com\""
+ std_out_file: "$${EMB_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.out"
+ std_err_file: "$${EMB_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.err"
+ alarm_if_fail: 1
+ job_load: 2
+ priority: 50
+ alarm_if_terminated: 1
+ group: EMB_CAE_UPG
+ application: CAE-COUNTED.H
+ send_notification: F
+ notification_template: "STG1_ZAYO"
+ resources: (EMB_CAE_UPG.RC_BatchControl,QUANTITY=10,FREE=A)
+ notification_emailaddress_on_failure: Naga.Gella@cognizant.com
+ notification_emailaddress_on_failure: LakshmiPrasanna.Poturi@cognizant.com
+ notification_emailaddress_on_failure: Kaviya.K2@cognizant.com
+ notification_emailaddress_on_failure: Deepak.Jandhyala@cognizant.com
+ notification_emailaddress_on_failure: PavanKumar.L@cognizant.com
+ notification_emailaddress_on_failure: Kodamasimham.Manisri@cognizant.com
+ notification_emailaddress_on_failure: Naga.Lakshmi2@cognizant.com
+
+
+ /* ----------------- EMB_CAE_UPG_0120_096.EH_CCI_custom_Mbr_PharmacyRef ----------------- */ 
+
+ insert_job: EMB_CAE_UPG_0120_096.EH_CCI_custom_Mbr_PharmacyRef   job_type: CMD 
+ box_name: EMB_CAE_UPG_0120__Daily
+ command: $${HBA_ParmS} $${CAEParmS} HBA_CAE_EH_CCI_custom_Mbr_PharmacyRef.xml $${EMB_CAEParmE}
+ machine: EMB_CAE.B73PRODBAT0015
+ owner: batchprod.service@B73
+ permission: 
+ date_conditions: 0
+ condition: s(EMB_CAE_UPG_0120_094.DefaultProvProg_notes)
+ description: "Operator Notes: Please rerun job upon first failure before paging oncall; Escalations: EMBCAEProdSupport  EMBCAEProdSupport@cognizant.com\""
+ std_out_file: "$${EMB_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.out"
+ std_err_file: "$${EMB_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.err"
+ alarm_if_fail: 1
+ job_load: 2
+ priority: 50
+ alarm_if_terminated: 1
+ group: EMB_CAE_UPG
+ application: CAE-COUNTED.H
+ send_notification: F
+ notification_template: "STG1_ZAYO"
+ resources: (EMB_CAE_UPG.RC_BatchControl,QUANTITY=10,FREE=A)
+ notification_emailaddress_on_failure: Naga.Gella@cognizant.com
+ notification_emailaddress_on_failure: LakshmiPrasanna.Poturi@cognizant.com
+ notification_emailaddress_on_failure: Kaviya.K2@cognizant.com
+ notification_emailaddress_on_failure: Deepak.Jandhyala@cognizant.com
+ notification_emailaddress_on_failure: PavanKumar.L@cognizant.com
+ notification_emailaddress_on_failure: Kodamasimham.Manisri@cognizant.com
+ notification_emailaddress_on_failure: Naga.Lakshmi2@cognizant.com
+
+
+ /* ----------------- EMB_CAE_UPG_0120_097.embp_custom_CCI_Mbr_CMopen_NoProg ----------------- */ 
+
+ insert_job: EMB_CAE_UPG_0120_097.embp_custom_CCI_Mbr_CMopen_NoProg   job_type: CMD 
+ box_name: EMB_CAE_UPG_0120__Daily
+ command: $${HBA_ParmS} $${CAEParmS} HBA_EMB_CAE_embp_custom_CCI_Mbr_CMopen_NoProg.xml $${EMB_CAEParmE}
+ machine: EMB_CAE.B73PRODBAT0015
+ owner: batchprod.service@B73
+ permission: 
+ date_conditions: 0
+ condition: s(EMB_CAE_UPG_0120_095.embp_custom_Mbr_CMopen_NoProg)
+ description: "Operator Notes: Please rerun job upon first failure before paging oncall; Escalations: EMBCAEProdSupport  EMBCAEProdSupport@cognizant.com\""
+ std_out_file: "$${EMB_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.out"
+ std_err_file: "$${EMB_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.err"
+ alarm_if_fail: 1
+ job_load: 2
+ priority: 50
+ alarm_if_terminated: 1
+ group: EMB_CAE_UPG
+ application: CAE-COUNTED.H
+ send_notification: F
+ notification_template: "STG1_ZAYO"
+ resources: (EMB_CAE_UPG.RC_BatchControl,QUANTITY=10,FREE=A)
+ notification_emailaddress_on_failure: Naga.Gella@cognizant.com
+ notification_emailaddress_on_failure: LakshmiPrasanna.Poturi@cognizant.com
+ notification_emailaddress_on_failure: Kaviya.K2@cognizant.com
+ notification_emailaddress_on_failure: Deepak.Jandhyala@cognizant.com
+ notification_emailaddress_on_failure: PavanKumar.L@cognizant.com
+ notification_emailaddress_on_failure: Kodamasimham.Manisri@cognizant.com
+ notification_emailaddress_on_failure: Naga.Lakshmi2@cognizant.com
+
+
+ /* ----------------- EMB_CAE_UPG_0120_105.Batch_Marker_End ----------------- */ 
+
+ insert_job: EMB_CAE_UPG_0120_105.Batch_Marker_End   job_type: CMD 
+ box_name: EMB_CAE_UPG_0120__Daily
+ command: $${HBA_ParmS} $${CAEParmS} HBA_CAE_EMB_BatchMarker_End.xml $${EMB_CAEParmE}
+ machine: EMB_CAE.B73PRODBAT0015
+ owner: batchprod.service@B73
+ permission: 
+ date_conditions: 0
+ condition: s(EMB_CAE_UPG_0120_020.Execute_DI_1) & s(EMB_CAE_UPG_0120_070.PCPDataSync)
+ description: "Operator Notes: Please rerun job upon first failure before paging oncall; Escalations: EMBCAEProdSupport  EMBCAEProdSupport@cognizant.com\""
+ std_out_file: "$${EMB_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.out"
+ std_err_file: "$${EMB_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.err"
+ alarm_if_fail: 1
+ job_load: 2
+ priority: 50
+ alarm_if_terminated: 1
+ group: EMB_CAE_UPG
+ application: CAE-COUNTED.H
+ send_notification: F
+ notification_template: "STG1_ZAYO"
+ resources: (EMB_CAE_UPG.RC_BatchControl,QUANTITY=10,FREE=A)
+ notification_emailaddress_on_failure: Naga.Gella@cognizant.com
+ notification_emailaddress_on_failure: LakshmiPrasanna.Poturi@cognizant.com
+ notification_emailaddress_on_failure: Kaviya.K2@cognizant.com
+ notification_emailaddress_on_failure: Deepak.Jandhyala@cognizant.com
+ notification_emailaddress_on_failure: PavanKumar.L@cognizant.com
+ notification_emailaddress_on_failure: Kodamasimham.Manisri@cognizant.com
+ notification_emailaddress_on_failure: Naga.Lakshmi2@cognizant.com
+
+
+ /* ----------------- EMB_CAE_UPG_0120_110.Execute_DeleteProgressNotesAttachments ----------------- */ 
+
+ insert_job: EMB_CAE_UPG_0120_110.Execute_DeleteProgressNotesAttachments   job_type: CMD 
+ box_name: EMB_CAE_UPG_0120__Daily
+ command: $${HBA_ParmS} $${CAEParmS} HBA_EMB_CAE_EXECUT_DeleteProgressNotesAttachements.xml $${EMB_CAEParmE}
+ machine: EMB_CAE.B73PRODBAT0015
+ owner: batchprod.service@B73
+ permission: 
+ date_conditions: 0
+ description: "Operator Notes: Escalations: EMBCAEProdSupport  EMBCAEProdSupport@cognizant.com\""
+ std_out_file: "$${EMB_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.out"
+ std_err_file: "$${EMB_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.err"
+ alarm_if_fail: 1
+ job_load: 2
+ priority: 50
+ alarm_if_terminated: 1
+ group: EMB_CAE_UPG
+ application: CAE-COUNTED.H
+ send_notification: F
+ notification_template: "STG1_ZAYO"
+ resources: (EMB_CAE_UPG.RC_BatchControl,QUANTITY=10,FREE=A)
+ notification_emailaddress_on_failure: Naga.Gella@cognizant.com
+ notification_emailaddress_on_failure: LakshmiPrasanna.Poturi@cognizant.com
+ notification_emailaddress_on_failure: Kaviya.K2@cognizant.com
+ notification_emailaddress_on_failure: Deepak.Jandhyala@cognizant.com
+ notification_emailaddress_on_failure: PavanKumar.L@cognizant.com
+ notification_emailaddress_on_failure: Kodamasimham.Manisri@cognizant.com
+ notification_emailaddress_on_failure: Naga.Lakshmi2@cognizant.com
+
+
+ /* ----------------- EMB_CAE_UPG_0120_140.FacetsCodeExtract ----------------- */ 
+
+ insert_job: EMB_CAE_UPG_0120_140.FacetsCodeExtract   job_type: CMD 
+ box_name: EMB_CAE_UPG_0120__Daily
+ command: $${HBA_ParmS} $${CAEParmS} HBA_EMB_CAE_FacetsCodeExtract.xml $${EMB_CAEParmE}
+ machine: EMB_CAE.B73PRODBAT0015
+ owner: batchprod.service@B73
+ permission: 
+ date_conditions: 0
+ condition: s(EMB_CAE_UPG_0120_020.Execute_DI_1)
+ description: "RITM1529356Operator Notes: Please rerun job upon first failure before paging oncall; Escalations: EMBCAEProdSupport EMBCAEProdSupport@cognizant.com\""
+ std_out_file: "$${EMB_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.out"
+ std_err_file: "$${EMB_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.err"
+ alarm_if_fail: 1
+ job_load: 2
+ priority: 50
+ alarm_if_terminated: 1
+ group: EMB_CAE_UPG
+ application: CAE-COUNTED.H
+ send_notification: F
+ notification_template: "STG1_ZAYO"
+ resources: (EMB_CAE_UPG.RC_BatchControl,QUANTITY=10,FREE=A)
+ notification_emailaddress_on_failure: Naga.Gella@cognizant.com
+ notification_emailaddress_on_failure: LakshmiPrasanna.Poturi@cognizant.com
+ notification_emailaddress_on_failure: Kaviya.K2@cognizant.com
+ notification_emailaddress_on_failure: Deepak.Jandhyala@cognizant.com
+ notification_emailaddress_on_failure: PavanKumar.L@cognizant.com
+ notification_emailaddress_on_failure: Kodamasimham.Manisri@cognizant.com
+ notification_emailaddress_on_failure: Naga.Lakshmi2@cognizant.com
+
+
+ /* ----------------- EMB_CAE_UPG_0120_150.Member_Alert ----------------- */ 
+
+ insert_job: EMB_CAE_UPG_0120_150.Member_Alert   job_type: CMD 
+ box_name: EMB_CAE_UPG_0120__Daily
+ command: $${HBA_ParmS} $${CAEParmS} HBA_EMB_CAE_MemberAlert.xml $${EMB_CAEParmE}
+ machine: EMB_CAE.B73PRODBAT0015
+ owner: batchprod.service@B73
+ permission: 
+ date_conditions: 0
+ condition: s(EMB_CAE_UPG_0120_010.Deactivate_Campaigns) & s(EMB_CAE_UPG_0120_020.Execute_DI_1) & s(EMB_CAE_UPG_0120_050.LOB_Indicator)
+ description: "Operator Notes: Please rerun job upon first failure before paging oncall; Escalations: EMBCAEProdSupport EMBCAEProdSupport@cognizant.com\" RITM1675476"
+ std_out_file: "$${EMB_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.out"
+ std_err_file: "$${EMB_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.err"
+ alarm_if_fail: 1
+ job_load: 2
+ priority: 50
+ alarm_if_terminated: 1
+ group: EMB_CAE_UPG
+ application: CAE-COUNTED.H
+ send_notification: F
+ notification_template: "STG1_ZAYO"
+ resources: (EMB_CAE_UPG.RC_BatchControl,QUANTITY=10,FREE=A)
+ notification_emailaddress_on_failure: Naga.Gella@cognizant.com
+ notification_emailaddress_on_failure: LakshmiPrasanna.Poturi@cognizant.com
+ notification_emailaddress_on_failure: Kaviya.K2@cognizant.com
+ notification_emailaddress_on_failure: Deepak.Jandhyala@cognizant.com
+ notification_emailaddress_on_failure: PavanKumar.L@cognizant.com
+ notification_emailaddress_on_failure: Kodamasimham.Manisri@cognizant.com
+ notification_emailaddress_on_failure: Naga.Lakshmi2@cognizant.com
+
+
+/* ----------------- EMB_CAE_UPG_0185__Concord_FAX_Report ----------------- */ 
+
+insert_job: EMB_CAE_UPG_0185__Concord_FAX_Report   job_type: BOX 
+owner: batchprod.service@B73
+permission: 
+date_conditions: 1
+run_calendar: EMB_CAE.UPG_Special
+start_times: "09:55"
+description: "Any Failures or Escalations: Abhishek.Ray@cognizant.com\"; Pradeep.S7@cognizant.com\";Arumugam.Mariappan@cognizant.com\";Srinivasan.Venkatesan2@cognizant.com\", EmblemTCSProdSupport (Cognizant) EmblemTCSProdSupport@cognizant.com"
+alarm_if_fail: 1
+alarm_if_terminated: 1
+group: EMB_CAE_UPG
+application: BOX-NOTCOUNTED.H
+
+
+ /* ----------------- EMB_CAE_UPG_0185_010.Concord_FAX_Report ----------------- */ 
+
+ insert_job: EMB_CAE_UPG_0185_010.Concord_FAX_Report   job_type: CMD 
+ box_name: EMB_CAE_UPG_0185__Concord_FAX_Report
+ command: $${HBA_ParmS} $${CAEParmS} HBA_EMB_RPT_SSIS_CCA045.xml $${EMB_CAEParmE}
+ machine: EMB_CAE.B73PRODBAT0016
+ owner: batchprod.service@B73
+ permission: 
+ date_conditions: 1
+ run_calendar: EMB_CAE.UPG_Special
+ start_times: "10:00"
+ condition: s(EMB_CAE_UPG_0100_010.Batch_Start) & s(EMB_CAE_UPG_0120__Daily)
+ description: "Operator Notes: Please rerun job upon first failure before paging oncall; Escalations: EMBCAEProdSupport  EMBCAEProdSupport@cognizant.com\""
+ std_out_file: "$${EMB_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.out"
+ std_err_file: "$${EMB_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.err"
+ alarm_if_fail: 1
+ job_load: 2
+ priority: 50
+ alarm_if_terminated: 1
+ group: EMB_CAE_UPG
+ application: CAE-COUNTED.H
+ send_notification: F
+ notification_template: "STG1_ZAYO"
+ resources: (EMB_CAE_UPG.RC_BatchControl,QUANTITY=10,FREE=A)
+ notification_emailaddress_on_failure: Naga.Gella@cognizant.com
+ notification_emailaddress_on_failure: LakshmiPrasanna.Poturi@cognizant.com
+ notification_emailaddress_on_failure: Kaviya.K2@cognizant.com
+ notification_emailaddress_on_failure: Deepak.Jandhyala@cognizant.com
+ notification_emailaddress_on_failure: PavanKumar.L@cognizant.com
+ notification_emailaddress_on_failure: Kodamasimham.Manisri@cognizant.com
+ notification_emailaddress_on_failure: Naga.Lakshmi2@cognizant.com
+
+
+/* ----------------- EMB_CAE_UPG_0400__TCS_Letter_Jobs ----------------- */ 
+
+insert_job: EMB_CAE_UPG_0400__TCS_Letter_Jobs   job_type: BOX 
+owner: batchprod.service@B73
+permission: 
+date_conditions: 1
+run_calendar: EMB_CAE.UPG_Special
+start_times: "13:55"
+alarm_if_fail: 1
+alarm_if_terminated: 1
+group: EMB_CAE_UPG
+application: BOX-NOTCOUNTED.H
+
+
+ /* ----------------- EMB_CAE_UPG_0400_010.TCS_WorkAssignerCAECCI ----------------- */ 
+
+ insert_job: EMB_CAE_UPG_0400_010.TCS_WorkAssignerCAECCI   job_type: CMD 
+ box_name: EMB_CAE_UPG_0400__TCS_Letter_Jobs
+ command: "C:\Program Files (x86)\Trizetto\TCS_590\BatchInfrastructure\IhmfWorkManager.exe" --Connection=ComponentDBConnectionString --Action=Run --WorkSpec=TZTCS.WorkAssigner.Standard.CAECCI
+ machine: EMB_CAE.B73PRODTCS0001
+ owner: ihmprod.service@B73
+ permission: 
+ date_conditions: 1
+ run_calendar: EMB_CAE.UPG_Special
+ start_times: "14:00"
+ condition: s(EMB_CAE_UPG_0100_010.Batch_Start) & s(EMB_CAE_UPG_0425__TCS_CAECC_Letter_Jobs)
+ description: "Any Failures or Escalations: Abhishek.Ray@cognizant.com\"; Pradeep.S7@cognizant.com\";Arumugam.Mariappan@cognizant.com\";Srinivasan.Venkatesan2@cognizant.com\", EmblemTCSProdSupport (Cognizant) EmblemTCSProdSupport@cognizant.com\",EMBCAEProdSupport (Cognizant) <EMBCAEProdSupport@cognizant.com\">"
+ std_out_file: "$${EMB_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.out"
+ std_err_file: "$${EMB_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.err"
+ alarm_if_fail: 1
+ job_load: 2
+ priority: 50
+ alarm_if_terminated: 1
+ group: EMB_CAE_UPG
+ application: CAE-COUNTED.H
+ resources: (EMB_CAE_UPG.RC_BatchControl,QUANTITY=10,FREE=A)
+
+
+ /* ----------------- EMB_CAE_UPG_0400_020.TCS_WorkDeliveryCAECCI ----------------- */ 
+
+ insert_job: EMB_CAE_UPG_0400_020.TCS_WorkDeliveryCAECCI   job_type: CMD 
+ box_name: EMB_CAE_UPG_0400__TCS_Letter_Jobs
+ command: "C:\Program Files (x86)\Trizetto\TCS_590\BatchInfrastructure\IhmfWorkManager.exe" --Connection=ComponentDBConnectionString --Action=Run --WorkSpec=TZTCS.Delivery.Standard.CAECCI
+ machine: EMB_CAE.B73PRODTCS0001
+ owner: ihmprod.service@B73
+ permission: 
+ date_conditions: 0
+ condition: s(EMB_CAE_UPG_0400_010.TCS_WorkAssignerCAECCI)
+ description: "Any Failures or Escalations: Abhishek.Ray@cognizant.com\"; Pradeep.S7@cognizant.com\";Arumugam.Mariappan@cognizant.com\";Srinivasan.Venkatesan2@cognizant.com"
+ std_out_file: "$${EMB_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.out"
+ std_err_file: "$${EMB_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.err"
+ alarm_if_fail: 1
+ job_load: 2
+ priority: 50
+ alarm_if_terminated: 1
+ group: EMB_CAE_UPG
+ application: CAE-COUNTED.H
+ send_notification: F
+ notification_template: "STG1_ZAYO"
+ resources: (EMB_CAE_UPG.RC_BatchControl,QUANTITY=10,FREE=A)
+ notification_emailaddress_on_failure: Naga.Gella@cognizant.com
+ notification_emailaddress_on_failure: LakshmiPrasanna.Poturi@cognizant.com
+ notification_emailaddress_on_failure: Kaviya.K2@cognizant.com
+ notification_emailaddress_on_failure: Deepak.Jandhyala@cognizant.com
+ notification_emailaddress_on_failure: PavanKumar.L@cognizant.com
+ notification_emailaddress_on_failure: Kodamasimham.Manisri@cognizant.com
+ notification_emailaddress_on_failure: Naga.Lakshmi2@cognizant.com
+
+
+ /* ----------------- EMB_CAE_UPG_0400_030.TCS_Manifest ----------------- */ 
+
+ insert_job: EMB_CAE_UPG_0400_030.TCS_Manifest   job_type: CMD 
+ box_name: EMB_CAE_UPG_0400__TCS_Letter_Jobs
+ command: C:\TCS\TCS_Manifest\CTS.TZ.TCS.Manifest.exe "15"
+ machine: EMB_CAE.B73PRODTCS0001
+ owner: ihmprod.service@B73
+ permission: 
+ date_conditions: 0
+ condition: s(EMB_CAE_UPG_0400_020.TCS_WorkDeliveryCAECCI)
+ description: "Any Failures or Escalations: Abhishek.Ray@cognizant.com\"; Pradeep.S7@cognizant.com\";Arumugam.Mariappan@cognizant.com\";Srinivasan.Venkatesan2@cognizant.com"
+ std_out_file: "$${EMB_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.out"
+ std_err_file: "$${EMB_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.err"
+ alarm_if_fail: 1
+ job_load: 2
+ priority: 50
+ alarm_if_terminated: 1
+ group: EMB_CAE_UPG
+ application: CAE-COUNTED.H
+ send_notification: F
+ notification_template: "STG1_ZAYO"
+ resources: (EMB_CAE_UPG.RC_BatchControl,QUANTITY=10,FREE=A)
+ notification_emailaddress_on_failure: Naga.Gella@cognizant.com
+ notification_emailaddress_on_failure: LakshmiPrasanna.Poturi@cognizant.com
+ notification_emailaddress_on_failure: Kaviya.K2@cognizant.com
+ notification_emailaddress_on_failure: Deepak.Jandhyala@cognizant.com
+ notification_emailaddress_on_failure: PavanKumar.L@cognizant.com
+ notification_emailaddress_on_failure: Kodamasimham.Manisri@cognizant.com
+ notification_emailaddress_on_failure: Naga.Lakshmi2@cognizant.com
+
+
+ /* ----------------- EMB_CAE_UPG_0400_040.ETS_EMBX_TCSX_MNFT_OUT ----------------- */ 
+
+ insert_job: EMB_CAE_UPG_0400_040.ETS_EMBX_TCSX_MNFT_OUT   job_type: CMD 
+ box_name: EMB_CAE_UPG_0400__TCS_Letter_Jobs
+ command: $${ETSParmS1} $${ETSParmS2}ETS_FACE_5XX_B73X_TCSX_MNFT_OUT.xml $${ETSParmE}
+ machine: EDI_FACE.A02MFTRTR0005
+ owner: b73prodedi@A02
+ permission: 
+ date_conditions: 0
+ condition: s(EMB_CAE_UPG_0400_030.TCS_Manifest)
+ description: "Operator Notes:Escalations: CIS TZ App EDI Operations OnCall"
+ std_out_file: "$${ETSLOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.out"
+ std_err_file: "$${ETSLOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.err"
+ alarm_if_fail: 1
+ job_load: 2
+ priority: 50
+ alarm_if_terminated: 1
+ group: EMB_CAE_UPG
+ application: EDI.CAE-NOTCOUNTED.H
+ send_notification: F
+ notification_template: "STG1_ZAYO"
+ resources: (EMB_CAE_UPG.RC_BatchControl,QUANTITY=10,FREE=A)
+ success_codes: 0
+ notification_emailaddress_on_failure: Naga.Gella@cognizant.com
+ notification_emailaddress_on_failure: LakshmiPrasanna.Poturi@cognizant.com
+ notification_emailaddress_on_failure: Kaviya.K2@cognizant.com
+ notification_emailaddress_on_failure: Deepak.Jandhyala@cognizant.com
+ notification_emailaddress_on_failure: PavanKumar.L@cognizant.com
+ notification_emailaddress_on_failure: Kodamasimham.Manisri@cognizant.com
+ notification_emailaddress_on_failure: Naga.Lakshmi2@cognizant.com
+
+
+/* ----------------- EMB_CAE_UPG_0420__CCI_CASEReopen ----------------- */ 
+
+insert_job: EMB_CAE_UPG_0420__CCI_CASEReopen   job_type: BOX 
+owner: batchprod.service@B73
+permission: 
+date_conditions: 1
+run_calendar: EMB_CAE.UPG_Special
+start_times: "09:55"
+alarm_if_fail: 1
+alarm_if_terminated: 1
+group: EMB_CAE_UPG
+application: BOX-NOTCOUNTED.H
+
+
+ /* ----------------- EMB_CAE_UPG_0420_010.EH_CCI_ManualReopen ----------------- */ 
+
+ insert_job: EMB_CAE_UPG_0420_010.EH_CCI_ManualReopen   job_type: CMD 
+ box_name: EMB_CAE_UPG_0420__CCI_CASEReopen
+ command: $${HBA_ParmS} $${CAEParmS} HBA_CAE_EH_CCI_ManualReopen.xml $${EMB_CAEParmE}
+ machine: EMB_CAE.B73PRODBAT0036
+ owner: batchprod.service@B73
+ permission: 
+ date_conditions: 1
+ run_calendar: EMB_CAE.UPG_Special
+ start_times: "10:00"
+ condition: s(EMB_FACE_UPG_0010_010.Batch_Start) & s(EMB_CAE_UPG_0120_020.Execute_DI_1) & s(EMB_CAE_UPG_0120__Daily)
+ description: "Operator Notes: Escalations: EMBCAEProdSupport  EMBCAEProdSupport@cognizant.com\""
+ std_out_file: "$${EMB_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.out"
+ std_err_file: "$${EMB_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.err"
+ alarm_if_fail: 1
+ job_load: 2
+ priority: 50
+ alarm_if_terminated: 1
+ group: EMB_CAE_UPG
+ application: CAE-COUNTED.H
+ send_notification: F
+ notification_template: "STG1_ZAYO"
+ resources: (EMB_CAE_UPG.RC_BatchControl,QUANTITY=10,FREE=A)
+ notification_emailaddress_on_failure: Naga.Gella@cognizant.com
+ notification_emailaddress_on_failure: LakshmiPrasanna.Poturi@cognizant.com
+ notification_emailaddress_on_failure: Kaviya.K2@cognizant.com
+ notification_emailaddress_on_failure: Deepak.Jandhyala@cognizant.com
+ notification_emailaddress_on_failure: PavanKumar.L@cognizant.com
+ notification_emailaddress_on_failure: Kodamasimham.Manisri@cognizant.com
+ notification_emailaddress_on_failure: Naga.Lakshmi2@cognizant.com
+
+
+ /* ----------------- EMB_CAE_UPG_0420_020.CCI_NIAReopen ----------------- */ 
+
+ insert_job: EMB_CAE_UPG_0420_020.CCI_NIAReopen   job_type: CMD 
+ box_name: EMB_CAE_UPG_0420__CCI_CASEReopen
+ command: $${HBA_ParmS} $${CAEParmS} HBA_CAE_CCI_NIAReopen.xml $${EMB_CAEParmE}
+ machine: EMB_CAE.B73PRODBAT0036
+ owner: batchprod.service@B73
+ permission: 
+ date_conditions: 0
+ condition: s(EMB_CAE_UPG_0420_010.EH_CCI_ManualReopen)
+ description: "Operator Notes: Escalations: EMBCAEProdSupport  EMBCAEProdSupport@cognizant.com\""
+ std_out_file: "$${EMB_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.out"
+ std_err_file: "$${EMB_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.err"
+ alarm_if_fail: 1
+ job_load: 2
+ priority: 50
+ alarm_if_terminated: 1
+ group: EMB_CAE_UPG
+ application: CAE-COUNTED.H
+ send_notification: F
+ notification_template: "STG1_ZAYO"
+ resources: (EMB_CAE_UPG.RC_BatchControl,QUANTITY=10,FREE=A)
+ notification_emailaddress_on_failure: Naga.Gella@cognizant.com
+ notification_emailaddress_on_failure: LakshmiPrasanna.Poturi@cognizant.com
+ notification_emailaddress_on_failure: Kaviya.K2@cognizant.com
+ notification_emailaddress_on_failure: Deepak.Jandhyala@cognizant.com
+ notification_emailaddress_on_failure: PavanKumar.L@cognizant.com
+ notification_emailaddress_on_failure: Kodamasimham.Manisri@cognizant.com
+ notification_emailaddress_on_failure: Naga.Lakshmi2@cognizant.com
+
+
+ /* ----------------- EMB_CAE_UPG_0420_030.CCI_SNFAccum ----------------- */ 
+
+ insert_job: EMB_CAE_UPG_0420_030.CCI_SNFAccum   job_type: CMD 
+ box_name: EMB_CAE_UPG_0420__CCI_CASEReopen
+ command: $${HBA_ParmS} $${CAEParmS} HBA_CAE_CCI_SNFAccum.xml $${EMB_CAEParmE}
+ machine: EMB_CAE.B73PRODBAT0015
+ owner: batchprod.service@B73
+ permission: 
+ date_conditions: 0
+ condition: s(EMB_CAE_UPG_0420_020.CCI_NIAReopen)
+ description: "Operator Notes: Escalations: EMBCAEProdSupport  EMBCAEProdSupport@cognizant.com\""
+ std_out_file: "$${EMB_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.out"
+ std_err_file: "$${EMB_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.err"
+ alarm_if_fail: 1
+ job_load: 2
+ priority: 50
+ alarm_if_terminated: 1
+ group: EMB_CAE_UPG
+ application: CAE-COUNTED.H
+ send_notification: F
+ notification_template: "STG1_ZAYO"
+ resources: (EMB_CAE_UPG.RC_BatchControl,QUANTITY=10,FREE=A)
+ notification_emailaddress_on_failure: Naga.Gella@cognizant.com
+ notification_emailaddress_on_failure: LakshmiPrasanna.Poturi@cognizant.com
+ notification_emailaddress_on_failure: Kaviya.K2@cognizant.com
+ notification_emailaddress_on_failure: Deepak.Jandhyala@cognizant.com
+ notification_emailaddress_on_failure: PavanKumar.L@cognizant.com
+ notification_emailaddress_on_failure: Kodamasimham.Manisri@cognizant.com
+ notification_emailaddress_on_failure: Naga.Lakshmi2@cognizant.com
+
+
+ /* ----------------- EMB_CAE_UPG_0420_040.CCI_OONNote ----------------- */ 
+
+ insert_job: EMB_CAE_UPG_0420_040.CCI_OONNote   job_type: CMD 
+ box_name: EMB_CAE_UPG_0420__CCI_CASEReopen
+ command: $${HBA_ParmS} $${CAEParmS} HBA_CAE_CCI_OONNote.xml $${EMB_CAEParmE}
+ machine: EMB_CAE.B73PRODBAT0036
+ owner: batchprod.service@B73
+ permission: 
+ date_conditions: 0
+ condition: s(EMB_CAE_UPG_0420_030.CCI_SNFAccum)
+ description: "Operator Notes: Escalations: EMBCAEProdSupport  EMBCAEProdSupport@cognizant.com\""
+ std_out_file: "$${EMB_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.out"
+ std_err_file: "$${EMB_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.err"
+ alarm_if_fail: 1
+ job_load: 2
+ priority: 50
+ alarm_if_terminated: 1
+ group: EMB_CAE_UPG
+ application: CAE-COUNTED.H
+ send_notification: F
+ notification_template: "STG1_ZAYO"
+ resources: (EMB_CAE_UPG.RC_BatchControl,QUANTITY=10,FREE=A)
+ notification_emailaddress_on_failure: Naga.Gella@cognizant.com
+ notification_emailaddress_on_failure: LakshmiPrasanna.Poturi@cognizant.com
+ notification_emailaddress_on_failure: Kaviya.K2@cognizant.com
+ notification_emailaddress_on_failure: Deepak.Jandhyala@cognizant.com
+ notification_emailaddress_on_failure: PavanKumar.L@cognizant.com
+ notification_emailaddress_on_failure: Kodamasimham.Manisri@cognizant.com
+ notification_emailaddress_on_failure: Naga.Lakshmi2@cognizant.com
+
+
+/* ----------------- EMB_CAE_UPG_0415__TCS_CAENOCC_Letter_Jobs ----------------- */ 
+
+insert_job: EMB_CAE_UPG_0415__TCS_CAENOCC_Letter_Jobs   job_type: BOX 
+owner: batchprod.service@B73
+permission: 
+date_conditions: 1
+run_calendar: EMB_CAE.UPG_Special
+start_times: "13:55"
+alarm_if_fail: 1
+alarm_if_terminated: 1
+group: EMB_CAE_UPG
+application: BOX-NOTCOUNTED.H
+
+
+ /* ----------------- EMB_CAE_UPG_0415_010.TCS_WorkAssignerCAENOCC ----------------- */ 
+
+ insert_job: EMB_CAE_UPG_0415_010.TCS_WorkAssignerCAENOCC   job_type: CMD 
+ box_name: EMB_CAE_UPG_0415__TCS_CAENOCC_Letter_Jobs
+ command: "C:\Program Files (x86)\Trizetto\TCS_590\BatchInfrastructure\IhmfWorkManager.exe" --Connection=ComponentDBConnectionString --Action=Run --WorkSpec=TZTCS.WorkAssigner.Standard.CAENOCC
+ machine: EMB_CAE.B73PRODTCS0001
+ owner: ihmprod.service@B73
+ permission: 
+ date_conditions: 1
+ run_calendar: EMB_CAE.UPG_Special
+ start_times: "14:00"
+ condition: s(EMB_CAE_UPG_0100_010.Batch_Start) & s(EMB_CAE_UPG_0400__TCS_Letter_Jobs)
+ description: "Any Failures or Escalations: Abhishek.Ray@cognizant.com\"; Pradeep.S7@cognizant.com\";Arumugam.Mariappan@cognizant.com\";Srinivasan.Venkatesan2@cognizant.com\", EmblemTCSProdSupport (Cognizant) EmblemTCSProdSupport@cognizant.com\",EMBCAEProdSupport (Cognizant) <EMBCAEProdSupport@cognizant.com\">"
+ std_out_file: "$${EMB_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.out"
+ std_err_file: "$${EMB_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.err"
+ alarm_if_fail: 1
+ job_load: 2
+ priority: 50
+ alarm_if_terminated: 1
+ group: EMB_CAE_UPG
+ application: CAE-COUNTED.H
+ resources: (EMB_CAE_UPG.RC_BatchControl,QUANTITY=10,FREE=A)
+
+
+ /* ----------------- EMB_CAE_UPG_0415_020.TCS_WorkDeliveryCAENOCC ----------------- */ 
+
+ insert_job: EMB_CAE_UPG_0415_020.TCS_WorkDeliveryCAENOCC   job_type: CMD 
+ box_name: EMB_CAE_UPG_0415__TCS_CAENOCC_Letter_Jobs
+ command: "C:\Program Files (x86)\Trizetto\TCS_590\BatchInfrastructure\IhmfWorkManager.exe" --Connection=ComponentDBConnectionString --Action=Run --WorkSpec=TZTCS.Delivery.Standard.CAENOCC
+ machine: EMB_CAE.B73PRODTCS0001
+ owner: ihmprod.service@B73
+ permission: 
+ date_conditions: 0
+ condition: s(EMB_CAE_UPG_0415_010.TCS_WorkAssignerCAENOCC)
+ description: "Any Failures or Escalations: Abhishek.Ray@cognizant.com\"; Pradeep.S7@cognizant.com\";Arumugam.Mariappan@cognizant.com\";Srinivasan.Venkatesan2@cognizant.com"
+ std_out_file: "$${EMB_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.out"
+ std_err_file: "$${EMB_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.err"
+ alarm_if_fail: 1
+ job_load: 2
+ priority: 50
+ alarm_if_terminated: 1
+ group: EMB_CAE_UPG
+ application: CAE-COUNTED.H
+ send_notification: F
+ notification_template: "STG1_ZAYO"
+ resources: (EMB_CAE_UPG.RC_BatchControl,QUANTITY=10,FREE=A)
+ notification_emailaddress_on_failure: Naga.Gella@cognizant.com
+ notification_emailaddress_on_failure: LakshmiPrasanna.Poturi@cognizant.com
+ notification_emailaddress_on_failure: Kaviya.K2@cognizant.com
+ notification_emailaddress_on_failure: Deepak.Jandhyala@cognizant.com
+ notification_emailaddress_on_failure: PavanKumar.L@cognizant.com
+ notification_emailaddress_on_failure: Kodamasimham.Manisri@cognizant.com
+ notification_emailaddress_on_failure: Naga.Lakshmi2@cognizant.com
+
+
+ /* ----------------- EMB_CAE_UPG_0415_030.TCS_Manifest ----------------- */ 
+
+ insert_job: EMB_CAE_UPG_0415_030.TCS_Manifest   job_type: CMD 
+ box_name: EMB_CAE_UPG_0415__TCS_CAENOCC_Letter_Jobs
+ command: C:\TCS\TCS_Manifest\CTS.TZ.TCS.Manifest.exe "5"
+ machine: EMB_CAE.B73PRODTCS0001
+ owner: ihmprod.service@B73
+ permission: 
+ date_conditions: 0
+ condition: s(EMB_CAE_UPG_0415_020.TCS_WorkDeliveryCAENOCC)
+ description: "Any Failures or Escalations: Abhishek.Ray@cognizant.com\"; Pradeep.S7@cognizant.com\";Arumugam.Mariappan@cognizant.com\";Srinivasan.Venkatesan2@cognizant.com"
+ std_out_file: "$${EMB_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.out"
+ std_err_file: "$${EMB_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.err"
+ alarm_if_fail: 1
+ job_load: 2
+ priority: 50
+ alarm_if_terminated: 1
+ group: EMB_CAE_UPG
+ application: CAE-COUNTED.H
+ send_notification: F
+ notification_template: "STG1_ZAYO"
+ resources: (EMB_CAE_UPG.RC_BatchControl,QUANTITY=10,FREE=A)
+ notification_emailaddress_on_failure: Naga.Gella@cognizant.com
+ notification_emailaddress_on_failure: LakshmiPrasanna.Poturi@cognizant.com
+ notification_emailaddress_on_failure: Kaviya.K2@cognizant.com
+ notification_emailaddress_on_failure: Deepak.Jandhyala@cognizant.com
+ notification_emailaddress_on_failure: PavanKumar.L@cognizant.com
+ notification_emailaddress_on_failure: Kodamasimham.Manisri@cognizant.com
+ notification_emailaddress_on_failure: Naga.Lakshmi2@cognizant.com
+
+
+ /* ----------------- EMB_CAE_UPG_0415_033.TCS_Manifest_1 ----------------- */ 
+
+ insert_job: EMB_CAE_UPG_0415_033.TCS_Manifest_1   job_type: CMD 
+ box_name: EMB_CAE_UPG_0415__TCS_CAENOCC_Letter_Jobs
+ command: C:\TCS\TCS_Manifest\CTS.TZ.TCS.Manifest.exe "5" "5000"
+ machine: EMB_CAE.B73PRODTCS0001
+ owner: ihmprod.service@B73
+ permission: 
+ date_conditions: 0
+ condition: s(EMB_CAE_UPG_0415_030.TCS_Manifest)
+ description: "Any Failures or Escalations: Please rerun the job at least 3 times(RITM1138883), if failed escalated to: Abhishek.Ray@cognizant.com\"; Pradeep.S7@cognizant.com\";Arumugam.Mariappan@cognizant.com\";Srinivasan.Venkatesan2@cognizant.com\", EmblemTCSProdSupport (Cognizant) EmblemTCSProdSupport@cognizant.com\",EMBCAEProdSupport (Cognizant) <EMBCAEProdSupport@cognizant.com\">"
+ std_out_file: "$${EMB_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.out"
+ std_err_file: "$${EMB_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.err"
+ alarm_if_fail: 1
+ job_load: 2
+ priority: 50
+ alarm_if_terminated: 1
+ group: EMB_CAE_UPG
+ application: CAE-COUNTED.H
+ resources: (EMB_CAE_UPG.RC_BatchControl,QUANTITY=10,FREE=A)
+
+
+ /* ----------------- EMB_CAE_UPG_0415_036.TCS_Manifest_2 ----------------- */ 
+
+ insert_job: EMB_CAE_UPG_0415_036.TCS_Manifest_2   job_type: CMD 
+ box_name: EMB_CAE_UPG_0415__TCS_CAENOCC_Letter_Jobs
+ command: C:\TCS\TCS_Manifest\CTS.TZ.TCS.Manifest.exe "5" "5000"
+ machine: EMB_CAE.B73PRODTCS0001
+ owner: ihmprod.service@B73
+ permission: 
+ date_conditions: 0
+ condition: s(EMB_CAE_UPG_0415_033.TCS_Manifest_1)
+ description: "Any Failures or Escalations: Please rerun the job at least 3 times(RITM1138883), if failed escalated to: Abhishek.Ray@cognizant.com\"; Pradeep.S7@cognizant.com\";Arumugam.Mariappan@cognizant.com\";Srinivasan.Venkatesan2@cognizant.com\", EmblemTCSProdSupport (Cognizant) EmblemTCSProdSupport@cognizant.com\",EMBCAEProdSupport (Cognizant) <EMBCAEProdSupport@cognizant.com\">"
+ std_out_file: "$${EMB_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.out"
+ std_err_file: "$${EMB_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.err"
+ alarm_if_fail: 1
+ job_load: 2
+ priority: 50
+ alarm_if_terminated: 1
+ group: EMB_CAE_UPG
+ application: CAE-COUNTED.H
+ resources: (EMB_CAE_UPG.RC_BatchControl,QUANTITY=10,FREE=A)
+
+
+ /* ----------------- EMB_CAE_UPG_0415_039.TCS_Manifest_3 ----------------- */ 
+
+ insert_job: EMB_CAE_UPG_0415_039.TCS_Manifest_3   job_type: CMD 
+ box_name: EMB_CAE_UPG_0415__TCS_CAENOCC_Letter_Jobs
+ command: C:\TCS\TCS_Manifest\CTS.TZ.TCS.Manifest.exe "5" "5000"
+ machine: EMB_CAE.B73PRODTCS0001
+ owner: ihmprod.service@B73
+ permission: 
+ date_conditions: 0
+ condition: s(EMB_CAE_UPG_0415_036.TCS_Manifest_2)
+ description: "Any Failures or Escalations: Please rerun the job at least 3 times(RITM1138883), if failed escalated to: Abhishek.Ray@cognizant.com\"; Pradeep.S7@cognizant.com\";Arumugam.Mariappan@cognizant.com\";Srinivasan.Venkatesan2@cognizant.com\", EmblemTCSProdSupport (Cognizant) EmblemTCSProdSupport@cognizant.com\",EMBCAEProdSupport (Cognizant) <EMBCAEProdSupport@cognizant.com\">"
+ std_out_file: "$${EMB_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.out"
+ std_err_file: "$${EMB_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.err"
+ alarm_if_fail: 1
+ job_load: 2
+ priority: 50
+ alarm_if_terminated: 1
+ group: EMB_CAE_UPG
+ application: CAE-COUNTED.H
+ resources: (EMB_CAE_UPG.RC_BatchControl,QUANTITY=10,FREE=A)
+
+
+ /* ----------------- EMB_CAE_UPG_0415_040.ETS_EMBX_TCSX_MNFT_OUT ----------------- */ 
+
+ insert_job: EMB_CAE_UPG_0415_040.ETS_EMBX_TCSX_MNFT_OUT   job_type: CMD 
+ box_name: EMB_CAE_UPG_0415__TCS_CAENOCC_Letter_Jobs
+ command: $${ETSParmS1} $${ETSParmS2}ETS_FACE_5XX_B73X_TCSX_MNFT_OUT.xml $${ETSParmE}
+ machine: EDI_FACE.A02MFTRTR0005
+ owner: b73prodedi@A02
+ permission: 
+ date_conditions: 0
+ condition: s(EMB_CAE_UPG_0415_030.TCS_Manifest)
+ description: "Operator Notes:Escalations: CIS TZ App EDI Operations OnCall"
+ std_out_file: "$${ETSLOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.out"
+ std_err_file: "$${ETSLOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.err"
+ alarm_if_fail: 1
+ job_load: 2
+ priority: 50
+ alarm_if_terminated: 1
+ group: EMB_CAE_UPG
+ application: EDI.CAE-NOTCOUNTED.H
+ send_notification: F
+ notification_template: "STG1_ZAYO"
+ resources: (EMB_CAE_UPG.RC_BatchControl,QUANTITY=10,FREE=A)
+ success_codes: 0
+ notification_emailaddress_on_failure: Naga.Gella@cognizant.com
+ notification_emailaddress_on_failure: LakshmiPrasanna.Poturi@cognizant.com
+ notification_emailaddress_on_failure: Kaviya.K2@cognizant.com
+ notification_emailaddress_on_failure: Deepak.Jandhyala@cognizant.com
+ notification_emailaddress_on_failure: PavanKumar.L@cognizant.com
+ notification_emailaddress_on_failure: Kodamasimham.Manisri@cognizant.com
+ notification_emailaddress_on_failure: Naga.Lakshmi2@cognizant.com
+
+
+/* ----------------- EMB_CAE_UPG_0425__TCS_CAECC_Letter_Jobs ----------------- */ 
+
+insert_job: EMB_CAE_UPG_0425__TCS_CAECC_Letter_Jobs   job_type: BOX 
+owner: batchprod.service@B73
+permission: 
+date_conditions: 1
+run_calendar: EMB_CAE.UPG_Special
+start_times: "13:55"
+alarm_if_fail: 1
+alarm_if_terminated: 1
+group: EMB_CAE_UPG
+application: BOX-NOTCOUNTED.H
+
+
+ /* ----------------- EMB_CAE_UPG_0425_010.TCS_WorkAssignerCAECC ----------------- */ 
+
+ insert_job: EMB_CAE_UPG_0425_010.TCS_WorkAssignerCAECC   job_type: CMD 
+ box_name: EMB_CAE_UPG_0425__TCS_CAECC_Letter_Jobs
+ command: "C:\Program Files (x86)\Trizetto\TCS_590\BatchInfrastructure\IhmfWorkManager.exe" --Connection=ComponentDBConnectionString --Action=Run --WorkSpec=TZTCS.WorkAssigner.Standard.CAECC
+ machine: EMB_CAE.B73PRODTCS0001
+ owner: ihmprod.service@B73
+ permission: 
+ date_conditions: 1
+ run_calendar: EMB_CAE.UPG_Special
+ start_times: "14:00"
+ condition: s(EMB_CAE_UPG_0100_010.Batch_Start)
+ description: "Any Failures or Escalations: Abhishek.Ray@cognizant.com\"; Pradeep.S7@cognizant.com\";Arumugam.Mariappan@cognizant.com\";Srinivasan.Venkatesan2@cognizant.com\", EmblemTCSProdSupport (Cognizant) EmblemTCSProdSupport@cognizant.com\",EMBCAEProdSupport (Cognizant) <EMBCAEProdSupport@cognizant.com\">"
+ std_out_file: "$${EMB_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.out"
+ std_err_file: "$${EMB_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.err"
+ alarm_if_fail: 1
+ job_load: 2
+ priority: 50
+ alarm_if_terminated: 1
+ group: EMB_CAE_UPG
+ application: CAE-COUNTED.H
+ resources: (EMB_CAE_UPG.RC_BatchControl,QUANTITY=10,FREE=A)
+
+
+ /* ----------------- EMB_CAE_UPG_0425_020.TCS_WorkDeliveryCAECC ----------------- */ 
+
+ insert_job: EMB_CAE_UPG_0425_020.TCS_WorkDeliveryCAECC   job_type: CMD 
+ box_name: EMB_CAE_UPG_0425__TCS_CAECC_Letter_Jobs
+ command: "C:\Program Files (x86)\Trizetto\TCS_590\BatchInfrastructure\IhmfWorkManager.exe" --Connection=ComponentDBConnectionString --Action=Run --WorkSpec=TZTCS.Delivery.Standard.CAECC
+ machine: EMB_CAE.B73PRODTCS0001
+ owner: ihmprod.service@B73
+ permission: 
+ date_conditions: 0
+ condition: s(EMB_CAE_UPG_0425_010.TCS_WorkAssignerCAECC) & n(EMB_CAE_UPG_0428_002.TCS_WorkDeliveryCAECC)
+ description: "Any Failures or Escalations: Abhishek.Ray@cognizant.com\"; Pradeep.S7@cognizant.com\";Arumugam.Mariappan@cognizant.com\";Srinivasan.Venkatesan2@cognizant.com"
+ std_out_file: "$${EMB_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.out"
+ std_err_file: "$${EMB_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.err"
+ alarm_if_fail: 1
+ job_load: 2
+ priority: 50
+ alarm_if_terminated: 1
+ group: EMB_CAE_UPG
+ application: CAE-COUNTED.H
+ send_notification: F
+ notification_template: "STG1_ZAYO"
+ resources: (EMB_CAE_UPG.RC_BatchControl,QUANTITY=10,FREE=A)
+ notification_emailaddress_on_failure: Naga.Gella@cognizant.com
+ notification_emailaddress_on_failure: LakshmiPrasanna.Poturi@cognizant.com
+ notification_emailaddress_on_failure: Kaviya.K2@cognizant.com
+ notification_emailaddress_on_failure: Deepak.Jandhyala@cognizant.com
+ notification_emailaddress_on_failure: PavanKumar.L@cognizant.com
+ notification_emailaddress_on_failure: Kodamasimham.Manisri@cognizant.com
+ notification_emailaddress_on_failure: Naga.Lakshmi2@cognizant.com
+
+
+ /* ----------------- EMB_CAE_UPG_0425_030.TCS_Manifest ----------------- */ 
+
+ insert_job: EMB_CAE_UPG_0425_030.TCS_Manifest   job_type: CMD 
+ box_name: EMB_CAE_UPG_0425__TCS_CAECC_Letter_Jobs
+ command: C:\TCS\TCS_Manifest\CTS.TZ.TCS.Manifest.exe "8"
+ machine: EMB_CAE.B73PRODTCS0001
+ owner: ihmprod.service@B73
+ permission: 
+ date_conditions: 0
+ condition: s(EMB_CAE_UPG_0425_020.TCS_WorkDeliveryCAECC)
+ description: "Any Failures or Escalations: Abhishek.Ray@cognizant.com\"; Pradeep.S7@cognizant.com\";Arumugam.Mariappan@cognizant.com\";Srinivasan.Venkatesan2@cognizant.com"
+ std_out_file: "$${EMB_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.out"
+ std_err_file: "$${EMB_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.err"
+ alarm_if_fail: 1
+ job_load: 2
+ priority: 50
+ alarm_if_terminated: 1
+ group: EMB_CAE_UPG
+ application: CAE-COUNTED.H
+ send_notification: F
+ notification_template: "STG1_ZAYO"
+ resources: (EMB_CAE_UPG.RC_BatchControl,QUANTITY=10,FREE=A)
+ notification_emailaddress_on_failure: Naga.Gella@cognizant.com
+ notification_emailaddress_on_failure: LakshmiPrasanna.Poturi@cognizant.com
+ notification_emailaddress_on_failure: Kaviya.K2@cognizant.com
+ notification_emailaddress_on_failure: Deepak.Jandhyala@cognizant.com
+ notification_emailaddress_on_failure: PavanKumar.L@cognizant.com
+ notification_emailaddress_on_failure: Kodamasimham.Manisri@cognizant.com
+ notification_emailaddress_on_failure: Naga.Lakshmi2@cognizant.com
+
+
+ /* ----------------- EMB_CAE_UPG_0425_040.ETS_EMBX_TCSX_MNFT_OUT ----------------- */ 
+
+ insert_job: EMB_CAE_UPG_0425_040.ETS_EMBX_TCSX_MNFT_OUT   job_type: CMD 
+ box_name: EMB_CAE_UPG_0425__TCS_CAECC_Letter_Jobs
+ command: $${ETSParmS1} $${ETSParmS2}ETS_FACE_5XX_B73X_TCSX_MNFT_OUT.xml $${ETSParmE}
+ machine: EDI_FACE.A02MFTRTR0005
+ owner: b73prodedi@A02
+ permission: 
+ date_conditions: 0
+ condition: s(EMB_CAE_UPG_0425_030.TCS_Manifest)
+ description: "Operator Notes:Escalations: CIS TZ App EDI Operations OnCall"
+ std_out_file: "$${ETSLOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.out"
+ std_err_file: "$${ETSLOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.err"
+ alarm_if_fail: 1
+ job_load: 2
+ priority: 50
+ alarm_if_terminated: 1
+ group: EMB_CAE_UPG
+ application: EDI.CAE-NOTCOUNTED.H
+ send_notification: F
+ notification_template: "STG1_ZAYO"
+ resources: (EMB_CAE_UPG.RC_BatchControl,QUANTITY=10,FREE=A)
+ success_codes: 0
+ notification_emailaddress_on_failure: Naga.Gella@cognizant.com
+ notification_emailaddress_on_failure: LakshmiPrasanna.Poturi@cognizant.com
+ notification_emailaddress_on_failure: Kaviya.K2@cognizant.com
+ notification_emailaddress_on_failure: Deepak.Jandhyala@cognizant.com
+ notification_emailaddress_on_failure: PavanKumar.L@cognizant.com
+ notification_emailaddress_on_failure: Kodamasimham.Manisri@cognizant.com
+ notification_emailaddress_on_failure: Naga.Lakshmi2@cognizant.com
+
+
+/* ----------------- EMB_CAE_UPG_0123__COMPDB_TO_CAE_Update ----------------- */ 
+
+insert_job: EMB_CAE_UPG_0123__COMPDB_TO_CAE_Update   job_type: BOX 
+owner: batchprod.service@B73
+permission: 
+date_conditions: 1
+run_calendar: EMB_CAE.UPG_Special
+start_times: "08:55"
+description: "Daily Custom Reports"
+alarm_if_fail: 1
+alarm_if_terminated: 1
+group: EMB_CAE_UPG
+application: BOX-NOTCOUNTED.H
+
+
+ /* ----------------- EMB_CAE_UPG_0123_010.COMPDB_TO_CAE_Update ----------------- */ 
+
+ insert_job: EMB_CAE_UPG_0123_010.COMPDB_TO_CAE_Update   job_type: CMD 
+ box_name: EMB_CAE_UPG_0123__COMPDB_TO_CAE_Update
+ command: $${HBA_ParmS} $${CAEParmS} HBA_EMB_COMPDB_TO_CAE.xml $${EMB_CAEParmE}
+ machine: EMB_CAE.B73PRODBAT0015
+ owner: batchprod.service@B73
+ permission: 
+ date_conditions: 1
+ run_calendar: EMB_CAE.UPG_Special
+ start_times: "09:00"
+ description: "Operator Notes: Escalations: EMBCAEProdSupport (Cognizant) EMBCAEProdSupport@cognizant.com"
+ std_out_file: "$${EMB_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.out"
+ std_err_file: "$${EMB_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.err"
+ alarm_if_fail: 1
+ job_load: 2
+ priority: 50
+ alarm_if_terminated: 1
+ group: EMB_CAE_UPG
+ application: CAE-COUNTED.H
+ resources: (EMB_CAE_UPG.RC_BatchControl,QUANTITY=10,FREE=A)
+
+
+ /* ----------------- EMB_CAE_UPG_0123_020.KBI_Sync_Templates ----------------- */ 
+
+ insert_job: EMB_CAE_UPG_0123_020.KBI_Sync_Templates   job_type: CMD 
+ box_name: EMB_CAE_UPG_0123__COMPDB_TO_CAE_Update
+ command: $${HBA_ParmS} $${CAEParmS} HBA_EMB_KBI_Sync_Templates.xml $${EMB_CAEParmE}
+ machine: EMB_CAE.B73PRODBAT0016
+ owner: batchprod.service@B73
+ permission: 
+ date_conditions: 0
+ condition: s(EMB_CAE_UPG_0123_010.COMPDB_TO_CAE_Update)
+ description: "Operator Notes: Escalations: EMBCAEProdSupport  EMBCAEProdSupport@cognizant.com\""
+ std_out_file: "$${EMB_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.out"
+ std_err_file: "$${EMB_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.err"
+ alarm_if_fail: 1
+ job_load: 2
+ priority: 50
+ alarm_if_terminated: 1
+ group: EMB_CAE_UPG
+ application: CAE-COUNTED.H
+ send_notification: F
+ notification_template: "STG1_ZAYO"
+ resources: (EMB_CAE_UPG.RC_BatchControl,QUANTITY=10,FREE=A)
+ notification_emailaddress_on_failure: Naga.Gella@cognizant.com
+ notification_emailaddress_on_failure: LakshmiPrasanna.Poturi@cognizant.com
+ notification_emailaddress_on_failure: Kaviya.K2@cognizant.com
+ notification_emailaddress_on_failure: Deepak.Jandhyala@cognizant.com
+ notification_emailaddress_on_failure: PavanKumar.L@cognizant.com
+ notification_emailaddress_on_failure: Kodamasimham.Manisri@cognizant.com
+ notification_emailaddress_on_failure: Naga.Lakshmi2@cognizant.com
+
+
+/* ----------------- EMB_CAE_UPG_0435__TCS_CAEFAX_Letter_Jobs ----------------- */ 
+
+insert_job: EMB_CAE_UPG_0435__TCS_CAEFAX_Letter_Jobs   job_type: BOX 
+owner: batchprod.service@B73
+permission: 
+date_conditions: 1
+run_calendar: EMB_CAE.UPG_Special
+start_times: "09:55,10:55,11:55,12:55,13:55,14:55"
+alarm_if_fail: 1
+alarm_if_terminated: 1
+group: EMB_CAE_UPG
+application: BOX-NOTCOUNTED.H
+
+
+ /* ----------------- EMB_CAE_UPG_0435_010.TCS_WorkAssignerCAEFAX ----------------- */ 
+
+ insert_job: EMB_CAE_UPG_0435_010.TCS_WorkAssignerCAEFAX   job_type: CMD 
+ box_name: EMB_CAE_UPG_0435__TCS_CAEFAX_Letter_Jobs
+ command: "C:\Program Files (x86)\Trizetto\TCS_590\BatchInfrastructure\IhmfWorkManager.exe" --Connection=ComponentDBConnectionString --Action=Run --WorkSpec=TZTCS.WorkAssigner.Standard.CAEFAX
+ machine: EMB_CAE.B73PRODTCS0001
+ owner: ihmprod.service@B73
+ permission: 
+ date_conditions: 1
+ run_calendar: EMB_CAE.UPG_Special
+ start_times: "10:00,11:00,12:00,13:00,14:00,15:00"
+ condition: s(EMB_CAE_UPG_0100_010.Batch_Start)
+ description: "Any Failures or Escalations: Abhishek.Ray@cognizant.com\"; Pradeep.S7@cognizant.com\";Arumugam.Mariappan@cognizant.com\";Srinivasan.Venkatesan2@cognizant.com\", EmblemTCSProdSupport (Cognizant) EmblemTCSProdSupport@cognizant.com\",EMBCAEProdSupport (Cognizant) <EMBCAEProdSupport@cognizant.com\">"
+ std_out_file: "$${EMB_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.out"
+ std_err_file: "$${EMB_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.err"
+ alarm_if_fail: 1
+ job_load: 2
+ priority: 50
+ alarm_if_terminated: 1
+ group: EMB_CAE_UPG
+ application: CAE-COUNTED.H
+ resources: (EMB_CAE_UPG.RC_BatchControl,QUANTITY=10,FREE=A)
+
+
+ /* ----------------- EMB_CAE_UPG_0435_020.TCS_WorkDeliveryCAEFAX ----------------- */ 
+
+ insert_job: EMB_CAE_UPG_0435_020.TCS_WorkDeliveryCAEFAX   job_type: CMD 
+ box_name: EMB_CAE_UPG_0435__TCS_CAEFAX_Letter_Jobs
+ command: "C:\Program Files (x86)\Trizetto\TCS_590\BatchInfrastructure\IhmfWorkManager.exe" --Connection=ComponentDBConnectionString --Action=Run --WorkSpec=TZTCS.Delivery.Standard.CAEFAX
+ machine: EMB_CAE.B73PRODTCS0001
+ owner: ihmprod.service@B73
+ permission: 
+ date_conditions: 0
+ condition: s(EMB_CAE_UPG_0435_010.TCS_WorkAssignerCAEFAX)
+ description: "Any Failures or Escalations: Abhishek.Ray@cognizant.com\"; Pradeep.S7@cognizant.com\";Arumugam.Mariappan@cognizant.com\";Srinivasan.Venkatesan2@cognizant.com"
+ std_out_file: "$${EMB_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.out"
+ std_err_file: "$${EMB_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.err"
+ alarm_if_fail: 1
+ job_load: 2
+ priority: 50
+ alarm_if_terminated: 1
+ group: EMB_CAE_UPG
+ application: CAE-COUNTED.H
+ send_notification: F
+ notification_template: "STG1_ZAYO"
+ resources: (EMB_CAE_UPG.RC_BatchControl,QUANTITY=10,FREE=A)
+ notification_emailaddress_on_failure: Naga.Gella@cognizant.com
+ notification_emailaddress_on_failure: LakshmiPrasanna.Poturi@cognizant.com
+ notification_emailaddress_on_failure: Kaviya.K2@cognizant.com
+ notification_emailaddress_on_failure: Deepak.Jandhyala@cognizant.com
+ notification_emailaddress_on_failure: PavanKumar.L@cognizant.com
+ notification_emailaddress_on_failure: Kodamasimham.Manisri@cognizant.com
+ notification_emailaddress_on_failure: Naga.Lakshmi2@cognizant.com
+
+
+ /* ----------------- EMB_CAE_UPG_0435_030.TCS_Manifest_3 ----------------- */ 
+
+ insert_job: EMB_CAE_UPG_0435_030.TCS_Manifest_3   job_type: CMD 
+ box_name: EMB_CAE_UPG_0435__TCS_CAEFAX_Letter_Jobs
+ command: C:\TCS\TCS_Manifest\CTS.TZ.TCS.Manifest.exe "3"
+ machine: EMB_CAE.B73PRODTCS0001
+ owner: ihmprod.service@B73
+ permission: 
+ date_conditions: 0
+ condition: s(EMB_CAE_UPG_0435_020.TCS_WorkDeliveryCAEFAX)
+ description: "Any Failures or Escalations: Abhishek.Ray@cognizant.com\"; Pradeep.S7@cognizant.com\";Arumugam.Mariappan@cognizant.com\";Srinivasan.Venkatesan2@cognizant.com"
+ std_out_file: "$${EMB_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.out"
+ std_err_file: "$${EMB_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.err"
+ alarm_if_fail: 1
+ job_load: 2
+ priority: 50
+ alarm_if_terminated: 1
+ group: EMB_CAE_UPG
+ application: CAE-COUNTED.H
+ send_notification: F
+ notification_template: "STG1_ZAYO"
+ resources: (EMB_CAE_UPG.RC_BatchControl,QUANTITY=10,FREE=A)
+ notification_emailaddress_on_failure: Naga.Gella@cognizant.com
+ notification_emailaddress_on_failure: LakshmiPrasanna.Poturi@cognizant.com
+ notification_emailaddress_on_failure: Kaviya.K2@cognizant.com
+ notification_emailaddress_on_failure: Deepak.Jandhyala@cognizant.com
+ notification_emailaddress_on_failure: PavanKumar.L@cognizant.com
+ notification_emailaddress_on_failure: Kodamasimham.Manisri@cognizant.com
+ notification_emailaddress_on_failure: Naga.Lakshmi2@cognizant.com
+
+
+ /* ----------------- EMB_CAE_UPG_0435_040.Custom_Fax_Job ----------------- */ 
+
+ insert_job: EMB_CAE_UPG_0435_040.Custom_Fax_Job   job_type: CMD 
+ box_name: EMB_CAE_UPG_0435__TCS_CAEFAX_Letter_Jobs
+ command: $${HBA_ParmS} $${CAEParmS} HBA_EMB_CAE_ConcordFAXProcess.xml $${EMB_CAEParmE}
+ machine: EMB_CAE.B73PRODTCS0001
+ owner: batchprod.service@B73
+ permission: 
+ date_conditions: 0
+ condition: s(EMB_CAE_UPG_0435_030.TCS_Manifest_3)
+ description: "Operator Notes: Escalations: EMBCAEProdSupport  EMBCAEProdSupport@cognizant.com\""
+ std_out_file: "$${EMB_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.out"
+ std_err_file: "$${EMB_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.err"
+ alarm_if_fail: 1
+ job_load: 2
+ priority: 50
+ alarm_if_terminated: 1
+ group: EMB_CAE_UPG
+ application: CAE-COUNTED.H
+ send_notification: F
+ notification_template: "STG1_ZAYO"
+ resources: (EMB_CAE_UPG.RC_BatchControl,QUANTITY=10,FREE=A)
+ notification_emailaddress_on_failure: Naga.Gella@cognizant.com
+ notification_emailaddress_on_failure: LakshmiPrasanna.Poturi@cognizant.com
+ notification_emailaddress_on_failure: Kaviya.K2@cognizant.com
+ notification_emailaddress_on_failure: Deepak.Jandhyala@cognizant.com
+ notification_emailaddress_on_failure: PavanKumar.L@cognizant.com
+ notification_emailaddress_on_failure: Kodamasimham.Manisri@cognizant.com
+ notification_emailaddress_on_failure: Naga.Lakshmi2@cognizant.com
+
+
+ /* ----------------- EMB_CAE_UPG_0435_045.Concord_Fax_Failure_Alert_Interface ----------------- */ 
+
+ insert_job: EMB_CAE_UPG_0435_045.Concord_Fax_Failure_Alert_Interface   job_type: CMD 
+ box_name: EMB_CAE_UPG_0435__TCS_CAEFAX_Letter_Jobs
+ command: $${HBA_ParmS} $${CAEParmS} HBA_CAE_Concord_Fax_Failure_Alert_Interface.xml $${EMB_CAEParmE}
+ machine: EMB_CAE.B73PRODBAT0020
+ owner: batchprod.service@B73
+ permission: 
+ date_conditions: 0
+ condition: s(EMB_CAE_UPG_0435_040.Custom_Fax_Job)
+ description: "Special Instructions: Escalations: ,EMBCAEProdSupport@cognizant.com RITM1365663"
+ std_out_file: "$${EMB_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.out"
+ std_err_file: "$${EMB_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.err"
+ alarm_if_fail: 1
+ job_load: 2
+ priority: 50
+ alarm_if_terminated: 1
+ group: EMB_CAE_UPG
+ application: CAE-COUNTED.H
+ resources: (EMB_CAE_UPG.RC_BatchControl,QUANTITY=10,FREE=A)
+
+
+ /* ----------------- EMB_CAE_UPG_0435_046.Concord_Fax_Notification_Interface ----------------- */ 
+
+ insert_job: EMB_CAE_UPG_0435_046.Concord_Fax_Notification_Interface   job_type: CMD 
+ box_name: EMB_CAE_UPG_0435__TCS_CAEFAX_Letter_Jobs
+ command: $${HBA_ParmS} $${CAEParmS} HBA_CAE_Concord_Fax_Notification_Interface.xml $${EMB_CAEParmE}
+ machine: EMB_CAE.B73PRODBAT0020
+ owner: batchprod.service@B73
+ permission: 
+ date_conditions: 0
+ condition: s(EMB_CAE_UPG_0435_040.Custom_Fax_Job)
+ description: "Special Instructions: Escalations: ,EMBCAEProdSupport@cognizant.com RITM1365663"
+ std_out_file: "$${EMB_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.out"
+ std_err_file: "$${EMB_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.err"
+ alarm_if_fail: 1
+ job_load: 2
+ priority: 50
+ alarm_if_terminated: 1
+ group: EMB_CAE_UPG
+ application: CAE-COUNTED.H
+ resources: (EMB_CAE_UPG.RC_BatchControl,QUANTITY=10,FREE=A)
+
+
+/* ----------------- EMB_CAE_UPG_0427__eLetters_SSIS ----------------- */ 
+
+insert_job: EMB_CAE_UPG_0427__eLetters_SSIS   job_type: BOX 
+owner: batchprod.service@B73
+permission: 
+date_conditions: 1
+run_calendar: EMB_CAE.UPG_Special
+start_times: "09:55"
+description: "RITM1413048"
+alarm_if_fail: 1
+alarm_if_terminated: 1
+group: EMB_CAE_UPG
+application: BOX-NOTCOUNTED.H
+
+
+ /* ----------------- EMB_CAE_UPG_0427_010.ETS_EMBX_ELETTER_Pref_IN ----------------- */ 
+
+ insert_job: EMB_CAE_UPG_0427_010.ETS_EMBX_ELETTER_Pref_IN   job_type: CMD 
+ box_name: EMB_CAE_UPG_0427__eLetters_SSIS
+ command: $${ETSParmS1} $${ETSParmS2}ETS_CAEX_5XX_B73X_DB_PREF_ELETTER_IN.xml $${ETSParmE}
+ machine: EDI_FACE.A02MFTRTR0005
+ owner: b73prodedi@A02
+ permission: 
+ date_conditions: 1
+ run_calendar: EMB_CAE.UPG_Special
+ start_times: "10:00"
+ condition: s(EMB_CAE_UPG_0100_010.Batch_Start)
+ description: "Special Instructions: Escalations: EMBCAEPRODSUPPORT@cognizant.com, CIS TZ App EDI Operations OnCall (Cognizant) RITM1413048"
+ std_out_file: "$${ETSLOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.out"
+ std_err_file: "$${ETSLOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.err"
+ alarm_if_fail: 1
+ job_load: 2
+ priority: 50
+ alarm_if_terminated: 1
+ group: EMB_CAE_UPG
+ application: EDI.CAE-NOTCOUNTED.H
+ resources: (EMB_CAE_UPG.RC_BatchControl,QUANTITY=10,FREE=A)
+
+
+ /* ----------------- EMB_CAE_UPG_0427_020.ELETTER_Pref_SSIS ----------------- */ 
+
+ insert_job: EMB_CAE_UPG_0427_020.ELETTER_Pref_SSIS   job_type: CMD 
+ box_name: EMB_CAE_UPG_0427__eLetters_SSIS
+ command: $${HBA_ParmS} $${CAEParmS} HBA_EMB_CAE_eLetter_SSIS.xml $${EMB_CAEParmE}
+ machine: EMB_CAE.B73PRODBAT0015
+ owner: batchprod.service@B73
+ permission: 
+ date_conditions: 0
+ condition: s(EMB_CAE_UPG_0427_010.ETS_EMBX_ELETTER_Pref_IN)
+ description: "Special Instructions: Escalations: EMBCAEPRODSUPPORT@cognizant.com RITM1413048"
+ std_out_file: "$${EMB_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.out"
+ std_err_file: "$${EMB_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.err"
+ alarm_if_fail: 1
+ job_load: 2
+ priority: 50
+ alarm_if_terminated: 1
+ group: EMB_CAE_UPG
+ application: CAE-COUNTED.H
+ resources: (EMB_CAE_UPG.RC_BatchControl,QUANTITY=10,FREE=A)
+
+
+ /* ----------------- EMB_CAE_UPG_0427_030.ELETTER_Pref_SSIS_After_DI ----------------- */ 
+
+ insert_job: EMB_CAE_UPG_0427_030.ELETTER_Pref_SSIS_After_DI   job_type: CMD 
+ box_name: EMB_CAE_UPG_0427__eLetters_SSIS
+ command: $${HBA_ParmS} $${CAEParmS} HBA_EMB_CAE_eLetter_SSIS.xml $${EMB_CAEParmE}
+ machine: EMB_CAE.B73PRODBAT0015
+ owner: batchprod.service@B73
+ permission: 
+ date_conditions: 0
+ condition: s(EMB_CAE_UPG_0120_020.Execute_DI_1)
+ description: "Special Instructions: Escalations: EMBCAEPRODSUPPORT@cognizant.com RITM1585089"
+ std_out_file: "$${EMB_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.out"
+ std_err_file: "$${EMB_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.err"
+ alarm_if_fail: 1
+ job_load: 2
+ priority: 50
+ alarm_if_terminated: 1
+ group: EMB_CAE_UPG
+ application: CAE-COUNTED.H
+ resources: (EMB_CAE_UPG.RC_BatchControl,QUANTITY=10,FREE=A)
+
+
+/* ----------------- EMB_CAE_UPG_0560__TCS_CAELP_Letter_Jobs ----------------- */ 
+
+insert_job: EMB_CAE_UPG_0560__TCS_CAELP_Letter_Jobs   job_type: BOX 
+owner: batchprod.service@B73
+permission: 
+date_conditions: 1
+run_calendar: EMB_CAE.UPG_Special
+start_times: "13:55"
+description: "RITM1448461"
+alarm_if_fail: 1
+alarm_if_terminated: 1
+group: EMB_CAE_UPG
+application: BOX-NOTCOUNTED.H
+
+
+ /* ----------------- EMB_CAE_UPG_0560_010.TCS_WorkAssignerCAELP ----------------- */ 
+
+ insert_job: EMB_CAE_UPG_0560_010.TCS_WorkAssignerCAELP   job_type: CMD 
+ box_name: EMB_CAE_UPG_0560__TCS_CAELP_Letter_Jobs
+ command: "C:\Program Files (x86)\Trizetto\TCS_590\BatchInfrastructure\IHMFWorkManager.exe" --Connection=ComponentDBConnectionString --Action=Run --WorkSpec=TZTCS.WorkAssigner.Standard.CAELP
+ machine: EMB_CAE.B73PRODTCS0001
+ owner: ihmprod.service@B73
+ permission: 
+ date_conditions: 1
+ run_calendar: EMB_CAE.UPG_Special
+ start_times: "14:00"
+ condition: s(EMB_CAE_UPG_0100_010.Batch_Start) & s(EMB_CAE_UPG_0415__TCS_CAENOCC_Letter_Jobs)
+ description: "Any Failures or Escalations: Abhishek.Ray@cognizant.com\"; Pradeep.S7@cognizant.com\";Arumugam.Mariappan@cognizant.com\";Srinivasan.Venkatesan2@cognizant.com\", EmblemTCSProdSupport (Cognizant) EmblemTCSProdSupport@cognizant.com\",EMBCAEProdSupport (Cognizant) <EMBCAEProdSupport@cognizant.com\"> RITM1448461"
+ std_out_file: "$${EMB_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.out"
+ std_err_file: "$${EMB_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.err"
+ alarm_if_fail: 1
+ job_load: 2
+ priority: 50
+ alarm_if_terminated: 1
+ group: EMB_CAE_UPG
+ application: CAE-COUNTED.H
+ resources: (EMB_CAE_UPG.RC_BatchControl,QUANTITY=10,FREE=A)
+
+
+ /* ----------------- EMB_CAE_UPG_0560_020.TCS_WorkDeliveryCAELP ----------------- */ 
+
+ insert_job: EMB_CAE_UPG_0560_020.TCS_WorkDeliveryCAELP   job_type: CMD 
+ box_name: EMB_CAE_UPG_0560__TCS_CAELP_Letter_Jobs
+ command: "C:\Program Files (x86)\Trizetto\TCS_590\BatchInfrastructure\IHMFWorkManager.exe" --Connection=ComponentDBConnectionString --Action=Run --WorkSpec=TZTCS.Delivery.Standard.CAELP
+ machine: EMB_CAE.B73PRODTCS0001
+ owner: ihmprod.service@B73
+ permission: 
+ date_conditions: 0
+ condition: s(EMB_CAE_UPG_0560_010.TCS_WorkAssignerCAELP)
+ description: "Any Failures or Escalations: Abhishek.Ray@cognizant.com\"; Pradeep.S7@cognizant.com\";Arumugam.Mariappan@cognizant.com\";Srinivasan.Venkatesan2@cognizant.com\", EmblemTCSProdSupport (Cognizant) EmblemTCSProdSupport@cognizant.com\",EMBCAEProdSupport (Cognizant) <EMBCAEProdSupport@cognizant.com\"> RITM1448461"
+ std_out_file: "$${EMB_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.out"
+ std_err_file: "$${EMB_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.err"
+ alarm_if_fail: 1
+ job_load: 2
+ priority: 50
+ alarm_if_terminated: 1
+ group: EMB_CAE_UPG
+ application: CAE-COUNTED.H
+ resources: (EMB_CAE_UPG.RC_BatchControl,QUANTITY=10,FREE=A)
+
+
+ /* ----------------- EMB_CAE_UPG_0560_030.TCS_Manifest ----------------- */ 
+
+ insert_job: EMB_CAE_UPG_0560_030.TCS_Manifest   job_type: CMD 
+ box_name: EMB_CAE_UPG_0560__TCS_CAELP_Letter_Jobs
+ command: C:\TCS\TCS_Manifest\CTS.TZ.TCS.Manifest.exe "10"
+ machine: EMB_CAE.B73PRODTCS0001
+ owner: ihmprod.service@B73
+ permission: 
+ date_conditions: 0
+ condition: s(EMB_CAE_UPG_0560_020.TCS_WorkDeliveryCAELP)
+ description: "Any Failures or Escalations: Abhishek.Ray@cognizant.com\"; Pradeep.S7@cognizant.com\";Arumugam.Mariappan@cognizant.com\";Srinivasan.Venkatesan2@cognizant.com\", EmblemTCSProdSupport (Cognizant) EmblemTCSProdSupport@cognizant.com\",EMBCAEProdSupport (Cognizant) <EMBCAEProdSupport@cognizant.com\"> RITM1448461"
+ std_out_file: "$${EMB_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.out"
+ std_err_file: "$${EMB_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.err"
+ alarm_if_fail: 1
+ job_load: 2
+ priority: 50
+ alarm_if_terminated: 1
+ group: EMB_CAE_UPG
+ application: CAE-COUNTED.H
+ resources: (EMB_CAE_UPG.RC_BatchControl,QUANTITY=10,FREE=A)
+
+
+ /* ----------------- EMB_CAE_UPG_0560_040.ETS_EMBX_TCSX_MNFT_OUT ----------------- */ 
+
+ insert_job: EMB_CAE_UPG_0560_040.ETS_EMBX_TCSX_MNFT_OUT   job_type: CMD 
+ box_name: EMB_CAE_UPG_0560__TCS_CAELP_Letter_Jobs
+ command: $${ETSParmS1} $${ETSParmS2}ETS_FACE_5XX_B73X_TCSX_MNFT_OUT.xml $${ETSParmE}
+ machine: EDI_FACE.A02MFTRTR0005
+ owner: b73prodedi@A02
+ permission: 
+ date_conditions: 0
+ condition: s(EMB_CAE_UPG_0560_030.TCS_Manifest)
+ description: "Operator Notes:Escalations: CIS TZ App EDI Operations OnCall (Cognizant),EMBCAEProdSupport (Cognizant) EMBCAEProdSupport@cognizant.com RITM1448461"
+ std_out_file: "$${ETSLOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.out"
+ std_err_file: "$${ETSLOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.err"
+ alarm_if_fail: 1
+ job_load: 2
+ priority: 50
+ alarm_if_terminated: 1
+ group: EMB_CAE_UPG
+ application: EDI.CAE-NOTCOUNTED.H
+ resources: (EMB_CAE_UPG.RC_BatchControl,QUANTITY=10,FREE=A)
+
+
+/* ----------------- EMB_CAE_UPG_0565__TCS_CAECCILP_Letter_Jobs ----------------- */ 
+
+insert_job: EMB_CAE_UPG_0565__TCS_CAECCILP_Letter_Jobs   job_type: BOX 
+owner: batchprod.service@B73
+permission: 
+date_conditions: 1
+run_calendar: EMB_CAE.UPG_Special
+start_times: "13:55"
+description: "RITM1448461"
+alarm_if_fail: 1
+alarm_if_terminated: 1
+group: EMB_CAE_UPG
+application: BOX-NOTCOUNTED.H
+
+
+ /* ----------------- EMB_CAE_UPG_0565_010.TCS_WorkAssignerCAECCILP ----------------- */ 
+
+ insert_job: EMB_CAE_UPG_0565_010.TCS_WorkAssignerCAECCILP   job_type: CMD 
+ box_name: EMB_CAE_UPG_0565__TCS_CAECCILP_Letter_Jobs
+ command: "C:\Program Files (x86)\Trizetto\TCS_590\BatchInfrastructure\IHMFWorkManager.exe" --Connection=ComponentDBConnectionString --Action=Run --WorkSpec=TZTCS.WorkAssigner.Standard.CAECCILP
+ machine: EMB_CAE.B73PRODTCS0001
+ owner: ihmprod.service@B73
+ permission: 
+ date_conditions: 1
+ run_calendar: EMB_CAE.UPG_Special
+ start_times: "14:00"
+ condition: s(EMB_CAE_UPG_0100_010.Batch_Start) & s(EMB_CAE_UPG_0560__TCS_CAELP_Letter_Jobs)
+ description: "Any Failures or Escalations: Abhishek.Ray@cognizant.com\"; Pradeep.S7@cognizant.com\";Arumugam.Mariappan@cognizant.com\";Srinivasan.Venkatesan2@cognizant.com\", EmblemTCSProdSupport (Cognizant) EmblemTCSProdSupport@cognizant.com\",EMBCAEProdSupport (Cognizant) <EMBCAEProdSupport@cognizant.com\"> RITM1448461"
+ std_out_file: "$${EMB_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.out"
+ std_err_file: "$${EMB_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.err"
+ alarm_if_fail: 1
+ job_load: 2
+ priority: 50
+ alarm_if_terminated: 1
+ group: EMB_CAE_UPG
+ application: CAE-COUNTED.H
+ resources: (EMB_CAE_UPG.RC_BatchControl,QUANTITY=10,FREE=A)
+
+
+ /* ----------------- EMB_CAE_UPG_0565_020.TCS_WorkDeliveryCAECCILP ----------------- */ 
+
+ insert_job: EMB_CAE_UPG_0565_020.TCS_WorkDeliveryCAECCILP   job_type: CMD 
+ box_name: EMB_CAE_UPG_0565__TCS_CAECCILP_Letter_Jobs
+ command: "C:\Program Files (x86)\Trizetto\TCS_590\BatchInfrastructure\IHMFWorkManager.exe" --Connection=ComponentDBConnectionString --Action=Run --WorkSpec=TZTCS.Delivery.Standard.CAECCILP
+ machine: EMB_CAE.B73PRODTCS0001
+ owner: ihmprod.service@B73
+ permission: 
+ date_conditions: 0
+ condition: s(EMB_CAE_UPG_0565_010.TCS_WorkAssignerCAECCILP)
+ description: "Any Failures or Escalations: Abhishek.Ray@cognizant.com\"; Pradeep.S7@cognizant.com\";Arumugam.Mariappan@cognizant.com\";Srinivasan.Venkatesan2@cognizant.com\", EmblemTCSProdSupport (Cognizant) EmblemTCSProdSupport@cognizant.com\",EMBCAEProdSupport (Cognizant) <EMBCAEProdSupport@cognizant.com\"> RITM1448461"
+ std_out_file: "$${EMB_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.out"
+ std_err_file: "$${EMB_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.err"
+ alarm_if_fail: 1
+ job_load: 2
+ priority: 50
+ alarm_if_terminated: 1
+ group: EMB_CAE_UPG
+ application: CAE-COUNTED.H
+ resources: (EMB_CAE_UPG.RC_BatchControl,QUANTITY=10,FREE=A)
+
+
+ /* ----------------- EMB_CAE_UPG_0565_030.TCS_Manifest ----------------- */ 
+
+ insert_job: EMB_CAE_UPG_0565_030.TCS_Manifest   job_type: CMD 
+ box_name: EMB_CAE_UPG_0565__TCS_CAECCILP_Letter_Jobs
+ command: C:\TCS\TCS_Manifest\CTS.TZ.TCS.Manifest.exe "20"
+ machine: EMB_CAE.B73PRODTCS0001
+ owner: ihmprod.service@B73
+ permission: 
+ date_conditions: 0
+ condition: s(EMB_CAE_UPG_0565_020.TCS_WorkDeliveryCAECCILP)
+ description: "Any Failures or Escalations: Abhishek.Ray@cognizant.com\"; Pradeep.S7@cognizant.com\";Arumugam.Mariappan@cognizant.com\";Srinivasan.Venkatesan2@cognizant.com\", EmblemTCSProdSupport (Cognizant) EmblemTCSProdSupport@cognizant.com\",EMBCAEProdSupport (Cognizant) <EMBCAEProdSupport@cognizant.com\"> RITM1448461"
+ std_out_file: "$${EMB_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.out"
+ std_err_file: "$${EMB_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.err"
+ alarm_if_fail: 1
+ job_load: 2
+ priority: 50
+ alarm_if_terminated: 1
+ group: EMB_CAE_UPG
+ application: CAE-COUNTED.H
+ resources: (EMB_CAE_UPG.RC_BatchControl,QUANTITY=10,FREE=A)
+
+
+ /* ----------------- EMB_CAE_UPG_0565_040.ETS_EMBX_TCSX_MNFT_OUT ----------------- */ 
+
+ insert_job: EMB_CAE_UPG_0565_040.ETS_EMBX_TCSX_MNFT_OUT   job_type: CMD 
+ box_name: EMB_CAE_UPG_0565__TCS_CAECCILP_Letter_Jobs
+ command: $${ETSParmS1} $${ETSParmS2}ETS_FACE_5XX_B73X_TCSX_MNFT_OUT.xml $${ETSParmE}
+ machine: EDI_FACE.A02MFTRTR0005
+ owner: b73prodedi@A02
+ permission: 
+ date_conditions: 0
+ condition: s(EMB_CAE_UPG_0565_030.TCS_Manifest)
+ description: "Operator Notes:Escalations: CIS TZ App EDI Operations OnCall (Cognizant),EMBCAEProdSupport (Cognizant) EMBCAEProdSupport@cognizant.com RITM1448461"
+ std_out_file: "$${ETSLOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.out"
+ std_err_file: "$${ETSLOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.err"
+ alarm_if_fail: 1
+ job_load: 2
+ priority: 50
+ alarm_if_terminated: 1
+ group: EMB_CAE_UPG
+ application: EDI.CAE-NOTCOUNTED.H
+ resources: (EMB_CAE_UPG.RC_BatchControl,QUANTITY=10,FREE=A)
+
+
+/* ----------------- EMB_CAE_UPG_0480__CAE_To_Facets_MissedCases_ProgressNotes ----------------- */ 
+
+insert_job: EMB_CAE_UPG_0480__CAE_To_Facets_MissedCases_ProgressNotes   job_type: BOX 
+owner: batchprod.service@B73
+permission: 
+date_conditions: 1
+run_calendar: EMB_CAE.UPG_Special
+start_times: "09:55"
+description: "RITM1452584"
+alarm_if_fail: 1
+alarm_if_terminated: 1
+group: EMB_CAE_UPG
+application: BOX-NOTCOUNTED.H
+
+
+ /* ----------------- EMB_CAE_UPG_0480_005.ProviderCollab_HealthDaily_Admits_Prognotes ----------------- */ 
+
+ insert_job: EMB_CAE_UPG_0480_005.ProviderCollab_HealthDaily_Admits_Prognotes   job_type: CMD 
+ box_name: EMB_CAE_UPG_0480__CAE_To_Facets_MissedCases_ProgressNotes
+ command: $${HBA_ParmS} $${CAEParmS} HBA_ProviderCollaborative_HealthDaily_Admits_Progressnotes.xml $${EMB_CAEParmE}
+ machine: EMB_CAE.B73PRODBAT0015
+ owner: batchprod.service@B73
+ permission: 
+ date_conditions: 1
+ run_calendar: EMB_CAE.UPG_Special
+ start_times: "10:00"
+ condition: s(EMB_CAE_UPG_0100_010.Batch_Start) & s(EMB_CAE_UPG_0120__Daily)
+ description: "Operator Notes: Escalations: EMBCAEProdSupport (Cognizant) EMBCAEProdSupport@cognizant.com, (Cognizant) <GlobalOperation-ProdSupport-Oncall@Cognizant.com>,embcaeprodsupport@cognizant.com, RITM1454075 Time change via RITM1472020 condition change via RITM1474351"
+ std_out_file: "$${EMB_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.out"
+ std_err_file: "$${EMB_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.err"
+ alarm_if_fail: 1
+ job_load: 2
+ priority: 50
+ alarm_if_terminated: 1
+ group: EMB_CAE_UPG
+ application: CAE-COUNTED.H
+ resources: (EMB_CAE_UPG.RC_BatchControl,QUANTITY=10,FREE=A)
+
+
+ /* ----------------- EMB_CAE_UPG_0480_010.CAE_To_Facets_MissedCases_ProgressNotes ----------------- */ 
+
+ insert_job: EMB_CAE_UPG_0480_010.CAE_To_Facets_MissedCases_ProgressNotes   job_type: CMD 
+ box_name: EMB_CAE_UPG_0480__CAE_To_Facets_MissedCases_ProgressNotes
+ command: $${HBA_ParmS} $${CAEParmS} HBA_CAE_To_Facets_MissedCases_ProgressNotes.xml $${EMB_CAEParmE}
+ machine: EMB_CAE.B73PRODBAT0015
+ owner: batchprod.service@B73
+ permission: 
+ date_conditions: 1
+ run_calendar: EMB_CAE.UPG_Special
+ start_times: "10:00"
+ condition: s(EMB_CAE_UPG_0100_010.Batch_Start) & s(EMB_CAE_UPG_0120__Daily)
+ description: "Operator Notes: Escalations: EMBCAEProdSupport (Cognizant) EMBCAEProdSupport@cognizant.com, (Cognizant) <GlobalOperation-ProdSupport-Oncall@Cognizant.com>,embcaeprodsupport@cognizant.com, RITM1452584"
+ std_out_file: "$${EMB_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.out"
+ std_err_file: "$${EMB_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.err"
+ alarm_if_fail: 1
+ job_load: 2
+ priority: 50
+ alarm_if_terminated: 1
+ group: EMB_CAE_UPG
+ application: CAE-COUNTED.H
+ resources: (EMB_CAE_UPG.RC_BatchControl,QUANTITY=10,FREE=A)
+
+
+/* ----------------- EMB_CAE_UPG_0428__eLetter_Box ----------------- */ 
+
+insert_job: EMB_CAE_UPG_0428__eLetter_Box   job_type: BOX 
+owner: batchprod.service@B73
+permission: 
+date_conditions: 1
+run_calendar: EMB_CAE.UPG_Special
+start_times: "10:00,11:00,12:00,13:00,14:00,15:00"
+description: "RITM1590301"
+alarm_if_fail: 1
+alarm_if_terminated: 1
+group: EMB_CAE_UPG
+application: BOX-NOTCOUNTED.H
+
+
+ /* ----------------- EMB_CAE_UPG_0428_001.TCS_WorkAssignerCAECC ----------------- */ 
+
+ insert_job: EMB_CAE_UPG_0428_001.TCS_WorkAssignerCAECC   job_type: CMD 
+ box_name: EMB_CAE_UPG_0428__eLetter_Box
+ command: "C:\Program Files (x86)\Trizetto\TCS_590\BatchInfrastructure\IhmfWorkManager.exe" --Connection=ComponentDBConnectionString --Action=Run --WorkSpec=TZTCS.WorkAssigner.Standard.CAECC
+ machine: EMB_CAE.B73PRODTCS0001
+ owner: ihmprod.service@B73
+ permission: 
+ date_conditions: 1
+ run_calendar: EMB_CAE.UPG_Special
+ start_times: "10:05,11:05,12:05,13:05,14:05,15:05"
+ condition: s(EMB_CAE_UPG_0100_010.Batch_Start)
+ description: "Any Failures or Escalations: Abhishek.Ray@cognizant.com\"; Pradeep.S7@cognizant.com\";Srinivasan.Venkatesan2@cognizant.com\", EmblemTCSProdSupport (Cognizant) EmblemTCSProdSupport@cognizant.com\",EMBCAEProdSupport (Cognizant) <EMBCAEProdSupport@cognizant.com\"> RITM1711487"
+ std_out_file: "$${EMB_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.out"
+ std_err_file: "$${EMB_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.err"
+ alarm_if_fail: 1
+ job_load: 2
+ priority: 50
+ alarm_if_terminated: 1
+ group: EMB_CAE_UPG
+ application: CAE-COUNTED.H
+ resources: (EMB_CAE_UPG.RC_BatchControl,QUANTITY=10,FREE=A)
+
+
+ /* ----------------- EMB_CAE_UPG_0428_002.TCS_WorkDeliveryCAECC ----------------- */ 
+
+ insert_job: EMB_CAE_UPG_0428_002.TCS_WorkDeliveryCAECC   job_type: CMD 
+ box_name: EMB_CAE_UPG_0428__eLetter_Box
+ command: "C:\Program Files (x86)\Trizetto\TCS_590\BatchInfrastructure\IhmfWorkManager.exe" --Connection=ComponentDBConnectionString --Action=Run --WorkSpec=TZTCS.Delivery.Standard.CAECC
+ machine: EMB_CAE.B73PRODTCS0001
+ owner: ihmprod.service@B73
+ permission: 
+ date_conditions: 0
+ condition: s(EMB_CAE_UPG_0428_001.TCS_WorkAssignerCAECC)
+ description: "Any Failures or Escalations: Abhishek.Ray@cognizant.com\"; Pradeep.S7@cognizant.com\";Srinivasan.Venkatesan2@cognizant.com;EmblemTCSProdSupport (Cognizant) EmblemTCSProdSupport@cognizant.com\",EMBCAEProdSupport (Cognizant) <EMBCAEProdSupport@cognizant.com RITM1711487"
+ std_out_file: "$${EMB_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.out"
+ std_err_file: "$${EMB_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.err"
+ alarm_if_fail: 1
+ job_load: 2
+ priority: 50
+ alarm_if_terminated: 1
+ group: EMB_CAE_UPG
+ application: CAE-COUNTED.H
+ send_notification: F
+ notification_template: "STG1_ZAYO"
+ resources: (EMB_CAE_UPG.RC_BatchControl,QUANTITY=10,FREE=A)
+ notification_emailaddress_on_failure: Naga.Gella@cognizant.com
+ notification_emailaddress_on_failure: LakshmiPrasanna.Poturi@cognizant.com
+ notification_emailaddress_on_failure: Kaviya.K2@cognizant.com
+ notification_emailaddress_on_failure: Deepak.Jandhyala@cognizant.com
+ notification_emailaddress_on_failure: PavanKumar.L@cognizant.com
+ notification_emailaddress_on_failure: Kodamasimham.Manisri@cognizant.com
+ notification_emailaddress_on_failure: Naga.Lakshmi2@cognizant.com
+
+
+ /* ----------------- EMB_CAE_UPG_0428_003.TCS_Manifest_9 ----------------- */ 
+
+ insert_job: EMB_CAE_UPG_0428_003.TCS_Manifest_9   job_type: CMD 
+ box_name: EMB_CAE_UPG_0428__eLetter_Box
+ command: C:\TCS\TCS_Manifest\CTS.TZ.TCS.Manifest.exe "9"
+ machine: EMB_CAE.B73PRODTCS0001
+ owner: ihmprod.service@B73
+ permission: 
+ date_conditions: 0
+ condition: s(EMB_CAE_UPG_0428_002.TCS_WorkDeliveryCAECC)
+ description: "Any Failures or Escalations: Abhishek.Ray@cognizant.com\"; Pradeep.S7@cognizant.com\";Arumugam.Mariappan@cognizant.com\";Srinivasan.Venkatesan2@cognizant.com\", EmblemTCSProdSupport (Cognizant) EmblemTCSProdSupport@cognizant.com\",EMBCAEProdSupport (Cognizant) <EMBCAEProdSupport@cognizant.com\"> RITM1711487"
+ std_out_file: "$${EMB_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.out"
+ std_err_file: "$${EMB_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.err"
+ alarm_if_fail: 1
+ job_load: 2
+ priority: 50
+ alarm_if_terminated: 1
+ group: EMB_CAE_UPG
+ application: CAE-COUNTED.H
+ resources: (EMB_CAE_UPG.RC_BatchControl,QUANTITY=10,FREE=A)
+
+
+ /* ----------------- EMB_CAE_UPG_0428_020.eLetters_Interface ----------------- */ 
+
+ insert_job: EMB_CAE_UPG_0428_020.eLetters_Interface   job_type: CMD 
+ box_name: EMB_CAE_UPG_0428__eLetter_Box
+ command: $${HBA_ParmS} $${CAEParmS} HBA_EMB_CAE_eLetters_Interface.xml $${EMB_CAEParmE}
+ machine: EMB_CAE.B73PRODBAT0015
+ owner: batchprod.service@B73
+ permission: 
+ date_conditions: 0
+ condition: s(EMB_CAE_UPG_0428_003.TCS_Manifest_9)
+ description: "Special Instructions: Escalations: EMBCAEPRODSUPPORT@cognizant.com RITM1590301"
+ std_out_file: "$${EMB_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.out"
+ std_err_file: "$${EMB_CAE_LOGPATH}\%AUTO_JOB_NAME%_$${MMDDYYYY}_%AUTORUN%.err"
+ alarm_if_fail: 1
+ job_load: 2
+ priority: 50
+ alarm_if_terminated: 1
+ group: EMB_CAE_UPG
+ application: CAE-COUNTED.H
+ resources: (EMB_CAE_UPG.RC_BatchControl,QUANTITY=10,FREE=A)

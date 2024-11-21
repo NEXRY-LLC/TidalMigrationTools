@@ -63,7 +63,7 @@
 			<artifactId>tidal.api</artifactId>
 			<version>1.1.16</version>
 			<scope>system</scope>
-			<systemPath>${project.basedir}/lib/tidal-1.1.16-TIDAL.API-GA.jar</systemPath>
+			<systemPath>${project.basedir}/lib/tidal-1.1.17-TIDAL.API-GA.jar</systemPath>
 		</dependency>
 		<dependency>
 			<groupId>com.bluehouseinc.toolkit</groupId>

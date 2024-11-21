@@ -387,7 +387,13 @@ public class EspJobVisitorHelper {
 	}
 
 	Function2<String, String, Boolean> visitJob(final EspSapJob job) {
+		
+
 		return (statementType, statementParameters) -> {
+			String name = job.getName();
+			if (name.contains("JDAOP_ZOP_RE")) {
+				name.getBytes();
+			}
 			switch (statementType) {
 			case "ABAPNAME":
 				if (StringUtils.isBlank(job.getAbapName())) {

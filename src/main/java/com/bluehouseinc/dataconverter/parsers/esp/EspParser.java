@@ -83,7 +83,7 @@ public class EspParser extends AbstractParser<EspDataModel> {
 	private final static String SERVICE_MON_PATTERN = "^SERVICE_MON (.*?)";
 	private final static String TEXT_MON_PATTERN = "^TEXT_MON (.*?)";
 
-	private final static String COMMENT_PATTERN = "^\\/*(.*) *\\/$";
+	private final static String COMMENT_PATTERN = "^\\/\\*(.*)\\*\\/$";
 	private final static String TEMPLATE_START_PATTERN = "^TEMPLATE (.*)";
 	private final static String TEMPLATE_END_PATTERN = "^ENDTEMPL";
 
@@ -231,7 +231,7 @@ public class EspParser extends AbstractParser<EspDataModel> {
 
 				String filename = filePath.getFileName().toString();
 
-				if (filename.equals("BLDAKPR1") || filename.contains("BLDAKPR1")) {
+				if (filename.equals("IPDMRP01") || filename.contains("BLDAKPR1")) {
 					filename.chars();
 				}
 
@@ -354,7 +354,7 @@ public class EspParser extends AbstractParser<EspDataModel> {
 
 	private void extractJob(final BufferedReader reader, String jobName, EspJobType jobType, EspJobGroup parent, String rawdata) throws Exception {
 
-		if (jobName.equals("CDSTAT.ZFIARI02CD")) {
+		if (jobName.contains("DSDFEM01")) {
 			jobName.getBytes();
 		}
 
@@ -449,15 +449,20 @@ public class EspParser extends AbstractParser<EspDataModel> {
 			return;
 		}
 
+		String name = currentJob.getName();
+		if (name.contains("ZZYCUS_SPEND")) {
+			name.getBytes();
+		}
+		// Go and do this visitor pattern stuff :) I rewrote this to work with my mind.
+		currentJob.processData(espJobVisitor, lines);
+
 		// Per customer if they commented out the run statement or a job does not have a run statement it should not be in the schedule
 		// Currently only doing what I am asked which is only exclude the jobs with a commented out run statement.
-		if (lines.stream().filter(f -> f.contains("/*RUN")).count() > 0) {
+		if (currentJob.getStatementObject().getEspRunStatements().isEmpty() || lines.stream().filter(f -> f.contains("/*RUN")).count() > 0) {
+			// Not designed to be scheduled.
 			log.debug("isExcludedJobFromGroup Group{} Job{} is true, SKIPPPING COMMENTED OUT RUN STATEMENT", parent.getName(), jobName);
 			return;
 		}
-
-		// Go and do this visitor pattern stuff :) I rewrote this to work with my mind.
-		currentJob.processData(espJobVisitor, lines);
 
 		if (currentJob instanceof EspDataObjectJob) {
 			if (parent.getVariables() == null) {
@@ -484,11 +489,16 @@ public class EspParser extends AbstractParser<EspDataModel> {
 			return;
 		} else if (currentJob instanceof EspExternalApplicationData) {
 
-			if (currentJob.getName().contains("DB0469A.MON")) {
+			if (currentJob.getName().contains("DSDFEM01")) {
 				rawdata.toCharArray();
 			}
 
 			EspExternalApplicationData exj = (EspExternalApplicationData) currentJob;
+			// hack fix so late in the process if APPLID(
+			if (rawdata.contains("EXTERNAL APPL(")) {
+				rawdata = rawdata.replace("EXTERNAL APPL(", "EXTERNAL APPLID(");
+			}
+
 			if (rawdata.contains("EXTERNAL APPLID(")) {
 				String[] jobdata = rawdata.split(" ");
 				if (jobdata.length >= 3) {
@@ -499,12 +509,13 @@ public class EspParser extends AbstractParser<EspDataModel> {
 				}
 			}
 
-			if (rawdata.contains("LIE.") || rawdata.contains("LIS.")) {
-				rawdata.chars(); // DO NOTHING. ITS a jobname we are looking for.
-			} else {
-				// use the object name for the dependency.
-				exj.setExternJobName(jobName);
+			// We need the actual job name
+			if (jobName.contains("LIE.") || jobName.contains("LIS.")) {
+				jobName = jobName.replace("LIE.", "").replace("LIS,","");
 			}
+
+			// use the object name for the dependency.
+			exj.setExternJobName(jobName);
 
 			if (rawdata.contains("SCOPE(")) {
 				parent.setContainsScopeAttribute(true);
@@ -524,13 +535,12 @@ public class EspParser extends AbstractParser<EspDataModel> {
 				sleep.setAgent("SLEEP_AGENT");
 				parent.addChild(sleep);
 				parent.addChild(currentJob);
-				log.debug("Adding Child[" + currentJob.getFullPath() + "] to Parent with sleep Job["+sleep.getFullPath()+"]");
+				log.debug("Adding Child[" + currentJob.getFullPath() + "] to Parent with sleep Job[" + sleep.getFullPath() + "]");
 				DependencyGraphMapper.registerSleepJobToMap(currentJob, sleep);
 			} else {
 				parent.addChild(currentJob);
 				log.debug("Adding Child[" + currentJob.getFullPath() + "] to Parent");
 			}
-			
 
 		}
 
@@ -785,6 +795,10 @@ public class EspParser extends AbstractParser<EspDataModel> {
 
 	private void doProcessGenericData(EspJobGroup in, EspAbstractJob data) {
 		if (data != null) {
+
+			if (data.getName().contains("DSDFEM01")) {
+				data.getName();
+			}
 
 			String desub = data.getDelaySubmission();
 			Integer duout = data.getDueout();

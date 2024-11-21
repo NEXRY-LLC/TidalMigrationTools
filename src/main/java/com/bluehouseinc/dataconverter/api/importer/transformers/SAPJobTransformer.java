@@ -2,6 +2,7 @@ package com.bluehouseinc.dataconverter.api.importer.transformers;
 
 import com.bluehouseinc.dataconverter.api.importer.TidalAPI;
 import com.bluehouseinc.dataconverter.model.impl.CsvSAPJob;
+import com.bluehouseinc.tidal.api.exceptions.TidalException;
 import com.bluehouseinc.tidal.api.model.job.JobType;
 import com.bluehouseinc.tidal.api.model.job.service.ServiceJob;
 import com.bluehouseinc.tidal.api.model.service.Service;
@@ -30,8 +31,9 @@ public class SAPJobTransformer implements ITransformer<CsvSAPJob, ServiceJob> {
 	@Override
 	public ServiceJob transform(CsvSAPJob in) throws TransformationException {
 
-		if (in.getName().contains("ZRV60SBAT_FINAL_2355")) {
-			in.getName();
+		String name = in.getName();
+		if (name.contains("JDAOP_ZOP_RE")) {
+			name.getBytes();
 		}
 		
 		this.base.setType(JobType.SAPJOB);
@@ -55,6 +57,10 @@ public class SAPJobTransformer implements ITransformer<CsvSAPJob, ServiceJob> {
 
 		if (in.getJobMode().equals("RUN_COPY")) {
 			Users rte = tidal.getUserByAccountNameAndDomain(in.getRuntimeUser().getRunTimeUserName(),null);
+			
+			if(rte==null) {
+				throw new TidalException("SAP RTE MUST BE SET");
+			}
 			log.debug("SAPJobTransformer transform -> processing(" + in.getFullPath() + ")");
 
 			

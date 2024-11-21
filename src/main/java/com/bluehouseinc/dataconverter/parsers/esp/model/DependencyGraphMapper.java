@@ -34,7 +34,6 @@ public class DependencyGraphMapper {
 	private EspConfigProvider cfgProvider;
 	private EspDataModel espmodel;
 
-
 	public DependencyGraphMapper(EspConfigProvider cfgProvider, TidalDataModel datamodel, EspDataModel espmodel) {
 		this.cfgProvider = cfgProvider;
 		this.datamodel = datamodel;
@@ -56,7 +55,7 @@ public class DependencyGraphMapper {
 		}
 
 		setupSleepDependency();
-		
+
 		doHandleExternalAppIDLogic(me, esp);
 
 		doHandlePrereq(me, esp);
@@ -270,9 +269,9 @@ public class DependencyGraphMapper {
 					if (jobDependency != null) {
 						log.debug("DependencyGraphMapper.doHandleAfterStatements Registering Dependency for Job[" + me.getFullPath() + "] this job must be completed [" + jobDependency.getFullPath() + "]");
 
-						this.getDatamodel().addJobDependencyForJob(jobDependency, me, DepLogic.MATCH, Operator.EQUAL, DependentJobStatus.COMPLETED, null);
+						this.getDatamodel().addJobDependencyForJob(me, jobDependency, DepLogic.MATCH, Operator.EQUAL, DependentJobStatus.COMPLETED, null);
 
-						handleSleepjob(jobDependency, me);
+						handleSleepjob(me, jobDependency);
 
 					} else {
 						log.error("DependencyGraphMapper.doHandleAfterStatements ERROR Unable to set Dependency for Job[" + me.getFullPath() + "] unable to locate [" + matchingEspJob.getFullPath() + "]");
@@ -285,7 +284,7 @@ public class DependencyGraphMapper {
 
 	private void doHandleExternalAppIDLogic(BaseCsvJobObject me, EspAbstractJob esp) {
 
-		if (esp.getName().contains("AIPPD040")) {
+		if (esp.getName().contains("DSDTBLFT")) {
 			esp.getName();
 		}
 		esp.getExternalApplicationDep().forEach(f -> {
@@ -304,7 +303,8 @@ public class DependencyGraphMapper {
 					return;
 				}
 
-				if (!StringUtils.isBlank(externjob)) {
+				// Must be different , otherwise its the same object and assumes a group.
+				if (!StringUtils.isBlank(externjob) && !externjob.equalsIgnoreCase(externgroup)) {
 					// We have a job to depend on
 
 					BaseCsvJobObject jobdepingroup = (BaseCsvJobObject) jobgroup.getChildren().stream().filter(child -> child.getName().equalsIgnoreCase(externjob)).findFirst().orElse(null);
@@ -376,7 +376,7 @@ public class DependencyGraphMapper {
 
 				this.getDatamodel().addJobDependencyForJob(currentjob, sleepdepson, DepLogic.MATCH, Operator.EQUAL, DependentJobStatus.COMPLETED, null);
 
-			}else {
+			} else {
 				log.error("DependencyGraphMapper.handleSleepjob Sleep Job[" + sleepjob.getFullPath() + "] Depends on Target Job[" + targetjob.getFullPath() + "] Unable to locate Sleep Job");
 
 			}
@@ -384,7 +384,6 @@ public class DependencyGraphMapper {
 
 	}
 
-	
 	/*
 	 * We need to add a depenency to each job that has a sleep job.
 	 */
@@ -405,7 +404,6 @@ public class DependencyGraphMapper {
 
 	private static Map<String, EspOSJOb> sleepJobKeyMap = new HashMap<>();
 
-	
 	/**
 	 * We need to register our sleep jobs to our actual job so we can build a dependency for them where Sleep Job dependes on Job
 	 * and when another job depends on a job that now has a sleep job, add it to be dependent on the sleep job too.

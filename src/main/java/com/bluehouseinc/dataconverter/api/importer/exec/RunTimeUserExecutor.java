@@ -61,14 +61,13 @@ public class RunTimeUserExecutor extends AbstractAPIExecutor {
 	protected void doProcessRunTimeUser(CsvRuntimeUser rte, ProgressBar bar) {
 
 		try {
-			Users existing = getTidalApi().getFirstRunTimeUserByNameAndDomain(rte.getRunTimeUserName(),rte.getRunTimeUserDomain());
-			
+			Users existing = getTidalApi().getFirstRunTimeUserByNameAndDomain(rte.getRunTimeUserName(), rte.getRunTimeUserDomain());
 
 			Collection<UserService> adapterpass = new ArrayList<>();
 
 			Users usr = null;
 
-			if (existing!= null) {
+			if (existing != null) {
 				usr = existing;
 				adapterpass = getTidalApi().getUserAdapterServices(existing);
 
@@ -130,11 +129,16 @@ public class RunTimeUserExecutor extends AbstractAPIExecutor {
 					existsvc.setServiceid(adapter.getId());
 					existsvc.setServicename(adapter.getName());
 					existsvc.setPassword(rte.getPasswordForSAP());
-					TesResult res = getTidalApi().getSession().getServiceFactory().userService().create(existsvc);
+					try {
+						TesResult res = getTidalApi().getSession().getServiceFactory().userService().create(existsvc);
 
-					int newid = res.getResult().getTesObjectid();
-					log.debug("doProcessRunTimeUser [" + usr.getName() + "] Response ID[" + newid + "][" + res.getResponseData() + "]");
+						int newid = res.getResult().getTesObjectid();
+						log.debug("doProcessRunTimeUser [" + usr.getName() + "] Response ID[" + newid + "][" + res.getResponseData() + "]");
+					} catch (Exception e) {
+						// eat
+						log.info("doProcessRunTimeUser ERROR");
 
+					}
 				}
 			}
 		} finally {

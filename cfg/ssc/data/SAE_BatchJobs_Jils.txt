@@ -1,0 +1,1341 @@
+
+/* ----------------- SAE_BatchJobs ----------------- */ 
+
+insert_job: SAE_BatchJobs   job_type: BOX 
+owner: batchusr@pvdlnewsjpsyb01
+permission: gx,ge
+date_conditions: 1
+days_of_week: mo,tu,we,th,fr
+start_times: "20:00"
+box_success: d(PSU_Daly_AUT_StopBox_PIA_PMDaily_BatchJobs_Box)
+description: "Mon-Fri,Box,PIA,PM-Batch-Jobs"
+alarm_if_fail: 0
+timezone: Europe/Dublin
+
+
+ /* ----------------- PSU_Q1WDoM_CSVR_TriggerEvent_PIA_GSSDAM_SchedOfCharges_Rpts ----------------- */ 
+
+ insert_job: PSU_Q1WDoM_CSVR_TriggerEvent_PIA_GSSDAM_SchedOfCharges_Rpts   job_type: CMD 
+ box_name: SAE_BatchJobs
+ command: \\PCAWLONFSHR02.ssnc-corp.cloud\app_prodapps\CRYSTAL_SERVER_APPS\TriggerEvent\Trigger_BOE_Event.exe PIA_GSSDAM_SchedOfCharges_Rpts
+ machine: dcmwinagt02
+ owner: svc_Autosys_PSuppDUB@ssnc-corp.global
+ permission: gx,wx,mx
+ date_conditions: 1
+ run_calendar: FebMayAugNov_1st_WDoM_IRL
+ start_times: "22:00"
+ condition: s(PIA_Qtly_PR_GSSDAM_CalcSchedOfChgs)
+ description: "Feb,May,Aug,Nov-1st Working Day, CSVR Trigger,RR=Y,DOC=N,T=PSU"
+ alarm_if_fail: 0
+ timezone: Europe/Dublin
+
+
+ /* ----------------- PIA_Qtly_PR_GSSDAM_CalcSchedOfChgs ----------------- */ 
+
+ insert_job: PIA_Qtly_PR_GSSDAM_CalcSchedOfChgs   job_type: CMD 
+ box_name: SAE_BatchJobs
+ command: /export/home/batchusr/RUN -C SAE -J DAM_GSS_CalcSchedOfChgs.ksh
+ machine: pvdlnewsjpsyb01
+ owner: batchusr@pvdlnewsjpsyb01
+ permission: gx,wx
+ date_conditions: 1
+ run_calendar: FebMayAugNov_1st_WDoM_IRL
+ start_times: "21:00"
+ condition: d(PIA_Daly_PR_GSSDAM_FeesandCharges)
+ description: "Feb,May,Aug,Nov -1st WorkDay populate table for crystal Reports,"
+ alarm_if_fail: 0
+ timezone: Europe/Dublin
+
+
+ /* ----------------- PIA_Dly_PR_PortfolioTrader_Liabilities ----------------- */ 
+
+ insert_job: PIA_Dly_PR_PortfolioTrader_Liabilities   job_type: CMD 
+ box_name: SAE_BatchJobs
+ command: \\PCAWLONFSHR02.ssnc-corp.cloud\app_prodapps\ICONExtract_PortfolioTrader\exe\PortfolioTraderIconExtract.exe PROD_SAE,REVIEWBATCH,**********,,INT_LIAB_JOB
+ machine: dcmwinagt01
+ owner: svc_Autosys_PSuppDUB@ssnc-corp.global
+ permission: gx,wx,mx
+ date_conditions: 1
+ days_of_week: mo,tu,we,th,fr
+ exclude_calendar: BankHolidays_IRL
+ start_times: "20:00"
+ description: "Mon-Fri,Job 1 of 8"
+ alarm_if_fail: 0
+ timezone: Europe/Dublin
+
+
+ /* ----------------- PIA_Dly_PR_PortfolioTrader_ICONTradeExport_Run1 ----------------- */ 
+
+ insert_job: PIA_Dly_PR_PortfolioTrader_ICONTradeExport_Run1   job_type: CMD 
+ box_name: SAE_BatchJobs
+ command: \\PCAWLONFSHR02.ssnc-corp.cloud\app_prodapps\ICONExtract_PortfolioTrader\exe\PortfolioTraderIconExtract.exe PROD_SAE,REVIEWBATCH,**********,,INT_EXPORT_TRADES_JOB
+ machine: dcmwinagt02
+ owner: svc_Autosys_PSuppDUB@ssnc-corp.global
+ permission: gx,wx,mx
+ date_conditions: 0
+ condition: s(PIA_Dly_PR_PortfolioTrader_Liabilities)
+ description: "Mon-Fri,Job 2 of 8"
+ alarm_if_fail: 0
+ timezone: Europe/Dublin
+
+
+ /* ----------------- PIA_Dly_PR_PortfolioTrader_ICONBalanceDownload_Run1 ----------------- */ 
+
+ insert_job: PIA_Dly_PR_PortfolioTrader_ICONBalanceDownload_Run1   job_type: CMD 
+ box_name: SAE_BatchJobs
+ command: \\PCAWLONFSHR02.ssnc-corp.cloud\app_prodapps\ICONExtract_PortfolioTrader\exe\PortfolioTraderIconExtract.exe PROD_SAE,REVIEWBATCH,**********,,INT_DOWNLOAD_BALS_JOB
+ machine: dcmwinagt02
+ owner: svc_Autosys_PSuppDUB@ssnc-corp.global
+ permission: gx,wx,mx
+ date_conditions: 0
+ condition: s(PIA_Dly_PR_PortfolioTrader_ICONTradeExport_Run1)
+ description: "Mon-Fri,Job 3 of 8"
+ alarm_if_fail: 0
+ timezone: Europe/Dublin
+
+
+ /* ----------------- PIA_Dly_PR_PortfolioTrader_BulkSwitchTrades ----------------- */ 
+
+ insert_job: PIA_Dly_PR_PortfolioTrader_BulkSwitchTrades   job_type: CMD 
+ box_name: SAE_BatchJobs
+ command: /export/home/batchusr/RUN -C SAE -J GSS_ProcessBulkSwitchTrades.ksh
+ machine: pvdlnewsjpsyb01
+ owner: batchusr@pvdlnewsjpsyb01
+ permission: gx,wx,mx
+ date_conditions: 0
+ condition: s(PIA_Dly_PR_PortfolioTrader_ICONBalanceDownload_Run1)
+ description: "Tue-Sat,Job 4 of 8"
+ alarm_if_fail: 0
+ timezone: Europe/Dublin
+
+
+ /* ----------------- PIA_Dly_PR_PortfolioTrader_ICONTradeExport_Run2 ----------------- */ 
+
+ insert_job: PIA_Dly_PR_PortfolioTrader_ICONTradeExport_Run2   job_type: CMD 
+ box_name: SAE_BatchJobs
+ command: \\PCAWLONFSHR02.ssnc-corp.cloud\app_prodapps\ICONExtract_PortfolioTrader\exe\PortfolioTraderIconExtract.exe PROD_SAE,REVIEWBATCH,**********,,INT_EXPORT_TRADES_JOB
+ machine: dcmwinagt02
+ owner: svc_Autosys_PSuppDUB@ssnc-corp.global
+ permission: gx,wx,mx
+ date_conditions: 0
+ condition: s(PIA_Dly_PR_PortfolioTrader_BulkSwitchTrades)
+ description: "Mon-Fri,Job 5 of 8"
+ alarm_if_fail: 0
+ timezone: Europe/Dublin
+
+
+ /* ----------------- PIA_Dly_PR_PortfolioTrader_ICONTradeExport_Run3 ----------------- */ 
+
+ insert_job: PIA_Dly_PR_PortfolioTrader_ICONTradeExport_Run3   job_type: CMD 
+ box_name: SAE_BatchJobs
+ command: \\PCAWLONFSHR02.ssnc-corp.cloud\app_prodapps\ICONExtract_PortfolioTrader\exe\PortfolioTraderIconExtract.exe PROD_SAE,REVIEWBATCH,**********,,INT_EXPORT_TRADES_JOB
+ machine: dcmwinagt02
+ owner: svc_Autosys_PSuppDUB@ssnc-corp.global
+ permission: gx,wx,mx
+ date_conditions: 1
+ days_of_week: tu,we,th,fr,sa
+ exclude_calendar: BankHolidays_Plus1_WDoM_IRL
+ start_times: "03:30"
+ condition: s(PIA_Dly_PR_PortfolioTrader_ICONTradeExport_Run2)
+ description: "Tue-Sat,Job 6 of 8"
+ alarm_if_fail: 0
+ timezone: Europe/Dublin
+
+
+ /* ----------------- PIA_Dly_PR_PortfolioTrader_ICONBalanceDownload_Run2 ----------------- */ 
+
+ insert_job: PIA_Dly_PR_PortfolioTrader_ICONBalanceDownload_Run2   job_type: CMD 
+ box_name: SAE_BatchJobs
+ command: \\PCAWLONFSHR02.ssnc-corp.cloud\app_prodapps\ICONExtract_PortfolioTrader\exe\PortfolioTraderIconExtract.exe PROD_SAE,REVIEWBATCH,**********,,INT_DOWNLOAD_BALS_JOB
+ machine: dcmwinagt02
+ owner: svc_Autosys_PSuppDUB@ssnc-corp.global
+ permission: gx,wx,mx
+ date_conditions: 1
+ days_of_week: tu,we,th,fr,sa
+ start_times: "03:30"
+ condition: s(PIA_Dly_PR_PortfolioTrader_ICONTradeExport_Run3)
+ description: "Tue-Sat,Job 7 of 8"
+ alarm_if_fail: 0
+ timezone: Europe/Dublin
+
+
+ /* ----------------- S_D_StartBatchJobs ----------------- */ 
+
+ insert_job: S_D_StartBatchJobs   job_type: CMD 
+ box_name: SAE_BatchJobs
+ command: sleep 10
+ machine: pvdlnewsjpsyb01
+ owner: root@clpsiwmwsdb04
+ permission: gx,ge,wx,we
+ date_conditions: 0
+ description: "Dummy job used to start the Batch box, added to enable Backup and Backupwatcher to have same dependancy"
+ alarm_if_fail: 0
+ timezone: Europe/Dublin
+
+
+ /* ----------------- S_D_EveningBackup ----------------- */ 
+
+ insert_job: S_D_EveningBackup   job_type: CMD 
+ box_name: SAE_BatchJobs
+ command: /export/home/batchusr/RUN -C SAE -J DBBackupToDisk PROD_SAE jria3 dumper E /PAGE
+ machine: pvdlnewsjpsyb01
+ owner: batchusr@pvdlnewsjpsyb01
+ permission: gx,wx
+ date_conditions: 0
+ condition: d(S_D_StartBatchJobs)
+ description: "Mon-Fri, DB Dump PROD_SAE.jria3,R=Yes D=No T=DBA"
+ alarm_if_fail: 0
+ timezone: Europe/Dublin
+
+
+ /* ----------------- PIA_Daly_SYB_AutoSegmentation ----------------- */ 
+
+ insert_job: PIA_Daly_SYB_AutoSegmentation   job_type: CMD 
+ box_name: SAE_BatchJobs
+ command: /export/home/batchusr/RUN -C SAE -J SPL_RunBondSplitting.ksh -SPROD_SAE -Djria3
+ machine: pvdlnewsjpsyb01
+ owner: batchusr@pvdlnewsjpsyb01
+ permission: gx,wx
+ date_conditions: 0
+ condition: s(S_D_EveningBackup) & d(PIA_Dly_PR_DBExtract_SafireFTP) & d(PIA_Dly_MI_DBExtr_SafireIllustrations_FTP)
+ description: "Mon-Fri, ReRun=No,Doc=Yes SUPP=AppSupp"
+ alarm_if_fail: 0
+ timezone: Europe/Dublin
+
+
+ /* ----------------- PIA_Dly_PR_DBExtract_SafireFTP ----------------- */ 
+
+ insert_job: PIA_Dly_PR_DBExtract_SafireFTP   job_type: CMD 
+ box_name: SAE_BatchJobs
+ command: /export/home/batchusr/RUN -C SAE -J RunPIAMIExtract.ksh -SPROD_SAE -Djria3 -A42
+ machine: pvdlnewsjpsyb01
+ owner: batchusr@pvdlnewsjpsyb01
+ permission: gx,wx
+ date_conditions: 1
+ days_of_week: mo,tu,we,th,fr
+ start_times: "19:55"
+ condition: s(S_D_EveningBackup)
+ description: "Mon-Fri,SafireFTP,R=NO,D=Yes,T=PS/DBA"
+ alarm_if_fail: 0
+ timezone: Europe/Dublin
+
+
+ /* ----------------- S_D_CashQuickMatch ----------------- */ 
+
+ insert_job: S_D_CashQuickMatch   job_type: CMD 
+ box_name: SAE_BatchJobs
+ command: /export/home/batchusr/RUN -C SAE -J CMQuickMatch.bsh -SPROD_SAE -Djria3
+ machine: pvdlnewsjpsyb01
+ owner: batchusr@pvdlnewsjpsyb01
+ permission: gx,wx
+ date_conditions: 0
+ condition: s(S_D_EveningBackup) & d(PIA_Daly_SYB_AutoSegmentation)
+ description: "Cash job 1 of 3 - R=No D=Yes T=ESG"
+ alarm_if_fail: 0
+ timezone: Europe/Dublin
+
+
+ /* ----------------- S_D_CashAutoMatch ----------------- */ 
+
+ insert_job: S_D_CashAutoMatch   job_type: CMD 
+ box_name: SAE_BatchJobs
+ command: /export/home/batchusr/RUN -C SAE -J CMAutoMatch.bsh -SPROD_SAE -Djria3
+ machine: pvdlnewsjpsyb01
+ owner: batchusr@pvdlnewsjpsyb01
+ permission: gx,wx
+ date_conditions: 0
+ condition: d(S_D_CashQuickMatch)
+ description: "Mon-Fri,Job2of3,R=No,D=Yes,T=ESG"
+ alarm_if_fail: 0
+ timezone: Europe/Dublin
+
+
+ /* ----------------- S_D_CashCreatePremiumInvEvents ----------------- */ 
+
+ insert_job: S_D_CashCreatePremiumInvEvents   job_type: CMD 
+ box_name: SAE_BatchJobs
+ command: /export/home/batchusr/RUN -C SAE -J CreatePremInvest.bsh -SPROD_SAE -Djria3
+ machine: pvdlnewsjpsyb01
+ owner: batchusr@pvdlnewsjpsyb01
+ permission: gx,wx
+ date_conditions: 0
+ condition: d(S_D_CashAutoMatch)
+ description: "Cash job 3 of 3 - R=No D=Yes T=ESG"
+ alarm_if_fail: 0
+ timezone: Europe/Dublin
+
+
+ /* ----------------- S_D_UnitProduction ----------------- */ 
+
+ insert_job: S_D_UnitProduction   job_type: CMD 
+ box_name: SAE_BatchJobs
+ command: /export/home/batchusr/RUN -C SAE -J UNT_Liabilities.ksh -SPROD_SAE -Djria3 -T1
+ machine: pvdlnewsjpsyb01
+ owner: batchusr@pvdlnewsjpsyb01
+ permission: gx,wx
+ date_conditions: 0
+ condition: d(S_D_CashCreatePremiumInvEvents) & d(PIA_Dly_PR_DBExtract_SafireFTP)
+ description: "units production job - R=No D=No T=ESG"
+ alarm_if_fail: 0
+ timezone: Europe/Dublin
+
+
+ /* ----------------- PIA_D_AustrianGiftTax ----------------- */ 
+
+ insert_job: PIA_D_AustrianGiftTax   job_type: CMD 
+ box_name: SAE_BatchJobs
+ command: /export/home/batchusr/RUN -C SAE -J AustrianGiftBatch.ksh -SPROD_SAE -Djria3
+ machine: pvdlnewsjpsyb01
+ owner: batchusr@pvdlnewsjpsyb01
+ permission: gx,wx
+ date_conditions: 0
+ condition: s(S_D_EveningBackup) & d(PIA_Daly_SYB_AutoSegmentation)
+ description: "Calls procedure to identify OSB 2 payments to parties other than current plan owners, create documents - R=No D=Yes T=ESG"
+ alarm_if_fail: 0
+ timezone: Europe/Dublin
+
+
+ /* ----------------- PIA_Dly_PR_PlanRevw_Warnings ----------------- */ 
+
+ insert_job: PIA_Dly_PR_PlanRevw_Warnings   job_type: CMD 
+ box_name: SAE_BatchJobs
+ command: \\PCAWLONFSHR02.ssnc-corp.cloud\app_apps\PlanReview\vbexes\WarningController.exe
+ machine: dcmwinagt01
+ owner: svc_Autosys_PSuppDUB@ssnc-corp.global
+ permission: gx,wx
+ date_conditions: 1
+ days_of_week: tu,we,th,fr,sa
+ start_times: "00:05"
+ condition: d(PIA_Daly_PR_PlanReview_SP2)
+ description: "PIA Regular Plan Review Warnings,  R=Yes,D=Yes,T=ESG"
+ term_run_time: 240
+ alarm_if_fail: 0
+ timezone: Europe/Dublin
+
+
+ /* ----------------- PIA_DLY_PR_Srvcin_AustGuarnte ----------------- */ 
+
+ insert_job: PIA_DLY_PR_Srvcin_AustGuarnte   job_type: CMD 
+ box_name: SAE_BatchJobs
+ command: /export/home/batchusr/RUN -C SAE -J AustriaGuaranteed.ksh -SPROD_SAE -Djria3
+ machine: pvdlnewsjpsyb01
+ owner: batchusr@pvdlnewsjpsyb01
+ permission: gx,wx
+ date_conditions: 1
+ exclude_calendar: BankHolidays_IRL
+ condition: s(S_D_EveningBackup) & d(PIA_Daly_SYB_AutoSegmentation)
+ description: "Mon-Fri, exclude on BankHolidays_IRL, produces Documents"
+ alarm_if_fail: 0
+ timezone: Europe/Dublin
+
+
+ /* ----------------- PIA_Ann_PR_ChargEV_GenCerts ----------------- */ 
+
+ insert_job: PIA_Ann_PR_ChargEV_GenCerts   job_type: CMD 
+ box_name: SAE_BatchJobs
+ command: /export/home/batchusr/RUN -C SAE -J ChargeEvents.ksh -T Y
+ machine: pvdlnewsjpsyb01
+ owner: batchusr@pvdlnewsjpsyb01
+ permission: gx,wx
+ date_conditions: 1
+ days_of_week: sa
+ start_times: "02:00"
+ condition: s(S_D_UnitProduction) & d(PIA_Dly_PR_CommRun_AdviserCharge)
+ description: "Yearly, on request, Chargeable Events Annual Certificate creation"
+ alarm_if_fail: 0
+ auto_hold: 1
+ timezone: Europe/Dublin
+
+
+ /* ----------------- PIA_Dly_PR_UnitsPro_Mismatch ----------------- */ 
+
+ insert_job: PIA_Dly_PR_UnitsPro_Mismatch   job_type: CMD 
+ box_name: SAE_BatchJobs
+ command: \\PCAWLONFSHR02.ssnc-corp.cloud\App_prodapps\CLPSICommonApps\UnitsMismatch\UnitsExtract.exe PROD_SAE \\PCAWLONFSHR02.ssnc-corp.cloud\App_prodapps\CLPSICommonApps\UnitsMismatch\UnitsExtract.ini
+ machine: dcmwinagt02
+ owner: svc_Autosys_PSuppDUB@ssnc-corp.global
+ permission: gx,ge
+ date_conditions: 0
+ condition: d(S_D_UnitProduction) & n(SJP_Dly_PR_UnitsPro_Mismatch) & n(PAC_Dly_PR_UnitsPro_Mismatch)
+ description: "Mon - Fri, UnitsMismatch report - R=No D=Yes T=ESG"
+ alarm_if_fail: 0
+ timezone: Europe/Dublin
+
+
+ /* ----------------- PIA_Daly_PR_GSSDAM_FeesandCharges ----------------- */ 
+
+ insert_job: PIA_Daly_PR_GSSDAM_FeesandCharges   job_type: CMD 
+ box_name: SAE_BatchJobs
+ command: /export/home/batchusr/RUN -C SAE -J GSS_Liabilities.ksh -SPROD_SAE -Djria3 -T1
+ machine: pvdlnewsjpsyb01
+ owner: batchusr@pvdlnewsjpsyb01
+ permission: gx,wx
+ date_conditions: 0
+ condition: d(S_D_UnitProduction)
+ description: "Mon-Fri,Units-for-GSS-DAM-plans,R=Y,D=Y,T=ESG"
+ alarm_if_fail: 0
+ timezone: Europe/Dublin
+
+
+ /* ----------------- PIA_Daly_PR_PlanReview_PR2 ----------------- */ 
+
+ insert_job: PIA_Daly_PR_PlanReview_PR2   job_type: CMD 
+ box_name: SAE_BatchJobs
+ command: \\PCAWLONFSHR02.ssnc-corp.cloud\app_apps\PlanReview\Vbexes\PR_Scheduler.exe \\PCAWLONFSHR02.ssnc-corp.cloud\app_prodapps\Planreview\ini\PlanReview_PIA_PR2.ini
+ machine: dcmwinagt01
+ owner: svc_Autosys_PSuppDUB@ssnc-corp.global
+ permission: gx,wx
+ date_conditions: 1
+ days_of_week: mo,tu,we,th,fr
+ start_times: "21:30"
+ run_window: "21:00-04:50"
+ condition: d(S_D_PR1PlanReview) & n(J_D_PlanReview)
+ description: "Depends on S_D_UnitProduction, must START before system date change, can continue after date change, avoid running with J_D_PlanReview"
+ alarm_if_fail: 0
+ timezone: Europe/Dublin
+
+
+ /* ----------------- PIA_Daly_PR_PlanReview_SP1 ----------------- */ 
+
+ insert_job: PIA_Daly_PR_PlanReview_SP1   job_type: CMD 
+ box_name: SAE_BatchJobs
+ command: \\PCAWLONFSHR02.ssnc-corp.cloud\app_apps\PlanReview\Vbexes\PR_Scheduler.exe \\PCAWLONFSHR02.ssnc-corp.cloud\app_prodapps\Planreview\ini\PlanReview_PIA_SP1.ini
+ machine: dcmwinagt01
+ owner: svc_Autosys_PSuppDUB@ssnc-corp.global
+ permission: gx,wx
+ date_conditions: 1
+ days_of_week: mo,tu,we,th,fr
+ start_times: "21:30"
+ run_window: "21:00-04:50"
+ condition: d(PIA_Daly_PR_PlanReview_PR2) & n(J_D_PlanReview)
+ description: "Depends on S_D_UnitProduction, must START before system date change, can continue after date change, avoid running with J_D_PlanReview"
+ alarm_if_fail: 0
+ timezone: Europe/Dublin
+
+
+ /* ----------------- PIA_Daly_PR_PlanReview_SP2 ----------------- */ 
+
+ insert_job: PIA_Daly_PR_PlanReview_SP2   job_type: CMD 
+ box_name: SAE_BatchJobs
+ command: \\PCAWLONFSHR02.ssnc-corp.cloud\app_apps\PlanReview\Vbexes\PR_Scheduler.exe \\PCAWLONFSHR02.ssnc-corp.cloud\app_prodapps\Planreview\ini\PlanReview_PIA_SP2.ini
+ machine: dcmwinagt01
+ owner: svc_Autosys_PSuppDUB@ssnc-corp.global
+ permission: gx,wx
+ date_conditions: 1
+ days_of_week: mo,tu,we,th,fr
+ start_times: "21:30"
+ run_window: "21:00-04:50"
+ condition: d(PIA_Daly_PR_PlanReview_SP1) & n(J_D_PlanReview)
+ description: "Depends on S_D_UnitProduction, must START before system date change, can continue after date change, avoid running with J_D_PlanReview"
+ alarm_if_fail: 0
+ timezone: Europe/Dublin
+
+
+ /* ----------------- PIA_Qtly_PR_ICON_GSSCommissionsP1 ----------------- */ 
+
+ insert_job: PIA_Qtly_PR_ICON_GSSCommissionsP1   job_type: CMD 
+ box_name: SAE_BatchJobs
+ command: /export/home/batchusr/RUN -C SAE -J GSSCommission_P1.ksh
+ machine: pvdlnewsjpsyb01
+ owner: batchusr@pvdlnewsjpsyb01
+ permission: gx,wx
+ date_conditions: 1
+ run_calendar: PIA_Qrtly_GSSCommissionsP1_cal
+ start_times: "23:50"
+ condition: d(S_D_GetCommissionEvents)
+ description: "Jan,Apr,Jul,Oct-Add date to Calendar on request,RR=N,DOC=Y,T=ESG"
+ alarm_if_fail: 0
+ timezone: Europe/Dublin
+
+
+ /* ----------------- PIA_Qtly_PR_ICON_GSSCommissionsP2 ----------------- */ 
+
+ insert_job: PIA_Qtly_PR_ICON_GSSCommissionsP2   job_type: CMD 
+ box_name: SAE_BatchJobs
+ command: /export/home/batchusr/RUN -C SAE -J GSSCommission_P2.ksh
+ machine: pvdlnewsjpsyb01
+ owner: batchusr@pvdlnewsjpsyb01
+ permission: gx,wx
+ date_conditions: 0
+ description: "Jan,Apr,Jul,Oct-ForceStart Immediately on Request,RR=No,DOC=Y,T=ESG"
+ alarm_if_fail: 0
+ auto_hold: 1
+ timezone: Europe/Dublin
+
+
+ /* ----------------- PIA_Qtly_PR_GSSDAM_Statements ----------------- */ 
+
+ insert_job: PIA_Qtly_PR_GSSDAM_Statements   job_type: CMD 
+ box_name: SAE_BatchJobs
+ command: /export/home/batchusr/RUN -C SAE -J DAM_ClientQtrStatements.ksh -UINDEXBATCH
+ machine: pvdlnewsjpsyb01
+ owner: autosys@clpsiwmwsdb04
+ permission: gx,wx
+ date_conditions: 1
+ run_calendar: GSSDAM_Qtrly_Statements_cal
+ start_times: "03:00"
+ description: "Jan,Apr,Jul,Oct produce statements for DAM plans"
+ alarm_if_fail: 0
+ timezone: Europe/Dublin
+
+
+ /* ----------------- PIA_Daly_PR_ICONData_ReversaExtract ----------------- */ 
+
+ insert_job: PIA_Daly_PR_ICONData_ReversaExtract   job_type: CMD 
+ box_name: SAE_BatchJobs
+ command: \\PCAWLONFSHR02.ssnc-corp.cloud\App_prodapps\ICON_BatchApps\exes\IconExtract.exe -i1 -sPROD_SAE -uREVIEWBATCH -p********** -tR
+ machine: dcmwinagt02
+ owner: svc_Autosys_PSuppDUB@ssnc-corp.global
+ permission: gx,ge
+ date_conditions: 1
+ days_of_week: tu,we,th,fr,sa
+ start_times: "01:00"
+ condition: d(PIA_Daly_PR_GSSDAM_FeesandCharges) & n(PIA_Daly_PR_ICONExtract_Valuations)
+ description: "Tue-Sat,R=Yes D=Yes T=ESG"
+ alarm_if_fail: 0
+ timezone: Europe/Dublin
+
+
+ /* ----------------- PIA_Daly_PR_GSSICON_RebateRecvble ----------------- */ 
+
+ insert_job: PIA_Daly_PR_GSSICON_RebateRecvble   job_type: CMD 
+ box_name: SAE_BatchJobs
+ command: /export/home/batchusr/RUN -C SAE -J GSS_GenFMRebateRcvblPyblBatch.ksh
+ machine: pvdlnewsjpsyb01
+ owner: batchusr@pvdlnewsjpsyb01
+ permission: gx,ge
+ date_conditions: 0
+ condition: d(PIA_Daly_PR_ICONData_ReversaExtract) & n(PIA_Daly_PR_ICONExtract_Valuations)
+ description: "Tue to Sat,R=Y,D=Y,T=ESG"
+ alarm_if_fail: 0
+ timezone: Europe/Dublin
+
+
+ /* ----------------- PIA_Daly_PR_OnlineVals_UnitValues ----------------- */ 
+
+ insert_job: PIA_Daly_PR_OnlineVals_UnitValues   job_type: CMD 
+ box_name: SAE_BatchJobs
+ command: /export/home/batchusr/RUN -C SAE -J RunPIAOnlineVals.ksh -RUV -A5
+ machine: pvdlnewsjpsyb01
+ owner: batchusr@pvdlnewsjpsyb01
+ permission: gx,ge
+ date_conditions: 1
+ exclude_calendar: BankHolidays_IRL
+ condition: s(S_D_UnitProduction) & n(PIA_Daly_PR_Reviews_LTCProjections)
+ description: "Mon-Fri,R=see-doc,D=Yes,T=ESG,Job1-populate tables with Unit Values"
+ alarm_if_fail: 0
+ timezone: Europe/Dublin
+
+
+ /* ----------------- PIA_Tue_PR_PortfolioBond_RolloverLetters ----------------- */ 
+
+ insert_job: PIA_Tue_PR_PortfolioBond_RolloverLetters   job_type: CMD 
+ box_name: SAE_BatchJobs
+ command: /export/home/batchusr/RUN -C SAE -J RunGSSRolloverLettersPrint.ksh -SPROD_SAE -Djria3
+ machine: pvdlnewsjpsyb01
+ owner: batchusr@pvdlnewsjpsyb01
+ permission: gx,wx
+ date_conditions: 1
+ days_of_week: tu
+ start_times: "04:00"
+ description: "Tue, create docs, R=No;D=Yes;T=ESG"
+ alarm_if_fail: 0
+ timezone: Europe/Dublin
+
+
+ /* ----------------- PIA_Daly_PR_Reviews_LTCProjections ----------------- */ 
+
+ insert_job: PIA_Daly_PR_Reviews_LTCProjections   job_type: CMD 
+ box_name: SAE_BatchJobs
+ command: \\PCAWLONFSHR02.ssnc-corp.cloud\app_prodapps\PIA_LTCProjections\exe\LtcProjections.Exe PROD_SAE,UNITSBATCH,**********,BATCH
+ machine: dcmwinagt01
+ owner: svc_Autosys_PSuppDUB@ssnc-corp.global
+ permission: gx,wx
+ date_conditions: 0
+ condition: s(S_D_UnitProduction) & d(PIA_Daly_PR_GSSDAM_FeesandCharges) & n(PIA_Daly_PR_OnlineVals_UnitValues) & (d(TEMP_Dly_Delay_PIA_LTCprojections) | d(TEMP_Dly_PreCache_PIA_LTCProjections))
+ description: "Mon-Fri,R=N,D=Y,T=AS - DO NOT RERUN - AppSupp/Acty to fix"
+ term_run_time: 200
+ alarm_if_fail: 0
+ max_exit_success: 1
+ timezone: Europe/Dublin
+
+
+ /* ----------------- PIA_Dly_PR_PrintDocs_BelguimLetters ----------------- */ 
+
+ insert_job: PIA_Dly_PR_PrintDocs_BelguimLetters   job_type: CMD 
+ box_name: SAE_BatchJobs
+ command: /export/home/batchusr/RUN -C SAE -J RunPrintNewBusLetter.bsh
+ machine: pvdlnewsjpsyb01
+ owner: batchusr@pvdlnewsjpsyb01
+ permission: gx,wx
+ date_conditions: 1
+ days_of_week: tu,we,th,fr,sa
+ start_times: "04:45"
+ description: "Tue-Sat,create docs, R=No;D=Yes;T=ESG"
+ alarm_if_fail: 0
+ timezone: Europe/Dublin
+
+
+ /* ----------------- PIA_Dly_PR_UnitsPro_RPLiabilities ----------------- */ 
+
+ insert_job: PIA_Dly_PR_UnitsPro_RPLiabilities   job_type: CMD 
+ box_name: SAE_BatchJobs
+ command: /export/home/batchusr/RUN -C SAE -J RPLiabilitiesRun.ksh
+ machine: pvdlnewsjpsyb01
+ owner: batchusr@pvdlnewsjpsyb01
+ permission: gx,wx
+ date_conditions: 1
+ days_of_week: tu,we,th,fr,sa
+ start_times: "00:15"
+ condition: s(S_D_UnitProduction) & d(PIA_Daly_PR_Reviews_LTCProjections)
+ description: "Mon-Fri,R=Y,D=Y,T=ESG Approval needed from FundAdmin/Actuarial before rerun"
+ alarm_if_fail: 0
+ timezone: Europe/Dublin
+
+
+ /* ----------------- PIA_PreCalcs_SP ----------------- */ 
+
+ insert_job: PIA_PreCalcs_SP   job_type: CMD 
+ box_name: SAE_BatchJobs
+ command: /export/home/batchusr/RUN -C SAE -J PR_PreCalcsData.ksh -IPR
+ machine: pvdlnewsjpsyb01
+ owner: batchusr@pvdlnewsjpsyb01
+ permission: gx,wx,mx
+ date_conditions: 1
+ days_of_week: tu,we,th,fr,sa
+ start_times: "03:20"
+ description: "Cache job for Plan Review"
+ term_run_time: 10
+ alarm_if_fail: 0
+ timezone: Europe/Dublin
+
+
+ /* ----------------- TEMP_Dly_Delay_PIA_LTCprojections ----------------- */ 
+
+ insert_job: TEMP_Dly_Delay_PIA_LTCprojections   job_type: CMD 
+ box_name: SAE_BatchJobs
+ command: sleep 1020
+ machine: pvdlnewsjpsyb01
+ owner: batchusr@pvdlnewsjpsyb01
+ permission: gx,wx
+ date_conditions: 0
+ condition: d(PIA_Daly_PR_GSSDAM_FeesandCharges)
+ description: "Mon-Fri,Temporary-fix-for-LTCProjections-connection-issue"
+ alarm_if_fail: 0
+ timezone: Europe/Dublin
+
+
+ /* ----------------- TEMP_Dly_PreCache_PIA_LTCProjections ----------------- */ 
+
+ insert_job: TEMP_Dly_PreCache_PIA_LTCProjections   job_type: CMD 
+ box_name: SAE_BatchJobs
+ command: /export/home/batchusr/RUN -C SAE -J PR_PreCalcsData.ksh -ILTCProjection
+ machine: pvdlnewsjpsyb01
+ owner: batchusr@pvdlnewsjpsyb01
+ permission: gx,wx
+ date_conditions: 0
+ condition: d(PIA_Daly_PR_GSSDAM_FeesandCharges)
+ description: "Mon-Fri,Temporary-fix-for-LTCProjections-connection-issue"
+ term_run_time: 15
+ alarm_if_fail: 0
+ timezone: Europe/Dublin
+
+
+ /* ----------------- PIA_Dly_PR_CommRun_AdviserCharge ----------------- */ 
+
+ insert_job: PIA_Dly_PR_CommRun_AdviserCharge   job_type: CMD 
+ box_name: SAE_BatchJobs
+ command: /export/home/batchusr/RUN -C SAE -J Comm_AdviserCharge.ksh
+ machine: pvdlnewsjpsyb01
+ owner: batchusr@pvdlnewsjpsyb01
+ permission: gx,wx
+ date_conditions: 0
+ condition: s(S_D_Commissions) & d(S_D_UnitProduction)
+ description: "Mon-Fri,R=No,D=Yes,T=ESG"
+ alarm_if_fail: 0
+ timezone: Europe/Dublin
+
+
+ /* ----------------- PIA_LWKD_UpdateTaxTransactions ----------------- */ 
+
+ insert_job: PIA_LWKD_UpdateTaxTransactions   job_type: CMD 
+ box_name: SAE_BatchJobs
+ command: /export/home/batchusr/RUN -C SAE -J TAX_UpdateIPTTransactions.ksh -SPROD_SAE -Djria3
+ machine: pvdlnewsjpsyb01
+ owner: batchusr@pvdlnewsjpsyb01
+ permission: gx,wx
+ date_conditions: 1
+ run_calendar: Monthly_Last_WDoM_UK
+ start_times: "20:05"
+ condition: s(S_D_UnitProduction)
+ description: "Monthly-LastWorkDayUK,updates OSB2 Tax Transactions for Rpt395 - R=No D=Yes T=ESG"
+ alarm_if_fail: 0
+ timezone: Europe/Dublin
+
+
+ /* ----------------- PIA_Dly_PR_ICONExtract_ContractNotes ----------------- */ 
+
+ insert_job: PIA_Dly_PR_ICONExtract_ContractNotes   job_type: CMD 
+ box_name: SAE_BatchJobs
+ command: \\PCAWLONFSHR02.ssnc-corp.cloud\app_prodapps\ICON_ContractNotes_PIA\exes\IconExtract.exe -i1 -sPROD_SAE -uREVIEWBATCH -p********** -tA
+ machine: dcmwinagt02
+ owner: svc_Autosys_PSuppDUB@ssnc-corp.global
+ permission: gx,wx
+ date_conditions: 1
+ days_of_week: tu,we,th,fr,sa
+ start_times: "04:30"
+ description: "Mon-Fri,R=Yes,D=Yes,T=ESG"
+ alarm_if_fail: 0
+ timezone: Europe/Dublin
+
+
+ /* ----------------- PIA_Dly_PR_GSSPrintDocs_ContractNotes ----------------- */ 
+
+ insert_job: PIA_Dly_PR_GSSPrintDocs_ContractNotes   job_type: CMD 
+ box_name: SAE_BatchJobs
+ command: /export/home/batchusr/RUN -C SAE -J GSS_PrintContractNotesDaily.ksh
+ machine: pvdlnewsjpsyb01
+ owner: batchusr@pvdlnewsjpsyb01
+ permission: gx,wx
+ date_conditions: 1
+ days_of_week: tu,we,th,fr,sa
+ start_times: "04:30"
+ condition: s(PIA_Dly_PR_ICONExtract_ContractNotes)
+ description: "Mon-Fri,R=Yes,D=Yes,T=ESG"
+ alarm_if_fail: 0
+ timezone: Europe/Dublin
+
+
+ /* ----------------- PIA_Dly_PR_AssetConfirmStatements ----------------- */ 
+
+ insert_job: PIA_Dly_PR_AssetConfirmStatements   job_type: CMD 
+ box_name: SAE_BatchJobs
+ command: \\PCAWLONFSHR02.ssnc-corp.cloud\app_prodapps\PT_ConfirmationStatements_PIA\exe\CLPSI.BatchJobs.ConfirmStatement.exe PROD_SAE,REVIEWBATCH,**********
+ machine: dcmwinagt02
+ owner: svc_Autosys_PSuppDUB@ssnc-corp.global
+ permission: gx,wx
+ date_conditions: 1
+ days_of_week: tu,we,th,fr,sa
+ start_times: "04:30"
+ description: "Mon-Fri,R=Yes,D=Yes,T=ESG"
+ alarm_if_fail: 0
+ timezone: Europe/Dublin
+
+
+ /* ----------------- PIA_Daly_PR_SybaseToIcon_InitialRun ----------------- */ 
+
+ insert_job: PIA_Daly_PR_SybaseToIcon_InitialRun   job_type: CMD 
+ box_name: SAE_BatchJobs
+ command: \\PCAWLONFSHR02.ssnc-corp.cloud\App_prodapps\SybaseToICON_PIA\Initial\SybaseToIcon.exe -SPROD_SAE -UREVIEWBATCH -P********** -iN -tN -r1
+ machine: dcmwinagt01
+ owner: svc_Autosys_PSuppDUB@ssnc-corp.global
+ permission: gx,ge
+ date_conditions: 1
+ days_of_week: mo,tu,we,th,fr
+ start_times: "20:00"
+ condition: s(PIA_Daly_PR_GSSDAM_FeesandCharges)
+ description: "Mon-Fri,R=NO,D=YES,T=ESG"
+ alarm_if_fail: 0
+ timezone: Europe/Dublin
+
+
+ /* ----------------- PIA_Daly_PR_SybaseToIcon_IntegrityCheck ----------------- */ 
+
+ insert_job: PIA_Daly_PR_SybaseToIcon_IntegrityCheck   job_type: CMD 
+ box_name: SAE_BatchJobs
+ command: \\PCAWLONFSHR02.ssnc-corp.cloud\App_prodapps\SybaseToICON_PIA\Integrity\SybaseToIcon.exe -SPROD_SAE -UREVIEWBATCH -P********** -iY -tY -r0
+ machine: dcmwinagt01
+ owner: svc_Autosys_PSuppDUB@ssnc-corp.global
+ permission: gx,ge
+ date_conditions: 1
+ days_of_week: tu,we,th,fr,sa
+ start_times: "03:00"
+ condition: d(PIA_Daly_PR_SybaseToIcon_InitialRun)
+ description: "Tue-Sat,R=YES,D=YES,T=ESG"
+ alarm_if_fail: 0
+ timezone: Europe/Dublin
+
+
+ /* ----------------- PIA_ANN_PR_Fatca_UWP ----------------- */ 
+
+ insert_job: PIA_ANN_PR_Fatca_UWP   job_type: CMD 
+ box_name: SAE_BatchJobs
+ command: /export/home/batchusr/RUN -C SAE -J SavePolicyValuation.ksh -TUWP
+ machine: pvdlnewsjpsyb01
+ owner: batchusr@pvdlnewsjpsyb01
+ permission: gx,wx
+ date_conditions: 1
+ run_calendar: Dec_Last_WDoM_ALL
+ start_times: "20:15"
+ condition: d(PIA_Daly_PR_GSSDAM_FeesandCharges)
+ description: "Dec-LastWorkDay,R=Yes D=Yes T=ESG"
+ alarm_if_fail: 0
+ timezone: Europe/Dublin
+
+
+ /* ----------------- PIA_Dly_MI_DBExtr_SafireIllustrations_FTP ----------------- */ 
+
+ insert_job: PIA_Dly_MI_DBExtr_SafireIllustrations_FTP   job_type: CMD 
+ box_name: SAE_BatchJobs
+ command: /export/home/batchusr/RUN -C SAE -J RunPlatformExtract.ksh
+ machine: pvdlnewsjpsyb01
+ owner: batchusr@pvdlnewsjpsyb01
+ permission: gx,wx
+ date_conditions: 1
+ days_of_week: mo,tu,we,th,fr
+ start_times: "19:55"
+ condition: d(PIA_Dly_PR_DBExtract_SafireFTP)
+ description: "Mon-Fri,SafireFTP,R=NO,D=Yes,T=PS/DBA"
+ alarm_if_fail: 0
+ timezone: Europe/Dublin
+
+
+ /* ----------------- PIA_Dly_PR_PlatformFeed_UnixExtract_SEI ----------------- */ 
+
+ insert_job: PIA_Dly_PR_PlatformFeed_UnixExtract_SEI   job_type: CMD 
+ box_name: SAE_BatchJobs
+ command: /export/home/batchusr/RUN -C SAE -J PlatformOutBound.ksh -T SEI
+ machine: pvdlnewsjpsyb01
+ owner: batchusr@pvdlnewsjpsyb01
+ permission: gx,wx
+ date_conditions: 1
+ days_of_week: mo,tu,we,th,fr
+ exclude_calendar: BankHolidays_UK
+ start_times: "20:30"
+ condition: s(PIA_Daly_PR_GSSDAM_FeesandCharges) & n(PIA_Dly_PR_PlatformFeed_UnixExtract_ASC)
+ description: "Mon-Fri,R=N,D=Y,T=PSU"
+ alarm_if_fail: 0
+ timezone: Europe/Dublin
+
+
+ /* ----------------- PIA_Dly_PR_PlatformFeed_UnixExtract_ASC ----------------- */ 
+
+ insert_job: PIA_Dly_PR_PlatformFeed_UnixExtract_ASC   job_type: CMD 
+ box_name: SAE_BatchJobs
+ command: /export/home/batchusr/RUN -C SAE -J PlatformOutBound.ksh -T ASC
+ machine: pvdlnewsjpsyb01
+ owner: batchusr@pvdlnewsjpsyb01
+ permission: gx,wx
+ date_conditions: 1
+ days_of_week: mo,tu,we,th,fr
+ start_times: "20:40"
+ condition: s(PIA_Daly_PR_GSSDAM_FeesandCharges) & n(PIA_Dly_PR_PlatformFeed_UnixExtract_SEI)
+ description: "Mon-Fri,R=N,D=Y,T=PSU"
+ alarm_if_fail: 0
+ timezone: Europe/Dublin
+
+
+ /* ----------------- PIA_Dly_PR_CRS_BatchVals ----------------- */ 
+
+ insert_job: PIA_Dly_PR_CRS_BatchVals   job_type: CMD 
+ box_name: SAE_BatchJobs
+ command: /export/home/batchusr/RUN -C SAE -J DocSysCRSBatchPrint.ksh
+ machine: pvdlnewsjpsyb01
+ owner: batchusr@pvdlnewsjpsyb01
+ permission: gx,wx
+ date_conditions: 0
+ condition: d(S_D_UnitProduction)
+ description: "CRS Batch Valuations; - R=No D=No T=ESG"
+ alarm_if_fail: 0
+ timezone: Europe/Dublin
+
+
+ /* ----------------- PIA_Dly_PR_RMAR_DataExtract_SFTP ----------------- */ 
+
+ insert_job: PIA_Dly_PR_RMAR_DataExtract_SFTP   job_type: CMD 
+ box_name: SAE_BatchJobs
+ command: /export/home/batchusr/RUN -C SAE -J RunPIA_RMARExtract.ksh
+ machine: pvdlnewsjpsyb01
+ owner: batchusr@pvdlnewsjpsyb01
+ permission: gx,ge,wx,we
+ date_conditions: 1
+ days_of_week: tu,we,th,fr,sa
+ exclude_calendar: BankHolidays_IRL
+ start_times: "05:30"
+ condition: s(S_D_UnitProduction)
+ description: "Tue-Sat,Extract Data for FTP to Craigforth via GIS, R=YES D=Y T=ESG"
+ alarm_if_fail: 0
+ timezone: Europe/Dublin
+
+
+ /* ----------------- PIA_Dly_PR_PlatformFeed_UnixExtract_TPI ----------------- */ 
+
+ insert_job: PIA_Dly_PR_PlatformFeed_UnixExtract_TPI   job_type: CMD 
+ box_name: SAE_BatchJobs
+ command: /export/home/batchusr/RUN -C SAE -J PlatformOutBound.ksh -T TPI
+ machine: pvdlnewsjpsyb01
+ owner: batchusr@pvdlnewsjpsyb01
+ permission: gx,wx
+ date_conditions: 1
+ days_of_week: mo,tu,we,th,fr
+ exclude_calendar: BankHolidays_UK
+ start_times: "20:50"
+ condition: s(PIA_Daly_PR_GSSDAM_FeesandCharges) & n(PIA_Dly_PR_PlatformFeed_UnixExtract_ASC) & n(PIA_Dly_PR_PlatformFeed_UnixExtract_SEI)
+ description: "Mon-Fri,R=N,D=Y,T=PSU"
+ alarm_if_fail: 0
+ timezone: Europe/Dublin
+
+
+ /* ----------------- PIA_Daly_PR_DataExtract_IntellifloValuations_SFTP ----------------- */ 
+
+ insert_job: PIA_Daly_PR_DataExtract_IntellifloValuations_SFTP   job_type: CMD 
+ box_name: SAE_BatchJobs
+ command: /export/home/batchusr/RUN -C SAE -J RPT_PIA_IntellifloDailyVals.ksh
+ machine: pvdlnewsjpsyb01
+ owner: batchusr@pvdlnewsjpsyb01
+ permission: gx,wx
+ date_conditions: 1
+ days_of_week: tu,we,th,fr,sa
+ start_times: "04:30"
+ condition: d(S_D_UnitProduction) & d(PIA_Daly_PR_GSSDAM_FeesandCharges)
+ description: "Tue-Sat,generate PIADailyIFABulkValuationsFileyyyymmdd,R=Y,D=Y,T=ESG"
+ alarm_if_fail: 0
+ timezone: Europe/Dublin
+
+
+ /* ----------------- S_D_DDExtractClydesdale ----------------- */ 
+
+ insert_job: S_D_DDExtractClydesdale   job_type: CMD 
+ box_name: SAE_BatchJobs
+ command: \\PCAWLONFSHR02.ssnc-corp.cloud\App_prodapps\DDRejections\VBExes\DDREJECT.EXE \\PCAWLONFSHR06.ssnc-corp.cloud\sec_secure\secure\ddrevers\sae\ddrclyde.dat,\\PCAWLONFSHR06.ssnc-corp.cloud\sec_secure\secure\ddrevers\sae\ddrclyde.log,\\PCAWLONFSHR06.ssnc-corp.cloud\sec_secure\secure\ddrevers\sae\ext.dat,PIA,
+ machine: dcmwinagt02
+ owner: svc_Autosys_PSuppDUB@ssnc-corp.global
+ permission: gx,wx
+ date_conditions: 1
+ days_of_week: tu,we,th,fr,sa
+ start_times: "02:30"
+ condition: n(S_M_DirectDebits)
+ description: "Mon-Fri,Job1-of-2"
+ alarm_if_fail: 0
+ timezone: Europe/Dublin
+
+
+ /* ----------------- S_D_DDUploadClydesdale ----------------- */ 
+
+ insert_job: S_D_DDUploadClydesdale   job_type: CMD 
+ box_name: SAE_BatchJobs
+ command: \\PCAWLONFSHR02.ssnc-corp.cloud\App_prodapps\DDRejections\VBExes\DDREXTR.EXE \\PCAWLONFSHR06.ssnc-corp.cloud\sec_secure\secure\ddrevers\sae\ext.dat, \\PCAWLONFSHR06.ssnc-corp.cloud\sec_secure\secure\ddrevers\sae\ddrextr.log,PROD_SAE,Clydesdale,**********
+ machine: dcmwinagt02
+ owner: svc_Autosys_PSuppDUB@ssnc-corp.global
+ permission: gx,wx
+ date_conditions: 0
+ condition: d(S_D_DDExtractClydesdale)
+ alarm_if_fail: 0
+ timezone: Europe/Dublin
+
+
+ /* ----------------- S_D_Commissions ----------------- */ 
+
+ insert_job: S_D_Commissions   job_type: CMD 
+ box_name: SAE_BatchJobs
+ command: /export/home/batchusr/RUN -C SAE -J RunComms.bsh -SPROD_SAE -Djria3
+ machine: pvdlnewsjpsyb01
+ owner: batchusr@pvdlnewsjpsyb01
+ permission: gx,wx
+ date_conditions: 0
+ condition: d(S_D_UnitCashSummPG) & d(S_D_UnitProduction)
+ description: "Mon-Fri,R=No,D=Yes,T=ESG"
+ alarm_if_fail: 1
+ max_exit_success: 1
+ timezone: Europe/Dublin
+
+
+ /* ----------------- S_D_GetCommissionEvents ----------------- */ 
+
+ insert_job: S_D_GetCommissionEvents   job_type: CMD 
+ box_name: SAE_BatchJobs
+ command: /export/home/batchusr/RUN -C SAE -J GetCommEvents.bsh -SPROD_SAE -Djria3
+ machine: pvdlnewsjpsyb01
+ owner: batchusr@pvdlnewsjpsyb01
+ permission: gx,wx
+ date_conditions: 0
+ condition: d(PIA_Dly_PR_CommRun_AdviserCharge) & d(S_D_Commissions)
+ description: "job to run the daily commissions report"
+ alarm_if_fail: 0
+ timezone: Europe/Dublin
+
+
+ /* ----------------- S_D_UnitCashSummPG ----------------- */ 
+
+ insert_job: S_D_UnitCashSummPG   job_type: CMD 
+ box_name: SAE_BatchJobs
+ command: /export/home/batchusr/RUN -C SAE -J UnitsCashSummPG.bsh -SPROD_SAE -Djria3
+ machine: pvdlnewsjpsyb01
+ owner: batchusr@pvdlnewsjpsyb01
+ permission: gx,wx
+ date_conditions: 0
+ condition: d(S_D_UnitsPrintBatch)
+ description: "Unit Cash Summary PG - R=No D=Yes T=ESG"
+ alarm_if_fail: 0
+ timezone: Europe/Dublin
+
+
+ /* ----------------- S_D_UnitsPrintBatch ----------------- */ 
+
+ insert_job: S_D_UnitsPrintBatch   job_type: CMD 
+ box_name: SAE_BatchJobs
+ command: /export/home/batchusr/RUN -C SAE -J RunPrintBatch.bsh -SPROD_SAE -Djria3
+ machine: pvdlnewsjpsyb01
+ owner: batchusr@pvdlnewsjpsyb01
+ permission: gx,wx
+ date_conditions: 0
+ condition: s(S_D_UnitProduction) & d(PIA_Daly_PR_Reviews_LTCProjections)
+ description: "Mon-Fri,Units-Statements,must-finished-by-04:55"
+ term_run_time: 15
+ alarm_if_fail: 0
+ timezone: Europe/Dublin
+
+
+ /* ----------------- S_D_LTCPlanReview ----------------- */ 
+
+ insert_job: S_D_LTCPlanReview   job_type: CMD 
+ box_name: SAE_BatchJobs
+ command: \\PCAWLONFSHR02.ssnc-corp.cloud\app_apps\PlanReview\Vbexes\PR_Scheduler.exe \\PCAWLONFSHR02.ssnc-corp.cloud\app_prodapps\Planreview\ini\PlanReview_PIA_SP.ini
+ machine: dcmwinagt01
+ owner: svc_Autosys_PSuppDUB@ssnc-corp.global
+ permission: gx,wx
+ date_conditions: 1
+ days_of_week: mo,tu,we,th,fr
+ start_times: "21:30"
+ run_window: "20:00-04:50"
+ condition: d(S_D_UnitProduction) & n(J_D_PlanReview)
+ description: "Depends on S_D_UnitProduction, must START before system date change, can continue after date change, avoid running with J_D_PlanReview"
+ alarm_if_fail: 0
+ timezone: Europe/Dublin
+
+
+ /* ----------------- S_D_DeleteTransDumpFiles ----------------- */ 
+
+ insert_job: S_D_DeleteTransDumpFiles   job_type: CMD 
+ box_name: SAE_BatchJobs
+ command: /export/home/batchusr/RUN -C SAE -J NEWDeleteTransDumpFiles.ksh -S PROD_SAE -T clpsiwmwsdb02
+ machine: pvdlnewsjpsyb01
+ owner: batchusr@pvdlnewsjpsyb01
+ permission: gx,wx
+ date_conditions: 0
+ condition: s(S_D_EveningBackup)
+ alarm_if_fail: 0
+ timezone: Europe/Dublin
+
+
+ /* ----------------- S_D_PR1PlanReview ----------------- */ 
+
+ insert_job: S_D_PR1PlanReview   job_type: CMD 
+ box_name: SAE_BatchJobs
+ command: \\PCAWLONFSHR02.ssnc-corp.cloud\app_apps\PlanReview\Vbexes\PR_Scheduler.exe \\PCAWLONFSHR02.ssnc-corp.cloud\app_prodapps\Planreview\ini\PlanReview_PIA_PR1.ini
+ machine: dcmwinagt01
+ owner: svc_Autosys_PSuppDUB@ssnc-corp.global
+ permission: gx,wx
+ date_conditions: 1
+ days_of_week: mo,tu,we,th,fr
+ start_times: "21:30"
+ run_window: "21:00-04:50"
+ condition: d(S_D_LTCPlanReview) & n(J_D_PlanReview)
+ description: "Depends on S_D_UnitProduction, must START before system date change, can continue after date change, avoid running with J_D_PlanReview"
+ alarm_if_fail: 0
+ timezone: Europe/Dublin
+
+
+ /* ----------------- S_M_CreateIdxCoverages ----------------- */ 
+
+ insert_job: S_M_CreateIdxCoverages   job_type: CMD 
+ box_name: SAE_BatchJobs
+ command: /export/home/batchusr/RUN -C SAE -J RunAICreate -SPROD_SAE -Djria3
+ machine: pvdlnewsjpsyb01
+ owner: batchusr@pvdlnewsjpsyb01
+ permission: gx,ge,wx,we
+ date_conditions: 1
+ run_calendar: Monthly_3rdTo10th_DoM_xWE_ALL
+ start_times: "19:45"
+ condition: d(S_D_CashCreatePremiumInvEvents)
+ description: "Mthly-3rdTo10th ex W/E, R=Yes D=Yes T=ESG"
+ alarm_if_fail: 0
+ timezone: Europe/Dublin
+
+
+ /* ----------------- S_M_CreateRenewalDocuments ----------------- */ 
+
+ insert_job: S_M_CreateRenewalDocuments   job_type: CMD 
+ box_name: SAE_BatchJobs
+ command: /export/home/batchusr/RUN -C SAE -J RunCreateRenDocs -SPROD_SAE -Djria3
+ machine: pvdlnewsjpsyb01
+ owner: batchusr@pvdlnewsjpsyb01
+ permission: gx,ge,wx,we
+ date_conditions: 1
+ run_calendar: Monthly_11thOrNextWeekDay_DoM
+ start_times: "19:45"
+ condition: d(S_D_CashCreatePremiumInvEvents)
+ description: "Monthly-11thorNextWeekDay,R=Yes D=Yes T=ESG"
+ alarm_if_fail: 0
+ timezone: Europe/Dublin
+
+
+ /* ----------------- S_M_IssueIdxCoverages ----------------- */ 
+
+ insert_job: S_M_IssueIdxCoverages   job_type: CMD 
+ box_name: SAE_BatchJobs
+ command: /export/home/batchusr/RUN -C SAE -J RunAIIssue -SPROD_SAE -Djria3
+ machine: pvdlnewsjpsyb01
+ owner: batchusr@pvdlnewsjpsyb01
+ permission: gx,ge,wx,we
+ date_conditions: 1
+ run_calendar: Monthly_20thTo24th_DoM_xWE_ALL
+ start_times: "19:45"
+ condition: d(S_D_CashCreatePremiumInvEvents)
+ description: "Mthly-20th-24th exclude W/E - R=No D=Yes T=ESG"
+ alarm_if_fail: 0
+ timezone: Europe/Dublin
+
+
+ /* ----------------- S_M_RenewalsJob ----------------- */ 
+
+ insert_job: S_M_RenewalsJob   job_type: CMD 
+ box_name: SAE_BatchJobs
+ command: /export/home/batchusr/RUN -C SAE -J RunRenewals.bsh -SPROD_SAE -Djria3 -RN -N5
+ machine: pvdlnewsjpsyb01
+ owner: batchusr@pvdlnewsjpsyb01
+ permission: gx,ge,wx,we
+ date_conditions: 1
+ run_calendar: Monthly_4thLast_WDoM_xDEC_UK
+ start_times: "20:00"
+ condition: s(S_D_EveningBackup) & d(PIA_Daly_SYB_AutoSegmentation)
+ description: "Mthly-4thLastWorkDay,Renewals,R=No D=Yes T=ESG"
+ alarm_if_fail: 0
+ timezone: Europe/Dublin
+
+
+ /* ----------------- S_M_DirectDebits ----------------- */ 
+
+ insert_job: S_M_DirectDebits   job_type: CMD 
+ box_name: SAE_BatchJobs
+ command: /export/home/batchusr/RUN -C SAE -J RunDDs.bsh -SPROD_SAE -Djria3
+ machine: pvdlnewsjpsyb01
+ owner: batchusr@pvdlnewsjpsyb01
+ permission: gx,ge,wx,we
+ date_conditions: 1
+ run_calendar: Monthly_4thLast_WDoM_xDEC_UK
+ start_times: "20:00"
+ condition: s(S_M_RenewalsJob)
+ description: "Mthly-4thLastWorkDay,Direct Debits,R=Yes D=Yes T=ESG"
+ alarm_if_fail: 0
+ timezone: Europe/Dublin
+
+
+ /* ----------------- S_M_CoMarketedTrans ----------------- */ 
+
+ insert_job: S_M_CoMarketedTrans   job_type: CMD 
+ box_name: SAE_BatchJobs
+ command: /export/home/batchusr/RUN -C SAE -J CMK_CreateMonthlyCoMarketedTrans.bsh -SPROD_SAE -Djria3
+ machine: pvdlnewsjpsyb01
+ owner: batchusr@pvdlnewsjpsyb01
+ permission: gx,ge,wx,we
+ date_conditions: 1
+ run_calendar: Monthly_Last_WDoM_IRL
+ condition: d(S_D_UnitProduction)
+ description: "Job must START before System Date Change @ 5am - R=No D=Yes T=ESG"
+ alarm_if_fail: 0
+ timezone: Europe/Dublin
+
+
+ /* ----------------- S_W_CoMarketedTrans ----------------- */ 
+
+ insert_job: S_W_CoMarketedTrans   job_type: CMD 
+ box_name: SAE_BatchJobs
+ command: /export/home/batchusr/RUN -C SAE -J CMK_CreateWeeklyCoMarketedTrans.bsh -SPROD_SAE -Djria3
+ machine: pvdlnewsjpsyb01
+ owner: batchusr@pvdlnewsjpsyb01
+ permission: gx,ge,wx,we
+ date_conditions: 1
+ days_of_week: sa
+ start_times: "02:30"
+ condition: d(S_D_UnitProduction)
+ description: "Job Must START before System Date Change @ 5am - R=No D=Yes T=ESG"
+ alarm_if_fail: 0
+ timezone: Europe/Dublin
+
+
+ /* ----------------- PSU_Daly_CSVR_TriggerEvent_PIA_PlanReview_Dly_PR2_Rpts ----------------- */ 
+
+ insert_job: PSU_Daly_CSVR_TriggerEvent_PIA_PlanReview_Dly_PR2_Rpts   job_type: CMD 
+ box_name: SAE_BatchJobs
+ command: \\PCAWLONFSHR02.ssnc-corp.cloud\app_prodapps\CRYSTAL_SERVER_APPS\TriggerEvent\Trigger_BOE_Event.exe PIA_PlanReview_Dly_PR2_Rpts
+ machine: dcmwinagt02
+ owner: svc_Autosys_PSuppDUB@ssnc-corp.global
+ permission: gx,wx,mx
+ date_conditions: 1
+ days_of_week: tu,we,th,fr,sa
+ start_times: "06:00"
+ condition: d(PIA_Daly_PR_PlanReview_PR2)
+ description: "Tue-Sat,Trigger-CSVR_Event,R=Y,D=N,T=PSU"
+ alarm_if_fail: 0
+ timezone: Europe/Dublin
+
+
+ /* ----------------- PSU_Daly_CSVR_TriggerEvent_PIA_PlanReview_Dly_SP_Rpts ----------------- */ 
+
+ insert_job: PSU_Daly_CSVR_TriggerEvent_PIA_PlanReview_Dly_SP_Rpts   job_type: CMD 
+ box_name: SAE_BatchJobs
+ command: \\PCAWLONFSHR02.ssnc-corp.cloud\app_prodapps\CRYSTAL_SERVER_APPS\TriggerEvent\Trigger_BOE_Event.exe PIA_PlanReview_Dly_SP_Rpts
+ machine: dcmwinagt02
+ owner: svc_Autosys_PSuppDUB@ssnc-corp.global
+ permission: gx,wx,mx
+ date_conditions: 1
+ days_of_week: tu,we,th,fr,sa
+ start_times: "06:00"
+ condition: d(S_D_LTCPlanReview)
+ description: "Tue-Sat,Trigger-CSVR_Event,R=Y,D=N,T=PSU"
+ alarm_if_fail: 0
+ timezone: Europe/Dublin
+
+
+ /* ----------------- PSU_Daly_CSVR_TriggerEvent_PIA_PlanReview_Dly_SP1_Rpts ----------------- */ 
+
+ insert_job: PSU_Daly_CSVR_TriggerEvent_PIA_PlanReview_Dly_SP1_Rpts   job_type: CMD 
+ box_name: SAE_BatchJobs
+ command: \\PCAWLONFSHR02.ssnc-corp.cloud\app_prodapps\CRYSTAL_SERVER_APPS\TriggerEvent\Trigger_BOE_Event.exe PIA_PlanReview_Dly_SP1_Rpts
+ machine: dcmwinagt02
+ owner: svc_Autosys_PSuppDUB@ssnc-corp.global
+ permission: gx,wx,mx
+ date_conditions: 1
+ days_of_week: tu,we,th,fr,sa
+ start_times: "06:00"
+ condition: d(PIA_Daly_PR_PlanReview_SP1)
+ description: "Tue-Sat,Trigger-CSVR_Event,R=Y,D=N,T=PSU"
+ alarm_if_fail: 0
+ timezone: Europe/Dublin
+
+
+ /* ----------------- PSU_Daly_CSVR_TriggerEvent_PIA_PlanReview_Dly_SP2_Rpts ----------------- */ 
+
+ insert_job: PSU_Daly_CSVR_TriggerEvent_PIA_PlanReview_Dly_SP2_Rpts   job_type: CMD 
+ box_name: SAE_BatchJobs
+ command: \\PCAWLONFSHR02.ssnc-corp.cloud\app_prodapps\CRYSTAL_SERVER_APPS\TriggerEvent\Trigger_BOE_Event.exe PIA_PlanReview_Dly_SP2_Rpts
+ machine: dcmwinagt02
+ owner: svc_Autosys_PSuppDUB@ssnc-corp.global
+ permission: gx,wx,mx
+ date_conditions: 1
+ days_of_week: tu,we,th,fr,sa
+ start_times: "06:00"
+ condition: d(PIA_Daly_PR_PlanReview_SP2)
+ description: "Tue-Sat,Trigger-CSVR_Event,R=Y,D=N,T=PSU"
+ alarm_if_fail: 0
+ timezone: Europe/Dublin
+
+
+ /* ----------------- PSU_Daly_CSVR_TriggerEvent_PIA_PlanReview_Dly_PR1_Rpts ----------------- */ 
+
+ insert_job: PSU_Daly_CSVR_TriggerEvent_PIA_PlanReview_Dly_PR1_Rpts   job_type: CMD 
+ box_name: SAE_BatchJobs
+ command: \\PCAWLONFSHR02.ssnc-corp.cloud\app_prodapps\CRYSTAL_SERVER_APPS\TriggerEvent\Trigger_BOE_Event.exe PIA_PlanReview_Dly_PR1_Rpts
+ machine: dcmwinagt02
+ owner: svc_Autosys_PSuppDUB@ssnc-corp.global
+ permission: gx,wx,mx
+ date_conditions: 1
+ days_of_week: tu,we,th,fr,sa
+ start_times: "06:00"
+ condition: d(S_D_PR1PlanReview)
+ description: "Tue-Sat,Trigger-CSVR_Event,R=Y,D=N,T=PSU"
+ alarm_if_fail: 0
+ timezone: Europe/Dublin
+
+
+ /* ----------------- PSU_Daly_CSVR_TriggerEvent_PIA_Dly_Fatca_Rpts ----------------- */ 
+
+ insert_job: PSU_Daly_CSVR_TriggerEvent_PIA_Dly_Fatca_Rpts   job_type: CMD 
+ box_name: SAE_BatchJobs
+ command: \\PCAWLONFSHR02.ssnc-corp.cloud\app_prodapps\CRYSTAL_SERVER_APPS\TriggerEvent\Trigger_BOE_Event.exe PIA_Dly_Fatca_Rpts
+ machine: dcmwinagt02
+ owner: svc_Autosys_PSuppDUB@ssnc-corp.global
+ permission: gx,wx,mx
+ date_conditions: 1
+ days_of_week: tu,we,th,fr,sa
+ start_times: "04:30"
+ condition: d(S_D_UnitProduction)
+ description: "Tue-Sat,CSVR trigger,R=No,D=No,T=PSU"
+ alarm_if_fail: 0
+ timezone: Europe/Dublin
+
+
+ /* ----------------- PSU_QOnReq_CSVR_TriggerEvent_PIA_GSSQrtlyRenewVal_Rpts ----------------- */ 
+
+ insert_job: PSU_QOnReq_CSVR_TriggerEvent_PIA_GSSQrtlyRenewVal_Rpts   job_type: CMD 
+ box_name: SAE_BatchJobs
+ command: \\PCAWLONFSHR02.ssnc-corp.cloud\app_prodapps\CRYSTAL_SERVER_APPS\TriggerEvent\Trigger_BOE_Event.exe PIA_GSSQrtlyRenewVal_Rpts
+ machine: dcmwinagt02
+ owner: svc_Autosys_PSuppDUB@ssnc-corp.global
+ permission: gx,wx,mx
+ date_conditions: 1
+ run_calendar: PIA_Qrtly_GSSCommissionsP1_cal
+ start_times: "23:50"
+ condition: d(PIA_Qtly_PR_ICON_GSSCommissionsP1)
+ description: "Jan,Apr,Jul,Oct-Add date to Calendar on request,RR=Y,DOC=N,T=PSU"
+ alarm_if_fail: 0
+ timezone: Europe/Dublin
+
+
+ /* ----------------- PSU_Daly_CSVR_TriggerEvent_PIA_ContractNotes_Rpts ----------------- */ 
+
+ insert_job: PSU_Daly_CSVR_TriggerEvent_PIA_ContractNotes_Rpts   job_type: CMD 
+ box_name: SAE_BatchJobs
+ command: \\PCAWLONFSHR02.ssnc-corp.cloud\app_prodapps\CRYSTAL_SERVER_APPS\TriggerEvent\Trigger_BOE_Event.exe PIA_ContractNotes_Rpts
+ machine: dcmwinagt02
+ owner: svc_Autosys_PSuppDUB@ssnc-corp.global
+ permission: gx,wx,mx
+ date_conditions: 1
+ days_of_week: tu,we,th,fr,sa
+ start_times: "05:45"
+ condition: d(PIA_Dly_PR_GSSPrintDocs_ContractNotes)
+ description: "Tue-Sat,CSVR Event trigger for PIA_ContractNotes"
+ alarm_if_fail: 0
+ timezone: Europe/Dublin
+
+
+ /* ----------------- PSU_Daly_CSVR_TriggerEvent_PIA_PT_Liabilities_Rpts ----------------- */ 
+
+ insert_job: PSU_Daly_CSVR_TriggerEvent_PIA_PT_Liabilities_Rpts   job_type: CMD 
+ box_name: SAE_BatchJobs
+ command: \\PCAWLONFSHR02.ssnc-corp.cloud\app_prodapps\CRYSTAL_SERVER_APPS\TriggerEvent\Trigger_BOE_Event.exe PIA_PT_Liabilities_Rpts
+ machine: dcmwinagt02
+ owner: svc_Autosys_PSuppDUB@ssnc-corp.global
+ permission: gx,wx,mx
+ date_conditions: 1
+ days_of_week: tu,we,th,fr,sa
+ start_times: "03:30"
+ condition: s(PIA_Dly_PR_PortfolioTrader_ICONBalanceDownload_Run2)
+ description: "Tue-Sat,Job 8 of 8"
+ alarm_if_fail: 0
+ timezone: Europe/Dublin
+
+
+ /* ----------------- PSU_Daly_CSVR_TriggerEvent_PIA_SybaseToIcon_Rpts ----------------- */ 
+
+ insert_job: PSU_Daly_CSVR_TriggerEvent_PIA_SybaseToIcon_Rpts   job_type: CMD 
+ box_name: SAE_BatchJobs
+ command: \\PCAWLONFSHR02.ssnc-corp.cloud\app_prodapps\CRYSTAL_SERVER_APPS\TriggerEvent\Trigger_BOE_Event.exe PIA_SybaseToIcon_Rpts
+ machine: dcmwinagt02
+ owner: svc_Autosys_PSuppDUB@ssnc-corp.global
+ permission: gx,wx,mx
+ date_conditions: 1
+ days_of_week: tu,we,th,fr,sa
+ start_times: "03:00"
+ condition: d(PIA_Daly_PR_SybaseToIcon_IntegrityCheck)
+ description: "Tue-Sat,Trigger-CSVR-Event-PIA_SybaseToIcon_Rpts,R=YES,D=NO,T=PSU"
+ alarm_if_fail: 0
+ timezone: Europe/Dublin
+
+
+ /* ----------------- PSU_Daly_AUT_StopBox_PIA_PMDaily_BatchJobs_Box ----------------- */ 
+
+ insert_job: PSU_Daly_AUT_StopBox_PIA_PMDaily_BatchJobs_Box   job_type: CMD 
+ box_name: SAE_BatchJobs
+ command: sleep 10
+ machine: pvdlnewsjpsyb01
+ owner: batchusr@pvdlnewsjpsyb01
+ permission: gx,wx
+ date_conditions: 1
+ days_of_week: tu,we,th,fr,sa
+ start_times: "08:00"
+ description: "Tue-Sat,StopBox-SAE_MI_BatchJobs"
+ alarm_if_fail: 0
+ timezone: Europe/Dublin
+

@@ -186,6 +186,9 @@ public class EspJobVisitorImpl implements EspJobVisitor {
 	// whether a second invoked switch hit a statement or not
 	private void visitCommon(EspAbstractJob job, List<String> lines, Function2<String, String, Boolean> lambdaFunction) {
 
+		if (job.getName().contains("JDAOP")) {
+			job.getName().getBytes();
+		}
 		for (String line : lines) {
 			if (line.startsWith("/*")) {
 				// job.getNoteData().add(line.substring(line.indexOf("/*") + 2));

@@ -118,7 +118,7 @@ public class JobGroupExecutor extends AbstractAPIExecutor {
 	private void doProcessJob(BaseCsvJobObject source, ProgressBar bar) {
 
 		String path = source.getFullPath();
-		log.debug("doProcessJobs Job[" + path + "] Type[" + source.getType().toString() + "]");
+		log.debug("JobGroupExecutor-doProcessJobs Job[" + path + "] Type[" + source.getType().toString() + "]");
 
 		BaseJob destination = getTidalApi().findJobByPathToLower(path); // Do we exist in the system already?
 
@@ -129,7 +129,7 @@ public class JobGroupExecutor extends AbstractAPIExecutor {
 
 			destination.setName(source.getName());
 
-			if (destination.getName().contains("DB0469A.MON") || destination.getName().contains("BFUSA_ESP")) {
+			if (destination.getName().contains("FSIP_MRP_DAILY_3071") || destination.getName().contains("BFUSA_ESP")) {
 				source.getName();
 			}
 
@@ -155,7 +155,7 @@ public class JobGroupExecutor extends AbstractAPIExecutor {
 					AgentList aglist = getTidalApi().getAgentListtByName(agentlistname);
 
 					if (aglist == null) {
-						throw new RuntimeException("doProcessJobs Agent List[" + agentlistname + "]is missing from system.");
+						throw new RuntimeException("JobGroupExecutor-doProcessJobs Agent List[" + agentlistname + "]is missing from system.");
 					} else {
 						destination.setAgentlistid(aglist.getId());
 						destination.setAgentlistname(aglist.getName());
@@ -167,7 +167,7 @@ public class JobGroupExecutor extends AbstractAPIExecutor {
 					Node agent = getTidalApi().getAgentByName(source.getAgentName());
 
 					if (agent == null) {
-						throw new RuntimeException("doProcessJobs Agent / Adapter [" + agentname + "]is missing from system.");
+						throw new RuntimeException("JobGroupExecutor-doProcessJobs Agent / Adapter [" + agentname + "]is missing from system.");
 					} else {
 						destination.setAgentid(agent.getId());
 						destination.setInheritagent(YesNoType.NO); //
@@ -230,7 +230,7 @@ public class JobGroupExecutor extends AbstractAPIExecutor {
 					} else {
 						// Technically we can't get here.. if we have a calendar listed and we can't
 						// find it in our system we have a major issue.
-						throw new TidalException("Unable to locate Calendar [" + calname + "] for Job["+source.getFullPath()+"]");
+						throw new TidalException("JobGroupExecutor-Unable to locate Calendar [" + calname + "] for Job["+source.getFullPath()+"]");
 					}
 
 					if (parent != null) {
@@ -306,7 +306,7 @@ public class JobGroupExecutor extends AbstractAPIExecutor {
 					JobClass jobclass = getTidalApi().getJobClassByName(jobclassname);
 
 					if(jobclass == null) {
-						throw new TidalException("Defined Job Class Not Found in TIDAL");
+						throw new TidalException("JobGroupExecutor-Defined Job Class Not Found in TIDAL");
 					}else {
 						destination.setJobclassid(jobclass.getId());
 					}
@@ -325,7 +325,7 @@ public class JobGroupExecutor extends AbstractAPIExecutor {
 			int existingID = destination.getId();
 			// Set correct ID on dep object is existing job in system.
 			getDataModel().updateBaseCsvJobObjectID(source, existingID);
-			log.debug("doCreate Skipping Job [" + destination.getFullpath() + "] Type[" + destination.getClass().getSimpleName() + "]");
+			log.debug("JobGroupExecutor-doCreate Skipping Job [" + destination.getFullpath() + "] Type[" + destination.getClass().getSimpleName() + "]");
 			return;
 		}
 
@@ -348,9 +348,7 @@ public class JobGroupExecutor extends AbstractAPIExecutor {
 				// Recurse
 				// agroup.getChildren().stream().forEach(f -> doProcessJobs((BaseCsvJobObject)
 				// f, model, bar));
-			}
-
-			if (source instanceof CsvOSJob) {
+			}else  if (source instanceof CsvOSJob) {
 
 				if (update) {
 
@@ -370,9 +368,7 @@ public class JobGroupExecutor extends AbstractAPIExecutor {
 
 				}
 
-			}
-
-			if (source instanceof CsvFtpJob) {
+			} else if (source instanceof CsvFtpJob) {
 				if (update) {
 
 				} else {
@@ -391,9 +387,7 @@ public class JobGroupExecutor extends AbstractAPIExecutor {
 					doCreate(osj, source, getDataModel());
 				}
 
-			}
-
-			if (source instanceof CsvOS400) {
+			} else if (source instanceof CsvOS400) {
 				if (update) {
 
 				} else {
@@ -412,9 +406,7 @@ public class JobGroupExecutor extends AbstractAPIExecutor {
 					doCreate(osj, source, getDataModel());
 				}
 
-			}
-
-			if (source instanceof CsvPeopleSoftJob) {
+			} else if (source instanceof CsvPeopleSoftJob) {
 				if (update) {
 
 				} else {
@@ -433,9 +425,7 @@ public class JobGroupExecutor extends AbstractAPIExecutor {
 					doCreate(osj, source, getDataModel());
 				}
 
-			}
-
-			if (source instanceof CsvSAPJob) {
+			}else if (source instanceof CsvSAPJob) {
 				if (update) {
 
 				} else {
@@ -454,9 +444,7 @@ public class JobGroupExecutor extends AbstractAPIExecutor {
 					doCreate(osj, source, getDataModel());
 				}
 
-			}
-
-			if (source instanceof CsvFileWatcherJob) {
+			}else if (source instanceof CsvFileWatcherJob) {
 				if (update) {
 
 				} else {
@@ -474,9 +462,7 @@ public class JobGroupExecutor extends AbstractAPIExecutor {
 
 					doCreate(osj, source, getDataModel());
 				}
-			}
-			
-			if (source instanceof CsvMilestoneJob) {
+			}else if (source instanceof CsvMilestoneJob) {
 				if (update) {
 
 				} else {
@@ -494,9 +480,12 @@ public class JobGroupExecutor extends AbstractAPIExecutor {
 
 					doCreate(osj, source, getDataModel());
 				}
+			}else {
+				log.error("JobGroupExecutor-Unknown Job Instance " + source.getClass().getName());
 			}
+			
 		} catch (IllegalAccessException | InvocationTargetException e) {
-			log.error(e);
+			log.info(e);
 		} finally {
 			bar.step();
 		}
@@ -507,7 +496,7 @@ public class JobGroupExecutor extends AbstractAPIExecutor {
 
 		Integer newid = null;
 		String tesresponse = null;
-		log.debug("doCreate Creating Job [" + destination.getFullpath() + "] Type[" + destination.getClass().getSimpleName() + "]");
+		log.debug("JobGroupExecutor-doCreate Creating Job [" + destination.getFullpath() + "] Type[" + destination.getClass().getSimpleName() + "]");
 		if (destination instanceof JobGroup) {
 			TesResult res = getTidalApi().getSession().getServiceFactory().jobGroup().create((JobGroup) destination);
 			newid = res.getResult().getTesObjectid();
@@ -552,9 +541,9 @@ public class JobGroupExecutor extends AbstractAPIExecutor {
 			getTidalApi().getJobs().add(destination);
 			getTidalApi().doProcessBaseJobMapToLower(destination);
 
-			log.debug("doCreate Job [" + destination.getFullpath() + "] Type[" + destination.getClass().getSimpleName() + "] Response ID[" + newid + "][" + tesresponse + "]");
+			log.debug("JobGroupExecutor-doCreate Job [" + destination.getFullpath() + "] Type[" + destination.getClass().getSimpleName() + "] Response ID[" + newid + "][" + tesresponse + "]");
 		} else {
-			throw new TidalException("Object ID is null or missing, somethign is wrong with [" + destination.getFullpath() + "]");
+			throw new TidalException("JobGroupExecutor-Object ID is null or missing, somethign is wrong with [" + destination.getFullpath() + "]");
 		}
 
 	}
