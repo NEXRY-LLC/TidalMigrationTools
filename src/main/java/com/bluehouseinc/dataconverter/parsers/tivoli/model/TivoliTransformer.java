@@ -135,10 +135,10 @@ public class TivoliTransformer implements ITransformer<List<TivoliJobObject>, Ti
 		}
 
 		// Need to set OR status.
-		if(job.isOperatorRelease()) {
+		if (job.isOperatorRelease()) {
 			out.setRequireOperatorRelease(true);
 		}
-		
+
 		return out;
 	}
 
@@ -241,7 +241,7 @@ public class TivoliTransformer implements ITransformer<List<TivoliJobObject>, Ti
 			}
 
 			in.setDoCommand(cmddata);
-			
+
 			doProcessCommandData(in, out);
 		}
 
@@ -271,7 +271,6 @@ public class TivoliTransformer implements ITransformer<List<TivoliJobObject>, Ti
 		in.getJobScheduleData().getNeeds().forEach(n -> {
 			addResource(out, n.getName(), n.getAmount());
 		});
-
 
 	}
 
@@ -307,12 +306,12 @@ public class TivoliTransformer implements ITransformer<List<TivoliJobObject>, Ti
 	private void doProcessCommandData(TivoliJobObject in, CsvOSJob out) {
 
 		String cmddata = in.getDoCommand();
-		
-		if(cmddata == null) {
+
+		if (cmddata == null) {
 			out.setCommandLine("NOTSET");
 			return;
 		}
-		
+
 		String[] cmddata_split = cmddata.trim().split("\\s+", 2);
 
 		if (cmddata_split.length == 2) {
@@ -323,22 +322,28 @@ public class TivoliTransformer implements ITransformer<List<TivoliJobObject>, Ti
 		}
 
 		String paramtest = out.getParamaters();
-		
-		if (paramtest!= null && paramtest.contains("UNISON")) {
+
+		if (paramtest != null && paramtest.contains("UNISON")) {
 			// We have a UNISON variable, in tivoli these represent a few different things.
 
-			if(paramtest.contains("$$UNISON_SCHED$$")) {
+			if (paramtest.contains("$$UNISON_SCHED$$")) {
 				paramtest = paramtest.replace("$$UNISON_SCHED$$", in.getParent().getName());
-			}else if(paramtest.contains("$$UNISON_SCHED_ID$$")) {
+			} else if (paramtest.contains("$$UNISON_SCHED_ID$$")) {
 				paramtest = paramtest.replace("$$UNISON_SCHED_ID$$", in.getParent().getName());
-			}else if(paramtest.contains("$$UNISON_JOB$$")) {
+			} else if (paramtest.contains("$$UNISON_JOB$$")) {
 				paramtest = paramtest.replace("$$UNISON_JOB$$", in.getName());
-			}else {
-				throw new TidalException("Unknown UNISON variable found");
+			} else if (paramtest.contains("${UNISON_SCHED}")) {
+				paramtest = paramtest.replace("${UNISON_SCHED}", in.getName());
+			} else if (paramtest.contains("${UNISON_SCHED_ID}")) {
+				paramtest = paramtest.replace("${UNISON_SCHED_ID}", in.getParent().getName());
+			} else if (paramtest.contains("$UNISON_SCHED")) {
+				paramtest = paramtest.replace("$UNISON_SCHED", in.getName());
+			}  else {
+				throw new TidalException("Unknown UNISON variable found [" + paramtest + "]");
 			}
-	
+
 			out.setParamaters(paramtest);
-			
+
 		}
 
 	}

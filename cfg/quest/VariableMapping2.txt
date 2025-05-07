@@ -1,0 +1,2 @@
+NAME,NEWNAME
+".*(%%(@G|\\${1}G|G)LBL_.*_SEQ\\.{0,1}).*",<JobID><JobReruns>

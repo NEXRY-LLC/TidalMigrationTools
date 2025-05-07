@@ -14,11 +14,15 @@ import com.bluehouseinc.dataconverter.parsers.bmc.model.jobs.BMCOS400Job;
 import com.bluehouseinc.dataconverter.parsers.bmc.model.jobs.BMCOS400MultiCommand;
 import com.bluehouseinc.dataconverter.parsers.bmc.model.jobs.BMCOracleEBSJob;
 import com.bluehouseinc.dataconverter.parsers.bmc.model.jobs.BMCPeopleSoftJob;
+import com.bluehouseinc.dataconverter.parsers.bmc.model.jobs.BMCRestOICORA;
+import com.bluehouseinc.dataconverter.parsers.bmc.model.jobs.BMCRestOracle;
+import com.bluehouseinc.dataconverter.parsers.bmc.model.jobs.BMCRestWROIC;
 import com.bluehouseinc.dataconverter.parsers.bmc.model.jobs.BMCSAPBOJob;
 import com.bluehouseinc.dataconverter.parsers.bmc.model.jobs.BMCSAPJob;
 import com.bluehouseinc.dataconverter.parsers.bmc.model.jobs.BMCSendEmailP;
 import com.bluehouseinc.dataconverter.parsers.bmc.model.jobs.BMCWebServiceJob;
 import com.bluehouseinc.dataconverter.parsers.bmc.model.jobs.BaseBMCJobOrFolder;
+import com.bluehouseinc.dataconverter.parsers.bmc.reporters.BMCCountByBMCType;
 
 /**
  * BMC has many job types like TIDAL so we have to deal with each one differently,
@@ -29,7 +33,7 @@ import com.bluehouseinc.dataconverter.parsers.bmc.model.jobs.BaseBMCJobOrFolder;
 public enum BMCJobTypes {
 
 	OS, OS400, OS400ATTACH, OS400MULTICOMMAND, DATABASE, FILE_TRANS, OEBS, PS8, FileWatch, OAP_11I, BIM, AmazonEC2
-	, WS, SAP_BO, SAP,HADOOP,SENDEMAILP,ETL_INFA,
+	, WS, SAP_BO, SAP,HADOOP,SENDEMAILP,ETL_INFA,RESTORACLE,RESTOICORA,RESTWROIC,
 
 	// SPECIAL STUFF not build into BMC XML.
 	SMARTFOLDER, SIMPLEFOLDER, SUBFOLDER;
@@ -73,7 +77,12 @@ public enum BMCJobTypes {
 			return new BMCSendEmailP();
 		case ETL_INFA:
 			return new BMCInformaticaETL();
-
+		case RESTORACLE:
+			return new BMCRestOracle();
+		case RESTWROIC:
+			return new BMCRestWROIC();
+		case RESTOICORA:
+			return new BMCRestOICORA();
 		default:
 			throw new RuntimeException(types.name() + " Not Supported");
 		}

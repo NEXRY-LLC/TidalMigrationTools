@@ -1,1 +1,4 @@
 NAME,NEWNAME
+tu-we-th-fr,TuesdayThroughFriday
+we,Wednesday
+mo-tu-we-th-fr-sa-su,Daily
