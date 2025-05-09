@@ -7,6 +7,7 @@ import com.bluehouseinc.dataconverter.common.exceptions.ParserNotSupportedExcept
 import com.bluehouseinc.dataconverter.parsers.IParser;
 import com.bluehouseinc.dataconverter.parsers.autosys.AutosysParser;
 import com.bluehouseinc.dataconverter.parsers.bmc.BMCParser;
+import com.bluehouseinc.dataconverter.parsers.bmcmainframe.BMCMainFrameParser;
 import com.bluehouseinc.dataconverter.parsers.esp.EspParser;
 import com.bluehouseinc.dataconverter.parsers.opc.OPCParser;
 import com.bluehouseinc.dataconverter.parsers.orsyp.OrsypParser;
@@ -48,13 +49,15 @@ public class ParserProvider {
 			return new TestingParser(this.cfgProvider);
 		case ESP:
 			return new EspParser(this.cfgProvider);
+		case BMCMAINFRAME:
+			return new BMCMainFrameParser(this.cfgProvider);
 		default:
 			throw new ParserNotSupportedException();
 		}
 	}
 
 	public enum MigrationDataTypes {
-		BMC, OPC, CSV, AUTOSYS, TIVOLI, ORSYP, ESP, TESTING;
+		BMC, OPC, CSV, AUTOSYS, TIVOLI, ORSYP, ESP, BMCMAINFRAME, TESTING;
 
 		public final static String MigrationDataType = "MigrationDataType";
 	}
