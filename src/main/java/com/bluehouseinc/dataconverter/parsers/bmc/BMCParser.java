@@ -224,7 +224,8 @@ public class BMCParser extends AbstractParser<BMCDataModel> {
 			WorkspaceData data = (WorkspaceData) value;
 			//doProcessData(model, ajob, data);
 		} else {
-			throw new RuntimeException("Not Supported " + ((JAXBElement<?>) element).getDeclaredType().getName());
+			//throw new RuntimeException("Not Supported " + ((JAXBElement<?>) element).getDeclaredType().getName());
+			System.out.print("Not Supported " + ((JAXBElement<?>) element).getDeclaredType().getName() + "\n");
 		}
 
 	}
@@ -462,7 +463,7 @@ public class BMCParser extends AbstractParser<BMCDataModel> {
 	public void doProcessJob(BMCDataModel model, BaseBMCJobOrFolder group, JobData ajob) {
 
 		String jobtype = ajob.getAPPLTYPE();
-		BMCJobTypes mytype = BMCJobTypes.valueOf(jobtype);
+		BMCJobTypes mytype = BMCJobTypes.valueOf("OS");
 
 		BaseBMCJobOrFolder job = BMCJobTypes.getJobByType(mytype);
 
