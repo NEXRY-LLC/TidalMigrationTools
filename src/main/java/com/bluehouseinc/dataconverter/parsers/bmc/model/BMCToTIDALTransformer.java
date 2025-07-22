@@ -47,7 +47,7 @@ import lombok.extern.log4j.Log4j2;
 @Data
 public class BMCToTIDALTransformer implements ITransformer<List<BaseBMCJobOrFolder>, TidalDataModel> {
 
-	SapDataImporter SAPImporter ;
+	SapDataImporter SAPImporter;
 	AccountParser parser;
 
 	// boolean USENEWDEPCODE = false;
@@ -59,10 +59,9 @@ public class BMCToTIDALTransformer implements ITransformer<List<BaseBMCJobOrFold
 
 	private Set<String> duplicateJobNameValidation = new HashSet<>();
 
-
 	// Integer containerLen;
 
-	public BMCToTIDALTransformer(TidalDataModel datamodel,BMCDataModel bmcdatamodel) {
+	public BMCToTIDALTransformer(TidalDataModel datamodel, BMCDataModel bmcdatamodel) {
 		this.bmcDataModel = bmcdatamodel;
 		this.tidalDataModel = datamodel;
 		trans400 = new BMCOS400JobTransformer(datamodel);
@@ -77,10 +76,9 @@ public class BMCToTIDALTransformer implements ITransformer<List<BaseBMCJobOrFold
 
 		if (accountfolder == null) {
 			throw new TidalException("Missing property " + accountfolder);
-		}else {
+		} else {
 			this.parser = new AccountParser(accountfolder);
 		}
-
 
 		in.forEach(f -> doProcessDupJobNameFix(f)); // Must fix before dep processing as we lookup
 													// by fullpath()
@@ -359,9 +357,9 @@ public class BMCToTIDALTransformer implements ITransformer<List<BaseBMCJobOrFold
 						}
 					} else {
 						tidal.getRerunLogic().setRepeatEvery(intv);
-						int repeatcount = bmc.getJobData().getMAXRERUN() == 0 ? 0 : bmc.getJobData().getMAXRERUN();
-						if (repeatcount > 0) {
-							tidal.getRerunLogic().setRepeatMaxTimes(repeatcount);
+						Integer maxrerun = bmc.getJobData().getMAXRERUN();
+						if (maxrerun != null && maxrerun > 0) {
+							tidal.getRerunLogic().setRepeatMaxTimes(maxrerun);
 						}
 						break;
 					}
@@ -376,9 +374,13 @@ public class BMCToTIDALTransformer implements ITransformer<List<BaseBMCJobOrFold
 					tidal.getRerunLogic().setRepeatType(RepeatType.SAME);
 					tidal.getRerunLogic().setRepeatEvery(intv);
 
-					int repeatcount = bmc.getJobData().getMAXRERUN() == 0 ? 1 : bmc.getJobData().getMAXRERUN();
-					tidal.getRerunLogic().setRepeatMaxTimes(repeatcount);
+					Integer maxrerun = bmc.getJobData().getMAXRERUN();
+					if (maxrerun != null) {
+						tidal.getRerunLogic().setRepeatMaxTimes(maxrerun);
 
+						int repeatcount = maxrerun == 0 ? 1 : maxrerun;
+						tidal.getRerunLogic().setRepeatMaxTimes(repeatcount);
+					}
 				}
 				break;
 			case NULL:
@@ -497,8 +499,6 @@ public class BMCToTIDALTransformer implements ITransformer<List<BaseBMCJobOrFold
 		return ps;
 	}
 
-
-
 	private BaseCsvJobObject doHandleSAP(BMCSAPJob bmc) {
 		CsvSAPJob ps = new CsvSAPJob();
 
@@ -532,44 +532,43 @@ public class BMCToTIDALTransformer implements ITransformer<List<BaseBMCJobOrFold
 		ps.setIncAppStat(bmc.getIncAppStat());
 		ps.setRerunStepNum(bmc.getRerunStepNum());
 
-		//String datafile = this.getBmcDataModel().getConfigeProvider().getSapDataFile();
+		// String datafile = this.getBmcDataModel().getConfigeProvider().getSapDataFile();
 
-//		if (datafile != null) {
-//
-//			if (SAPDATALIST == null) {
-//				File file = new File(datafile);
-//				log.debug("doHandleSAP Reading Data [" + datafile + "]");
-//				SAPDATALIST = AbstractCsvImporter.fromFile(file, CsvSAPData.class);
-//			}
+		// if (datafile != null) {
+		//
+		// if (SAPDATALIST == null) {
+		// File file = new File(datafile);
+		// log.debug("doHandleSAP Reading Data [" + datafile + "]");
+		// SAPDATALIST = AbstractCsvImporter.fromFile(file, CsvSAPData.class);
+		// }
 
+		CsvSAPData sapdata = SAPImporter.getDataByJobName(ps.getJobName());
 
-			CsvSAPData sapdata = SAPImporter.getDataByJobName(ps.getJobName());
+		if (sapdata != null) {
+			// We found our matching job. Not really needed but just in case we need future processing.
+			bmc.setSapData(sapdata);
+			// This should pick them all up if they are named the same.
+			// ObjectUtils.copyMatchingFields(sapdata, ps);
 
-			if (sapdata != null) {
-				// We found our matching job. Not really needed but just in case we need future processing.
-				bmc.setSapData(sapdata);
-				// This should pick them all up if they are named the same.
-				// ObjectUtils.copyMatchingFields(sapdata, ps);
+			ps.setProgramName(bmc.getSapData().getProgramName());
+			ps.setVariant(bmc.getSapData().getVariant());
+			ps.setPdest(bmc.getSapData().getPdest());
 
-				ps.setProgramName(bmc.getSapData().getProgramName());
-				ps.setVariant(bmc.getSapData().getVariant());
-				ps.setPdest(bmc.getSapData().getPdest());
+			ps.setPrcop(bmc.getSapData().getPrcop());
+			ps.setPlist(bmc.getSapData().getPlist());
+			ps.setPrtxt(bmc.getSapData().getPrtxt());
+			ps.setPrber(bmc.getSapData().getPrber());
 
-				ps.setPrcop(bmc.getSapData().getPrcop());
-				ps.setPlist(bmc.getSapData().getPlist());
-				ps.setPrtxt(bmc.getSapData().getPrtxt());
-				ps.setPrber(bmc.getSapData().getPrber());
+			log.debug("doHandleSAP Processing data for [" + ps.getFullPath() + "]");
+		} else {
+			log.debug("doHandleSAP Missing data for [" + ps.getFullPath() + "] setting a placeholder only job");
+			ps.setJobMode("MISSING DATA");
 
-				log.debug("doHandleSAP Processing data for [" + ps.getFullPath() + "]");
-			} else {
-				log.debug("doHandleSAP Missing data for [" + ps.getFullPath() + "] setting a placeholder only job");
-				ps.setJobMode("MISSING DATA");
-
-			}
-//		} else {
-//			log.debug("doHandleSAP Skipping No data File Loaded for [" + ps.getFullPath() + "] setting a placeholder only job");
-//			// ps.setExtendedInfo(osj.getExtenedInfo());
-//		}
+		}
+		// } else {
+		// log.debug("doHandleSAP Skipping No data File Loaded for [" + ps.getFullPath() + "] setting a placeholder only job");
+		// // ps.setExtendedInfo(osj.getExtenedInfo());
+		// }
 
 		// ps.setExtendedInfo(osj.getExtenedInfo());
 

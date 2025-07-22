@@ -31,6 +31,8 @@ public class BMCConfigProvider extends AbstractConfigProvider {
 	private static final String BMCGroupByApplication = "BMC.GroupByApplication";
 	private static final String BMCProcessPreAndPostData = "BMC.ProcessPreAndPostData";
 	private static final String BMCIncludeDisabledJobs = "BMC.IncludeDisabledJobs";
+	private static final String BMCUseMemNameOnNullJobName = "BMC.useMemNameOnNullJobName";
+	private static final String BMCForceJobType = "BMC.forceJobType";
 
 	public BMCConfigProvider(ConfigurationProvider provider) {
 		super(provider);
@@ -125,4 +127,13 @@ public class BMCConfigProvider extends AbstractConfigProvider {
 		return Boolean.valueOf(tf);
 	}
 
+	public boolean useMemNameOnNullJobName() {
+		String tf = this.getProvider().getConfigurations().getOrDefault(BMCUseMemNameOnNullJobName, "false");
+		return Boolean.valueOf(tf);
+	}
+
+	public String forceOSJobType() {
+		String tf = this.getProvider().getConfigurations().getOrDefault(BMCForceJobType, null);
+		return tf;
+	}
 }

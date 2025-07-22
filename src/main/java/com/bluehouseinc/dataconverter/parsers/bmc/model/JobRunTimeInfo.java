@@ -4,6 +4,8 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.EnumSet;
+import java.util.Optional;
+import java.util.stream.Stream;
 
 import org.jline.utils.Log;
 
@@ -75,7 +77,13 @@ public class JobRunTimeInfo {
 	 */
 	public Integer getRerunInterval() {
 
+		//FIXME: In BMC for CVS they have null internval to indicate no limit
 		// if (this.jobData.getCYCLICTYPE().equals("Interval")) {
+		if(this.jobData.getINTERVAL() == null) {
+			return null;
+			//throw new RuntimeException("Null getINTERVAL["+this.jobData.getMEMNAME()+"]");
+		}
+		
 		String i = this.jobData.getINTERVAL();
 		if (i.endsWith("M")) {
 			return Integer.parseInt(i.replace("M", ""));
@@ -164,10 +172,16 @@ public class JobRunTimeInfo {
 		}
 
 		public static RerunType valueOfSring(String type) {
+			RerunType reruntype;
+			
 			if (type == null) {
 				return NULL;
 			}
-			return EnumSet.allOf(RerunType.class).stream().filter(e -> e.type.equals(type)).findFirst().orElseThrow(() -> new IllegalStateException(String.format("Unsupported type %s.", type)));
+			
+			reruntype = RerunType.valueOf(type);
+			
+			return reruntype;
+			
 		}
 	}
 

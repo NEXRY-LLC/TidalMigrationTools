@@ -1,6 +1,10 @@
 package com.bluehouseinc.util;
 
 import java.time.Duration;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -47,8 +51,6 @@ public abstract class APIDateUtils {
 	 */
 	public static List<Duration> getEveryNTimes(List<String> rules) {
 
-
-
 		List<java.util.Calendar> calc = new ArrayList<>();
 		List<String> durations = new ArrayList<>();
 		List<Duration> dur = new ArrayList<>();
@@ -59,8 +61,8 @@ public abstract class APIDateUtils {
 
 			String intone = ruleone.replaceFirst("^0+(?!$)", "");
 
-			int timeone =  Integer.valueOf(intone);
-			int timetwo = timeone+timeone; // I know, I know..
+			int timeone = Integer.valueOf(intone);
+			int timetwo = timeone + timeone; // I know, I know..
 
 			rules.clear();
 
@@ -230,7 +232,7 @@ public abstract class APIDateUtils {
 
 			List<Duration> durations = getEveryNTimes(cleaned);
 
-			if(durations == null) {
+			if (durations == null) {
 				return;
 			}
 
@@ -241,9 +243,9 @@ public abstract class APIDateUtils {
 				String negcheck = Long.toString(minutes);
 				negcheck = negcheck.replace("-", "");
 
-				//obj.setStartTime(cleaned.get(0)); // Set our start time
+				// obj.setStartTime(cleaned.get(0)); // Set our start time
 				obj.getRerunLogic().setRepeatEvery(Integer.valueOf(negcheck));
-				//obj.getRerunLogic().setRepeatMaxTimes(startList.size());
+				// obj.getRerunLogic().setRepeatMaxTimes(startList.size());
 
 				if (repeattype == RepeatInternalType.SAME) {
 					obj.getRerunLogic().setRepeatType(RepeatType.SAME);
@@ -273,4 +275,198 @@ public abstract class APIDateUtils {
 		}
 	}
 
+	// Common date formats used in enterprise systems
+	private static final List<DateTimeFormatter> DATE_FORMATTERS = Arrays.asList(DateTimeFormatter.ofPattern("yyyy-MM-dd"), // ISO format: 2024-01-15
+			DateTimeFormatter.ofPattern("MM/dd/yyyy"), // US format: 01/15/2024
+			DateTimeFormatter.ofPattern("dd/MM/yyyy"), // European format: 15/01/2024
+			DateTimeFormatter.ofPattern("yyyy/MM/dd"), // Alternative ISO: 2024/01/15
+			DateTimeFormatter.ofPattern("MMM dd, yyyy"), // Jan 15, 2024
+			DateTimeFormatter.ofPattern("dd-MMM-yyyy"), // 15-Jan-2024
+			DateTimeFormatter.ofPattern("yyyyMMdd"), // Compact: 20240115
+			DateTimeFormatter.ofPattern("MM-dd-yyyy"), // Dash US: 01-15-2024
+			DateTimeFormatter.ofPattern("dd-MM-yyyy") // Dash European: 15-01-2024
+	);
+
+	private static final List<DateTimeFormatter> DATETIME_FORMATTERS = Arrays.asList(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"), // ISO datetime
+			DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"), // ISO datetime short
+			DateTimeFormatter.ofPattern("MM/dd/yyyy HH:mm:ss"), // US datetime
+			DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss"), // European datetime
+			DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss"), // ISO T format
+			DateTimeFormatter.ofPattern("MMM dd, yyyy HH:mm:ss") // Readable datetime
+	);
+
+	/**
+	 * Checks if the given date string represents a date in the past.
+	 * 
+	 * @param dateString The date string to check
+	 * @return true if the date is in the past, false if it's today or in the future
+	 * @throws IllegalArgumentException if the date string cannot be parsed
+	 */
+	public static boolean isInPast(String dateString) {
+		if (dateString == null || dateString.trim().isEmpty()) {
+			throw new IllegalArgumentException("Date string cannot be null or empty");
+		}
+
+		String trimmedDate = dateString.trim();
+
+		// Try to parse as LocalDateTime first (includes time component)
+		LocalDateTime parsedDateTime = tryParseDateTime(trimmedDate);
+		if (parsedDateTime != null) {
+			return parsedDateTime.isBefore(LocalDateTime.now());
+		}
+
+		// Try to parse as LocalDate (date only)
+		LocalDate parsedDate = tryParseDate(trimmedDate);
+		if (parsedDate != null) {
+			return parsedDate.isBefore(LocalDate.now());
+		}
+
+		throw new IllegalArgumentException(String.format("Unable to parse date string: '%s'. Supported formats include: " + "yyyy-MM-dd, MM/dd/yyyy, dd/MM/yyyy, MMM dd yyyy, yyyyMMdd, etc.", dateString));
+	}
+
+	/**
+	 * Checks if the given date string represents a date in the past, with custom error handling.
+	 * 
+	 * @param dateString The date string to check
+	 * @return DateCheckResult containing the result and any error information
+	 */
+	public static DateCheckResult checkIfPast(String dateString) {
+		try {
+			boolean isPast = isInPast(dateString);
+			return new DateCheckResult(isPast, true, null);
+		} catch (Exception e) {
+			return new DateCheckResult(false, false, e.getMessage());
+		}
+	}
+
+	/**
+	 * Checks if the first date string is in the past relative to the second date string.
+	 * Useful for comparing contract dates, milestone validations, etc.
+	 * 
+	 * @param dateToCheck   The date string to check (e.g., contract start date)
+	 * @param referenceDate The reference date string (e.g., contract end date)
+	 * @return true if dateToCheck is before referenceDate, false otherwise
+	 * @throws IllegalArgumentException if either date string cannot be parsed
+	 */
+	public static boolean isInPast(String dateToCheck, String referenceDate) {
+		if (dateToCheck == null || dateToCheck.trim().isEmpty()) {
+			throw new IllegalArgumentException("Date to check cannot be null or empty");
+		}
+		if (referenceDate == null || referenceDate.trim().isEmpty()) {
+			throw new IllegalArgumentException("Reference date cannot be null or empty");
+		}
+
+		String trimmedDateToCheck = dateToCheck.trim();
+		String trimmedReferenceDate = referenceDate.trim();
+
+		// Try to parse both as LocalDateTime first
+		LocalDateTime parsedDateTimeToCheck = tryParseDateTime(trimmedDateToCheck);
+		LocalDateTime parsedDateTimeReference = tryParseDateTime(trimmedReferenceDate);
+
+		if (parsedDateTimeToCheck != null && parsedDateTimeReference != null) {
+			return parsedDateTimeToCheck.isBefore(parsedDateTimeReference);
+		}
+
+		// Try to parse both as LocalDate
+		LocalDate parsedDateToCheck = tryParseDate(trimmedDateToCheck);
+		LocalDate parsedDateReference = tryParseDate(trimmedReferenceDate);
+
+		if (parsedDateToCheck != null && parsedDateReference != null) {
+			return parsedDateToCheck.isBefore(parsedDateReference);
+		}
+
+		// Mixed date/datetime comparison - convert date to datetime at start of day
+		if (parsedDateToCheck != null && parsedDateTimeReference != null) {
+			return parsedDateToCheck.atStartOfDay().isBefore(parsedDateTimeReference);
+		}
+		if (parsedDateTimeToCheck != null && parsedDateReference != null) {
+			return parsedDateTimeToCheck.isBefore(parsedDateReference.atStartOfDay());
+		}
+
+		// Build error message showing which dates failed to parse
+		StringBuilder errorMsg = new StringBuilder("Unable to parse date strings: ");
+		if (parsedDateToCheck == null && parsedDateTimeToCheck == null) {
+			errorMsg.append(String.format("'%s' (first date)", dateToCheck));
+		}
+		if (parsedDateReference == null && parsedDateTimeReference == null) {
+			if (parsedDateToCheck == null && parsedDateTimeToCheck == null) {
+				errorMsg.append(" and ");
+			}
+			errorMsg.append(String.format("'%s' (reference date)", referenceDate));
+		}
+
+		throw new IllegalArgumentException(errorMsg.toString());
+	}
+
+	/**
+	 * Attempts to parse the string as a LocalDate using supported formats.
+	 */
+	private static LocalDate tryParseDate(String dateString) {
+		for (DateTimeFormatter formatter : DATE_FORMATTERS) {
+			try {
+				return LocalDate.parse(dateString, formatter);
+			} catch (DateTimeParseException e) {
+				// Continue to next formatter
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Attempts to parse the string as a LocalDateTime using supported formats.
+	 */
+	private static LocalDateTime tryParseDateTime(String dateString) {
+		for (DateTimeFormatter formatter : DATETIME_FORMATTERS) {
+			try {
+				return LocalDateTime.parse(dateString, formatter);
+			} catch (DateTimeParseException e) {
+				// Continue to next formatter
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Result container for date checking operations.
+	 */
+	public static class DateCheckResult {
+		private final boolean isPast;
+		private final boolean success;
+		private final String errorMessage;
+
+		public DateCheckResult(boolean isPast, boolean success, String errorMessage) {
+			this.isPast = isPast;
+			this.success = success;
+			this.errorMessage = errorMessage;
+		}
+
+		public boolean isPast() {
+			return isPast;
+		}
+
+		public boolean isSuccess() {
+			return success;
+		}
+
+		public String getErrorMessage() {
+			return errorMessage;
+		}
+
+		@Override
+		public String toString() {
+			if (success) {
+				return String.format("DateCheckResult{isPast=%s}", isPast);
+			} else {
+				return String.format("DateCheckResult{error='%s'}", errorMessage);
+			}
+		}
+	}
+
+	/**
+	 * Utility method to get all supported date format patterns for documentation.
+	 */
+	public static List<String> getSupportedDateFormats() {
+		return Arrays.asList("yyyy-MM-dd (ISO format)", "MM/dd/yyyy (US format)", "dd/MM/yyyy (European format)", "yyyy/MM/dd", "MMM dd, yyyy", "dd-MMM-yyyy", "yyyyMMdd (compact)", "MM-dd-yyyy", "dd-MM-yyyy", "yyyy-MM-dd HH:mm:ss (with time)",
+				"yyyy-MM-dd'T'HH:mm:ss (ISO datetime)");
+	}
 }
