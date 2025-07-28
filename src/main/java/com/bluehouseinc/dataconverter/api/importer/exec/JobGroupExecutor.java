@@ -26,6 +26,7 @@ import com.bluehouseinc.dataconverter.model.impl.CsvPeopleSoftJob;
 import com.bluehouseinc.dataconverter.model.impl.CsvSAPJob;
 import com.bluehouseinc.dataconverter.model.impl.CsvVariable;
 import com.bluehouseinc.dataconverter.providers.ConfigurationProvider;
+import com.bluehouseinc.dataconverter.util.ObjectUtils;
 import com.bluehouseinc.tidal.api.exceptions.TidalException;
 import com.bluehouseinc.tidal.api.impl.atom.response.TesResult;
 import com.bluehouseinc.tidal.api.model.YesNoType;
@@ -37,6 +38,8 @@ import com.bluehouseinc.tidal.api.model.job.CarryOverType;
 import com.bluehouseinc.tidal.api.model.job.DepLogicType;
 import com.bluehouseinc.tidal.api.model.job.Job;
 import com.bluehouseinc.tidal.api.model.job.JobType;
+import com.bluehouseinc.tidal.api.model.job.SaveOutputType;
+import com.bluehouseinc.tidal.api.model.job.TimeWindowOptionType;
 import com.bluehouseinc.tidal.api.model.job.filewatcher.FileWatcherJob;
 import com.bluehouseinc.tidal.api.model.job.ftp.FTPJob;
 import com.bluehouseinc.tidal.api.model.job.group.JobGroup;
@@ -252,6 +255,13 @@ public class JobGroupExecutor extends AbstractAPIExecutor {
 			}
 
 			APIJobUtils.setStartEndTime(destination, source);
+			
+			if(!StringUtils.isBlank(destination.getTimewindowuntiltime())) {
+				TimeWindowOptionType optiontype= TimeWindowOptionType.valueOf(getDataModel().getCfgProvider().getTidalJobTimeOutOption());
+				destination.setTimewindowoption(optiontype);
+			}
+			
+			
 			APIJobUtils.setRerunFrequency(destination, source);
 
 
@@ -317,6 +327,10 @@ public class JobGroupExecutor extends AbstractAPIExecutor {
 				destination.setDisablecarryover(CarryOverType.TRUE);
 			}
 
+			
+			destination.setSaveoutputoption(SaveOutputType.valueOf(getDataModel().getCfgProvider().getJobSaveOutputOption()));
+			
+			
 		} else {
 			update = true;
 			if (source.getName().trim().equals("YFTXLDRE")) {

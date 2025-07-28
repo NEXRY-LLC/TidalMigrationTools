@@ -598,7 +598,7 @@ public class BMCToTIDALTransformer implements ITransformer<List<BaseBMCJobOrFold
 
 	}
 
-	public static void setJobCommandDetail(CsvOSJob dest, BMCCommandLineJob cmdjob) {
+	public  void setJobCommandDetail(CsvOSJob dest, BMCCommandLineJob cmdjob) {
 
 		String cmd = cmdjob.getCommandLine();
 
@@ -618,7 +618,8 @@ public class BMCToTIDALTransformer implements ITransformer<List<BaseBMCJobOrFold
 			cmd = cmd.replace("\"null\"", "");
 		}
 
-		APIJobUtils.setJobCommandDetail(dest, cmd);
+		
+		APIJobUtils.setJobCommandDetail(dest, cmd, getTidalDataModel().getCfgProvider().formatJobParams());
 
 		dest.setWorkingDirectory(cmdjob.getWorkingDir());
 

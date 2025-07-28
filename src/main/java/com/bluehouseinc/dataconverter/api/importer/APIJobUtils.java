@@ -39,7 +39,6 @@ public class APIJobUtils {
 	public static void setStartEndTime(BaseJob newjob, BaseCsvJobObject job) {
 		try {
 
-
 			if (!StringUtils.isBlank(job.getEndTime())) {
 				JobUtil.setEndTime(newjob, job.getEndTime()); // If we have one
 				newjob.setInherittimewindow(YesNoType.NO);
@@ -50,15 +49,14 @@ public class APIJobUtils {
 				newjob.setInherittimewindow(YesNoType.NO);
 			}
 
-			if(job.getMaxRunTime() != null) {
+			if (job.getMaxRunTime() != null) {
 				newjob.setDurationmaximum(job.getMaxRunTime());
 			}
-			
+
 		} catch (NumberFormatException e) {
 			log.error("##################### Unable to set start[" + job.getStartTime() + "] or end time[" + job.getEndTime() + "] for job[" + job.getFullPath() + "] #########################");
 		}
 	}
-
 
 	public static void setRerunFrequency(BaseJob newjob, BaseCsvJobObject job) {
 
@@ -101,12 +99,10 @@ public class APIJobUtils {
 		} else {
 			setEnableInhertOnJob(job);
 		}
-		
-		
+
 	}
 
-
-	public static void setJobCommandDetail(CsvOSJob dest, String command) {
+	public static void setJobCommandDetail(CsvOSJob dest, String command, boolean format) {
 
 		if (command == null) {
 			command = "ERROR NOT SET";
@@ -118,12 +114,22 @@ public class APIJobUtils {
 			command = command.replace("\"\"", "\"");
 		}
 
+		if (command.contains("\"")) {
+			command = command.replace("\"", "");
+		}
+
 		try {
 
 			CommandLine cl = CommandLine.parse(command);
 			String exe = cl.getExecutable();
 
-			String params = String.join("\n", cl.getArguments());
+			String params;
+
+			if (format) {
+				params = String.join("\n", cl.getArguments());
+			} else {
+				params = String.join(" ", cl.getArguments());
+			}
 
 			dest.setCommandLine(exe);
 
@@ -133,7 +139,7 @@ public class APIJobUtils {
 		} catch (IllegalArgumentException e) {
 			log.info(e.getLocalizedMessage());
 			dest.setCommandLine("UNSET");
-			//throw new TidalException(e);
+			// throw new TidalException(e);
 		}
 
 	}

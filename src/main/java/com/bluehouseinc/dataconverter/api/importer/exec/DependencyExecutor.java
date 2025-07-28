@@ -104,8 +104,12 @@ public class DependencyExecutor extends AbstractAPIExecutor {
 				try {
 
 					log.debug("doProcessDep[" + mepath + "] depends on  [" + deppath + "]");
+					
+					boolean loopdetected = false;
 
-					boolean loopdetected = getTidalApi().getSession().getServiceFactory().job().dependencyLoopDetected(me, depson);
+					if (this.getDataModel().getCfgProvider().checkDependencyLoop()) {
+						loopdetected = getTidalApi().getSession().getServiceFactory().job().dependencyLoopDetected(me, depson);
+					}
 
 					if (loopdetected) {
 						log.error("doProcessDep dependencyLoopDetected Job[" + mepath + "] depends on Job[" + deppath + "]");

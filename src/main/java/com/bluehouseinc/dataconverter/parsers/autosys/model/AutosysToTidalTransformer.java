@@ -275,34 +275,12 @@ public class AutosysToTidalTransformer implements ITransformer<List<AutosysAbstr
 	}
 
 	private void setJobCommandDetails(CsvOSJob csvOSJob, String cmd) {
-		if (cmd == null) {
-			cmd = "ERROR NOT SET";
-		}
-		// quotes are in the XML we get back sometimes.
-		cmd = cmd.replaceAll("&quot;", "\"");
-
-		if (cmd.contains("\"\"")) {
-			cmd = cmd.replace("\"\"", "");
-		}
-		if (cmd.contains("\"")) {
-			cmd = cmd.replace("\"", "");
-		}
 
 		// TODO-IMPORTANT: Also, modify value of `cmd` parameter since it can contain batch/executable/script file along with parameters and that should be
 		// processd as separate field of CsvOSJob variable (`commandLine` and `parameters`)
 
-		try {
-			CommandLine cl = CommandLine.parse(cmd);
-			String exe = cl.getExecutable();
-			String params = String.join("\n", cl.getArguments());
-			csvOSJob.setCommandLine(exe);
+		APIJobUtils.setJobCommandDetail(csvOSJob, cmd,getTidalDataModel().getCfgProvider().formatJobParams());
 
-			if (!StringUtils.isBlank(params)) {
-				csvOSJob.setParamaters(params);
-			}
-		} catch (IllegalArgumentException e) {
-			throw new TidalException(e);
-		}
 	}
 
 	private void doSetCommonJobInformation(AutosysAbstractJob autosysAbstractJob, BaseCsvJobObject baseCsvJobObject) {
