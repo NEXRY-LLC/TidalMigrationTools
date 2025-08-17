@@ -1,0 +1,7 @@
+//JOBREC                                                                        
+JOBUSR(CORP\twagent)                                                            
+JOBPWD(YES)                                                                     
+INTRACTV(NO)                                                                    
+JOBCMD(SCRIPT)                                                                  
+//END JOBREC                                                                    
+powershell.exe -File Z:\Provider\Batch\ProviderNotification\start.ps1           

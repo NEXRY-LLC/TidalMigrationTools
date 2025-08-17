@@ -1,0 +1,7 @@
+//JOBREC                                                                        
+JOBUSR(CORP\facomprd)                                                           
+JOBPWD(YES)                                                                     
+INTRACTV(NO)                                                                    
+JOBCMD(SCRIPT)                                                                  
+//END JOBREC                                                                    
+"\\corp\apps\facets\prd\Customer\Script\WNAAM240 - cmcbrcp_WebPremEft_NPAB.bat" 

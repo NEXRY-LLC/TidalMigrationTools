@@ -7,7 +7,12 @@ import com.bluehouseinc.dataconverter.api.importer.TidalAPI;
 import com.bluehouseinc.dataconverter.model.TidalDataModel;
 import com.bluehouseinc.dataconverter.model.impl.CsvRuntimeUser;
 import com.bluehouseinc.dataconverter.providers.ConfigurationProvider;
+import com.bluehouseinc.tidal.api.TidalApi;
+import com.bluehouseinc.tidal.api.TidalReadOnlyEntry;
+import com.bluehouseinc.tidal.api.impl.atom.response.Entry;
+import com.bluehouseinc.tidal.api.impl.atom.response.Feed;
 import com.bluehouseinc.tidal.api.impl.atom.response.TesResult;
+import com.bluehouseinc.tidal.api.model.BaseAPIObject;
 import com.bluehouseinc.tidal.api.model.owners.Owner;
 import com.bluehouseinc.tidal.api.model.users.Users;
 import com.bluehouseinc.tidal.api.model.workgroup.WorkGroup;
@@ -86,7 +91,7 @@ public class WorkGroupRunUserExecutor extends AbstractAPIExecutor {
 
 					log.debug("doProcessWorkGroupRunUser Adding[" + rte.getRunTimeUserName() + "][" + workgroup.getName() + "]");
 
-					TesResult res = getTidalApi().getSf().workGroupRunUser().create(wu);
+					TesResult res = doCreate(wu);
 					int newid = res.getResult().getTesObjectid();
 					wu.setId(newid);
 					getTidalApi().getWorkRunUsers().add(wu);
@@ -102,5 +107,11 @@ public class WorkGroupRunUserExecutor extends AbstractAPIExecutor {
 		} finally {
 			bar.step();
 		}
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public <E extends Entry<C>, F extends Feed<C, E>, C extends BaseAPIObject, D extends TidalReadOnlyEntry<E, C>> TidalApi<E, F, C, D> getExecutorAPI(C object) {
+		return (TidalApi<E, F, C, D>) getTidalApi().getSf().workGroupRunUser();
 	}
 }

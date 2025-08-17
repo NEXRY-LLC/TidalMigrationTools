@@ -1,0 +1,8 @@
+//JOBREC                                                                        
+JOBUSR(CORP\cladmin)                                                            
+JOBPWD(YES)                                                                     
+INTRACTV(NO)                                                                    
+JOBCMD(SCRIPT)                                                                  
+//END JOBREC                                                                    
+C:\WINDOWS\SYSTEM32\CSCRIPT.EXE "C:\ClientLetter\Batch_Files\Job_Schedule\CMD\W\
+NCLMG02.vbs"                                                                    

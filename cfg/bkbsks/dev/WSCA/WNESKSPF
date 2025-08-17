@@ -1,0 +1,7 @@
+//JOBREC                                                                        
+JOBUSR(CORP\twagent)                                                            
+JOBPWD(YES)                                                                     
+INTRACTV(YES)                                                                   
+JOBCMD(SCRIPT)                                                                  
+//END JOBREC                                                                    
+\\tkmsmfp009\Provider\Batch\ProviderExportToEDI\EDI_BR_PROVIDER_NPI_FILE_KS.EXE 

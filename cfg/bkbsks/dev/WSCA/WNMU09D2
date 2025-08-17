@@ -1,0 +1,7 @@
+//JOBREC                                                                        
+JOBUSR(CORP\ICD-RunAgent)                                                       
+JOBPWD(YES)                                                                     
+INTRACTV(NO)                                                                    
+JOBCMD(SCRIPT)                                                                  
+//END JOBREC                                                                    
+\\tkmsmfp009\ICD10\Batch\MassUpdate\MassUpdateBatchProcess.exe DSSP             

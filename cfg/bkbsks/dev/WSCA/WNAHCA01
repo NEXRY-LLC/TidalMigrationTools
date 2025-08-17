@@ -1,0 +1,7 @@
+//JOBREC                                                                        
+JOBUSR(CORP\twagent)                                                            
+JOBPWD(YES)                                                                     
+INTRACTV(NO)                                                                    
+JOBCMD(SCRIPT)                                                                  
+//END JOBREC                                                                    
+"\\tkmsmsrp001\data\Clinical_Analysis\Provider_Onboarding\WNAHCA01.bat"         

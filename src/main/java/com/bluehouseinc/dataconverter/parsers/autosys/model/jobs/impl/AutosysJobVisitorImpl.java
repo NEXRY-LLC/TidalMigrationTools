@@ -341,7 +341,7 @@ public class AutosysJobVisitorImpl implements AutosysJobVisitor {
 						log.info("ERROR in locating Parent[{}] for Job[{}]; object.name={} Adding placeholder", value, job.getFullPath(), job.getName());
 						parent = new AutosysBoxJob(value);
 						parent.setMachine("MISSING_GROUP");
-						model.addDataDuplicateLevelCheck(parent);
+						model.addDataObject(parent);
 					}
 				}
 				// parents.stream().filter(f -> f.getName().trim().toLowerCase().equals(value.trim().toLowerCase())).findAny().orElse(null);

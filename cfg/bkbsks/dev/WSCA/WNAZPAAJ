@@ -1,0 +1,8 @@
+//JOBREC                                                                        
+JOBUSR(CORP\twagent)                                                            
+JOBPWD(YES)                                                                     
+INTRACTV(NO)                                                                    
+JOBCMD(SCRIPT)                                                                  
+//END JOBREC                                                                    
+powershell.exe -File \\TKMSMSRP001\Data\Azure\prod\WNAZPAAJ_2nd_Friday_executio\
+n_script.ps1                                                                    

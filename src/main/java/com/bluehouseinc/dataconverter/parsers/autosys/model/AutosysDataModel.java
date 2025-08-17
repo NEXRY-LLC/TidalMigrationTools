@@ -1,38 +1,25 @@
 package com.bluehouseinc.dataconverter.parsers.autosys.model;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Component;
 
-import com.bluehouseinc.dataconverter.model.BaseJobOrGroupObject;
 import com.bluehouseinc.dataconverter.model.BaseParserDataModel;
 import com.bluehouseinc.dataconverter.model.BaseVariableProcessor;
 import com.bluehouseinc.dataconverter.model.TidalDataModel;
 import com.bluehouseinc.dataconverter.model.impl.BaseCsvJobObject;
-import com.bluehouseinc.dataconverter.model.impl.CvsDependencyJob;
 import com.bluehouseinc.dataconverter.parsers.IParserModel;
 import com.bluehouseinc.dataconverter.parsers.autosys.AutoSysConfProvider;
-import com.bluehouseinc.dataconverter.parsers.autosys.model.job_dependencies.AutosysBaseDependency;
-import com.bluehouseinc.dataconverter.parsers.autosys.model.job_dependencies.types.AutosysExitCodeDependency;
-import com.bluehouseinc.dataconverter.parsers.autosys.model.job_dependencies.types.AutosysJobStatusDependency;
-import com.bluehouseinc.dataconverter.parsers.autosys.model.job_dependencies.types.AutosysVariableDependency;
 import com.bluehouseinc.dataconverter.parsers.autosys.model.job_dependencies.util.AutosysDependencyParserUtil;
-import com.bluehouseinc.dataconverter.parsers.autosys.model.job_dependencies.util.AutosysJobStatus;
 import com.bluehouseinc.dataconverter.parsers.autosys.model.jobs.AutosysAbstractJob;
 import com.bluehouseinc.dataconverter.providers.ConfigurationProvider;
-import com.bluehouseinc.dataconverter.util.ObjectUtils;
-import com.bluehouseinc.expressions.ExpressionType;
-import com.bluehouseinc.expressions.ExpressionUtil;
 import com.bluehouseinc.tidal.api.exceptions.TidalException;
-import com.bluehouseinc.tidal.api.model.dependency.job.DepLogic;
-import com.bluehouseinc.tidal.api.model.dependency.job.DependentJobStatus;
-import com.bluehouseinc.tidal.api.model.dependency.job.ExitCodeOperator;
-import com.bluehouseinc.tidal.api.model.dependency.job.Operator;
+import com.bluehouseinc.tidal.api.model.YesNoType;
+import com.bluehouseinc.tidal.api.model.job.RepeatType;
 import com.bluehouseinc.tidal.utils.DependencyBuilder;
-import com.bluehouseinc.tidal.utils.StringUtils;
 import com.bluehouseinc.transform.ITransformer;
 
 import lombok.extern.log4j.Log4j2;
@@ -63,7 +50,7 @@ public class AutosysDataModel extends BaseParserDataModel<AutosysAbstractJob, Au
 
 	@Override
 	public void doPostTransformJobObjects(List<AutosysAbstractJob> jobs) {
-		// Nothing to do here. 
+		// Nothing to do here.
 
 	}
 
@@ -107,4 +94,43 @@ public class AutosysDataModel extends BaseParserDataModel<AutosysAbstractJob, Au
 		});
 	}
 
+	@Override
+	public void doPostJobDependencyJobObject(List<AutosysAbstractJob> jobs) {
+
+		if (getConfigeProvider().setRerunOnChildDependencyJobs()) {
+			getTidal().getJobOrGroups().forEach(j -> jobdoPostJobDependencyJobObject(j));
+
+		}
+	}
+
+	private void jobdoPostJobDependencyJobObject(BaseCsvJobObject job) {
+
+		if (!(job.getRerunLogic().getRepeatType() == RepeatType.NONE)) {
+			Map<Integer, Set<BaseCsvJobObject>> downstreamLevels = getTidal().getDependencyProcessor().getDownstreamDependencyLevels(job);
+
+			if (!downstreamLevels.isEmpty() && downstreamLevels.size() > 1) { // Level 0 is the source job itself
+
+				// Iterate through each level (skip level 0 which is the source job)
+				for (int level = 1; level < downstreamLevels.size(); level++) {
+					Set<BaseCsvJobObject> jobsAtLevel = downstreamLevels.get(level);
+
+					if (jobsAtLevel != null && !jobsAtLevel.isEmpty()) {
+						log.debug("Job {} has {} downstream jobs:", job.getFullPath(), jobsAtLevel.size());
+
+						// Process each job at this level
+						for (BaseCsvJobObject downstreamJob : jobsAtLevel) {
+							if (downstreamJob.getRerunLogic().getRepeatType() == RepeatType.NONE) {
+								log.debug("  - {} needs to be flagged for rerun each time dependency are met", downstreamJob.getFullPath());
+
+								// Your rerun logic here
+								downstreamJob.setRerundependency(YesNoType.YES);
+							}
+						}
+					}
+				}
+			}
+		}
+
+		job.getChildren().forEach(c -> jobdoPostJobDependencyJobObject((BaseCsvJobObject) c));
+	}
 }

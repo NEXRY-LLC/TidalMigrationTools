@@ -1,0 +1,7 @@
+//JOBREC                                                                        
+JOBUSR(CORP\twagent)                                                            
+JOBPWD(YES)                                                                     
+INTRACTV(NO)                                                                    
+JOBCMD(SCRIPT)                                                                  
+//END JOBREC                                                                    
+\\tkmsmf06\BCBSWeb\Actuarial\Batch\AL\ClmsPrcssng\ALClaimsProcessing.exe        

@@ -8,8 +8,13 @@ import com.bluehouseinc.dataconverter.model.TidalDataModel;
 import com.bluehouseinc.dataconverter.model.impl.BaseCsvJobObject;
 import com.bluehouseinc.dataconverter.model.impl.CsvJobTag;
 import com.bluehouseinc.dataconverter.providers.ConfigurationProvider;
+import com.bluehouseinc.tidal.api.TidalApi;
+import com.bluehouseinc.tidal.api.TidalReadOnlyEntry;
 import com.bluehouseinc.tidal.api.exceptions.TidalException;
+import com.bluehouseinc.tidal.api.impl.atom.response.Entry;
+import com.bluehouseinc.tidal.api.impl.atom.response.Feed;
 import com.bluehouseinc.tidal.api.impl.atom.response.TesResult;
+import com.bluehouseinc.tidal.api.model.BaseAPIObject;
 import com.bluehouseinc.tidal.api.model.YesNoType;
 import com.bluehouseinc.tidal.api.model.job.BaseJob;
 import com.bluehouseinc.tidal.api.model.jobclass.JobClass;
@@ -79,11 +84,12 @@ public class JobTagMapExecutor extends AbstractAPIExecutor {
 						jobtag.setTableid(TagMapType.JOB);
 						jobtag.setTagid(existingtag.getId());
 
-						TesResult res = getTidalApi().getSession().getServiceFactory().tagmap().create(jobtag);
+						TesResult res = doCreate(jobtag);
 
 						int newid = res.getResult().getTesObjectid();
 						jobtag.setId(newid);
 						getTidalApi().getTagMap().add(jobtag);
+
 						log.debug("doProcessJobTag Added Tag[" + existingtag.getName() + "] to Job[" + foundjob.getFullpath() + "] Response ID[" + newid + "][" + res.getResponseData() + "]");
 					} else {
 						log.debug("doProcessJobTag SKIPPING Tag[" + existingtag.getName() + "] to Job[" + job.getFullPath() + "] already exists");
@@ -97,6 +103,12 @@ public class JobTagMapExecutor extends AbstractAPIExecutor {
 		} finally {
 			bar.step();
 		}
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public <E extends Entry<C>, F extends Feed<C, E>, C extends BaseAPIObject, D extends TidalReadOnlyEntry<E, C>> TidalApi<E, F, C, D> getExecutorAPI(C object) {
+		return (TidalApi<E, F, C, D>) getTidalApi().getSession().getServiceFactory().tagmap();
 	}
 
 }

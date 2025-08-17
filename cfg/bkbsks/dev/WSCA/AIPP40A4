@@ -1,0 +1,5 @@
+//JOBREC                                                                        
+JOBUSR(edgeadm)                                                                 
+JOBCMD(SCRIPT)                                                                  
+//END JOBREC                                                                    
+scripts/mysqlcheck.sh                                                           

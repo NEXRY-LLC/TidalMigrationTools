@@ -1,0 +1,6 @@
+//JOBREC                                                                        
+JOBUSR(twagent)                                                                 
+JOBCMD(SCRIPT)                                                                  
+//END JOBREC                                                                    
+/apps/jobs/batch_submitter /apps/ME/xJcl/AIMEP904.xml                          \
+/apps/ME/properties/AIMET904.properties                                         

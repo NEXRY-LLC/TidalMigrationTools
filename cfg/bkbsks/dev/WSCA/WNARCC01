@@ -1,0 +1,7 @@
+//JOBREC                                                                        
+JOBUSR(CORP\Actuarial-RunAgent)                                                 
+JOBPWD(YES)                                                                     
+INTRACTV(YES)                                                                   
+JOBCMD(SCRIPT)                                                                  
+//END JOBREC                                                                    
+\\tkmsmfp009\actuarial\ARContinuityofCare\AR_ContinuityofCareReportBatch.exe    

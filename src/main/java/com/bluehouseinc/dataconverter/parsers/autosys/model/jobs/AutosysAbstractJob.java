@@ -38,7 +38,7 @@ public abstract class AutosysAbstractJob extends BaseJobOrGroupObject implements
 	protected String mustCompleteTimes;
 	protected String mustStartTimes;
 	protected String startTimes;
-	protected String startMins; // start_mins: 05,10,15,20,25,30,35,40,45,50 , every minutes after hour... Kinda don't get this one.
+	protected String startMins; // start_mins: 05,10,15,20,25,30,35,40,45,50 , every minutes after hour... With CCI this simply  means minutes after each hour.
 	protected String status;
 	protected String runWindow; // run_window need to code for this one. run_window: "05:00 - 17:05"
 	protected String description;
@@ -55,7 +55,8 @@ public abstract class AutosysAbstractJob extends BaseJobOrGroupObject implements
 	protected List<String> notificationEmailAddressOnTerminated;
 	protected List<String> notificationEmailAddressOnFailureList;
 	protected String condition;
-
+	boolean complexTimeSetup = false;
+	
 	public AutosysAbstractJob(String name) {
 		this.name = name;
 	}

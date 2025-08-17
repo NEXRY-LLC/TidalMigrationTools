@@ -1,0 +1,7 @@
+//JOBREC                                                                        
+JOBUSR(CORP\facomprd)                                                           
+JOBPWD(YES)                                                                     
+INTRACTV(NO)                                                                    
+JOBCMD(SCRIPT)                                                                  
+//END JOBREC                                                                    
+"\\corp\apps\facets\prd\Customer\Script\WNAAD200 - cmcbrcp_ACH_NPAB.bat"        

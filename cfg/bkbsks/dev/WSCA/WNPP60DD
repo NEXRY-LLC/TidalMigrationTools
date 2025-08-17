@@ -1,0 +1,8 @@
+//JOBREC                                                                        
+JOBUSR(CORP\twagent)                                                            
+JOBPWD(YES)                                                                     
+INTRACTV(NO)                                                                    
+JOBCMD(SCRIPT)                                                                  
+//END JOBREC                                                                    
+\\tkmsmf252\Data\HealthAnalytics\Production\PaymentInnovations\TivoliScripts\Pa\
+ymentInnovationPGPDecrypt2D.vbs                                                 

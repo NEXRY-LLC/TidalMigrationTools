@@ -1,0 +1,7 @@
+//JOBREC                                                                        
+JOBUSR(CORP\twagent)                                                            
+JOBPWD(YES)                                                                     
+INTRACTV(NO)                                                                    
+JOBCMD(SCRIPT)                                                                  
+//END JOBREC                                                                    
+\\TKMSMFP009\Enterprise\Batch\DataWarehouse\ClaimsMEM_IDUpdates\WNDWCF01.bat    

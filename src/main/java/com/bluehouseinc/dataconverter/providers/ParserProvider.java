@@ -7,12 +7,14 @@ import com.bluehouseinc.dataconverter.common.exceptions.ParserNotSupportedExcept
 import com.bluehouseinc.dataconverter.parsers.IParser;
 import com.bluehouseinc.dataconverter.parsers.autosys.AutosysParser;
 import com.bluehouseinc.dataconverter.parsers.bmc.BMCParser;
-import com.bluehouseinc.dataconverter.parsers.bmcmainframe.BMCMainFrameParser;
+import com.bluehouseinc.dataconverter.parsers.bmcmainframe.cvs.BMCParserMainframeCVS;
 import com.bluehouseinc.dataconverter.parsers.esp.EspParser;
 import com.bluehouseinc.dataconverter.parsers.opc.OPCParser;
 import com.bluehouseinc.dataconverter.parsers.orsyp.OrsypParser;
 import com.bluehouseinc.dataconverter.parsers.testing.TestingParser;
 import com.bluehouseinc.dataconverter.parsers.tivoli.TivoliParser;
+import com.bluehouseinc.dataconverter.parsers.tivolimainframeopc.CA7Parser;
+
 
 @Component
 public class ParserProvider {
@@ -49,15 +51,17 @@ public class ParserProvider {
 			return new TestingParser(this.cfgProvider);
 		case ESP:
 			return new EspParser(this.cfgProvider);
-		case BMCMAINFRAME:
-			return new BMCMainFrameParser(this.cfgProvider);
+		case BMCMAINFRAMECVS:
+			return new BMCParserMainframeCVS(this.cfgProvider);
+		case TWSMAINFRAME:
+			return new CA7Parser(this.cfgProvider);
 		default:
 			throw new ParserNotSupportedException();
 		}
 	}
 
 	public enum MigrationDataTypes {
-		BMC, OPC, CSV, AUTOSYS, TIVOLI, ORSYP, ESP, BMCMAINFRAME, TESTING;
+		BMC, OPC, CSV, AUTOSYS, TIVOLI, ORSYP, ESP, BMCMAINFRAMECVS, TESTING,TIVOLIMAINFRAME,TWSMAINFRAME;
 
 		public final static String MigrationDataType = "MigrationDataType";
 	}

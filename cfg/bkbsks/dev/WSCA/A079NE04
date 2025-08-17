@@ -1,0 +1,40 @@
+//A079NE04 JOB (P5C,NJ01,90410),'SALLYB/E4',                                    
+//    MSGCLASS=Z,NOTIFY=A079,CLASS=L                                            
+/*JOBPARM R=652K                                                                
+//NE04P2AK EXEC PGM=NE04P2AK                                                    
+//STEPLIB   DD DISP=SHR,DSN=TE.NJ00.CMNPSTAG.#006094.LOD                        
+//          DD DSN=DSSJ.DSNLOAD,DISP=SHR                                        
+//          DD DSN=SYS3.CSQP.SCSQAUTH,DISP=SHR                                  
+//          DD DSN=SYS3.CSQP.SCSQANLE,DISP=SHR                                  
+//          DD DSN=SYS1.CSSLIB,DISP=SHR                                         
+//          DD DSN=USER.CM30.PRODLIB,DISP=SHR                                   
+//*                                                                             
+//DFSESL    DD DSN=SYS3.CSQP.SCSQAUTH,DISP=SHR                                  
+//          DD DSN=SYS3.CSQP.SCSQANLE,DISP=SHR                                  
+//CEEDUMP   DD SYSOUT=*                                                         
+//SYSUDUMP  DD SYSOUT=*                                                         
+//IDIREPRT  DD SYSOUT=*                                                         
+//IMSABEND  DD SYSOUT=*                                                         
+//SYSOUT    DD SYSOUT=*                                                         
+//SYSDBOUT  DD SYSOUT=*                                                         
+//SYSABEND  DD SYSOUT=*                                                         
+//SYSABOUT  DD SYSOUT=*                                                         
+//SYSPRINT  DD SYSOUT=*                                                         
+//SYSTSPRT  DD SYSOUT=*                                                         
+//MQINFO    DD *                                                                
+BCQP DSSP FEPOC.B2B.TPKA.KS.FA.QL0000                                           
+//*BCQT DSSJ FEPP2.B2B.TPKA.KS.FA.QL0000                                        
+//*BCQT DSSJ FEPC2.B2B.TPKA.KS.FA.QL0000                                        
+//*                                                                             
+//*QDATA    DD SYSOUT=*                                                         
+//ERRORS    DD DSN=TE.FEP.PRODP2AK.ERROR.LISTING(+1),                           
+//             DISP=(NEW,CATLG,CATLG),                                          
+//             UNIT=SYSTSO,SPACE=(CYL,(9,2),RLSE),                              
+//             DCB=(RECFM=FB,LRECL=150,BLKSIZE=0)                               
+//VALIDS    DD DSN=TE.FEP.PRODP2AK.VALID.LISTING(+1),                           
+//             DISP=(NEW,CATLG,CATLG),                                          
+//             UNIT=SYSTSO,SPACE=(CYL,(9,2),RLSE),                              
+//             DCB=(RECFM=FB,LRECL=150,BLKSIZE=0)                               
+//*                                                                             
+//FDD2043  DD DSN=TE.TIM1.CARDPERM(PU108500),DISP=SHR                           
+//FDD2044  DD DSN=USER.CM30.CARDLIB(PU108510),DISP=SHR                          

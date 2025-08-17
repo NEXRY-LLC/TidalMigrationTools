@@ -1,0 +1,5 @@
+//JOBREC                                                                        
+JOBUSR(twagent)                                                                 
+JOBCMD(SCRIPT)                                                                  
+//END JOBREC                                                                    
+/opt/informatica/infa_shared/ExecutionScripts/AIAH5815                          

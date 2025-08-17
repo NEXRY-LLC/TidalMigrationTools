@@ -1,0 +1,2 @@
+/opt/IBM/TWA_twagent/TWS/bin/filewatch -c wmrc -f /apps/MR/input/dateCard/DAILY\
+ -int 30  -deadline 0                                                           

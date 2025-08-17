@@ -1,0 +1,8 @@
+//JOBREC                                                                        
+JOBUSR(CORP\twagent)                                                            
+JOBPWD(YES)                                                                     
+INTRACTV(NO)                                                                    
+JOBCMD(SCRIPT)                                                                  
+//END JOBREC                                                                    
+powershell.exe -File \\tkmsmsrp001\Data\Azure\prod\BHCC_CoCM_execution_script.p\
+s1                                                                              

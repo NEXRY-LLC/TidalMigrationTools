@@ -1,0 +1,2 @@
+/opt/IBM/TWA_twagent/TWS/bin/filewatch -c wmrc -f /opt/informatica/infa_shared/\
+SrcFiles/SecurityReports/BC.DMSR.D0032TSS -int 30 -deadline 0                   

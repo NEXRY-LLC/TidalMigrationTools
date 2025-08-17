@@ -1,0 +1,6 @@
+//JOBREC                                                                        
+JOBUSR(wasadm)                                                                  
+//END JOBREC                                                                    
+/opt/IBM/TWA_twagent/TWS/bin/filewatch -c wcr -f "/apps/ME/OutboundFiles/method\
+ology/_System Doc/Medicare/MedicareIncomingResponseFile/Test/UAT/MedicareQueryF\
+inderFile.txt" -int 30 -deadline 0                                              

@@ -1,0 +1,8 @@
+//JOBREC                                                                        
+JOBUSR(CORP\twagent)                                                            
+JOBPWD(YES)                                                                     
+INTRACTV(NO)                                                                    
+JOBCMD(SCRIPT)                                                                  
+//END JOBREC                                                                    
+\\tkmsciap001\HealthAnalytics\Attribution\Attribution2CLocal\TivoliScripts\FTP\\
+VBDP2CLocalAttributionFTPtoMainframe.vbs                                        

@@ -1,0 +1,8 @@
+//JOBREC                                                                        
+JOBUSR(CORP\twagent)                                                            
+JOBPWD(YES)                                                                     
+INTRACTV(NO)                                                                    
+JOBCMD(SCRIPT)                                                                  
+//END JOBREC                                                                    
+\\TKMSMFP009\finance\Batch\Accounting\WNFI6002\exe\Finance.MedAdv.GeneralLedger\
+Claims.exe                                                                      

@@ -1,14 +1,11 @@
 package com.bluehouseinc.dataconverter.model;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 import com.bluehouseinc.dataconverter.model.impl.BaseCsvJobObject;
 import com.bluehouseinc.dataconverter.parsers.IParserModel;
-import com.bluehouseinc.dataconverter.parsers.esp.model.EspAbstractJob;
 import com.bluehouseinc.dataconverter.util.ObjectUtils;
 import com.bluehouseinc.tidal.api.exceptions.TidalException;
 import com.bluehouseinc.transform.ITransformer;
@@ -27,7 +24,6 @@ public abstract class BaseParserDataModel<E extends BaseJobOrGroupObject, P exte
 	private P configeProvider;
 
 	private List<E> dataObjects = new ArrayList<>();
-	private List<String> dupCheck = new ArrayList<>();
 
 	private BaseVariableProcessor<E> variableProcessor;
 
@@ -67,28 +63,41 @@ public abstract class BaseParserDataModel<E extends BaseJobOrGroupObject, P exte
 				long finishtime = (endTime - startTime) / 1000; // debugging
 				log.info("convertToDomainDataModel.getTransformer={} seconds", finishtime); // debugging
 
+				log.info("doPostTransformJobObject Starting."); // debugging
+				long startTimej = System.currentTimeMillis(); // debugging
+				doPostTransformJobObjects(this.dataObjects);
+				long endTimej = System.currentTimeMillis(); // debugging
+				long doPostTransformJobObjectsTime = (endTimej - startTimej) / 1000; // debugging
+				log.info("doPostTransformJobObject Time={} seconds", doPostTransformJobObjectsTime); // debugging
+
 			} catch (TransformationException e) {
 				throw new TidalException(e);
 			}
 		}
 
-		log.info("doPostTransformJobObject Starting."); // debugging
-		long startTimej = System.currentTimeMillis(); // debugging
-		doPostTransformJobObjects(this.dataObjects);
-		long endTimej = System.currentTimeMillis(); // debugging
-		long jobDependencyProcessingTimej = (endTimej - startTimej) / 1000; // debugging
-		log.info("doPostTransformJobObject Time={} seconds", jobDependencyProcessingTimej); // debugging
-
 		if (getConfigeProvider().skipDependencyProcessing()) {
 			log.info("doProcessJobDependency Skipping. skipDependencyProcessing() == true"); // debugging
 		} else {
+
 			log.info("doProcessJobDependency Starting."); // debugging
 			long startTime = System.currentTimeMillis(); // debugging
 			doProcessJobDependency(this.dataObjects);
 			long endTime = System.currentTimeMillis(); // debugging
 			long jobDependencyProcessingTime = (endTime - startTime) / 1000; // debugging
 			log.info("doProcessJobDependency Time={} seconds", jobDependencyProcessingTime); // debugging
+
 		}
+
+		log.info("doPostTransformJobObject Starting."); // debugging
+		long startTimedp = System.currentTimeMillis(); // debugging
+		doPostJobDependencyJobObject(this.dataObjects);
+		long endTimejpb = System.currentTimeMillis(); // debugging
+		long doPostTransformJobObjectsTimedp = (startTimedp - endTimejpb) / 1000; // debugging
+		log.info("doPostTransformJobObjectsTimedp Time={} seconds", doPostTransformJobObjectsTimedp); // debugging
+
+		TidalDataModelStats statprinter = new TidalDataModelStats(getTidal());
+		statprinter.displayFullStatistics();
+		// this.datamodel.getDependencyProcessor().getEnhancedModelStatistics().printStatistics();
 
 		return this.getTidal();
 	}
@@ -105,34 +114,50 @@ public abstract class BaseParserDataModel<E extends BaseJobOrGroupObject, P exte
 
 	public abstract ITransformer<List<E>, TidalDataModel> getJobTransformer(TidalDataModel model);
 
+	public abstract void doPostJobDependencyJobObject(List<E> jobs);
+
 	/**
-	 * Add a new object to our datamodel and check for duplicates at the same level.
+	 * Add a new top-level object to our datamodel with TIDAL validation.
+	 * Enforces the rule: no two top-level objects can have the same name.
 	 *
-	 * @param <E>
-	 * @param obj
+	 * @param obj The object to add
+	 * @throws IllegalArgumentException if top-level name conflicts with existing object
 	 */
-	public void addDataDuplicateLevelCheck(E obj) {
-		addDataDuplicateLevelCheck(obj, true);
+	public void addDataObject(E obj) {
+		// TIDAL Validation: Check for name conflicts at top level
+		if (hasTopLevelObjectWithName(obj.getName())) {
+			String errorMsg = String.format("TIDAL Top-Level Validation Error: Cannot add top-level object '%s' - name already exists. " + "Existing object path: %s, New object would be: \\%s", obj.getName(),
+					getTopLevelObjectByName(obj.getName()).getFullPath(), obj.getName());
+			log.error(errorMsg);
+			throw new IllegalArgumentException(errorMsg);
+		}
+
+		this.dataObjects.add(obj);
+		log.debug("Added top-level object '{}' with path: {}", obj.getName(), obj.getFullPath());
 	}
 
-	public void addDataDuplicateLevelCheck(E obj, boolean fail) {
-
-		String path = obj.getFullPath(); // This is what I should be concerned with.. Jobs with the same name at the
-											// same
-											// level.
-		// dupNameCheck(path);
-		// String path = obj.getId().toString();
-
-		if (dupCheck.contains(path)) {
-			if (fail) {
-				throw new RuntimeException("Duplicate Job/Group[" + path + "] detected");
-			} else {
-				log.warn("Duplicate Job/Group[" + path + "] detected");
-			}
-		} else {
-			this.dataObjects.add(obj);
-			this.dupCheck.add(path);
+	/**
+	 * Check if a top-level object with the given name already exists.
+	 * Case-insensitive comparison for TIDAL compatibility.
+	 */
+	private boolean hasTopLevelObjectWithName(String name) {
+		if (name == null) {
+			return false;
 		}
+
+		return dataObjects.stream().anyMatch(obj -> name.equalsIgnoreCase(obj.getName()));
+	}
+
+	/**
+	 * Get top-level object by name (case-insensitive).
+	 * Returns null if not found.
+	 */
+	private E getTopLevelObjectByName(String name) {
+		if (name == null) {
+			return null;
+		}
+
+		return dataObjects.stream().filter(obj -> name.equalsIgnoreCase(obj.getName())).findFirst().orElse(null);
 	}
 
 	public List<E> getBaseObjectsNameBeginsWith(String name) {
@@ -227,12 +252,12 @@ public abstract class BaseParserDataModel<E extends BaseJobOrGroupObject, P exte
 			List<E> cleaned = new ArrayList<>();
 
 			for (E obj : this.dataObjects) {
-				List<E>  tmp = doProcessEmptyGroupData(obj);
+				List<E> tmp = doProcessEmptyGroupData(obj);
 				cleaned.addAll(tmp);
 			}
 			this.dataObjects.clear();
 			this.dataObjects.addAll(cleaned);
-			
+
 			cnt = ObjectUtils.toFlatStream(this.getDataObjects()).collect(Collectors.toList()).size();
 			log.info("tidal.skip.empty.groupsr=true List New Size{}", cnt); // debugging
 		}

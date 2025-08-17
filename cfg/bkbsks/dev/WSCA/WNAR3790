@@ -1,0 +1,8 @@
+//JOBREC                                                                        
+JOBUSR(CORP\twagent)                                                            
+JOBPWD(YES)                                                                     
+INTRACTV(NO)                                                                    
+JOBCMD(SCRIPT)                                                                  
+//END JOBREC                                                                    
+powershell.exe -File                                                           \
+\\tkmsmfp009\actuarial\ARMassPrint\ARMassprint_AR37.ps1                         

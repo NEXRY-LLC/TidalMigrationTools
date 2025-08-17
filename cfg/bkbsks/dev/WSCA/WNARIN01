@@ -1,0 +1,7 @@
+//JOBREC                                                                        
+JOBUSR(CORP\twagent)                                                            
+JOBPWD(YES)                                                                     
+INTRACTV(YES)                                                                   
+JOBCMD(SCRIPT)                                                                  
+//END JOBREC                                                                    
+\\TKMSSQP021\SSIS Process Files\DBZBAR\AR01Income.Bat                           

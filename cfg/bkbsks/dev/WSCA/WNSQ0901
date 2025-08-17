@@ -1,0 +1,7 @@
+//JOBREC                                                                        
+JOBUSR(CORP\twagent)                                                            
+JOBPWD(YES)                                                                     
+INTRACTV(YES)                                                                   
+JOBCMD(SCRIPT)                                                                  
+//END JOBREC                                                                    
+C:\WINDOWS\SYSTEM32\CSCRIPT.EXE "C:\SCRIPTS\REBOOTSERVER.VBS" WNSQ0901          

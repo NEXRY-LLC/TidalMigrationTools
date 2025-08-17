@@ -1,0 +1,8 @@
+//JOBREC                                                                        
+JOBUSR(CORP\twagent)                                                            
+JOBPWD(YES)                                                                     
+INTRACTV(NO)                                                                    
+JOBCMD(SCRIPT)                                                                  
+//END JOBREC                                                                    
+\\TKMSMFP010\HealthAnalytics\SupplementalProxyPricing\TivoliScripts\SOKSuppleme\
+ntalProxyPricingUpdate.vbs                                                      

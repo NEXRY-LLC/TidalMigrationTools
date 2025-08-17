@@ -1,0 +1,8 @@
+//JOBREC                                                                        
+JOBUSR(CORP\twagent)                                                            
+JOBPWD(YES)                                                                     
+INTRACTV(NO)                                                                    
+JOBCMD(SCRIPT)                                                                  
+//END JOBREC                                                                    
+\\TKMSMFP009\finance\Batch\AlternateFunded\WNAL910P\exe\ALMUltipleMemberReportT\
+ableUpdates.exe                                                                 

@@ -1,0 +1,8 @@
+//JOBREC                                                                        
+JOBUSR(CORP\twagent)                                                            
+JOBPWD(YES)                                                                     
+INTRACTV(YES)                                                                   
+JOBCMD(SCRIPT)                                                                  
+//END JOBREC                                                                    
+\\TKMSMFP009\finance\Batch\Accounting\BudgetCostPerClaim\exe\BudgetCostPerClaim\
+.exe                                                                            

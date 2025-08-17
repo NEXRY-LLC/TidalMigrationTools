@@ -1,0 +1,7 @@
+//JOBREC                                                                        
+JOBUSR(CORP\AIDPPZ20)                                                           
+JOBPWD(YES)                                                                     
+INTRACTV(NO)                                                                    
+JOBCMD(SCRIPT)                                                                  
+//END JOBREC                                                                    
+Z:\Provider\Batch\ProviderExportForInterop\App\ProviderExport.exe               

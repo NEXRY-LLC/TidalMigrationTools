@@ -4,10 +4,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.bluehouseinc.dataconverter.model.BaseJobOrGroupObject;
+import com.bluehouseinc.tidal.api.model.YesNoType;
 import com.bluehouseinc.tidal.api.model.job.ConcurrentType;
 import com.bluehouseinc.tidal.api.model.job.JobType;
+import com.bluehouseinc.tidal.api.model.job.NearOutageType;
 import com.bluehouseinc.tidal.utils.DependencyBuilder;
 import com.bluehouseinc.tidal.utils.StringUtils;
+import com.google.api.client.util.Key;
 import com.opencsv.bean.CsvBindByName;
 import com.opencsv.bean.CsvIgnore;
 import com.opencsv.bean.CsvRecurse;
@@ -102,6 +105,9 @@ public abstract class BaseCsvJobObject extends BaseJobOrGroupObject {
 	Boolean inheritCalendar = false;// Default is no but if you want to force a job to inherit a group calenendar set this to yes.
 
 	@CsvBindByName
+	Boolean inheritAgent = false;// Default is no.
+
+	@CsvBindByName
 	String compoundDependency; // If this is set we will look up dependency objects by the ID's listed.
 
 	@CsvBindByName
@@ -116,12 +122,18 @@ public abstract class BaseCsvJobObject extends BaseJobOrGroupObject {
 	@CsvRecurse
 	ConcurrentType concurrentIfActiveLogic = ConcurrentType.RUNANYWAY;
 	
+	@CsvRecurse
+	NearOutageType nearOutagType = NearOutageType.RUNANYWAY;
+	
 	@CsvBindByName
 	Integer maxRunTime;
 	
 	@Setter(value = AccessLevel.PRIVATE)
 	DependencyBuilder compoundDependencyBuilder = new DependencyBuilder();
 
+	@CsvBindByName
+	YesNoType rerundependency;
+	
 	public void setCompoundDependency(String data) {
 		if (StringUtils.isBlank(data)) {
 			this.compoundDependency = null;

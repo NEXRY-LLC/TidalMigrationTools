@@ -1,0 +1,3 @@
+/opt/IBM/TWA_twagent/TWS/bin/filewatch -c wcr -f "/apps/ME/OutboundFiles/method\
+ology/_System DOC/MedicareIncomingResponseFile/Test/CRIT/MedicareQueryFinderFil\
+e.txt" -int 30  -deadline 0                                                     

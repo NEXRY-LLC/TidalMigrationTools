@@ -1,0 +1,8 @@
+//JOBREC                                                                        
+JOBUSR(CORP\twagent)                                                            
+JOBPWD(YES)                                                                     
+INTRACTV(YES)                                                                   
+JOBCMD(SCRIPT)                                                                  
+//END JOBREC                                                                    
+"\\tkmsmf37\C$\scripts\ITS_Plan_Profile_Stubfile\obj\Release\ITS_Plan_Profile_S\
+tubfile.exe"                                                                    

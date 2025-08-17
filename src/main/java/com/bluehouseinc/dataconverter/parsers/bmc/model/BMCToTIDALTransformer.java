@@ -69,6 +69,8 @@ public class BMCToTIDALTransformer implements ITransformer<List<BaseBMCJobOrFold
 		// USENEWDEPCODE = Boolean.valueOf(this.cfgProvider.getConfiguration().getOrDefault("tidal.dep.newcode", "false"));
 	}
 
+	boolean didthis = false;
+
 	@Override
 	public TidalDataModel transform(List<BaseBMCJobOrFolder> in) throws TransformationException {
 
@@ -80,8 +82,14 @@ public class BMCToTIDALTransformer implements ITransformer<List<BaseBMCJobOrFold
 			this.parser = new AccountParser(accountfolder);
 		}
 
-		in.forEach(f -> doProcessDupJobNameFix(f)); // Must fix before dep processing as we lookup
-													// by fullpath()
+		if (didthis) {
+			didthis = true;
+		} else {
+			didthis = true;
+			in.forEach(f -> doProcessDupJobNameFix(f)); // Must fix before dep processing as we lookup
+			// by fullpath()
+		}
+
 
 		String glbnames = this.getBmcDataModel().getConfigeProvider().getBMCGlobalPrefixes();
 
@@ -111,8 +119,18 @@ public class BMCToTIDALTransformer implements ITransformer<List<BaseBMCJobOrFold
 			if (!base.getChildren().isEmpty()) {
 
 				CsvJobGroup group = new CsvJobGroup();
-
 				group.setName(base.getName());
+
+				if (base instanceof BMCSimpleFolder) {
+					getTidalDataModel().addCalendarToJobOrGroup(group, new CsvCalendar("Daily"));
+
+					String defaultRuntimeUser = this.getBmcDataModel().getConfigeProvider().getProvider().getOrThrow("BMC.SimpleFolderRunTime");
+					String defaultagent = this.getBmcDataModel().getConfigeProvider().getProvider().getOrThrow("BMC.SimpleFolderAgent");
+					base.getJobData().setRUNAS(defaultRuntimeUser);
+					base.getJobData().setNODEID(defaultagent);
+
+				}
+
 				setBaseNameInfo(base, group);
 				setRunTimeInfo(base, group);
 				setBasicInfo(base, group);
@@ -120,10 +138,6 @@ public class BMCToTIDALTransformer implements ITransformer<List<BaseBMCJobOrFold
 				setRunTimeUserInfo(base, group);
 				setVariables(base, group);
 				doProcessResources(base, group);
-
-				if (base instanceof BMCSimpleFolder) {
-					getTidalDataModel().addCalendarToJobOrGroup(group, new CsvCalendar("Daily"));
-				}
 
 				if (parent != null) {
 					parent.addChild(group);
@@ -598,7 +612,7 @@ public class BMCToTIDALTransformer implements ITransformer<List<BaseBMCJobOrFold
 
 	}
 
-	public  void setJobCommandDetail(CsvOSJob dest, BMCCommandLineJob cmdjob) {
+	public void setJobCommandDetail(CsvOSJob dest, BMCCommandLineJob cmdjob) {
 
 		String cmd = cmdjob.getCommandLine();
 
@@ -618,7 +632,6 @@ public class BMCToTIDALTransformer implements ITransformer<List<BaseBMCJobOrFold
 			cmd = cmd.replace("\"null\"", "");
 		}
 
-		
 		APIJobUtils.setJobCommandDetail(dest, cmd, getTidalDataModel().getCfgProvider().formatJobParams());
 
 		dest.setWorkingDirectory(cmdjob.getWorkingDir());
@@ -660,6 +673,7 @@ public class BMCToTIDALTransformer implements ITransformer<List<BaseBMCJobOrFold
 				String key = QUANT_CTL_PRE + f.getNAME().trim();
 				CsvResource res = new CsvResource(key, tidal.getOwner());
 				res.setLimit(QANT_TCL_CNT);
+				res.setExclusive(false);
 				getTidalDataModel().addResourceToJob(tidal, res);
 			});
 
@@ -671,6 +685,7 @@ public class BMCToTIDALTransformer implements ITransformer<List<BaseBMCJobOrFold
 					String key = CTL_PRE + f.getNAME().trim();
 					CsvResource res = new CsvResource(key, tidal.getOwner());
 					res.setLimit(TCL_CNT);
+					res.setExclusive(true);
 					getTidalDataModel().addResourceToJob(tidal, res);
 				});
 			}

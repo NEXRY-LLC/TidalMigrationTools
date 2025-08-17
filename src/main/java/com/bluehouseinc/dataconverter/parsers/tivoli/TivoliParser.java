@@ -122,7 +122,7 @@ public class TivoliParser extends AbstractParser<TivoliDataModel> {
 		TivoliJobObject container = new TivoliJobObject();
 		container.setName(containername);
 
-		this.getParserDataModel().addDataDuplicateLevelCheck(container);
+		this.getParserDataModel().addDataObject(container);
 		log.info("Added Container{} to model", container.getFullPath());
 
 		data.forEach(sched -> {

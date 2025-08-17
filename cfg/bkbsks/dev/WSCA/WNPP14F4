@@ -1,0 +1,8 @@
+//JOBREC                                                                        
+JOBUSR(CORP\twagent)                                                            
+JOBPWD(YES)                                                                     
+INTRACTV(NO)                                                                    
+JOBCMD(SCRIPT)                                                                  
+//END JOBREC                                                                    
+\\tkmsmfP010\HealthAnalytics\DST\DSTOutputFiles\QRS\TivoliScripts\FTPDemographi\
+csFile.vbs                                                                      

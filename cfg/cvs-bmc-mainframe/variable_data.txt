@@ -1,1 +1,2 @@
 NAME,VALUE
+GroovyScriptPath,/path/to/groovy.exe

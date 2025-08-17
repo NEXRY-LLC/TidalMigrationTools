@@ -1,0 +1,8 @@
+//JOBREC                                                                        
+JOBUSR(CORP\twagent)                                                            
+JOBPWD(YES)                                                                     
+INTRACTV(NO)                                                                    
+JOBCMD(SCRIPT)                                                                  
+//END JOBREC                                                                    
+"C:\Program Files (x86)\DSTHS_CareAnalyzer\Batch_Processing_Control_Files\Batch\
+_File\MRKT_Group.bat"                                                           

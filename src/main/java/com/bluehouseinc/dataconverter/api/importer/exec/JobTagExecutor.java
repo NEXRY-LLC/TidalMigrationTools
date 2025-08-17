@@ -6,8 +6,13 @@ import com.bluehouseinc.dataconverter.api.importer.TidalAPI;
 import com.bluehouseinc.dataconverter.model.TidalDataModel;
 import com.bluehouseinc.dataconverter.model.impl.CsvJobTag;
 import com.bluehouseinc.dataconverter.providers.ConfigurationProvider;
+import com.bluehouseinc.tidal.api.TidalApi;
+import com.bluehouseinc.tidal.api.TidalReadOnlyEntry;
 import com.bluehouseinc.tidal.api.exceptions.TidalException;
+import com.bluehouseinc.tidal.api.impl.atom.response.Entry;
+import com.bluehouseinc.tidal.api.impl.atom.response.Feed;
 import com.bluehouseinc.tidal.api.impl.atom.response.TesResult;
+import com.bluehouseinc.tidal.api.model.BaseAPIObject;
 import com.bluehouseinc.tidal.api.model.YesNoType;
 import com.bluehouseinc.tidal.api.model.jobclass.JobClass;
 import com.bluehouseinc.tidal.api.model.owners.Owner;
@@ -71,7 +76,7 @@ public class JobTagExecutor extends AbstractAPIExecutor {
 				jobtagtoadd.setOwner(owner);
 				jobtagtoadd.setActive("Y");
 				jobtagtoadd.setPub(YesNoType.YES);
-				TesResult res = getTidalApi().getSession().getServiceFactory().tag().create(jobtagtoadd);
+				TesResult res = doCreate(jobtagtoadd);
 
 				int newid = res.getResult().getTesObjectid();
 				jobtagtoadd.setId(newid);
@@ -82,6 +87,12 @@ public class JobTagExecutor extends AbstractAPIExecutor {
 		} finally {
 			bar.step();
 		}
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public <E extends Entry<C>, F extends Feed<C, E>, C extends BaseAPIObject, D extends TidalReadOnlyEntry<E, C>> TidalApi<E, F, C, D> getExecutorAPI(C object) {
+		return (TidalApi<E, F, C, D>) getTidalApi().getSession().getServiceFactory().tag();
 	}
 
 }

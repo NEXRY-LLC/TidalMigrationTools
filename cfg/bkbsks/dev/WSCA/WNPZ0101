@@ -1,0 +1,8 @@
+//JOBREC                                                                        
+JOBUSR(CORP\twagent)                                                            
+JOBPWD(YES)                                                                     
+INTRACTV(NO)                                                                    
+JOBCMD(SCRIPT)                                                                  
+//END JOBREC                                                                    
+Z:\Provider\Batch\ProviderExportForAdvantasure\app\BCBSKS.Provider.MEAD.Console\
+.exe                                                                            

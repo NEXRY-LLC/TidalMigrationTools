@@ -1,0 +1,7 @@
+//JOBREC                                                                        
+JOBUSR(CORP\ProviderJobScheduler)                                               
+JOBPWD(YES)                                                                     
+INTRACTV(NO)                                                                    
+JOBCMD(SCRIPT)                                                                  
+//END JOBREC                                                                    
+powershell.exe -File \\TKMSMFP009\Provider\Batch\ProviderDataFormat\start.ps1   

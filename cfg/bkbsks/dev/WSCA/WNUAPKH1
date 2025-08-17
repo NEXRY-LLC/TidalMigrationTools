@@ -1,0 +1,8 @@
+//JOBREC                                                                        
+JOBUSR(CORP\aidua50f)                                                           
+JOBPWD(YES)                                                                     
+INTRACTV(NO)                                                                    
+JOBCMD(SCRIPT)                                                                  
+//END JOBREC                                                                    
+cmd.exe /c "\\TKMSSQP024\SSIS Process Files\SSIS_KHIIS_File_Needed_By_Membershi\
+p.bat"                                                                          

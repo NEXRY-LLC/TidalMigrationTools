@@ -8,7 +8,13 @@ import com.bluehouseinc.dataconverter.model.TidalDataModel;
 import com.bluehouseinc.dataconverter.model.impl.BaseCsvJobObject;
 import com.bluehouseinc.dataconverter.model.impl.CsvResource;
 import com.bluehouseinc.dataconverter.providers.ConfigurationProvider;
+import com.bluehouseinc.tidal.api.TidalApi;
+import com.bluehouseinc.tidal.api.TidalReadOnlyEntry;
+import com.bluehouseinc.tidal.api.impl.atom.response.Entry;
+import com.bluehouseinc.tidal.api.impl.atom.response.Feed;
 import com.bluehouseinc.tidal.api.impl.atom.response.TesResult;
+import com.bluehouseinc.tidal.api.methods.resource.jobjoin.TidalResourceJobJoin;
+import com.bluehouseinc.tidal.api.model.BaseAPIObject;
 import com.bluehouseinc.tidal.api.model.resource.jobjoin.ResourceJobJoin;
 import com.bluehouseinc.tidal.api.model.resource.virtual.VirtualResource;
 
@@ -77,9 +83,16 @@ public class JobResourceJoinExecutor extends AbstractAPIExecutor {
 					resjobjoin.setJobid(ajob.getId());
 					resjobjoin.setResourceid(vres.getId());
 					resjobjoin.setResourcename(vres.getName());
+
+					TidalResourceJobJoin resfactory = getTidalApi().getSession().getServiceFactory().resourceJobJoin();
+
 					resjobjoin.setUsed(limit);
 
-					TesResult res = getTidalApi().getSession().getServiceFactory().resourceJobJoin().create(resjobjoin);
+					if (resource.getExclusive()) {
+						resfactory.setResourceAsExclusive(resjobjoin);
+					}
+
+					TesResult res = resfactory.create(resjobjoin);
 					int newid = res.getResult().getTesObjectid();
 					resjobjoin.setId(newid);
 					getTidalApi().getResourcesJobJoin().add(resjobjoin);
@@ -95,6 +108,12 @@ public class JobResourceJoinExecutor extends AbstractAPIExecutor {
 		} finally {
 			bar.step();
 		}
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public <E extends Entry<C>, F extends Feed<C, E>, C extends BaseAPIObject, D extends TidalReadOnlyEntry<E, C>> TidalApi<E, F, C, D> getExecutorAPI(C object) {
+		return (TidalApi<E, F, C, D>) getTidalApi().getSession().getServiceFactory().resourceJobJoin();
 	}
 
 }

@@ -1,0 +1,7 @@
+//JOBREC                                                                        
+JOBUSR(twagent)                                                                 
+JOBCMD(SCRIPT)                                                                  
+//END JOBREC                                                                    
+/apps/jobs/batch_submitter                                                     \
+/apps/MF/xJcl/CreateGroupFirstInvoiceFromSGIRMMNTProcess_xJCL.xml              \
+/apps/MF/properties/FinanceBillingBatchJobConfig.properties                     

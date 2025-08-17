@@ -1,0 +1,8 @@
+//JOBREC                                                                        
+JOBUSR(CORP\twagent)                                                            
+JOBPWD(YES)                                                                     
+INTRACTV(NO)                                                                    
+JOBCMD(SCRIPT)                                                                  
+//END JOBREC                                                                    
+\\tkmsmft012\HealthAnalytics\Attribution\Attribution2CFEP\TivoliScripts\Extract\
+\VBDP2CFEPAttributionExtract.vbs                                                

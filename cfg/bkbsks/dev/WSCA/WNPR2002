@@ -1,0 +1,7 @@
+//JOBREC                                                                        
+JOBUSR(CORP\AIDPPR00)                                                           
+JOBPWD(YES)                                                                     
+INTRACTV(YES)                                                                   
+JOBCMD(SCRIPT)                                                                  
+//END JOBREC                                                                    
+"\\TKMSSQP029\ssis process files\dbza10\ExecuteAssociations.bat"                

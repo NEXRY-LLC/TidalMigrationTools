@@ -1,0 +1,2 @@
+/opt/IBM/TWA_twagent/TWS/bin/filewatch -c wcr -f /apps/FrontEnd/PK01/Profession\
+al/EdiFileProfessionalClaims_B.txt -int 30 -deadline 0                          

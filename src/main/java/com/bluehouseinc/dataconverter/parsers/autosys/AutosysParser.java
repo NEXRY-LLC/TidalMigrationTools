@@ -139,7 +139,7 @@ public class AutosysParser extends AbstractParser<AutosysDataModel> {
 					autosysAbstractJob = extractJob(reader, line, jobName);
 
 					if (autosysAbstractJob.getParent() == null) {
-						this.getParserDataModel().addDataDuplicateLevelCheck(autosysAbstractJob); // Add our object
+						this.getParserDataModel().addDataObject(autosysAbstractJob); // Add our object
 					}
 				}
 			}

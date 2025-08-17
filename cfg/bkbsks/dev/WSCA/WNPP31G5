@@ -1,0 +1,8 @@
+//JOBREC                                                                        
+JOBUSR(CORP\twagent)                                                            
+JOBPWD(YES)                                                                     
+INTRACTV(NO)                                                                    
+JOBCMD(SCRIPT)                                                                  
+//END JOBREC                                                                    
+\\TKMSMFP010\healthanalytics\HealthAnalytics\Enrollment\CaseNDiseaseManagementE\
+xtract\TivoliScripts\CMDMCompleteEmail.vbs                                      

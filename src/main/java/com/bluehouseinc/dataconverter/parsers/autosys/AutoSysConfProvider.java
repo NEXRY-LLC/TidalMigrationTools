@@ -66,5 +66,9 @@ public class AutoSysConfProvider extends AbstractConfigProvider {
 		return Integer.valueOf( getProvider().getConfigurations().getOrDefault("AUTOSYS.OffSetCalendarDays", "0"));
 	}
 
+	public boolean setRerunOnChildDependencyJobs() {
+		String tf = getProvider().getConfigurations().getOrDefault("AUTOSYS.RerunOnMetChildJobs", "false");
+		return Boolean.valueOf(tf);
 
+	}
 }

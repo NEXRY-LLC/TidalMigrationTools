@@ -1,0 +1,5 @@
+//JOBREC                                                                        
+JOBUSR(wa8adm)                                                                  
+JOBCMD(SCRIPT)                                                                  
+//END JOBREC                                                                    
+/home/wa8adm/scripts/odais_batch.sh                                             

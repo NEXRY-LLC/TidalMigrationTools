@@ -1,0 +1,10 @@
+//JOBREC                                                                        
+JOBUSR(CORP\AIDPZPHD)                                                           
+JOBPWD(YES)                                                                     
+INTRACTV(NO)                                                                    
+JOBCMD(SCRIPT)                                                                  
+//END JOBREC                                                                    
+DTExec.exe /ISSERVER "\SSISDB\SSISZPHD\Pareto Hub Data Load\Package.dtsx" /SERV\
+ER                                                                             \
+"TKMSSQP036\PROD2,54765" /Par                                                  \
+"$ServerOption::SYNCHRONIZED(Boolean)";True                                    \

@@ -1,0 +1,8 @@
+//JOBREC                                                                        
+JOBUSR(CORP\twagent)                                                            
+JOBPWD(YES)                                                                     
+INTRACTV(NO)                                                                    
+JOBCMD(SCRIPT)                                                                  
+//END JOBREC                                                                    
+powershell.exe -File \\TKMSMSRP001\Data\Azure\prod\DBZWCD_D_Aft_AHCDWKDY01_exec\
+ution_script.ps1                                                                

@@ -1,0 +1,7 @@
+//JOBREC                                                                        
+JOBUSR(CORP\Underwrite-RunAgent)                                                
+JOBPWD(YES)                                                                     
+INTRACTV(NO)                                                                    
+JOBCMD(SCRIPT)                                                                  
+//END JOBREC                                                                    
+"\\tkmsmfp009\underwriting\Record_Governance\BCBSKS.UW.RecordGovernance.exe"    

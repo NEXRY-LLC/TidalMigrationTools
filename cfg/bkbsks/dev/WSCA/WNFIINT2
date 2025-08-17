@@ -1,0 +1,8 @@
+//JOBREC                                                                        
+JOBUSR(CORP\AIDPFI00)                                                           
+JOBPWD(YES)                                                                     
+INTRACTV(NO)                                                                    
+JOBCMD(SCRIPT)                                                                  
+//END JOBREC                                                                    
+\\TKMSMFP009\finance\Batch\Accounting\WNFIINT2\exe\Finance.WorkdayProcurementIn\
+ventory.IntTwo.exe                                                              

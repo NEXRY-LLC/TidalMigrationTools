@@ -5,7 +5,12 @@ import java.util.concurrent.ExecutorService;
 import com.bluehouseinc.dataconverter.api.importer.exec.AbstractAPIExecutor;
 import com.bluehouseinc.dataconverter.model.TidalDataModel;
 import com.bluehouseinc.dataconverter.providers.ConfigurationProvider;
+import com.bluehouseinc.tidal.api.TidalApi;
+import com.bluehouseinc.tidal.api.TidalReadOnlyEntry;
 import com.bluehouseinc.tidal.api.exceptions.TidalException;
+import com.bluehouseinc.tidal.api.impl.atom.response.Entry;
+import com.bluehouseinc.tidal.api.impl.atom.response.Feed;
+import com.bluehouseinc.tidal.api.model.BaseAPIObject;
 
 import me.tongfei.progressbar.ProgressBar;
 
@@ -369,5 +374,10 @@ public class TidalApiExecutor extends AbstractAPIExecutor {
 		} finally {
 			bar.step();
 		}
+	}
+
+	@Override
+	public <E extends Entry<C>, F extends Feed<C, E>, C extends BaseAPIObject, D extends TidalReadOnlyEntry<E, C>> TidalApi<E, F, C, D> getExecutorAPI(C object) {
+		throw new RuntimeException("Not Supported");
 	}
 }

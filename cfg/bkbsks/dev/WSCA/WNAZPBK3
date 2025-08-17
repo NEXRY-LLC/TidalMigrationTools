@@ -1,0 +1,8 @@
+//JOBREC                                                                        
+JOBUSR(CORP\twagent)                                                            
+JOBPWD(YES)                                                                     
+INTRACTV(NO)                                                                    
+JOBCMD(SCRIPT)                                                                  
+//END JOBREC                                                                    
+powershell.exe -File \\tkmsmsrp001\Data\Azure\prod\DBZWBK_WkDay_DSSP#WKDY#01_ex\
+ecution_script.ps1                                                              

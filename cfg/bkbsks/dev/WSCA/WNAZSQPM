@@ -1,0 +1,8 @@
+//JOBREC                                                                        
+JOBUSR(CORP\twagent)                                                            
+JOBPWD(YES)                                                                     
+INTRACTV(NO)                                                                    
+JOBCMD(SCRIPT)                                                                  
+//END JOBREC                                                                    
+powershell.exe -File E:\HealthAnalytics\Azure\stage\HA_DBZPQM_PatDetail_stage_C\
+ustom_execution_script.ps1                                                      

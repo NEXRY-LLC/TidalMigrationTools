@@ -1,0 +1,7 @@
+//JOBREC                                                                        
+JOBUSR(CORP\AIDPZPHD)                                                           
+JOBPWD(YES)                                                                     
+INTRACTV(NO)                                                                    
+JOBCMD(SCRIPT)                                                                  
+//END JOBREC                                                                    
+//*********************waiting for script *************************************\

@@ -131,4 +131,10 @@ public class EspDataModel extends BaseParserDataModel<EspAbstractJob, EspConfigP
 		return this.mailProcessor;
 	}
 
+	@Override
+	public void doPostJobDependencyJobObject(List<EspAbstractJob> jobs) {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

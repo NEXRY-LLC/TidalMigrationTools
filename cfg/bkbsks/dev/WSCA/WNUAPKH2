@@ -1,0 +1,8 @@
+//JOBREC                                                                        
+JOBUSR(CORP\aidua50f)                                                           
+JOBPWD(YES)                                                                     
+INTRACTV(NO)                                                                    
+JOBCMD(SCRIPT)                                                                  
+//END JOBREC                                                                    
+cmd.exe /c "\\TKMSSQP024\SSIS Process Files\SSIS_KHIIS_Run_Claim_and_Provider_P\
+ackages.bat"                                                                    

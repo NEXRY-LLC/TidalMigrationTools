@@ -1,0 +1,2 @@
+/opt/IBM/TWA_twagent/TWS/bin/filewatch -c wcr -f /apps/ME/PHIOWFiles/input/OWMe\
+mberAuthorizationRevoke.txt -int 30 -deadline 0                                 

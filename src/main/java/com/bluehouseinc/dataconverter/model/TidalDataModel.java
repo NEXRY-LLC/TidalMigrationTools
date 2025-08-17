@@ -33,6 +33,7 @@ import com.bluehouseinc.dataconverter.model.impl.CsvTimeZone;
 import com.bluehouseinc.dataconverter.model.impl.CsvVariable;
 import com.bluehouseinc.dataconverter.model.impl.CvsDependencyFile;
 import com.bluehouseinc.dataconverter.model.impl.CvsDependencyJob;
+import com.bluehouseinc.dataconverter.parsers.tivolimainframeopc.model.jobs.impl.CA7BaseJobObject;
 import com.bluehouseinc.dataconverter.util.ObjectUtils;
 import com.bluehouseinc.tidal.api.exceptions.TidalException;
 import com.bluehouseinc.tidal.api.model.dependency.job.DepLogic;
@@ -83,8 +84,8 @@ public class TidalDataModel {
 	private Set<CsvCalendar> calendars = new HashSet<>();
 	@Getter(value = AccessLevel.PUBLIC)
 	private Set<CsvOwner> owners = new HashSet<>();
-	@Getter(value = AccessLevel.PUBLIC)
-	private List<BaseCvsDependency> dependencies = new ArrayList<>();
+	// @Getter(value = AccessLevel.PUBLIC)
+	// private List<BaseCvsDependency> dependencies = new ArrayList<>();
 	@Getter(value = AccessLevel.PUBLIC)
 	private Set<CsvRuntimeUser> runtimeusers = new HashSet<>();
 	@Getter(value = AccessLevel.PUBLIC)
@@ -100,7 +101,7 @@ public class TidalDataModel {
 	@Getter(value = AccessLevel.PUBLIC)
 	private Map<CsvJobTag, List<BaseCsvJobObject>> jobTags = new HashedMap<>();
 	private int jobTagsMapCounter = 0;
-	
+
 	private Map<String, BaseCsvJobObject> jobOrGroupsMap = null;
 	// private Map<String, BaseCsvJobObject> registeredBaseJobs = new HashedMap<>();
 
@@ -113,7 +114,9 @@ public class TidalDataModel {
 
 	public static TidalDataModel model;
 
-	public TidalDataModel(AbstractConfigProvider cfgProvider) {
+	static TidalDependencyProcessor depProcessor;
+
+	TidalDataModel(AbstractConfigProvider cfgProvider) {
 		this.cfgProvider = cfgProvider;
 		loadVariableData(); // Do this early to make sure they are fully for reference in jobs.
 	}
@@ -130,7 +133,13 @@ public class TidalDataModel {
 			model = new TidalDataModel(cfgProvider);
 		}
 
+		depProcessor = TidalDependencyProcessor.instance(model);
+
 		return model;
+	}
+
+	public TidalDependencyProcessor getDependencyProcessor() {
+		return depProcessor;
 	}
 
 	public void loadVariableData() {
@@ -242,9 +251,6 @@ public class TidalDataModel {
 		}
 	}
 
-	private List<NameNewNamePairCsvMapping> agentmappingdata;
-	private List<NameNewNamePairCsvMapping> agentlistmappingdata;
-
 	public void addNodeToJobOrGroup(BaseCsvJobObject ajob, String agentname) {
 		if (agentname == null) {
 			return;
@@ -313,6 +319,9 @@ public class TidalDataModel {
 			}
 		}
 	}
+
+	private List<NameNewNamePairCsvMapping> agentmappingdata;
+	private List<NameNewNamePairCsvMapping> agentlistmappingdata;
 
 	private String doHandleAgentDataMapping(BaseCsvJobObject ajob, String agentname) {
 		String agentmapping = this.cfgProvider.getProvider().getConfigurations().getOrDefault(TIDALMapAgentDataFile, null);
@@ -411,8 +420,10 @@ public class TidalDataModel {
 	}
 
 	public void addJobToModel(BaseCsvJobObject job) {
-		this.jobOrGroups.add(job);
-		registerCompoundDependencyJob(job);
+		if(isNotDuplicateLevelCheck(job,true,true) ) {
+			this.jobOrGroups.add(job);
+			registerCompoundDependencyJob(job);
+		}
 	}
 
 	public void registerCompoundDependencyJob(BaseCsvJobObject job) {
@@ -435,59 +446,11 @@ public class TidalDataModel {
 	}
 
 	public CvsDependencyJob addJobDependencyForJob(BaseCsvJobObject myjob, BaseCsvJobObject depensonme, DepLogic logic, Operator operator, DependentJobStatus status, Integer dateOffset) {
-
-		// Do we not do it this way?
-		List<BaseCvsDependency> deps = this.dependencies.stream().filter(dep -> Objects.equals(dep.getJobObject().getId(), myjob.getId())).collect(Collectors.toList());
-
-		// this.dependencies.add(dep);
-		// I have existing dependency objects so add to my existing
-		// List<BaseDependency> deps = this.dependencies.stream().filter(f ->
-		// f.getJobObject().getFullPath().equals(myjob.getFullPath())).collect(Collectors.toList());
-
-		boolean duplicate = false;
-
-		CvsDependencyJob dep = new CvsDependencyJob();
-		dep.setJobObject(myjob);
-		dep.setDependsOnJob(depensonme);
-		dep.setOperator(operator);
-		dep.setJobStatus(status);
-		dep.setLogic(logic);
-		dep.setDateOffset(dateOffset);
-
-		if (deps.isEmpty()) {
-			this.dependencies.add(dep);
-		} else {
-
-			for (BaseCvsDependency f : deps) {
-
-				if (f instanceof CvsDependencyJob) {
-					if (((CvsDependencyJob) f).getDependsOnJob().getId().equals(depensonme.getId())) {
-						// if (((DependencyJob)
-						// f).getDependsOnJob().getFullPath().equals(depensonme.getFullPath())) {
-						// TODO: Determine if I should throw an error here because this is a job dep loop.
-						duplicate = true; /// Cant depend on myself.
-						break;
-					}
-				}
-			}
-
-			if (!duplicate) {
-				this.dependencies.add(dep);
-			}
-		}
-
-		return dep;
+		return depProcessor.addJobDependencyForJob(myjob, depensonme, logic, operator, status, dateOffset);
 	}
 
 	public CvsDependencyFile addFileDependencyForJob(BaseCsvJobObject myjob, String filename) {
-
-		CvsDependencyFile filedep = new CvsDependencyFile();
-		filedep.setJobObject(myjob);
-		filedep.setFilename(filename);
-
-		this.dependencies.add(filedep);
-
-		return filedep;
+		return depProcessor.addFileDependencyForJob(myjob, filename);
 	}
 
 	public CsvOwner getDefaultOwner() {
@@ -554,8 +517,6 @@ public class TidalDataModel {
 
 	}
 
-
-
 	public CsvJobGroup findGroupByName(String name) {
 		return findGroupByName(name, this.jobOrGroups);
 	}
@@ -603,58 +564,44 @@ public class TidalDataModel {
 	}
 
 	/*
+	 * Helper method to prevent having to edit all classes.
+	 */
+	public List<BaseCvsDependency> getDependencies() {
+		return depProcessor.getDependencies();
+	}
+
+	/*
 	 * Ugly but we have to track ID changes on jobs to depdenency as this is the
 	 * only ares so far I know of.
 	 */
 	public void updateBaseCsvJobObjectID(BaseCsvJobObject job, int newid) {
+		
+
 		int oldid = job.getId();
 		String path = job.getFullPath();
 
-		// Look for dependy refs.
 
-		if (getDependencies() != null) {
-			log.debug("updateBaseCsvJobObjectID OLDID[" + oldid + "] NEW ID[" + newid + "]  BaseDependency COUNT[" + getDependencies().size() + "] starting ");
-
-			// List<BaseCvsDependency> mydeps = getDependencies().stream().filter(f ->
-			// f.getJobObject().getId() == oldid).collect(Collectors.toList());
-
-			for (BaseCvsDependency dep : getDependencies()) {
-				// hmm. need id and depjob id
-				int jobdepid = dep.getJobObject().getId();
-				if (jobdepid == oldid) {
-					log.debug("updateBaseCsvJobObjectID getJobObject[" + oldid + "] NEW ID[" + newid + "] for Job[" + path + "]");
-					dep.getJobObject().setId(newid); // set to new id
-				}
-
-				if (dep instanceof CvsDependencyJob) {
-					CvsDependencyJob jd = (CvsDependencyJob) dep;
-					int depjobid = jd.getDependsOnJob().getId();
-					if (depjobid == oldid) {
-						log.debug("updateBaseCsvJobObjectID getDependsOnJob[" + oldid + "] NEW ID[" + newid + "] for Job[" + path + "]");
-						jd.getDependsOnJob().setId(newid);
-					}
-				} else {
-					log.debug("UNKNOWN updateBaseCsvJobObjectID getDependsOnJob[" + oldid + "] NEW ID[" + newid + "] for Job[" + path + "]");
-				}
-			}
-
-			log.debug("updateBaseCsvJobObjectID  OLDID[" + oldid + "] NEW ID[" + newid + "]  BaseDependency COUNT[" + getDependencies().size() + "] Completed ");
-
-		} else {
-			log.debug("updateBaseCsvJobObjectID DEP Data is missing.");
-		}
-
-		log.debug("updateBaseCsvJobObjectID OLDID[" + oldid + "] NEWID[" + newid + "] for Job[" + path + "]");
-		job.setId(newid);
-		log.debug("updateBaseCsvJobObjectID OLDID[" + oldid + "] NEWID[" + newid + "] for Job[" + path + "] Updating Parent");
-
-		if (!job.getChildren().isEmpty()) {
-			job.getChildren().forEach(c -> c.setParentId(newid));
-		}
+		getDependencyProcessor().updateJobId(newid,job);
+		
+		updateChildrenParentIds(newid,job);
 
 		log.debug("updateBaseCsvJobObjectID OLDID[" + oldid + "] NEWID[" + newid + "] for Job[" + path + "] Updating Parent Complete");
 	}
 
+	/**
+	 * Recursively update all children's parent IDs when parent job ID changes
+	 */
+
+	private void updateChildrenParentIds(Integer newParentId,BaseCsvJobObject parentJob) {
+		if (!parentJob.getChildren().isEmpty()) {
+			parentJob.getChildren().forEach(child -> {
+				child.setParentId(newParentId);
+				// Recursively update nested children
+				updateChildrenParentIds(child.getId(),(BaseCsvJobObject) child); // Each child keeps its own ID as parent for its children
+			});
+		}
+	}
+	
 	/**
 	 * Returns all registered IBaseJobGroupObject to the model of Class type <J>.
 	 *
@@ -837,4 +784,44 @@ public class TidalDataModel {
 		}
 	}
 
+	public boolean isNotDuplicateLevelCheck(BaseJobOrGroupObject obj, boolean fail, boolean append) {
+
+		String path = obj.getFullPath(); // This is what I should be concerned with.. Jobs with the same name at the
+											// same
+											// level.
+		// dupNameCheck(path);
+		// String path = obj.getId().toString();
+
+		if (dupCheck.contains(path)) {
+			if (fail) {
+				throw new RuntimeException("Duplicate Job/Group[" + path + "] detected");
+			} else {
+				log.error("Duplicate Job/Group[" + path + "] detected");
+				
+				if(append) {
+					obj.setName(obj.getName()+"-Dup");
+					obj.invalidatePathCache();
+					path = obj.getFullPath();
+					log.info("Duplicate Job/Group Renamed To[" + path + "] detected");
+				}
+			}
+		} 
+			
+		
+		return this.dupCheck.add(path);
+
+	}
+
+	private List<String> dupCheck = new ArrayList<>();
+	
+	/**
+	 * If you need to process the objects and add back to the list
+	 * @return
+	 */
+	public List<BaseCsvJobObject> getAndResetJobObject(){
+		dupCheck.clear();
+		List<BaseCsvJobObject> newlist =  new ArrayList<>(jobOrGroups);
+		jobOrGroups.clear();
+		return newlist;
+	}
 }

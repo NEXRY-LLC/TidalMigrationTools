@@ -1,0 +1,8 @@
+//JOBREC                                                                        
+JOBUSR(CORP\twagent)                                                            
+JOBPWD(YES)                                                                     
+INTRACTV(YES)                                                                   
+JOBCMD(SCRIPT)                                                                  
+//END JOBREC                                                                    
+"\\tkmsmf05\BCBSWeb\MedicalAffairs\ClickOnce\KHDS_Admin(HD30-33)\HD33WithImport\
+\Application Files\HD33ClmsWith_1_0_0_0\HD33ClmsWith.exe"                       

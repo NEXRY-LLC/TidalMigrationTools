@@ -1,0 +1,8 @@
+//JOBREC                                                                        
+JOBUSR(CORP\twagent)                                                            
+JOBPWD(YES)                                                                     
+INTRACTV(NO)                                                                    
+JOBCMD(SCRIPT)                                                                  
+//END JOBREC                                                                    
+powershell.exe -File \\TKMSMSRP001\Data\Azure\prod\DBZAAD_Daily_Aft_AHGR0130_ex\
+ecution_script.ps1                                                              

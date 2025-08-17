@@ -1,0 +1,7 @@
+//JOBREC                                                                        
+JOBUSR(CORP\AIDMPIMP)                                                           
+JOBPWD(YES)                                                                     
+INTRACTV(NO)                                                                    
+JOBCMD(SCRIPT)                                                                  
+//END JOBREC                                                                    
+\\TKMSMFT006\MedicalAffairs\AQC-RecordPurge\RecordRetention_PurgeOldRecords.exe 

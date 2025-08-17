@@ -1,0 +1,8 @@
+//JOBREC                                                                        
+JOBUSR(CORP\AIDTBM00)                                                           
+JOBPWD(YES)                                                                     
+INTRACTV(NO)                                                                    
+JOBCMD(SCRIPT)                                                                  
+//END JOBREC                                                                    
+cmd.exe /c "\\TKMSSQT040\SSIS Process Files\\DBZABM\SSIS_Orchestration_Biometri\
+csWellness.bat"                                                                 

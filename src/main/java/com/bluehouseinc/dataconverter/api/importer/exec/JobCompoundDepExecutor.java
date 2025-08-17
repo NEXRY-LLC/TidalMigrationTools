@@ -6,7 +6,12 @@ import com.bluehouseinc.dataconverter.api.importer.TidalAPI;
 import com.bluehouseinc.dataconverter.model.TidalDataModel;
 import com.bluehouseinc.dataconverter.model.impl.BaseCsvJobObject;
 import com.bluehouseinc.dataconverter.providers.ConfigurationProvider;
+import com.bluehouseinc.tidal.api.TidalApi;
+import com.bluehouseinc.tidal.api.TidalReadOnlyEntry;
 import com.bluehouseinc.tidal.api.exceptions.TidalException;
+import com.bluehouseinc.tidal.api.impl.atom.response.Entry;
+import com.bluehouseinc.tidal.api.impl.atom.response.Feed;
+import com.bluehouseinc.tidal.api.model.BaseAPIObject;
 import com.bluehouseinc.tidal.api.model.job.BaseJob;
 import com.bluehouseinc.tidal.api.model.job.DepLogicType;
 import com.bluehouseinc.tidal.api.model.job.Job;
@@ -117,6 +122,12 @@ public class JobCompoundDepExecutor extends AbstractAPIExecutor {
 			bar.step();
 		}
 
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public <E extends Entry<C>, F extends Feed<C, E>, C extends BaseAPIObject, D extends TidalReadOnlyEntry<E, C>> TidalApi<E, F, C, D> getExecutorAPI(C object) {
+		return (TidalApi<E, F, C, D>) getTidalApi().getSession().getServiceFactory().job();
 	}
 
 }

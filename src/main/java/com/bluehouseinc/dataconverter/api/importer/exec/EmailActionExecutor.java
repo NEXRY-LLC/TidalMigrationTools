@@ -6,8 +6,13 @@ import com.bluehouseinc.dataconverter.api.importer.TidalAPI;
 import com.bluehouseinc.dataconverter.model.TidalDataModel;
 import com.bluehouseinc.dataconverter.model.impl.CsvActionEmail;
 import com.bluehouseinc.dataconverter.providers.ConfigurationProvider;
+import com.bluehouseinc.tidal.api.TidalApi;
+import com.bluehouseinc.tidal.api.TidalReadOnlyEntry;
 import com.bluehouseinc.tidal.api.exceptions.TidalException;
+import com.bluehouseinc.tidal.api.impl.atom.response.Entry;
+import com.bluehouseinc.tidal.api.impl.atom.response.Feed;
 import com.bluehouseinc.tidal.api.impl.atom.response.TesResult;
+import com.bluehouseinc.tidal.api.model.BaseAPIObject;
 import com.bluehouseinc.tidal.api.model.actions.email.EmailAction;
 import com.bluehouseinc.tidal.api.model.owners.Owner;
 import com.bluehouseinc.tidal.utils.StringUtils;
@@ -92,7 +97,7 @@ public class EmailActionExecutor extends AbstractAPIExecutor {
 							add.setOwner(getTidalApi().getDefaultOwner());
 						}
 
-						TesResult res = getTidalApi().getSession().getServiceFactory().emailAction().create(add);
+						TesResult res = doCreate(add);
 						int newid = res.getResult().getTesObjectid();
 						add.setId(newid);
 						getTidalApi().getEmailActions().add(add);
@@ -108,6 +113,12 @@ public class EmailActionExecutor extends AbstractAPIExecutor {
 		} finally {
 			bar.step();
 		}
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public <E extends Entry<C>, F extends Feed<C, E>, C extends BaseAPIObject, D extends TidalReadOnlyEntry<E, C>> TidalApi<E, F, C, D> getExecutorAPI(C object) {
+		return (TidalApi<E, F, C, D>) getTidalApi().getSession().getServiceFactory().emailAction();
 	}
 
 }

@@ -1,0 +1,6 @@
+//JOBREC                                                                        
+JOBUSR(CORP\facomtst)                                                           
+JOBPWD(YES)                                                                     
+JOBCMD(SCRIPT)                                                                  
+//END JOBREC                                                                    
+"\\corp\apps\Facets\dev\481\Customer\Script\WNA2D400 - cmcmco0.bat"             

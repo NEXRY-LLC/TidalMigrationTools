@@ -21,8 +21,20 @@ public abstract class DateUtil {
 		if (job.getName().equals("scepm004_DEM")) {
 			// System.out.println();
 		}
-
+		
 		String calname = "";
+		
+		String confcal = job.getJobData().getCONFCAL();
+		
+		if(confcal != null) {
+			String confcalcalendar = confcal;
+			String val = "CONFCAL[" + confcalcalendar + "]";
+
+			calname = calname.isEmpty() ? val : calname + val;
+			
+			return calname;
+		}
+
 		String weekdays = job.getJobData().getWEEKDAYS();
 
 		if (weekdays != null) {

@@ -247,7 +247,7 @@ public class EspParser extends AbstractParser<EspDataModel> {
 
 				if (existingEspJobGroup == null) {
 					currentJobGroup = new EspJobGroup(jobGroupName);
-					this.getParserDataModel().addDataDuplicateLevelCheck(currentJobGroup);
+					this.getParserDataModel().addDataObject(currentJobGroup);
 				} else {
 					currentJobGroup = (EspJobGroup) existingEspJobGroup;
 				}

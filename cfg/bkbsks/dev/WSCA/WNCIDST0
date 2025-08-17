@@ -1,0 +1,7 @@
+//JOBREC                                                                        
+JOBUSR(CORP\AIDPCIRA)                                                           
+JOBPWD(YES)                                                                     
+INTRACTV(NO)                                                                    
+JOBCMD(SCRIPT)                                                                  
+//END JOBREC                                                                    
+"\\tkmsmft006\imaging\Replay_Batch\Replay_Batch.exe"                            

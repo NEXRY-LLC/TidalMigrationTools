@@ -1,0 +1,8 @@
+//JOBREC                                                                        
+JOBUSR(CORP\twagent)                                                            
+JOBPWD(YES)                                                                     
+INTRACTV(NO)                                                                    
+JOBCMD(SCRIPT)                                                                  
+//END JOBREC                                                                    
+\\tkmsmfp010\healthanalytics\DST\DSTClaimsExtract\URAC\QRS\TivoliScripts\URACYe\
+ar1Extract.vbs                                                                  

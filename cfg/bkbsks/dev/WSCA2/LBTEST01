@@ -1,0 +1,92 @@
+//TASKTYPE=jsr352javabatch                                                     \
+ <?xml version="1.0" encoding="UTF-8"?>
+<jsdl:jobDefinition xmlns:jsdl="http://\
+www.ibm.com/xmlns/prod/scheduling/1.0/jsdl" xmlns:jsdljsr352javabatch="http://w\
+ww.ibm.com/xmlns/prod/scheduling/1.0/jsdljsr352javabatch" name="JSR352JAVABATCH\
+">
+  <jsdl:application name="jsr352javabatch">
+    <jsdljsr352javabatch:jsr352j\
+avabatch>
+			<jsdljsr352javabatch:JSR352JavaBatchParameters>
+				<jsdljsr352jav\
+abatch:Connection>
+					<jsdljsr352javabatch:connectionInfo>
+						<jsdljsr352j\
+avabatch:hostname>javabatch.bcbsks.com</jsdljsr352javabatch:hostname>
+						<js\
+dljsr352javabatch:port>9453</jsdljsr352javabatch:port>
+						<jsdljsr352javabat\
+ch:protocol>HTTPS</jsdljsr352javabatch:protocol>
+						<jsdljsr352javabatch:cre\
+dentials>
+							<jsdl:userName/>
+							<jsdl:password/>
+						</jsdljsr352jav\
+abatch:credentials>
+						<jsdljsr352javabatch:CertificateGroup1>
+							<jsdlj\
+sr352javabatch:keyStoreFilePath/>
+							<jsdljsr352javabatch:password/>
+						\
+</jsdljsr352javabatch:CertificateGroup1>
+					</jsdljsr352javabatch:connectionI\
+nfo>
+					<jsdljsr352javabatch:retryOptions>
+						<jsdljsr352javabatch:NumberO\
+fRetries>0</jsdljsr352javabatch:NumberOfRetries>
+						<jsdljsr352javabatch:Ret\
+ryIntervalSeconds>30</jsdljsr352javabatch:RetryIntervalSeconds>
+					</jsdljsr3\
+52javabatch:retryOptions>
+				</jsdljsr352javabatch:Connection>
+				<jsdljsr352\
+javabatch:Action>
+					<jsdljsr352javabatch:actionInfo>
+						<jsdljsr352javaba\
+tch:applicationname>test.war</jsdljsr352javabatch:applicationname>
+						<jsdlj\
+sr352javabatch:modulename>test.test</jsdljsr352javabatch:modulename>
+						<jsd\
+ljsr352javabatch:componentname/>
+						<jsdljsr352javabatch:jobxmlname>test.xml\
+</jsdljsr352javabatch:jobxmlname>
+						<jsdljsr352javabatch:jobxmlfile>test.xm\
+l</jsdljsr352javabatch:jobxmlfile>
+						<jsdljsr352javabatch:jobxml/>
+
+					</\
+jsdljsr352javabatch:actionInfo>
+				</jsdljsr352javabatch:Action>
+				<jsdljsr3\
+52javabatch:BackupConnection>
+					<jsdljsr352javabatch:backupConnectionInfo>
+	\
+					<jsdljsr352javabatch:backupHostname/>
+						<jsdljsr352javabatch:backupPor\
+t>9443</jsdljsr352javabatch:backupPort>
+						<jsdljsr352javabatch:backupProtoc\
+ol>HTTPS</jsdljsr352javabatch:backupProtocol>
+						<jsdljsr352javabatch:modeGr\
+oup>
+							<jsdljsr352javabatch:switchMode>backup</jsdljsr352javabatch:switchM\
+ode>
+						</jsdljsr352javabatch:modeGroup>
+						<jsdljsr352javabatch:backupCr\
+edentials>
+							<jsdljsr352javabatch:usePrimaryServerCredentials/>
+						</js\
+dljsr352javabatch:backupCredentials>
+						<jsdljsr352javabatch:backupCertifica\
+te>
+							<jsdljsr352javabatch:usePrimaryServerCertificate/>
+						</jsdljsr35\
+2javabatch:backupCertificate>
+					</jsdljsr352javabatch:backupConnectionInfo>
+\
+				</jsdljsr352javabatch:BackupConnection>
+			</jsdljsr352javabatch:JSR352Java\
+BatchParameters>
+		</jsdljsr352javabatch:jsr352javabatch>
+  </jsdl:application>\
+
+</jsdl:jobDefinition>                                                          

@@ -1,0 +1,8 @@
+//JOBREC                                                                        
+JOBUSR(CORP\aidua50f)                                                           
+JOBPWD(YES)                                                                     
+INTRACTV(NO)                                                                    
+JOBCMD(SCRIPT)                                                                  
+//END JOBREC                                                                    
+"\\tkmsblrp001\h$\Group Reporting\IS\ExecutableCode\Scripts\TriggerControllerDa\
+ily.vbs"                                                                        

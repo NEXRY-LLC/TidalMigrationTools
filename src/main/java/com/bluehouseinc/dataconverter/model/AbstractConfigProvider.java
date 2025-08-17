@@ -18,6 +18,7 @@ public abstract class AbstractConfigProvider {
 	private String TIDAL_DEP_LOOP_CHECK = "tidal.check.dependency.loop";
 	private String TIDAL_SAVE_OUT_OPTION = "tidal.job.save.output.option";
 	private String TIDAL_FORMAT_PARAMS = "tidal.job.format.params";
+	private String TIDAL_JOB_NEAR_OUTAGE = "tidal.job.near.outage";
 	
 	public AbstractConfigProvider(ConfigurationProvider provider) {
 		this.provider = provider;
@@ -67,6 +68,10 @@ public abstract class AbstractConfigProvider {
 	public boolean formatJobParams() {
 		String tf = this.getProvider().getConfigurations().getOrDefault(TIDAL_FORMAT_PARAMS, "true");
 		return Boolean.valueOf(tf);
+	}
+	
+	public String getTidalNearOutage() {
+		return this.getProvider().getConfigurations().getOrDefault(TIDAL_JOB_NEAR_OUTAGE, "RUNANYWAY");
 	}
 	
 	public boolean bfusaFixSqlplus() {

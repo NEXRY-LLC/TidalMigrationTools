@@ -1,0 +1,8 @@
+//JOBREC                                                                        
+JOBUSR(CORP\ProviderJobScheduler)                                               
+JOBPWD(YES)                                                                     
+INTRACTV(NO)                                                                    
+JOBCMD(SCRIPT)                                                                  
+//END JOBREC                                                                    
+powershell.exe -File \\TKMSMFP009\Provider\Batch\MedProviderDataFormat\start_in\
+cremental.ps1                                                                   

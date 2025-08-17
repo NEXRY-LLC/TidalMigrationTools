@@ -27,5 +27,8 @@ public class CsvResource {
 
 	@CsvRecurse
 	CsvOwner owner;
+	
+	@CsvBindByName
+	Boolean exclusive;
 
 }

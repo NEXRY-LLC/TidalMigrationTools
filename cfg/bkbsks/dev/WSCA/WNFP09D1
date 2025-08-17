@@ -1,0 +1,8 @@
+//JOBREC                                                                        
+JOBUSR(CORP\twagent)                                                            
+JOBPWD(YES)                                                                     
+INTRACTV(NO)                                                                    
+JOBCMD(SCRIPT)                                                                  
+//END JOBREC                                                                    
+"\\TKMSMFP009\ICD10\HLIDeltaFileProcess\ICD HLI Delta File\ICD HLI Delta File\I\
+CD HLI Delta File\bin\Debug\ICD HLI Delta File.exe"                             

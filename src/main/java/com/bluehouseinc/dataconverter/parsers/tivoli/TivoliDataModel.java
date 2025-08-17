@@ -158,4 +158,10 @@ public class TivoliDataModel extends BaseParserDataModel<TivoliJobObject, Tivoli
 	private BaseCsvJobObject findJobInList(List<BaseJobOrGroupObject> childs, String name) {
 		return (BaseCsvJobObject) childs.stream().filter(child -> child.getName().equalsIgnoreCase(name)).findFirst().orElse(null);
 	}
+
+	@Override
+	public void doPostJobDependencyJobObject(List<TivoliJobObject> jobs) {
+		// TODO Auto-generated method stub
+		
+	}
 }

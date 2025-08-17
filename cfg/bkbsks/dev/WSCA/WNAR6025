@@ -1,0 +1,8 @@
+//JOBREC                                                                        
+JOBUSR(CORP\twagent)                                                            
+JOBPWD(YES)                                                                     
+INTRACTV(NO)                                                                    
+JOBCMD(SCRIPT)                                                                  
+//END JOBREC                                                                    
+C:\WINDOWS\SYSTEM32\CSCRIPT.EXE "z:\actuarial\OldWorldBAR_Conversion\BARRatingA\
+pp.vbs"                                                                         

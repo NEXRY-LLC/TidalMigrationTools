@@ -1,0 +1,8 @@
+//JOBREC                                                                        
+JOBUSR(CORP\twagent)                                                            
+JOBPWD(YES)                                                                     
+INTRACTV(NO)                                                                    
+JOBCMD(SCRIPT)                                                                  
+//END JOBREC                                                                    
+\\tkmsws007\DSTHS_CareAnalyzer\Batch_Processing_Control_Files\Batch_File\MedAdv\
+NonReg.bat                                                                      

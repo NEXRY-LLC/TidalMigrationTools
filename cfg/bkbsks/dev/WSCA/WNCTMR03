@@ -1,0 +1,8 @@
+//JOBREC                                                                        
+JOBUSR(CORP\cladmin)                                                            
+JOBPWD(YES)                                                                     
+INTRACTV(NO)                                                                    
+JOBCMD(SCRIPT)                                                                  
+//END JOBREC                                                                    
+C:\WINDOWS\SYSTEM32\CSCRIPT.EXE "C:\CLIENT~1\BATCH_~1\JOB_SC~1\CMD\WNCTMR03.VBS\
+"                                                                               

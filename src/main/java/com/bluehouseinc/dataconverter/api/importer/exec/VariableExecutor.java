@@ -7,7 +7,12 @@ import com.bluehouseinc.dataconverter.api.importer.TidalAPI;
 import com.bluehouseinc.dataconverter.model.TidalDataModel;
 import com.bluehouseinc.dataconverter.model.impl.CsvVariable;
 import com.bluehouseinc.dataconverter.providers.ConfigurationProvider;
+import com.bluehouseinc.tidal.api.TidalApi;
+import com.bluehouseinc.tidal.api.TidalReadOnlyEntry;
+import com.bluehouseinc.tidal.api.impl.atom.response.Entry;
+import com.bluehouseinc.tidal.api.impl.atom.response.Feed;
 import com.bluehouseinc.tidal.api.impl.atom.response.TesResult;
+import com.bluehouseinc.tidal.api.model.BaseAPIObject;
 import com.bluehouseinc.tidal.api.model.YesNoType;
 import com.bluehouseinc.tidal.api.model.variable.Variable;
 import com.bluehouseinc.tidal.api.model.variable.VariableType;
@@ -68,7 +73,7 @@ public class VariableExecutor extends AbstractAPIExecutor {
 				add.setPub(YesNoType.NO);
 				add.setType(VariableType.STRING);
 				add.setOwner(getTidalApi().getDefaultOwner());
-				TesResult res = getTidalApi().getSession().getServiceFactory().variable().create(add);
+				TesResult res = doCreate(add);
 				int newid = res.getResult().getTesObjectid();
 				add.setId(newid); // Why are we not setting this on create??
 				getTidalApi().getVariables().add(add); // Add our new variable back to tidal.
@@ -78,6 +83,12 @@ public class VariableExecutor extends AbstractAPIExecutor {
 		} finally {
 			bar.step();
 		}
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public <E extends Entry<C>, F extends Feed<C, E>, C extends BaseAPIObject, D extends TidalReadOnlyEntry<E, C>> TidalApi<E, F, C, D> getExecutorAPI(C object) {
+		return (TidalApi<E, F, C, D>) getTidalApi().getSession().getServiceFactory().variable();
 	}
 
 }

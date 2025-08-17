@@ -42,9 +42,9 @@ public abstract class BaseVariableProcessor<E extends BaseJobOrGroupObject> {
 	@SuppressWarnings("unchecked")
 	public void processJob(E job) {
 
-		if(job.getName().contains("LAWEXP_RTI_APPMT_LX")) {
-			job.getName();
-		}
+		//if(job.getName().contains("LAWEXP_RTI_APPMT_LX")) {
+		//	job.getName();
+		//}
 		
 		List<Field> rawfields = ObjectUtils.getAllKnownFields(job).stream().filter(f -> f.getType().isInstance(new String())).collect(Collectors.toList());
 

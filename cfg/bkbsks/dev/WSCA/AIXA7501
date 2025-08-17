@@ -1,0 +1,6 @@
+//JOBREC                                                                        
+JOBUSR(twagent)                                                                 
+JOBCMD(SCRIPT)                                                                  
+//END JOBREC                                                                    
+/apps/jobs/batch_submitter /apps/MR/xJcl/ReadFileAndWriteToFile.xml            \
+/apps/MR/xJcl/test.properties                                                   

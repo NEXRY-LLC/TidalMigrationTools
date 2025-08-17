@@ -77,7 +77,7 @@ public class TidalImporter {
 
 		}
 	}
-
+	
 	private Credentials createCredentials() {
 		final String url = cp.getConfigurations().get("tidal.url");
 		final String userName = cp.getConfigurations().get("tidal.user");

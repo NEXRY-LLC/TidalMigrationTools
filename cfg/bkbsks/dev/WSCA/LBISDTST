@@ -1,0 +1,54 @@
+//TASKTYPE=jsr352javabatch                                                     \
+ <?xml version="1.0" encoding="UTF-8"?>
+<jsdl:jobDefinition xmlns:jsdl="http://\
+www.ibm.com/xmlns/prod/scheduling/1.0/jsdl" xmlns:jsdljsr352javabatch="http://w\
+ww.ibm.com/xmlns/prod/scheduling/1.0/jsdljsr352javabatch" name="JSR352JAVABATCH\
+">
+  <jsdl:application name="jsr352javabatch">
+    <jsdljsr352javabatch:jsr352j\
+avabatch>
+			<jsdljsr352javabatch:JSR352JavaBatchParameters>
+				<jsdljsr352jav\
+abatch:Connection>
+					<jsdljsr352javabatch:connectionInfo>
+						<jsdljsr352j\
+avabatch:hostname>dev-javabatch.bcbsks.com</jsdljsr352javabatch:hostname>
+					\
+	<jsdljsr352javabatch:port>9452</jsdljsr352javabatch:port>
+						<jsdljsr352jav\
+abatch:protocol>HTTPS</jsdljsr352javabatch:protocol>
+						<jsdljsr352javabatch\
+:user>javabatchscheduler</jsdljsr352javabatch:user>
+						<jsdljsr352javabatch:\
+password>{aes}h3+Xxvzkfsi+i2a9i3jDf5+4QLn6dAs8xebx9zFQ53s=</jsdljsr352javabatch\
+:password>
+					</jsdljsr352javabatch:connectionInfo>
+					<jsdljsr352javabatch\
+:retryOptions>
+						<jsdljsr352javabatch:NumberOfRetries>0</jsdljsr352javabatc\
+h:NumberOfRetries>
+						<jsdljsr352javabatch:RetryIntervalSeconds>30</jsdljsr3\
+52javabatch:RetryIntervalSeconds>
+					</jsdljsr352javabatch:retryOptions>
+				\
+</jsdljsr352javabatch:Connection>
+				<jsdljsr352javabatch:Action>
+					<jsdljs\
+r352javabatch:actionInfo>
+						<jsdljsr352javabatch:applicationname>DemoBatch<\
+/jsdljsr352javabatch:applicationname>
+						<jsdljsr352javabatch:modulename>Dem\
+oBatchWAR.war</jsdljsr352javabatch:modulename>
+						<jsdljsr352javabatch:compo\
+nentname/>
+						<jsdljsr352javabatch:jobxmlname>DemoBatch.xml</jsdljsr352javab\
+atch:jobxmlname>
+
+					</jsdljsr352javabatch:actionInfo>
+				</jsdljsr352javaba\
+tch:Action>
+			</jsdljsr352javabatch:JSR352JavaBatchParameters>
+		</jsdljsr352j\
+avabatch:jsr352javabatch>
+  </jsdl:application>
+</jsdl:jobDefinition>           

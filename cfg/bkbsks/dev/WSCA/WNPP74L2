@@ -1,0 +1,8 @@
+//JOBREC                                                                        
+JOBUSR(CORP\twagent)                                                            
+JOBPWD(YES)                                                                     
+INTRACTV(NO)                                                                    
+JOBCMD(SCRIPT)                                                                  
+//END JOBREC                                                                    
+\\tkmsmfp010\healthanalytics\GeoHealth\GeoHealthDataExtract\PopulationHealth\Ti\
+voliScripts\GeoHealthDataExtract.vbs                                            

@@ -1,0 +1,8 @@
+//JOBREC                                                                        
+JOBUSR(CORP\twagent)                                                            
+JOBPWD(YES)                                                                     
+INTRACTV(NO)                                                                    
+JOBCMD(SCRIPT)                                                                  
+//END JOBREC                                                                    
+powershell.exe -File \\corp\apps\prod.netwebcontent\BCBSWEB\Marketing\Batch\Lts\
+ToTmsTransfer\run.ps1                                                           

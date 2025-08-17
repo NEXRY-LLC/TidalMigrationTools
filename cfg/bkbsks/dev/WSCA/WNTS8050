@@ -1,0 +1,7 @@
+//JOBREC                                                                        
+JOBUSR(CORP\Marketing-RunAgent)                                                 
+JOBPWD(YES)                                                                     
+INTRACTV(NO)                                                                    
+JOBCMD(SCRIPT)                                                                  
+//END JOBREC                                                                    
+powershell.exe -File Z:\marketing\Batch\Reporting\RenewalPrint.ps1              

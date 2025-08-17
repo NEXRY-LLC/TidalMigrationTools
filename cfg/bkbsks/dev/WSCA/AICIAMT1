@@ -1,0 +1,5 @@
+//JOBREC                                                                        
+JOBUSR(root)                                                                    
+JOBCMD(SCRIPT)                                                                  
+//END JOBREC                                                                    
+/as/full_backup_online_snapshot.sh                                              

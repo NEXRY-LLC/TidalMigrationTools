@@ -1,0 +1,7 @@
+//JOBREC                                                                        
+JOBUSR(CORP\ACoE-RunAgent)                                                      
+JOBPWD(YES)                                                                     
+INTRACTV(NO)                                                                    
+JOBCMD(SCRIPT)                                                                  
+//END JOBREC                                                                    
+Z:\ACoE\MiResource-FileLoad\MiResourceFileLoad.exe                              

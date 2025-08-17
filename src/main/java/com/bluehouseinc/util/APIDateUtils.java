@@ -3,11 +3,14 @@ package com.bluehouseinc.util;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import com.bluehouseinc.dataconverter.model.TidalDataModel;
@@ -275,6 +278,24 @@ public abstract class APIDateUtils {
 		}
 	}
 
+	public static void setRerunNewOccurance(Integer repeatevery, Integer maxreruns, BaseCsvJobObject obj, TidalDataModel datamodel) {
+
+		if (repeatevery == 0) {
+			repeatevery = 60;
+		}
+		RepeatType which = RepeatType.SAME;
+		if (repeatevery >= 30) {
+			which = RepeatType.NEW;
+		}
+
+		obj.getRerunLogic().setRepeatEvery(repeatevery);
+		obj.getRerunLogic().setRepeatType(which);
+
+		if (maxreruns != null) {
+			obj.getRerunLogic().setRepeatMaxTimes(maxreruns);
+		}
+	}
+
 	// Common date formats used in enterprise systems
 	private static final List<DateTimeFormatter> DATE_FORMATTERS = Arrays.asList(DateTimeFormatter.ofPattern("yyyy-MM-dd"), // ISO format: 2024-01-15
 			DateTimeFormatter.ofPattern("MM/dd/yyyy"), // US format: 01/15/2024
@@ -294,6 +315,20 @@ public abstract class APIDateUtils {
 			DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss"), // ISO T format
 			DateTimeFormatter.ofPattern("MMM dd, yyyy HH:mm:ss") // Readable datetime
 	);
+
+	// Define all possible time formats in order of preference
+	private static final List<DateTimeFormatter> TIME_FORMATTERS = Arrays.asList(DateTimeFormatter.ofPattern("h:mm a"), // 1:00 PM, 12:00 AM
+			DateTimeFormatter.ofPattern("h:m a"), // 1:0 PM
+			DateTimeFormatter.ofPattern("hh:mm a"), // 01:00 PM
+			DateTimeFormatter.ofPattern("H:mm"), // 13:00, 1:00
+			DateTimeFormatter.ofPattern("HH:mm"), // 13:00, 01:00
+			DateTimeFormatter.ofPattern("H:m"), // 13:0, 1:0
+			DateTimeFormatter.ofPattern("h a"), // 1 PM
+			DateTimeFormatter.ofPattern("ha"), // 1PM
+			DateTimeFormatter.ofPattern("H") // 13, 1
+	);
+
+	private static final Pattern NUMERIC_ONLY = Pattern.compile("^\\d+$");
 
 	/**
 	 * Checks if the given date string represents a date in the past.
@@ -468,5 +503,126 @@ public abstract class APIDateUtils {
 	public static List<String> getSupportedDateFormats() {
 		return Arrays.asList("yyyy-MM-dd (ISO format)", "MM/dd/yyyy (US format)", "dd/MM/yyyy (European format)", "yyyy/MM/dd", "MMM dd, yyyy", "dd-MMM-yyyy", "yyyyMMdd (compact)", "MM-dd-yyyy", "dd-MM-yyyy", "yyyy-MM-dd HH:mm:ss (with time)",
 				"yyyy-MM-dd'T'HH:mm:ss (ISO datetime)");
+	}
+
+	/**
+	 * Calculate minutes between two time strings
+	 * Handles various formats: "600", "12:30", "1:00 PM", etc.
+	 */
+	public static long getMinutesBetween(String startTime, String endTime) {
+		LocalTime start = parseTime(startTime);
+		LocalTime end = parseTime(endTime);
+
+		long minutes = ChronoUnit.MINUTES.between(start, end);
+
+		// Handle crossing midnight
+		return minutes < 0 ? minutes + (24 * 60) : minutes;
+	}
+
+	/**
+	 * Parse time string to LocalTime object
+	 * Automatically handles padding and format detection
+	 */
+	public static LocalTime parseTime(String timeStr) {
+		if (timeStr == null || timeStr.trim().isEmpty()) {
+			throw new IllegalArgumentException("Time string cannot be null or empty");
+		}
+
+		String processedTime = preprocessTime(timeStr.trim().toUpperCase());
+
+		for (DateTimeFormatter formatter : TIME_FORMATTERS) {
+			try {
+				return LocalTime.parse(processedTime, formatter);
+			} catch (DateTimeParseException e) {
+				// Continue to next formatter
+			}
+		}
+
+		throw new IllegalArgumentException("Unable to parse time: " + timeStr);
+	}
+
+	/**
+	 * Internal method - handles padding and preprocessing
+	 */
+	private static String preprocessTime(String timeStr) {
+		// If it's purely numeric, apply internal padding logic
+		if (NUMERIC_ONLY.matcher(timeStr).matches()) {
+			return padNumericTime(timeStr);
+		}
+
+		// Return as-is for other formats
+		return timeStr;
+	}
+
+	/**
+	 * Internal padding logic - not exposed to users
+	 */
+	private static String padNumericTime(String numericTime) {
+		int value = Integer.parseInt(numericTime);
+		int length = numericTime.length();
+
+		// Validate reasonable time values
+		if (value < 0 || value > 2400) {
+			throw new IllegalArgumentException("Time value out of range: " + value);
+		}
+
+		switch (length) {
+		case 1:
+		case 2:
+			// Hours only
+			if (value > 24) {
+				throw new IllegalArgumentException("Invalid hour value: " + value);
+			}
+			return String.format("%02d:00", value);
+
+		case 3:
+			// H:MM format
+			int hours3 = Integer.parseInt(numericTime.substring(0, 1));
+			int minutes3 = Integer.parseInt(numericTime.substring(1));
+
+			if (hours3 > 24 || minutes3 > 59) {
+				throw new IllegalArgumentException("Invalid time components: " + hours3 + ":" + minutes3);
+			}
+
+			return String.format("%02d:%02d", hours3, minutes3);
+
+		case 4:
+			// HH:MM format
+			int hours4 = Integer.parseInt(numericTime.substring(0, 2));
+			int minutes4 = Integer.parseInt(numericTime.substring(2));
+
+			if (hours4 > 24 || minutes4 > 59) {
+				throw new IllegalArgumentException("Invalid time components: " + hours4 + ":" + minutes4);
+			}
+
+			return String.format("%02d:%02d", hours4, minutes4);
+
+		default:
+			throw new IllegalArgumentException("Invalid numeric time format length: " + length);
+		}
+	}
+
+	/**
+	 * Get absolute difference (always positive)
+	 */
+	public static long getAbsoluteMinutesBetween(String startTime, String endTime) {
+		return Math.abs(getMinutesBetween(startTime, endTime));
+	}
+
+	/**
+	 * Batch processing for multiple time pairs
+	 */
+	public static long[] calculateMinutesBatch(String[][] timePairs) {
+		long[] results = new long[timePairs.length];
+
+		for (int i = 0; i < timePairs.length; i++) {
+			try {
+				results[i] = getMinutesBetween(timePairs[i][0], timePairs[i][1]);
+			} catch (Exception e) {
+				throw new RuntimeException("Failed to process time pair at index " + i + ": [" + timePairs[i][0] + ", " + timePairs[i][1] + "]", e);
+			}
+		}
+
+		return results;
 	}
 }

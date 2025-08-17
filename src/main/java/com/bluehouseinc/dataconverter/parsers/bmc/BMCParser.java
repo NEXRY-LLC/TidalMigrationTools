@@ -1,10 +1,13 @@
 package com.bluehouseinc.dataconverter.parsers.bmc;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.xml.bind.JAXBContext;
@@ -14,8 +17,14 @@ import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.transform.stream.StreamSource;
 
+import com.bluehouseinc.dataconverter.importers.AbstractCsvImporter;
 import com.bluehouseinc.dataconverter.model.IModelReport;
 import com.bluehouseinc.dataconverter.model.TidalDataModel;
+import com.bluehouseinc.dataconverter.model.csv.NameCsvMapping;
+import com.bluehouseinc.dataconverter.model.csv.NameNewNamePairCsvMapping;
+import com.bluehouseinc.dataconverter.model.csv.NameValuePairCsvMapping;
+import com.bluehouseinc.dataconverter.model.impl.BaseCsvJobObject;
+import com.bluehouseinc.dataconverter.model.impl.CsvVariable;
 import com.bluehouseinc.dataconverter.parsers.AbstractParser;
 import com.bluehouseinc.dataconverter.parsers.bmc.model.BMCDataModel;
 import com.bluehouseinc.dataconverter.parsers.bmc.model.BMCJobTypes;
@@ -32,6 +41,7 @@ import com.bluehouseinc.dataconverter.parsers.bmc.xml.model.DEFTABLE;
 import com.bluehouseinc.dataconverter.parsers.bmc.xml.model.DoActionData;
 import com.bluehouseinc.dataconverter.parsers.bmc.xml.model.DoCondData;
 import com.bluehouseinc.dataconverter.parsers.bmc.xml.model.DoForceJobData;
+import com.bluehouseinc.dataconverter.parsers.bmc.xml.model.DoIfRerunData;
 import com.bluehouseinc.dataconverter.parsers.bmc.xml.model.DoMailData;
 import com.bluehouseinc.dataconverter.parsers.bmc.xml.model.DoSetVarData;
 import com.bluehouseinc.dataconverter.parsers.bmc.xml.model.DoShoutData;
@@ -87,8 +97,9 @@ public class BMCParser extends AbstractParser<BMCDataModel> {
 		}
 	}
 
-	private DEFTABLE data;
-
+	protected DEFTABLE data;
+	protected JAXBContext context;
+	
 	@Override
 	public void parseFile() throws Exception {
 		this.parseXmlFile(this.getParserDataModel().getConfigeProvider().getBMCFilePath());
@@ -96,7 +107,7 @@ public class BMCParser extends AbstractParser<BMCDataModel> {
 
 	public TidalDataModel parseXmlFile(File file) throws Exception {
 
-		JAXBContext jc = JAXBContext.newInstance(DEFTABLE.class);
+		context = JAXBContext.newInstance(DEFTABLE.class);
 
 		XMLInputFactory xif = XMLInputFactory.newInstance();// .newFactory();
 		xif.setProperty(XMLInputFactory.SUPPORT_DTD, true);
@@ -106,14 +117,14 @@ public class BMCParser extends AbstractParser<BMCDataModel> {
 
 		if (file.exists()) {
 			XMLStreamReader xsr = xif.createXMLStreamReader(new StreamSource(file));
-			Unmarshaller unmarshaller = jc.createUnmarshaller();
+			Unmarshaller unmarshaller = context.createUnmarshaller();
 
 			this.data = (DEFTABLE) unmarshaller.unmarshal(xsr);
 
 			BMCDataModel model = this.getParserDataModel();
 			this.data.getWORKSPACEOrFOLDEROrSCHEDTABLE().stream().forEach(f -> onElementExplored(model, f, null));
 
-			return this.getParserDataModel().convertToDomainDataModel();
+			return model.convertToDomainDataModel();
 
 		} else {
 			throw new TidalException("File [" + file.getAbsolutePath() + "] Not Found");
@@ -222,16 +233,20 @@ public class BMCParser extends AbstractParser<BMCDataModel> {
 			doProcessData(model, ajob, data);
 		} else if (value instanceof WorkspaceData) {
 			WorkspaceData data = (WorkspaceData) value;
-			// doProcessData(model, ajob, data);
+			doProcessData(model, ajob, data);
+		} else if (value instanceof DoIfRerunData) {
+			DoIfRerunData data = (DoIfRerunData) value;
+			doProcessData(model, ajob, data);
 		} else {
-			// throw new RuntimeException("Not Supported " + ((JAXBElement<?>) element).getDeclaredType().getName());
-			System.out.print("Not Supported " + ((JAXBElement<?>) element).getDeclaredType().getName() + "\n");
+			throw new RuntimeException("Not Supported " + ((JAXBElement<?>) element).getDeclaredType().getName());
+			//System.out.print("Not Supported " + ((JAXBElement<?>) element).getDeclaredType().getName() + "\n");
 		}
 
 	}
 
 	public void onSimpleFolder(BMCDataModel model, SimpleFolder folder) {
 
+		
 		String foldername = "";
 
 		if (folder.getFOLDERNAME() == null) {
@@ -245,13 +260,12 @@ public class BMCParser extends AbstractParser<BMCDataModel> {
 		if (!processDisabledJobs) {
 			if (StringUtils.isBlank(folder.getFOLDERORDERMETHOD())) {
 				log.debug(String.format("onSimpleFolder Skipping Folder[%s]", foldername));
-				//return;
+				// return;
 			}
 		}
 
 		BMCSimpleFolder simplefolder = new BMCSimpleFolder();
 		simplefolder.setBmcJobType(BMCJobTypes.SIMPLEFOLDER);
-
 		// childgroup.setContainer(folder.get);
 
 		JobData fake = new JobData();
@@ -285,7 +299,7 @@ public class BMCParser extends AbstractParser<BMCDataModel> {
 				bmccontainer.setName(container);
 				bmccontainer.addChild(simplefolder);
 				this.containers.put(container, bmccontainer);
-				this.getParserDataModel().addDataDuplicateLevelCheck(bmccontainer, true); // Add our object
+				this.getParserDataModel().addDataObject(bmccontainer); // Add our object
 			}
 
 		} else if (groupByDataCenter) {
@@ -302,10 +316,10 @@ public class BMCParser extends AbstractParser<BMCDataModel> {
 				bmccontainer.setName(container);
 				bmccontainer.addChild(simplefolder);
 				this.containers.put(container, bmccontainer);
-				this.getParserDataModel().addDataDuplicateLevelCheck(bmccontainer, true); // Add our object
+				this.getParserDataModel().addDataObject(bmccontainer); // Add our object
 			}
 		} else {
-			this.getParserDataModel().addDataDuplicateLevelCheck(simplefolder, false); // Add our object
+			this.getParserDataModel().addDataObject(simplefolder); // Add our object
 		}
 
 		log.debug(String.format("Processing Simple Folder[%s]", simplefolder.getFullPath()));
@@ -337,7 +351,7 @@ public class BMCParser extends AbstractParser<BMCDataModel> {
 				}
 			}
 		}
-		
+
 		BMCSmartFolder smartfolder = new BMCSmartFolder();
 		smartfolder.setBmcJobType(BMCJobTypes.SMARTFOLDER);
 
@@ -378,7 +392,7 @@ public class BMCParser extends AbstractParser<BMCDataModel> {
 					bmccontainer.setName(container);
 					bmccontainer.addChild(smartfolder);
 					this.containers.put(container, bmccontainer);
-					this.getParserDataModel().addDataDuplicateLevelCheck(bmccontainer, true); // Add our object
+					this.getParserDataModel().addDataObject(bmccontainer); // Add our object
 				}
 
 			} else if (groupByDataCenter) {
@@ -396,10 +410,10 @@ public class BMCParser extends AbstractParser<BMCDataModel> {
 					bmccontainer.setName(container);
 					bmccontainer.addChild(smartfolder);
 					this.containers.put(container, bmccontainer);
-					this.getParserDataModel().addDataDuplicateLevelCheck(bmccontainer, true); // Add our object
+					this.getParserDataModel().addDataObject(bmccontainer); // Add our object
 				}
 			} else {
-				this.getParserDataModel().addDataDuplicateLevelCheck(smartfolder, false); // Add our object
+				this.getParserDataModel().addDataObject(smartfolder); // Add our object
 			}
 			// this.getParserDataModel().addDataDuplicateLevelCheck(childgroup, false);
 		}
@@ -423,13 +437,13 @@ public class BMCParser extends AbstractParser<BMCDataModel> {
 			foldername = folder.getJOBNAME().trim();
 		}
 
-//		if (!processDisabledJobs) {
-//			long howmany = folder.getAUTOEDIT2OrAUTOEDITOrVARIABLE().stream().filter(f -> RuleBasedCalendar.class.isInstance(f.getValue())).count();
-//			if (howmany == 0) {
-//				log.debug(String.format("onSubFolderFolder Skipping Folder[%s]", foldername));
-//				return;
-//			}
-//		}
+		// if (!processDisabledJobs) {
+		// long howmany = folder.getAUTOEDIT2OrAUTOEDITOrVARIABLE().stream().filter(f -> RuleBasedCalendar.class.isInstance(f.getValue())).count();
+		// if (howmany == 0) {
+		// log.debug(String.format("onSubFolderFolder Skipping Folder[%s]", foldername));
+		// return;
+		// }
+		// }
 
 		if (!processDisabledJobs) {
 			String dateinpast = folder.getACTIVETILL();
@@ -465,7 +479,7 @@ public class BMCParser extends AbstractParser<BMCDataModel> {
 		if (group != null) {
 			group.addChild(childgroup);
 		} else {
-			this.getParserDataModel().addDataDuplicateLevelCheck(childgroup, false);
+			this.getParserDataModel().addDataObject(childgroup);
 		}
 
 		log.debug(String.format("Processing Sub Folder[%s]", childgroup.getFullPath()));
@@ -481,14 +495,14 @@ public class BMCParser extends AbstractParser<BMCDataModel> {
 
 		String jobname = ajob.getJOBNAME(); // Default
 
-		if (model.getConfigeProvider().useMemNameOnNullJobName()) {
-			jobname = ajob.getMEMNAME();
-		}
-
 		Objects.requireNonNull(jobname, "Job Name value cannot be null");
 
 		if (jobname.equalsIgnoreCase("EH084D")) {
 			System.out.println();
+		}
+
+		if (!canAddFilteredJobs(jobname)) {
+			return;
 		}
 
 		if (!processDisabledJobs) {
@@ -502,8 +516,6 @@ public class BMCParser extends AbstractParser<BMCDataModel> {
 		}
 
 		String jobtype = ajob.getAPPLTYPE();
-		// FIXME: Hack for CVS all the jobs are mainframe so there is no type defined.
-		jobtype = model.getConfigeProvider().forceOSJobType() != null ? model.getConfigeProvider().forceOSJobType() : ajob.getAPPLTYPE();
 
 		Objects.requireNonNull(jobtype, "getAPPLTYPE value cannot be null");
 
@@ -531,6 +543,62 @@ public class BMCParser extends AbstractParser<BMCDataModel> {
 
 		ajob.getAUTOEDIT2OrAUTOEDITOrVARIABLE().forEach(f -> onElementExplored(model, f, job));
 
+	}
+
+	private Set<String> includeJobNames;
+	private Set<String> excludeJobNames;
+
+	private boolean canAddFilteredJobs(String jobname) {
+		String doweFilterJobs = getParserDataModel().getConfigeProvider().getProvider().getConfigurations().getOrDefault("BMC.FilterJobs", "false");
+
+		boolean doFilter = Boolean.parseBoolean(doweFilterJobs);
+		if (!doFilter) {
+			return true;
+		}
+
+		// Initialize sets once, not on every call
+		initializeFilterSets();
+
+		String normalizedJobName = jobname.trim().toLowerCase();
+
+		// Fast Set lookups instead of stream filtering
+		if (includeJobNames.contains(normalizedJobName)) {
+			return true;
+		}
+
+		if (excludeJobNames.contains(normalizedJobName)) {
+			return false;
+		}
+
+		// Handle no-match case
+		String noMatchString = getParserDataModel().getConfigeProvider().getProvider().getConfigurations().getOrDefault("BMC.IncludeNoMatch", "true");
+
+		return Boolean.parseBoolean(noMatchString);
+	}
+
+	private void initializeFilterSets() {
+		if (includeJobNames == null) {
+			String includeJobFile = getParserDataModel().getConfigeProvider().getProvider().getConfigurations().getOrDefault("BMC.IncludeJobNames", null);
+
+			includeJobNames = (includeJobFile != null) ? loadJobNamesFromFile(includeJobFile) : Collections.emptySet();
+		}
+
+		if (excludeJobNames == null) {
+			String excludeJobFile = getParserDataModel().getConfigeProvider().getProvider().getConfigurations().getOrDefault("BMC.ExcludeJobNames", null);
+
+			excludeJobNames = (excludeJobFile != null) ? loadJobNamesFromFile(excludeJobFile) : Collections.emptySet();
+		}
+	}
+
+	private Set<String> loadJobNamesFromFile(String filename) {
+		try {
+			File file = new File(filename);
+			List<NameCsvMapping> mappings = AbstractCsvImporter.fromFile(file, NameCsvMapping.class);
+			return mappings.stream().map(m -> m.getName().trim().toLowerCase()).collect(Collectors.toSet());
+		} catch (Exception e) {
+			// Log error and return empty set for graceful degradation
+			return Collections.emptySet();
+		}
 	}
 
 	/**
@@ -786,4 +854,12 @@ public class BMCParser extends AbstractParser<BMCDataModel> {
 		return new BMCReporters();
 	}
 
+	public void doProcessData(BMCDataModel model, BaseBMCJobOrFolder job, DoIfRerunData data) {
+		log.error(String.format("SKIPPING Processing Job[%s] with Data[%s] Class[%s]", job.getFullPath(), data, job.getClass().getName()));
+	}
+	
+	public void doProcessData(BMCDataModel model, BaseBMCJobOrFolder job, WorkspaceData data) {
+		log.error(String.format("SKIPPING Processing Job[%s] with Data[%s] Class[%s]", job.getFullPath(), data, job.getClass().getName()));
+	}
+	
 }

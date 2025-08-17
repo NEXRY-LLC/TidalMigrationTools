@@ -1,0 +1,2 @@
+/opt/IBM/TWA_twagent/TWS/bin/filewatch -c wmrc -f /apps/MR/input/dateCard/DATEC\
+AL -int 30 -deadline 7200                                                       

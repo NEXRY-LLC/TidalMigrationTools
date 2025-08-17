@@ -1,0 +1,8 @@
+//JOBREC                                                                        
+JOBUSR(CORP\twagent)                                                            
+JOBPWD(YES)                                                                     
+INTRACTV(NO)                                                                    
+JOBCMD(SCRIPT)                                                                  
+//END JOBREC                                                                    
+"\\tkmsmf175\data\Prod.NETWebContent\BCBSWEB\Marketing\batch\SBASBatch\Marketin\
+g.Batch.SBAS.exe DB2DSSP Daily"                                                 

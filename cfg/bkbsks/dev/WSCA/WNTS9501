@@ -1,0 +1,7 @@
+//JOBREC                                                                        
+JOBUSR(CORP\SBC-RunAgent)                                                       
+JOBPWD(YES)                                                                     
+INTRACTV(YES)                                                                   
+JOBCMD(SCRIPT)                                                                  
+//END JOBREC                                                                    
+powershell.exe -File C:\TS95\Swift_Batch\SwiftBatch.ps1                         

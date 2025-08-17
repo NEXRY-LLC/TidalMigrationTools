@@ -97,7 +97,7 @@ public class BMCDataModel extends BaseParserDataModel<BaseBMCJobOrFolder,BMCConf
 	public void doProcessJobDependency(List<BaseBMCJobOrFolder> jobs) {
 		
 		if (getConfigeProvider().includeConditions()) {
-			jobs.forEach(f -> this.depgraph.doProcessJobDeps(f));
+			jobs.forEach(f -> this.getDependencyGraphMapper().doProcessJobDeps(f));
 		}
 	}
 
@@ -158,5 +158,11 @@ public class BMCDataModel extends BaseParserDataModel<BaseBMCJobOrFolder,BMCConf
 		}
 
 		bmc.getChildren().forEach(f -> doProcessReportDoSetData((BaseBMCJobOrFolder) f, data));
+	}
+
+	@Override
+	public void doPostJobDependencyJobObject(List<BaseBMCJobOrFolder> jobs) {
+		// TODO Auto-generated method stub
+		
 	}
 }

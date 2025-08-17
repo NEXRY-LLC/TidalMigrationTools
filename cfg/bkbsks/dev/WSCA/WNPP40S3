@@ -1,0 +1,8 @@
+//JOBREC                                                                        
+JOBUSR(CORP\twagent)                                                            
+JOBPWD(YES)                                                                     
+INTRACTV(NO)                                                                    
+JOBCMD(SCRIPT)                                                                  
+//END JOBREC                                                                    
+\\tkmsmfp010\healthanalytics\RiskAdjustment\Claims\DataExtraction\ClaimSingleEx\
+tract\BlueCare\TivoliScripts\SortClaimsLoadFile.vbs                             

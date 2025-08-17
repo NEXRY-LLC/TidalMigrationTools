@@ -9,7 +9,6 @@ import com.bluehouseinc.dataconverter.model.impl.CsvCalendar;
 import com.bluehouseinc.dataconverter.model.impl.CsvFileWatcherJob;
 import com.bluehouseinc.dataconverter.model.impl.CsvJobClass;
 import com.bluehouseinc.dataconverter.model.impl.CsvJobGroup;
-import com.bluehouseinc.dataconverter.model.impl.CsvMsSqlJob;
 import com.bluehouseinc.dataconverter.model.impl.CsvOSJob;
 import com.bluehouseinc.dataconverter.model.impl.CsvResource;
 import com.bluehouseinc.dataconverter.model.impl.CsvRuntimeUser;
@@ -24,10 +23,8 @@ import com.bluehouseinc.dataconverter.parsers.autosys.model.jobs.util.AutosysYes
 import com.bluehouseinc.dataconverter.parsers.autosys.model.statements.AutosysResourceStatement;
 import com.bluehouseinc.tidal.api.exceptions.TidalException;
 import com.bluehouseinc.tidal.api.model.TrueFalse;
-import com.bluehouseinc.tidal.api.model.job.ConcurrentType;
 import com.bluehouseinc.tidal.utils.DateParser;
 import com.bluehouseinc.tidal.utils.StringUtils;
-import com.bluehouseinc.toolkit.CommandLine;
 import com.bluehouseinc.transform.ITransformer;
 import com.bluehouseinc.transform.TransformationException;
 import com.bluehouseinc.util.APIDateUtils;
@@ -97,12 +94,6 @@ public class AutosysToTidalTransformer implements ITransformer<List<AutosysAbstr
 			throw new TidalException("Error, unknown job type for Name=[" + base.getFullPath() + "]");
 		}
 
-		if (parent != null) {
-			parent.addChild(baseCsvJobObject);
-		} else {
-			this.getTidalDataModel().addJobToModel(baseCsvJobObject);
-		}
-
 		doSetCommonJobInformation(base, baseCsvJobObject);
 
 		doAddJobClassToJob(base, baseCsvJobObject);
@@ -115,20 +106,11 @@ public class AutosysToTidalTransformer implements ITransformer<List<AutosysAbstr
 			}
 		}
 
-		String typenum = getTidalDataModel().getCfgProvider().getTidalConcurrentTypes();
-		baseCsvJobObject.setConcurrentIfActiveLogic(ConcurrentType.valueOf(typenum));
-		
 		return baseCsvJobObject;
 	}
 
 	private BaseCsvJobObject processAutosysBoxJob(AutosysBoxJob autosysBoxJob, CsvJobGroup parent) {
 		CsvJobGroup csvJobGroup = new CsvJobGroup();
-
-		if (parent != null) {
-			parent.addChild(csvJobGroup);
-		} else {
-			this.getTidalDataModel().addJobToModel(csvJobGroup);
-		}
 
 		return csvJobGroup;
 	}
@@ -136,6 +118,16 @@ public class AutosysToTidalTransformer implements ITransformer<List<AutosysAbstr
 	private BaseCsvJobObject processAutosysCommandLineJob(AutosysCommandLineJob autosysCommandLineJob) {
 		CsvOSJob csvOSJob = new CsvOSJob();
 		String cmd = autosysCommandLineJob.getCommand();
+
+		cmd = cmd.replaceAll("\\\\:", ":") // Remove colon escaping \: -> :
+				.replaceAll("\\\\#", "#") // Remove hash escaping \# -> #
+				.replaceAll("\\\\;", ";") // Remove semicolon escaping \; -> ;
+				.replaceAll("\\\\\"", "\"") // Remove quote escaping \" -> "
+				.replaceAll("\\\\\\|", "|") // Remove pipe escaping \| -> |
+				.replaceAll("\\\\\\$", "$") // Remove dollar escaping \$ -> $
+				.replaceAll("\\\\\\&", "&") // Remove ampersand escaping \& -> &
+				.replaceAll("\\\\\\(", "(") // Remove left paren escaping \( -> (
+				.replaceAll("\\\\\\)", ")"); // Remove right paren escaping \) -> )
 
 		// TODO: Fix this issue with processing unbalanced quotes either:
 		// a) Here in this current method (so APIJobUtils.setJobCommandDetail is NOT modified due to potential unexpected behaviour in conversions for other
@@ -204,23 +196,21 @@ public class AutosysToTidalTransformer implements ITransformer<List<AutosysAbstr
 
 		String nochange = filetrigger.getWatchNoChange();
 
-
-		
 		if (!StringUtils.isBlank(nochange)) {
 			nochange = nochange.replace("s", "");
-			
+
 			boolean isminutes = false;
-			if(nochange.contains("m")) {
+			if (nochange.contains("m")) {
 				isminutes = true;
 				nochange = nochange.replace("m", "");
 			}
-			
+
 			int interval = Integer.parseInt(nochange);
-			
-			if(isminutes) {
+
+			if (isminutes) {
 				interval = interval * 60;
 			}
-			
+
 			csv.setPollInterval(interval);
 		}
 
@@ -279,7 +269,7 @@ public class AutosysToTidalTransformer implements ITransformer<List<AutosysAbstr
 		// TODO-IMPORTANT: Also, modify value of `cmd` parameter since it can contain batch/executable/script file along with parameters and that should be
 		// processd as separate field of CsvOSJob variable (`commandLine` and `parameters`)
 
-		APIJobUtils.setJobCommandDetail(csvOSJob, cmd,getTidalDataModel().getCfgProvider().formatJobParams());
+		APIJobUtils.setJobCommandDetail(csvOSJob, cmd, getTidalDataModel().getCfgProvider().formatJobParams());
 
 	}
 
@@ -289,7 +279,7 @@ public class AutosysToTidalTransformer implements ITransformer<List<AutosysAbstr
 		baseCsvJobObject.setName(autosysAbstractJob.getName());
 		baseCsvJobObject.setNotes(autosysAbstractJob.getDescription());
 
-		if (baseCsvJobObject.getName().equalsIgnoreCase("CVS_FACE_9915_010.Batch_Metrics")) {
+		if (baseCsvJobObject.getName().equalsIgnoreCase("fo.mip2.crude.sonris_imp_exp_by_company.capture")) {
 			baseCsvJobObject.getName();
 		}
 
@@ -359,6 +349,40 @@ public class AutosysToTidalTransformer implements ITransformer<List<AutosysAbstr
 				String startTimes = autosysAbstractJob.getStartMins();
 
 				APIDateUtils.setRerunSameStartMinutes(startTimes, baseCsvJobObject, getTidalDataModel(), true);
+			} else {
+				// This is return every hour at this time. "Minutes After Each Hour"
+				// if single number, then rerun minu
+				// APIDateUtils.setRerunNewOccurance(Integer.valueOf(startdata), null, baseCsvJobObject, getTidalDataModel());
+
+				// Check time between start and end , if longer than 60 mins. Otherwise no repeat.
+				// 60 - timewindow > 0
+
+				String start = baseCsvJobObject.getStartTime() == null ? "00:00" : baseCsvJobObject.getStartTime();
+				String end = baseCsvJobObject.getEndTime() == null ? "11:59" : baseCsvJobObject.getEndTime();
+				int minafterhour = Integer.valueOf(startdata);
+
+				try {
+					Long minbetween = APIDateUtils.getMinutesBetween(start, end);
+
+					if (minbetween > 60) {
+						// More than one.
+						Double drun = Math.ceil(minbetween / 60); // How many reruns do we allow
+						Integer maxreruns = drun.intValue();
+						// minbetween.byteValue();
+						if (minafterhour == 0) {
+							APIDateUtils.setRerunNewOccurance(60, maxreruns, baseCsvJobObject, getTidalDataModel());
+						} else {
+							// Need to figure this out.
+							APIDateUtils.setRerunNewOccurance(60, maxreruns, baseCsvJobObject, getTidalDataModel());
+						}
+					} else {
+						// Do nothing. we are not rerunning the job.
+						// if a job is setup to run between an hour and says run 15 after the hour, that is technically a delay to the start.
+
+					}
+				} catch (IllegalArgumentException e) {
+					autosysAbstractJob.setComplexTimeSetup(true);
+				}
 			}
 		}
 

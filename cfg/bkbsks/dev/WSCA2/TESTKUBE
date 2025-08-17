@@ -1,0 +1,42 @@
+//TASKTYPE=kubernetes                                                          \
+ <?xml version="1.0" encoding="UTF-8"?>
+<jsdl:jobDefinition xmlns:jsdl="http://\
+www.ibm.com/xmlns/prod/scheduling/1.0/jsdl" xmlns:jsdlkubernetes="http://www.ib\
+m.com/xmlns/prod/scheduling/1.0/jsdlkubernetes" name="KUBERNETES">
+  <jsdl:appl\
+ication name="kubernetes">
+    <jsdlkubernetes:kubernetes>
+			<jsdlkubernetes:K\
+ubernetesParameters>
+				<jsdlkubernetes:Connection>
+					<jsdlkubernetes:conne\
+ctiongroup>
+						<jsdlkubernetes:defaultgroup/>
+					</jsdlkubernetes:connecti\
+ongroup>
+					<jsdlkubernetes:namespaceGroup>
+						<jsdlkubernetes:namespace/>\
+
+					</jsdlkubernetes:namespaceGroup>
+				</jsdlkubernetes:Connection>
+				<js\
+dlkubernetes:SubmitJob>
+					<jsdlkubernetes:submit_job>
+						<jsdlkubernetes:\
+submitjobgroup>
+							<jsdlkubernetes:jobfilepath_option>
+								<jsdlkuberne\
+tes:jobfile_path>/apps/kbtest/samples-bill-run.yaml</jsdlkubernetes:jobfile_pat\
+h>
+
+							</jsdlkubernetes:jobfilepath_option>
+						</jsdlkubernetes:submitjo\
+bgroup>
+					</jsdlkubernetes:submit_job>
+				</jsdlkubernetes:SubmitJob>
+			</\
+jsdlkubernetes:KubernetesParameters>
+		</jsdlkubernetes:kubernetes>
+  </jsdl:ap\
+plication>
+</jsdl:jobDefinition>                                                

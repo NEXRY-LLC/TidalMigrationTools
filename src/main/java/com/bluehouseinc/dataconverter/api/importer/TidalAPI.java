@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
@@ -14,6 +15,8 @@ import com.bluehouseinc.dataconverter.providers.ConfigurationProvider;
 import com.bluehouseinc.dataconverter.util.ObjectUtils;
 import com.bluehouseinc.tidal.api.ServiceFactory;
 import com.bluehouseinc.tidal.api.exceptions.TidalException;
+import com.bluehouseinc.tidal.api.impl.Tidal;
+import com.bluehouseinc.tidal.api.impl.services.session.Credentials;
 import com.bluehouseinc.tidal.api.impl.services.session.TidalSession;
 import com.bluehouseinc.tidal.api.model.actions.email.EmailAction;
 import com.bluehouseinc.tidal.api.model.agentlist.AgentList;
@@ -93,6 +96,7 @@ public class TidalAPI {
 
 	}
 
+
 	void initdata() {
 
 		apiExecutor.execute();
@@ -121,6 +125,7 @@ public class TidalAPI {
 		return user;
 	}
 
+	
 	public Service getAdapterByGUID(String guid) {
 		Optional<Service> existing = getAdapters().stream().filter(f -> f.getGuid().equalsIgnoreCase(guid)).findFirst();
 		return existing.get();
@@ -169,12 +174,19 @@ public class TidalAPI {
 		return existing;
 	}
 
-	private List<JobDependency> findDependencyByJobId(int id) {
-		return this.getJobdeps().stream().filter(f -> f.getJobid() == id).collect(Collectors.toList());
+	// Build index once for fast lookups
+	private Map<String, JobDependency> dependencyIndex;
+
+	private void buildDependencyIndex() {
+		dependencyIndex = this.getJobdeps().stream().collect(Collectors.toMap(dep -> dep.getJobid() + "-" + dep.getDepjobid(), dep -> dep, (existing, replacement) -> { throw new RuntimeException("Duplicate!"); } // Handle duplicates
+		));
 	}
 
-	public JobDependency findDependencyByJobId(int jobid, int depjobid) {
-		return findDependencyByJobId(jobid).stream().filter(f -> f.getDepjobid() == depjobid).findAny().orElse(null);
+	public JobDependency findDependencyByJobId(Integer jobid, Integer depjobid) {
+		if (dependencyIndex == null) {
+			buildDependencyIndex();
+		}
+		return dependencyIndex.get(jobid + "-" + depjobid);
 	}
 
 	public BaseJob findJobByPathToLower(String path) {
@@ -275,7 +287,7 @@ public class TidalAPI {
 
 		return null;
 	}
-	
+
 	public Tag getJobTagByName(String name) {
 		return getTags().stream().filter(f -> f.getName().trim().equalsIgnoreCase(name.trim())).findAny().orElse(null);
 	}

@@ -9,7 +9,12 @@ import com.bluehouseinc.dataconverter.api.importer.TidalAPI;
 import com.bluehouseinc.dataconverter.model.TidalDataModel;
 import com.bluehouseinc.dataconverter.model.impl.CsvRuntimeUser;
 import com.bluehouseinc.dataconverter.providers.ConfigurationProvider;
+import com.bluehouseinc.tidal.api.TidalApi;
+import com.bluehouseinc.tidal.api.TidalReadOnlyEntry;
+import com.bluehouseinc.tidal.api.impl.atom.response.Entry;
+import com.bluehouseinc.tidal.api.impl.atom.response.Feed;
 import com.bluehouseinc.tidal.api.impl.atom.response.TesResult;
+import com.bluehouseinc.tidal.api.model.BaseAPIObject;
 import com.bluehouseinc.tidal.api.model.service.Service;
 import com.bluehouseinc.tidal.api.model.users.Users;
 import com.bluehouseinc.tidal.api.model.users.adapter.UserService;
@@ -129,8 +134,9 @@ public class RunTimeUserExecutor extends AbstractAPIExecutor {
 					existsvc.setServiceid(adapter.getId());
 					existsvc.setServicename(adapter.getName());
 					existsvc.setPassword(rte.getPasswordForSAP());
+					
 					try {
-						TesResult res = getTidalApi().getSession().getServiceFactory().userService().create(existsvc);
+						TesResult res = doCreate(existsvc);
 
 						int newid = res.getResult().getTesObjectid();
 						log.debug("doProcessRunTimeUser [" + usr.getName() + "] Response ID[" + newid + "][" + res.getResponseData() + "]");
@@ -144,5 +150,11 @@ public class RunTimeUserExecutor extends AbstractAPIExecutor {
 		} finally {
 			bar.step();
 		}
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public <E extends Entry<C>, F extends Feed<C, E>, C extends BaseAPIObject, D extends TidalReadOnlyEntry<E, C>> TidalApi<E, F, C, D> getExecutorAPI(C object) {
+		return (TidalApi<E, F, C, D>) getTidalApi().getSession().getServiceFactory().userService();
 	}
 }

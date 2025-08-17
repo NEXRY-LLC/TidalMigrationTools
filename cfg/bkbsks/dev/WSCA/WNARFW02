@@ -1,0 +1,16 @@
+//JOBREC                                                                        
+JOBUSR(CORP\twagent)                                                            
+JOBPWD(YES)                                                                     
+JOBCMD(EXECUTABLE)                                                              
+PARM(-condition)                                                                
+PARM2(WCR)                                                                      
+PARM3(-filename)                                                                
+PARM4(\\corp\apps\ar_apps\Production\Reports\PatientSummary\AR07_PatientSummary\
+.txt)                                                                           
+PARM5(-deadline)                                                                
+PARM6(345600)                                                                   
+PARM7(-interval)                                                                
+PARM8(30)                                                                       
+PARM9(-returncode)                                                              
+//END JOBREC                                                                    
+C:\SCRIPTS\FILEWATCH\FILEWATCH.BAT                                              

@@ -146,7 +146,7 @@ public class MainImport {
 				IParser parser = parserProvider.getParser();
 
 				this.datamodel = parser.processDataModel();
-
+	
 				this.importer.printWorkToDo(this.datamodel);
 			}
 
@@ -182,6 +182,7 @@ public class MainImport {
 
 			this.importer.processDataModel(this.datamodel);
 
+			
 			log.info("\nImporting DataModel to TIDAL - Completed");
 
 			inProgress = false;

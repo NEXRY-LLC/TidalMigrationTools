@@ -1,0 +1,8 @@
+//JOBREC                                                                        
+JOBUSR(CORP\twagent)                                                            
+JOBPWD(YES)                                                                     
+INTRACTV(NO)                                                                    
+JOBCMD(SCRIPT)                                                                  
+//END JOBREC                                                                    
+\\tkmsmfp009\HealthAnalytics\TREO\ExtractSetupFiles\TivoliScripts\TREOSetupFile\
+XMLSetup.vbs                                                                    

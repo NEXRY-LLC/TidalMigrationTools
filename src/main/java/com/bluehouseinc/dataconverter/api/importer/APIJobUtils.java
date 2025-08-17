@@ -93,7 +93,7 @@ public class APIJobUtils {
 
 	public static void setJobDefaults(BaseJob job) {
 		job.setActive(YesNoType.NO);
-
+		job.setCritical(YesNoType.NO);
 		if (job.getParent() == null) {
 			setDisableInhertOnJob(job);
 		} else {

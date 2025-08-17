@@ -1,0 +1,16 @@
+//*%OPC SCAN                                                                    
+//JOBREC                                                                        
+JOBUSR(CORP\cladmin)                                                            
+JOBPWD(YES)                                                                     
+JOBCMD(EXECUTABLE)                                                              
+PARM(-condition)                                                                
+PARM2(WMR)                                                                      
+PARM3(-filename)                                                                
+PARM4(C:\ClientLetter\Batch_Files\MR_System_TIMS\Input_Files\MR30_C7120CCE.txt) 
+PARM5(-deadline)                                                                
+PARM6(345600)                                                                   
+PARM7(-interval)                                                                
+PARM8(30)                                                                       
+PARM9(-returncode)                                                              
+//END JOBREC                                                                    
+C:\SCRIPTS\FILEWATCH\FILEWATCH.BAT                                              

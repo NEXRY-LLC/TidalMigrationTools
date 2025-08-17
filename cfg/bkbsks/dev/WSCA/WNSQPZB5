@@ -1,0 +1,7 @@
+//JOBREC                                                                        
+JOBUSR(CORP\ProviderJobScheduler)                                               
+JOBPWD(YES)                                                                     
+INTRACTV(NO)                                                                    
+JOBCMD(SCRIPT)                                                                  
+//END JOBREC                                                                    
+"\\tkmssqp021\SSIS Process Files\DBZMAP\scripts\TricareFull.bat"                

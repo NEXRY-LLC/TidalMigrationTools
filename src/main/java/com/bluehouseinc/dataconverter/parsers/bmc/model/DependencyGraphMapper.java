@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import com.bluehouseinc.dataconverter.model.TidalDataModel;
 import com.bluehouseinc.dataconverter.model.impl.BaseCsvJobObject;
 import com.bluehouseinc.dataconverter.parsers.bmc.model.jobs.BaseBMCJobOrFolder;
 
@@ -48,7 +47,7 @@ public class DependencyGraphMapper {
 
 		// REG our OUTCON lookup map to simplify out dep graph building.
 		bmc.getOutConditionData().forEach(f -> {
-			if (f.getSIGN().equals("+")) { // If it is to add the OUTCON ONLY
+			if (f.getSIGN().equals("+") || f.getSIGN().equals("ADD")) { // If it is to add the OUTCON ONLY
 				String key = f.getNAME(); // My OutConditionName;
 
 				if (OutConditionDataMap.containsKey(key)) {
@@ -68,6 +67,7 @@ public class DependencyGraphMapper {
 		if (base.getName().contains("DEVDLY")) {
 			log.debug("");
 		}
+
 
 		if (!base.getInConditionData().isEmpty()) {
 

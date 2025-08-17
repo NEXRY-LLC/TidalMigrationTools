@@ -16,3 +16,53 @@ delete from owneragt
 delete from owneragtlst
 delete from nodlstdt 
 delete from varmst 
+
+
+
+delete from trgjob
+delete from jobdtl 
+delete from jobdep
+delete from tsksch
+delete from resjob
+delete from jobrunx
+delete from jobrun
+delete from jobmst 
+
+delete from trgsch
+delete from evntchld 
+
+delete from evntchld 
+delete from evntmst where evntmst_id  <> 39
+
+delete from workusr 
+
+delete from owner where owner_type = 1 and owner_id not in (select usrmst_id from usrmst)
+
+delete from owner where owner_type = 2 and owner_id not in (select workgrp_id from workgrp)
+
+
+delete from workrunusr 
+delete from usreqv 
+delete from usrmst where usrmst_suser = 'R'
+
+delete from trgtsk 
+delete from tskalrt 
+delete from tskmail 
+delete from tsklog 
+delete from tskvar 
+delete from tskmst 
+delete from owneragt 
+delete from trgmst 
+delete from resnod 
+delete from nodres 
+delete from nodlstdt 
+delete from nodlstms 
+
+delete from nodres  
+delete from resmst 
+delete from nodmst where nodmst_id <> 1
+
+delete from tagmst
+
+
+select * from evntmst
