@@ -5,10 +5,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.bluehouseinc.dataconverter.model.BaseJobOrGroupObject;
+import com.bluehouseinc.dataconverter.parsers.tivolimainframeopc.CA7JobNameParser;
+import com.bluehouseinc.dataconverter.parsers.tivolimainframeopc.CA7JobNameParser.ParsedJobName;
 import com.bluehouseinc.dataconverter.parsers.tivolimainframeopc.CA7Resource;
 import com.bluehouseinc.dataconverter.parsers.tivolimainframeopc.CA7Schedule;
 import com.bluehouseinc.dataconverter.parsers.tivolimainframeopc.CA7UserField;
-import com.bluehouseinc.tidal.utils.StringUtils;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -19,6 +20,8 @@ import lombok.Setter;
 @EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = true)
 public class CA7BaseJobObject extends BaseJobOrGroupObject {
 
+	private ParsedJobName nameParser;
+	
 	private LocalDate validFrom;
 	private String calendar;
 	private String description;
@@ -53,7 +56,7 @@ public class CA7BaseJobObject extends BaseJobOrGroupObject {
 	private boolean useSAI;
 	private int smoothing;
 	private int limitFeedback;
-	private boolean customScript;
+	private boolean cScript; //CSCRIPT
 	private String owner;
 
 	List<CA7Dependency> dependencies = new ArrayList<>();
@@ -86,7 +89,7 @@ public class CA7BaseJobObject extends BaseJobOrGroupObject {
 	}
 
 	public enum JobType {
-		CA7, JAVA, SCRIPT, APPLICATION
+		CA7, END, SCRIPT, APPLICATION
 	}
 
 	@Override

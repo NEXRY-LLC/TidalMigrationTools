@@ -53,33 +53,41 @@ public class AutosysToTidalTransformer implements ITransformer<List<AutosysAbstr
 
 	public void doProcessObjects(AutosysAbstractJob autosysAbstractJob, CsvJobGroup parent) {
 
+		BaseCsvJobObject newobject;
+		
 		log.debug("doProcessObjects() AutosysAbstractJob Name[{}]", autosysAbstractJob.getFullPath());
 
 		if (autosysAbstractJob.isGroup()) {
 
-			CsvJobGroup group = (CsvJobGroup) processBaseJobOrGroupObject(autosysAbstractJob, parent);
+			 newobject = processBaseJobOrGroupObject(autosysAbstractJob);
 
-			autosysAbstractJob.getChildren().forEach(autosysChildJob -> doProcessObjects((AutosysAbstractJob) autosysChildJob, group)); // Parse children
+			autosysAbstractJob.getChildren().forEach(autosysChildJob -> doProcessObjects((AutosysAbstractJob) autosysChildJob, (CsvJobGroup) newobject)); // Parse children
 
 		} else {
-			processBaseJobOrGroupObject(autosysAbstractJob, parent);
-
+			newobject = processBaseJobOrGroupObject(autosysAbstractJob);
 		}
+		
+		if(parent == null) {
+			getTidalDataModel().addJobToModel(newobject);
+		}else {
+			parent.addChild(newobject);
+		}
+			
 	}
 
 	// TODO: Check here to see if we can take our file trigger job type and use it to apply to the children jobs that depende on me.
 
-	private BaseCsvJobObject processBaseJobOrGroupObject(AutosysAbstractJob base, CsvJobGroup parent) {
+	private BaseCsvJobObject processBaseJobOrGroupObject(AutosysAbstractJob base) {
 
 		if (base == null) {
 			throw new TidalException("BaseJobOrGroupObject is null");
 		}
 
-		log.debug("processBaseJobOrGroupObject() Processing Job/Group Name[{}]", base.getFullPath());
+		log.info("processBaseJobOrGroupObject() Processing Job/Group Name[{}]", base.getFullPath());
 
 		BaseCsvJobObject baseCsvJobObject = null;
 		if (base instanceof AutosysBoxJob) {
-			baseCsvJobObject = processAutosysBoxJob((AutosysBoxJob) base, parent);
+			baseCsvJobObject = processAutosysBoxJob((AutosysBoxJob) base);
 		} else if (base instanceof AutosysCommandLineJob) {
 			baseCsvJobObject = processAutosysCommandLineJob((AutosysCommandLineJob) base);
 		} else if (base instanceof AutosysFileWatcherJob) {
@@ -109,7 +117,7 @@ public class AutosysToTidalTransformer implements ITransformer<List<AutosysAbstr
 		return baseCsvJobObject;
 	}
 
-	private BaseCsvJobObject processAutosysBoxJob(AutosysBoxJob autosysBoxJob, CsvJobGroup parent) {
+	private BaseCsvJobObject processAutosysBoxJob(AutosysBoxJob autosysBoxJob) {
 		CsvJobGroup csvJobGroup = new CsvJobGroup();
 
 		return csvJobGroup;

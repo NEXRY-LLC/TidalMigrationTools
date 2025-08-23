@@ -94,6 +94,9 @@ public class TidalDataModelStats {
 			double percentage = totalJobs > 0 ? (entry.getValue() * 100.0 / totalJobs) : 0;
 			outputf("%-20s %s%8s%s %7.1f%%", entry.getKey().toString(), ANSI_YELLOW, numberFormat.format(entry.getValue()), ANSI_RESET, percentage);
 		});
+		
+		outputf("%-20s %s%8s%s", "TOP LEVEL", ANSI_YELLOW, numberFormat.format(model.getJobOrGroups().size()), ANSI_RESET);
+
 	}
 
 	private void printDependencySection() {

@@ -77,7 +77,8 @@ public class AutosysDataModel extends BaseParserDataModel<AutosysAbstractJob, Au
 
 		if (targetjob == null) {
 			log.info("Unable to locate job[{}]", sourcejob.getFullPath());
-			throw new TidalException("Unable to Locate Job[{" + sourcejob.getFullPath() + "}] by Path");
+			//throw new TidalException("Unable to Locate Job[{" + sourcejob.getFullPath() + "}] by Path");
+			return;
 		}
 
 		log.debug("[doProcessJobDeps] Job={}", targetjob.getFullPath());

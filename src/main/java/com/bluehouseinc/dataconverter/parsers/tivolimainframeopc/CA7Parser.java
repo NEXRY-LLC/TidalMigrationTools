@@ -11,18 +11,22 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import com.bluehouseinc.dataconverter.model.BaseJobOrGroupObject;
 import com.bluehouseinc.dataconverter.model.IModelReport;
 import com.bluehouseinc.dataconverter.parsers.AbstractParser;
+import com.bluehouseinc.dataconverter.parsers.tivolimainframeopc.CA7JobNameParser.ParsedJobName;
 import com.bluehouseinc.dataconverter.parsers.tivolimainframeopc.model.TivoliMainframeOPCDataModel;
 import com.bluehouseinc.dataconverter.parsers.tivolimainframeopc.model.jobs.impl.CA7BaseJobObject;
 import com.bluehouseinc.dataconverter.parsers.tivolimainframeopc.model.jobs.impl.CA7BaseJobObject.JobType;
 import com.bluehouseinc.dataconverter.parsers.tivolimainframeopc.model.jobs.impl.CA7Dependency;
 import com.bluehouseinc.dataconverter.providers.ConfigurationProvider;
+import com.bluehouseinc.dataconverter.util.ObjectUtils;
 
 import lombok.extern.log4j.Log4j2;
 
@@ -102,7 +106,6 @@ public class CA7Parser extends AbstractParser<TivoliMainframeOPCDataModel> {
 		lastline = line;
 	}
 
-
 	/**
 	 * Process a complete line (after handling continuations)
 	 */
@@ -114,16 +117,36 @@ public class CA7Parser extends AbstractParser<TivoliMainframeOPCDataModel> {
 			parseADSTART(line, currentApplication);
 		} else if (ADOP_PATTERN.matcher(line).find()) {
 			currentState = ParseState.ADOP;
-			if (currentJob != null) {
+			if (currentJob != null && currentJob.getName() != null) {
 				// are we a start or end job?
 				if (currentJob.getName().trim().equalsIgnoreCase("start")) {
-					currentApplication.setStartTime(currentJob.getStartTime());	
+					currentApplication.setStartTime(currentJob.getStartTime());
+					currentApplication.getDependencies().addAll(currentJob.getDependencies());
+					currentApplication.getResources().addAll(currentJob.getResources());
+
 				} else if (currentJob.getName().trim().equalsIgnoreCase("end")) {
-					// Not sure if we need to do anything with this.. 
-				}else {
-					currentApplication.addChild(currentJob);
+					// Not sure if we need to do anything with this..
+
+					currentJob.setJobType(JobType.END);
+					currentJob.setName("MILESTONE-END");
+					// Get only external dependencies.
+					//List<CA7Dependency> external = new ArrayList<CA7Dependency>(currentJob.getDependencies().stream().filter(f -> Objects.nonNull(f.getPredecessorWorkstationId())).collect(Collectors.toList()));
+					//currentJob.getDependencies().clear();
+					//currentJob.getDependencies().addAll(external);
+					
+					if (!currentApplication.addChildTest(currentJob)) {
+						currentJob.setName(currentJob.getName() + "-" + currentJob.getOperationNumber());
+						currentApplication.addChild(currentJob);
+					}
+	
+				} else {
+					if (!currentApplication.addChildTest(currentJob)) {
+						currentJob.setName(currentJob.getName() + "-" + currentJob.getOperationNumber());
+						currentApplication.addChild(currentJob);
+					}
 				}
 			}
+
 			currentJob = new CA7BaseJobObject();
 			parseADOP(line, currentJob);
 
@@ -195,11 +218,25 @@ public class CA7Parser extends AbstractParser<TivoliMainframeOPCDataModel> {
 
 		if (params.containsKey("ADID")) {
 			String name = cleanValue(params.get("ADID"));
-			application.setName(name);
+			if (name.startsWith("#")) {
+				name = name.substring(1);
+			}
+			ParsedJobName pname = CA7JobNameParser.parseJobName(name);
+			application.setNameParser(pname);
 
-			// getParserDataModel().getDataObjects().add(application);
+			application.setName(pname.getOriginalValue());
 
-			getParserDataModel().addDataObject(application);
+			if (!getParserDataModel().addDataObjectTest(application)) {
+				String newname = application.getName() + "-" + application.getOperationNumber();
+				application.setName(newname);
+				application.invalidatePathCache();
+
+				String errorMsg = String.format("Top-Level Validation Error: Renaming Object -> %s", application.getFullPath());
+
+				log.error(errorMsg);
+
+				getParserDataModel().addDataObject(application);
+			}
 		}
 		if (params.containsKey("ADVALFROM")) {
 			application.setValidFrom(parseDate(params.get("ADVALFROM")));
@@ -255,6 +292,8 @@ public class CA7Parser extends AbstractParser<TivoliMainframeOPCDataModel> {
 			if (job.getFullPath().contains("TWS#TEST#DFB")) {
 				jobname.chars();
 			}
+
+			// ParsedJobName pname = CA7JobNameParser.parseJobName(jobname);
 
 			job.setName(jobname);
 			// logger.warning(String.format("Error parsing line %d: %s - %s", lineNumber, line, e.getMessage()));
@@ -332,7 +371,7 @@ public class CA7Parser extends AbstractParser<TivoliMainframeOPCDataModel> {
 			job.setExpandJCL(parseBoolean(params.get("ADOPEXPJCL")));
 		}
 		if (params.containsKey("CSCRIPT")) {
-			job.setCustomScript(parseBoolean(params.get("CSCRIPT")));
+			job.setCScript(parseBoolean(params.get("CSCRIPT")));
 		}
 		if (params.containsKey("USEXTNAME")) {
 			job.setUseExternalName(parseBoolean(params.get("USEXTNAME")));
@@ -692,23 +731,24 @@ public class CA7Parser extends AbstractParser<TivoliMainframeOPCDataModel> {
 	}
 
 	private void parseJavaJobFile(List<String> lines, CA7BaseJobObject job) {
-		job.setJobType(JobType.JAVA);
+		// job.setJobType(JobType.JAVA);
 		// Extract task type
-		String firstLine = lines.get(0);
-		if (firstLine.contains("=")) {
-			String taskType = firstLine.split("=", 2)[1].trim();
-			// Store taskType in job object properties as needed
-		}
+		// String firstLine = lines.get(0);
+		// if (firstLine.contains("=")) {
+		// String taskType = firstLine.split("=", 2)[1].trim();
+		// // Store taskType in job object properties as needed
+		// }
+		//
+		// // Combine all XML content (skip first line which is task type)
+		// StringBuilder xmlContent = new StringBuilder();
+		// for (int i = 1; i < lines.size(); i++) {
+		// xmlContent.append(lines.get(i)).append("\n");
+		// }
 
-		// Combine all XML content (skip first line which is task type)
-		StringBuilder xmlContent = new StringBuilder();
-		for (int i = 1; i < lines.size(); i++) {
-			xmlContent.append(lines.get(i)).append("\n");
-		}
-
-		job.setCommandLineData(xmlContent.toString());
+		// job.setCommandLineData(xmlContent.toString());
 		// Parse XML content and extract what you need
-
+		job.setJobType(JobType.CA7);
+		job.setCommandLineData("//SYS3.IWS.V101.WSCA.JSRLIB(" + job.getName() + ")");
 		// etc.
 	}
 

@@ -63,7 +63,8 @@ public abstract class AutosysAbstractJob extends BaseJobOrGroupObject implements
 
 	@Override
 	public boolean isGroup() {
-		return this instanceof AutosysBoxJob;
+		boolean tf = this instanceof AutosysBoxJob;
+		return tf;
 	}
 
 }

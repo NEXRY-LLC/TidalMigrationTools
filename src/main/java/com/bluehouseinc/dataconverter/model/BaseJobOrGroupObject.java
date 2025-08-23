@@ -73,6 +73,16 @@ public abstract class BaseJobOrGroupObject  {
 		return this.fullPath;
 	}
 
+	public <E extends BaseJobOrGroupObject> boolean addChildTest(E child) {
+		
+		try {
+			addChild(child);
+			return true;
+		}catch(Exception e) {
+			return false;
+		}
+	}
+	
 	/**
 	 * Add a child to this object with TIDAL validation.
 	 * Enforces the rule: no two objects at the same level can have the same name.

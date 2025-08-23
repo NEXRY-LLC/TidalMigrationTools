@@ -126,14 +126,25 @@ public abstract class BaseParserDataModel<E extends BaseJobOrGroupObject, P exte
 	public void addDataObject(E obj) {
 		// TIDAL Validation: Check for name conflicts at top level
 		if (hasTopLevelObjectWithName(obj.getName())) {
-			String errorMsg = String.format("TIDAL Top-Level Validation Error: Cannot add top-level object '%s' - name already exists. " + "Existing object path: %s, New object would be: \\%s", obj.getName(),
-					getTopLevelObjectByName(obj.getName()).getFullPath(), obj.getName());
+			String errorMsg = String.format("TIDAL Top-Level Validation Error: Cannot add top-level object '%s' - name already exists.", obj.getName(), getTopLevelObjectByName(obj.getName()).getFullPath(), obj.getName());
+			
 			log.error(errorMsg);
+			
 			throw new IllegalArgumentException(errorMsg);
 		}
 
 		this.dataObjects.add(obj);
+		
 		log.debug("Added top-level object '{}' with path: {}", obj.getName(), obj.getFullPath());
+	}
+
+	public boolean addDataObjectTest(E obj) {
+		try {
+			addDataObject(obj);
+			return true;
+		} catch (Exception e) {
+			return false;
+		}
 	}
 
 	/**

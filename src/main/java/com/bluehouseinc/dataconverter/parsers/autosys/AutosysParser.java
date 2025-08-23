@@ -40,7 +40,7 @@ public class AutosysParser extends AbstractParser<AutosysDataModel> {
 	private final String JOB_TYPE_PATTERN = ".*?(insert_job\\: )(.*?)(job_type: )(.*)";
 	private final static String EMPTY_LINE_PATTERN = "^\\s*$";
 
-	List<AutosysAbstractJob> parents = new ArrayList<>(); // parents represents job Group
+	// List<AutosysAbstractJob> parents = new ArrayList<>(); // parents represents job Group
 
 	AutosysJobVisitor autosysJobVisitor;
 
@@ -77,8 +77,6 @@ public class AutosysParser extends AbstractParser<AutosysDataModel> {
 		}
 
 		log.debug("Processing TOTAL[{}] data objects", this.getParserDataModel().getDataObjects().size());
-
-
 
 		if (this.getParserDataModel().getConfigeProvider().useGroupContainer()) {
 			log.info("AUTOSYS.UseGroupContainer is true, setting up jobs to belong to the group attribute as top level grouping");
@@ -119,14 +117,14 @@ public class AutosysParser extends AbstractParser<AutosysDataModel> {
 
 		try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
 			String line;
-			AutosysAbstractJob autosysAbstractJob; // Start a new one, whether is BOX or some other job type.
+			// AutosysAbstractJob autosysAbstractJob; // Start a new one, whether is BOX or some other job type.
 
 			while ((line = readLine(reader)) != null) {
 				if (shouldSkipLine(line)) {
 					continue;
 				}
 
-				if(line.contains("DHP_EDM_PROD_6100_010.ETS_837_ENC_OUT.FT00")) {
+				if (line.contains("DHP_EDM_PROD_6100_010.ETS_837_ENC_OUT.FT00")) {
 					line.getBytes();
 				}
 				if (isJobHeaderLine(line)) {
@@ -136,7 +134,11 @@ public class AutosysParser extends AbstractParser<AutosysDataModel> {
 						throw new RuntimeException("jobName is EMPTY for following line=" + line);
 					}
 
-					autosysAbstractJob = extractJob(reader, line, jobName);
+					AutosysAbstractJob autosysAbstractJob = extractJob(reader, line, jobName);
+
+					if (autosysAbstractJob == null) {
+						throw new RuntimeException("Error Processing Line for job, extractJob Failed");
+					}
 
 					if (autosysAbstractJob.getParent() == null) {
 						this.getParserDataModel().addDataObject(autosysAbstractJob); // Add our object
@@ -168,7 +170,8 @@ public class AutosysParser extends AbstractParser<AutosysDataModel> {
 	private AutosysAbstractJob extractJob(final BufferedReader reader, String line, String jobName) throws Exception {
 		String currentLine;
 		// FIXME: Read https://softwareengineering.stackexchange.com/q/419445/339761 for more info
-		while (!(currentLine = readLine(reader)).matches(JOB_TYPE_PATTERN));
+		while (!(currentLine = readLine(reader)).matches(JOB_TYPE_PATTERN))
+			;
 
 		String jobTypeLine = RegexHelper.extractNthMatch(currentLine, JOB_TYPE_PATTERN, 3);
 		List<String> lines = parseJobLines(reader);
@@ -179,7 +182,6 @@ public class AutosysParser extends AbstractParser<AutosysDataModel> {
 		case BOX:
 		case b:
 			job = new AutosysBoxJob(jobName);
-			//this.parents.add(job); // considered as Job Group, i.e., parent object
 			break;
 		case CMD:
 		case c:
@@ -203,13 +205,11 @@ public class AutosysParser extends AbstractParser<AutosysDataModel> {
 			throw new RuntimeException("Unknown job type[" + jobTypeLine + "]!");
 		}
 
-
 		job.accept(autosysJobVisitor, lines);
-
 
 		if (this.getParserDataModel().getConfigeProvider().clearBoxConditions()) {
 
-			if(job instanceof AutosysBoxJob) {
+			if (job instanceof AutosysBoxJob) {
 				AutosysBoxJob bj = (AutosysBoxJob) job;
 				bj.setCondition(null); // Clear out
 			}

@@ -144,7 +144,7 @@ public class JobGroupExecutor extends AbstractAPIExecutor {
 			processJobByType(source, destination);
 
 		} catch (Exception e) {
-			log.error("Error processing job [{}]: {}", source.getFullPath(), e.getMessage(), e);
+			log.info("Error processing job [{}]: {}", source.getFullPath(), e.getMessage(), e);
 			throw new TidalException("Failed to process job: " + source.getFullPath(), e);
 		} finally {
 			bar.step();
