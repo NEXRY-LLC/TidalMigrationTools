@@ -98,6 +98,9 @@ public abstract class BaseJobOrGroupObject  {
 			throw new IllegalArgumentException(errorMsg);
 		}
 
+		if(child.getName()==null) {
+			child.getId();
+		}
 		// Set up parent-child relationship
 		child.setParent(this);
 		this.children.add(child);

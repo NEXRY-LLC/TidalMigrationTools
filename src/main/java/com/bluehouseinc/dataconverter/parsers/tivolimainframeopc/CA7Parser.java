@@ -747,7 +747,7 @@ public class CA7Parser extends AbstractParser<TivoliMainframeOPCDataModel> {
 
 		// job.setCommandLineData(xmlContent.toString());
 		// Parse XML content and extract what you need
-		job.setJobType(JobType.CA7);
+		job.setJobType(JobType.LIBERTY);
 		job.setCommandLineData("//SYS3.IWS.V101.WSCA.JSRLIB(" + job.getName() + ")");
 		// etc.
 	}

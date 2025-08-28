@@ -77,7 +77,7 @@ public abstract class AbstractAPIExecutor extends AbstractExecutor {
 	private <C extends BaseAPIObject> TesResult doCreate(C object, int attemptNumber) {
 
 		final int MAX_AUTH_RETRIES = 20;
-		final long RETRY_DELAY_MS = 1000;
+		final long RETRY_DELAY_MS = 2000;
 
 		try {
 
@@ -146,7 +146,7 @@ public abstract class AbstractAPIExecutor extends AbstractExecutor {
 		}
 
 		if (e instanceof SocketTimeoutException) {
-			return true;
+			return false;
 		}
 
 		return false;
@@ -171,9 +171,9 @@ public abstract class AbstractAPIExecutor extends AbstractExecutor {
 			// Add small delay before retry
 			Thread.sleep(RETRY_DELAY_MS);
 
-			getTidalApi().getSession().authenticateForced();
+			getTidalApi().getSession().fullReset();
 
-			getTidalApi().getSession().login();
+			//getTidalApi().getSession().login();
 
 			log.info("Authentication recovery successful - session recreated...{}", attempts);
 			return true;

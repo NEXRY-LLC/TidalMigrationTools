@@ -74,7 +74,7 @@ public class CA7BaseJobObject extends BaseJobOrGroupObject {
 	private String commandLineData;
 
 	private String javaBatchXML;
-	private JobType jobType;
+	private JobType jobType = JobType.APPLICATION;
 
 	public void addDependency(CA7Dependency dependency) {
 		this.dependencies.add(dependency);
@@ -89,7 +89,7 @@ public class CA7BaseJobObject extends BaseJobOrGroupObject {
 	}
 
 	public enum JobType {
-		CA7, END, SCRIPT, APPLICATION
+		CA7,LIBERTY, END, SCRIPT, APPLICATION
 	}
 
 	@Override

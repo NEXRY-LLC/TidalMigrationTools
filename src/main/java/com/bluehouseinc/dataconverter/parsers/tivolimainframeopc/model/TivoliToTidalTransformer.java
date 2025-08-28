@@ -73,25 +73,15 @@ public class TivoliToTidalTransformer implements ITransformer<List<CA7BaseJobObj
 
 		if (application.getSchedules().isEmpty()) {
 			group.setCalendar(null);
-			
+
 		} else {
 
 			application.getSchedules().forEach(s -> {
 				String rule = s.getRuleDescription();
-				rule = rule.replace("ONLY", "").replace("PERIOD", "PE")
-						.replace("MONDAY","MO").replace("TUESDAY", "TU")
-						.replace("WEDNESDAY", "WE").replace("THURSDAY", "TH")
-						.replace("FRIDAY", "FR").replace("SATURDAY", "SA")
-						.replace("SUNDAY", "SU").replace("WORKDAY","WD")
-						.replace("LAST","LST").replace("WEEK","W")
-						.replace("JANUARY","JA").replace("FEBRUARY","FE")
-						.replace("MARCH","MA").replace("APRIL","AP")
-						.replace("MAY","MAY").replace("JUNE","JU")
-						.replace("JULY","JUL").replace("AUGUST","AU")
-						.replace("SEPTEMBER","SEP").replace("NOVEMBER","NV")
-						.replace("DECEMBER","DE").replace("ADHOC","AH")
-						.replace("YEAR","YR").replace("(", "").replace(")", "")
-						.replace(" ", "").replace("DAY", "DY").replace("EVERY", "EV");
+				rule = rule.replace("ONLY", "").replace("PERIOD", "PE").replace("MONDAY", "MO").replace("TUESDAY", "TU").replace("WEDNESDAY", "WE").replace("THURSDAY", "TH").replace("FRIDAY", "FR").replace("SATURDAY", "SA").replace("SUNDAY", "SU")
+						.replace("WORKDAY", "WD").replace("LAST", "LST").replace("WEEK", "W").replace("JANUARY", "JA").replace("FEBRUARY", "FE").replace("MARCH", "MA").replace("APRIL", "AP").replace("MAY", "MAY").replace("JUNE", "JU")
+						.replace("JULY", "JUL").replace("AUGUST", "AU").replace("SEPTEMBER", "SEP").replace("NOVEMBER", "NV").replace("DECEMBER", "DE").replace("ADHOC", "AH").replace("YEAR", "YR").replace("(", "").replace(")", "").replace(" ", "")
+						.replace("DAY", "DY").replace("EVERY", "EV");
 
 				cannamebuilder.append(rule);
 				cannamebuilder.append("-R" + s.getRule());
@@ -106,7 +96,6 @@ public class TivoliToTidalTransformer implements ITransformer<List<CA7BaseJobObj
 			this.getTidalDataModel().addCalendarToJobOrGroup(group, cal);
 		}
 
-	
 		this.getTidalDataModel().addJobToModel(group);
 
 		application.getChildren().forEach(childjob -> processBaseJobOrGroupObject((CA7BaseJobObject) childjob, group)); // Parse children
@@ -114,19 +103,17 @@ public class TivoliToTidalTransformer implements ITransformer<List<CA7BaseJobObj
 	}
 
 	public static String truncateLines(String input, int charCount) {
-	    if (input == null) {
-	        return null;
-	    }
-	    
-	    if (charCount <= 0) {
-	        throw new IllegalArgumentException("Character count must be greater than 0");
-	    }
-	    
-	    return Arrays.stream(input.split("\\r?\\n"))
-	        .map(line -> line.trim()) // Remove leading/trailing whitespace
-	        .filter(line -> !line.isEmpty()) // Skip empty lines
-	        .map(line -> line.length() > charCount ? line.substring(0, charCount) : line)
-	        .collect(Collectors.joining(" "));
+		if (input == null) {
+			return null;
+		}
+
+		if (charCount <= 0) {
+			throw new IllegalArgumentException("Character count must be greater than 0");
+		}
+
+		return Arrays.stream(input.split("\\r?\\n")).map(line -> line.trim()) // Remove leading/trailing whitespace
+				.filter(line -> !line.isEmpty()) // Skip empty lines
+				.map(line -> line.length() > charCount ? line.substring(0, charCount) : line).collect(Collectors.joining(" "));
 	}
 
 	// TODO: Check here to see if we can take our file trigger job type and use it to apply to the children jobs that depende on me.
@@ -160,13 +147,13 @@ public class TivoliToTidalTransformer implements ITransformer<List<CA7BaseJobObj
 			throw new TidalException("Error, unknown job type for Name=[" + base.getFullPath() + "]");
 		}
 
+		doSetCommonJobInformation(base, baseCsvJobObject);
+
 		if (parent != null) {
 			parent.addChild(baseCsvJobObject);
 		} else {
 			this.getTidalDataModel().addJobToModel(baseCsvJobObject);
 		}
-
-		doSetCommonJobInformation(base, baseCsvJobObject);
 
 		if (baseCsvJobObject.getAgentName() != null) {
 			if (parent.getAgentName() == null || parent.getAgentName().equalsIgnoreCase(baseCsvJobObject.getAgentName())) {

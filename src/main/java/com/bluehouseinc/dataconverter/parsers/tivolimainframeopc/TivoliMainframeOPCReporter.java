@@ -17,8 +17,10 @@ import lombok.extern.log4j.Log4j2;
 public class TivoliMainframeOPCReporter implements IModelReport {
 	@Override
 	public List<IReporter> getReporters() {
-
-		return new ArrayList<IReporter>();
+		ArrayList<IReporter> reports = new ArrayList<IReporter>();
+		reports.add(new TivoliJobsByType());
+		
+		return reports;
 	}
 
 }
